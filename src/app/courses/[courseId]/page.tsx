@@ -5,6 +5,57 @@ import { CheckCircleIcon, UserCircleIcon, ClockIcon, BookOpenIcon, StarIcon } fr
 import { CalendarIcon, PuzzlePieceIcon } from '@heroicons/react/24/outline';
 import { UserIcon, AcademicCapIcon, DevicePhoneMobileIcon, DocumentTextIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 
+interface Instructor {
+  name: string;
+  role: string;
+  bio: string;
+  avatar: string;
+  rating: number;
+  students: number;
+  courses: number;
+}
+
+interface Review {
+  name: string;
+  rating: number;
+  avatar: string;
+  date: string;
+  comment: string;
+}
+
+interface Lesson {
+  title: string;
+  duration: string;
+}
+
+interface Module {
+  title: string;
+  duration: string;
+  lessons: Lesson[];
+}
+
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  fullDescription: string;
+  image: string;
+  level: string;
+  price: number;
+  duration: string;
+  lessonsCount: number;
+  totalHours: number;
+  lastUpdated: string;
+  rating: number;
+  reviewsCount: number;
+  isFeatured: boolean;
+  learningPoints: string[];
+  prerequisites: string[];
+  modules: Module[];
+  instructor: Instructor;
+  reviews: Review[];
+}
+
 interface CourseParams {
   params: {
     courseId: string;
@@ -13,10 +64,8 @@ interface CourseParams {
 }
 
 export default function CoursePage({ params, searchParams }: CourseParams) {
-  // In a real app, we would fetch the course data from an API 
-  // based on the courseId from the URL params
   const courseId = params.courseId;
-  const course = courses.find(c => c.id === courseId);
+  const course = courses.find(c => c.id === courseId) as Course;
 
   if (!course) {
     return (
@@ -66,18 +115,18 @@ export default function CoursePage({ params, searchParams }: CourseParams) {
             <div className="md:col-span-2">
               <h2 className="text-2xl font-bold mb-6">What you'll learn</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                {course.topics.map((topic, index) => (
+                {course.learningPoints.map((point: string, index: number) => (
                   <div key={index} className="flex items-start">
                     <CheckCircleIcon className="h-6 w-6 text-[#0066cc] mr-2 flex-shrink-0" />
-                    <span>{topic}</span>
+                    <span>{point}</span>
                   </div>
                 ))}
               </div>
 
               <h2 className="text-2xl font-bold mb-6">Requirements</h2>
               <ul className="list-disc list-inside space-y-2 text-[#1d1d1f]">
-                {course.requirements.map((req, index) => (
-                  <li key={index}>{req}</li>
+                {course.prerequisites.map((prereq: string, index: number) => (
+                  <li key={index}>{prereq}</li>
                 ))}
               </ul>
             </div>
@@ -85,7 +134,7 @@ export default function CoursePage({ params, searchParams }: CourseParams) {
             {/* Sidebar */}
             <div className="bg-[#f5f5f7] rounded-2xl p-6">
               <div className="text-center mb-6">
-                <span className="text-3xl font-bold text-[#1d1d1f]">$99.99</span>
+                <span className="text-3xl font-bold text-[#1d1d1f]">${course.price}</span>
                 <p className="text-[#86868b]">Lifetime Access</p>
               </div>
               <button className="w-full bg-[#0066cc] text-white font-medium py-3 px-6 rounded-full hover:bg-[#0077ed] transition-colors mb-4">
@@ -118,7 +167,7 @@ export default function CoursePage({ params, searchParams }: CourseParams) {
 }
 
 // Mock data for course details
-const courses = [
+const courses: Course[] = [
   {
     id: "react-masterclass",
     title: "React Masterclass",
