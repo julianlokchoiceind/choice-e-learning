@@ -56,14 +56,14 @@ interface Course {
   reviews: Review[];
 }
 
-interface CourseParams {
+interface PageProps {
   params: {
     courseId: string;
   };
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-export default function CoursePage({ params, searchParams }: CourseParams) {
+export default async function CoursePage({ params, searchParams }: PageProps) {
   const courseId = params.courseId;
   const course = courses.find(c => c.id === courseId) as Course;
 
@@ -285,6 +285,7 @@ const courses: Course[] = [
     id: "node-backend",
     title: "Node.js Backend Development",
     description: "Create scalable backend systems with Node.js, Express, and MongoDB",
+    fullDescription: "Master backend development with Node.js in this comprehensive course. You'll learn how to build scalable and secure web applications using Node.js, Express, and MongoDB. Starting with Node.js fundamentals, you'll progress through advanced topics like authentication, real-time communication with WebSockets, and deployment strategies. By the end of this course, you'll be able to architect and implement production-ready backend systems that can handle high traffic and complex business requirements.",
     image: "https://images.unsplash.com/photo-1627398242454-45a1465c2479?q=80&w=1974&auto=format&fit=crop",
     level: "Advanced",
     price: 99.99,
