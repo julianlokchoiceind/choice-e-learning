@@ -56,118 +56,15 @@ interface Course {
   reviews: Review[];
 }
 
-interface PageProps {
+type PageProps = {
   params: {
     courseId: string;
   };
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
-export default async function CoursePage({ params, searchParams }: PageProps) {
-  const courseId = params.courseId;
-  const course = courses.find(c => c.id === courseId) as Course;
-
-  if (!course) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-3xl font-bold mb-4">Course Not Found</h1>
-        <p className="mb-8">The course you're looking for doesn't exist or has been removed.</p>
-        <Link href="/courses" className="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700 transition-colors">
-          Browse Courses
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-white">
-      {/* Course Hero Section */}
-      <section className="pt-24 pb-12 bg-gradient-to-br from-[#000428] to-[#004e92]">
-        <div className="max-w-[980px] mx-auto px-6 md:px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            {course.title}
-          </h1>
-          <p className="text-xl text-white/80 max-w-2xl mb-8">
-            {course.description}
-          </p>
-          <div className="flex flex-wrap gap-4 text-white/70">
-            <span className="flex items-center">
-              <UserIcon className="h-5 w-5 mr-2" />
-              {course.instructor.name}
-            </span>
-            <span className="flex items-center">
-              <ClockIcon className="h-5 w-5 mr-2" />
-              {course.duration}
-            </span>
-            <span className="flex items-center">
-              <AcademicCapIcon className="h-5 w-5 mr-2" />
-              {course.level}
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* Course Content */}
-      <section className="py-12">
-        <div className="max-w-[980px] mx-auto px-6 md:px-4">
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="md:col-span-2">
-              <h2 className="text-2xl font-bold mb-6">What you'll learn</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                {course.learningPoints.map((point: string, index: number) => (
-                  <div key={index} className="flex items-start">
-                    <CheckCircleIcon className="h-6 w-6 text-[#0066cc] mr-2 flex-shrink-0" />
-                    <span>{point}</span>
-                  </div>
-                ))}
-              </div>
-
-              <h2 className="text-2xl font-bold mb-6">Requirements</h2>
-              <ul className="list-disc list-inside space-y-2 text-[#1d1d1f]">
-                {course.prerequisites.map((prereq: string, index: number) => (
-                  <li key={index}>{prereq}</li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Sidebar */}
-            <div className="bg-[#f5f5f7] rounded-2xl p-6">
-              <div className="text-center mb-6">
-                <span className="text-3xl font-bold text-[#1d1d1f]">${course.price}</span>
-                <p className="text-[#86868b]">Lifetime Access</p>
-              </div>
-              <button className="w-full bg-[#0066cc] text-white font-medium py-3 px-6 rounded-full hover:bg-[#0077ed] transition-colors mb-4">
-                Enroll Now
-              </button>
-              <button className="w-full bg-white text-[#0066cc] font-medium py-3 px-6 rounded-full border border-[#0066cc] hover:bg-[#f5f5f7] transition-colors">
-                Add to Wishlist
-              </button>
-
-              <div className="mt-6 space-y-4 text-[#1d1d1f]">
-                <div className="flex items-center">
-                  <DevicePhoneMobileIcon className="h-5 w-5 mr-3 text-[#86868b]" />
-                  <span>Access on mobile and desktop</span>
-                </div>
-                <div className="flex items-center">
-                  <DocumentTextIcon className="h-5 w-5 mr-3 text-[#86868b]" />
-                  <span>Certificate of completion</span>
-                </div>
-                <div className="flex items-center">
-                  <ChatBubbleLeftRightIcon className="h-5 w-5 mr-3 text-[#86868b]" />
-                  <span>Community support</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-// Mock data for course details
-const courses: Course[] = [
+// Mock course data
+const courses = [
   {
     id: "react-masterclass",
     title: "React Masterclass",
@@ -363,4 +260,106 @@ const courses: Course[] = [
       }
     ]
   }
-]; 
+] as Course[];
+
+async function getCourse(courseId: string): Promise<Course | undefined> {
+  return courses.find(c => c.id === courseId);
+}
+
+export default async function CoursePage({ params, searchParams }: PageProps) {
+  const course = await getCourse(params.courseId);
+  
+  if (!course) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <h1 className="text-2xl font-bold text-gray-800">Course not found</h1>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Course Hero Section */}
+      <section className="pt-24 pb-12 bg-gradient-to-br from-[#000428] to-[#004e92]">
+        <div className="max-w-[980px] mx-auto px-6 md:px-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            {course.title}
+          </h1>
+          <p className="text-xl text-white/80 max-w-2xl mb-8">
+            {course.description}
+          </p>
+          <div className="flex flex-wrap gap-4 text-white/70">
+            <span className="flex items-center">
+              <UserIcon className="h-5 w-5 mr-2" />
+              {course.instructor.name}
+            </span>
+            <span className="flex items-center">
+              <ClockIcon className="h-5 w-5 mr-2" />
+              {course.duration}
+            </span>
+            <span className="flex items-center">
+              <AcademicCapIcon className="h-5 w-5 mr-2" />
+              {course.level}
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Course Content */}
+      <section className="py-12">
+        <div className="max-w-[980px] mx-auto px-6 md:px-4">
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="md:col-span-2">
+              <h2 className="text-2xl font-bold mb-6">What you'll learn</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                {course.learningPoints.map((point: string, index: number) => (
+                  <div key={index} className="flex items-start">
+                    <CheckCircleIcon className="h-6 w-6 text-[#0066cc] mr-2 flex-shrink-0" />
+                    <span>{point}</span>
+                  </div>
+                ))}
+              </div>
+
+              <h2 className="text-2xl font-bold mb-6">Requirements</h2>
+              <ul className="list-disc list-inside space-y-2 text-[#1d1d1f]">
+                {course.prerequisites.map((prereq: string, index: number) => (
+                  <li key={index}>{prereq}</li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Sidebar */}
+            <div className="bg-[#f5f5f7] rounded-2xl p-6">
+              <div className="text-center mb-6">
+                <span className="text-3xl font-bold text-[#1d1d1f]">${course.price}</span>
+                <p className="text-[#86868b]">Lifetime Access</p>
+              </div>
+              <button className="w-full bg-[#0066cc] text-white font-medium py-3 px-6 rounded-full hover:bg-[#0077ed] transition-colors mb-4">
+                Enroll Now
+              </button>
+              <button className="w-full bg-white text-[#0066cc] font-medium py-3 px-6 rounded-full border border-[#0066cc] hover:bg-[#f5f5f7] transition-colors">
+                Add to Wishlist
+              </button>
+
+              <div className="mt-6 space-y-4 text-[#1d1d1f]">
+                <div className="flex items-center">
+                  <DevicePhoneMobileIcon className="h-5 w-5 mr-3 text-[#86868b]" />
+                  <span>Access on mobile and desktop</span>
+                </div>
+                <div className="flex items-center">
+                  <DocumentTextIcon className="h-5 w-5 mr-3 text-[#86868b]" />
+                  <span>Certificate of completion</span>
+                </div>
+                <div className="flex items-center">
+                  <ChatBubbleLeftRightIcon className="h-5 w-5 mr-3 text-[#86868b]" />
+                  <span>Community support</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+} 
