@@ -1,0 +1,346 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Colors */
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255;
+  
+  /* Apple-style colors */
+  --apple-bg: 255, 255, 255;
+  --apple-text: 29, 29, 31;
+  --apple-link: 0, 102, 204;
+  --apple-subdued: 134, 134, 139;
+  --apple-highlight: 245, 245, 247;
+  --apple-secondary: 51, 51, 54;
+  --apple-accent: 0, 113, 227;
+  
+  /* Button styles */
+  --btn-primary-bg: 0, 113, 227;
+  --btn-primary-text: 255, 255, 255;
+  --btn-secondary-bg: 245, 245, 247;
+  --btn-secondary-text: 29, 29, 31;
+  
+  /* Animation durations */
+  --animation-slow: 1200ms;
+  --animation-medium: 800ms;
+  --animation-fast: 300ms;
+  
+  /* Card styles */
+  --card-bg: 255, 255, 255;
+  --card-border: 229, 229, 229;
+  --card-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --card-hover-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+/* Theme configuration */
+:root {
+  --color-background: var(--background-white);
+  --color-foreground: var(--text-primary);
+  --color-accent: var(--button-primary);
+  --color-primary: var(--button-primary);
+  --color-secondary: var(--button-secondary);
+  --color-highlight: var(--button-primary-hover);
+  --font-sans: 'SF Pro Display', 'SF Pro Icons', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+body {
+  background-color: var(--background-white);
+  color: var(--text-primary);
+  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", sans-serif;
+  font-size: 17px;
+  line-height: 1.47059;
+  font-weight: 400;
+  letter-spacing: -0.022em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  color: var(--text-primary);
+}
+
+h1, .h1 {
+  font-size: 48px;
+  line-height: 1.08349;
+  font-weight: 700;
+  letter-spacing: -0.003em;
+}
+
+h2, .h2 {
+  font-size: 40px;
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: 0.004em;
+}
+
+h3, .h3 {
+  font-size: 32px;
+  line-height: 1.125;
+  font-weight: 600;
+  letter-spacing: 0.004em;
+}
+
+h4, .h4 {
+  font-size: 24px;
+  line-height: 1.19048;
+  font-weight: 600;
+  letter-spacing: 0.0045em;
+}
+
+h5, .h5 {
+  font-size: 20px;
+  line-height: 1.2381;
+  font-weight: 600;
+  letter-spacing: 0.0045em;
+}
+
+h6, .h6 {
+  font-size: 18px;
+  line-height: 1.33341;
+  font-weight: 600;
+  letter-spacing: 0.004em;
+}
+
+p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+a {
+  color: var(--blue);
+  text-decoration: none;
+  transition: color var(--duration-fast) ease;
+}
+
+a:hover {
+  color: var(--accent-blue);
+}
+
+/* Custom Utility Classes */
+.button-primary {
+  display: inline-block;
+  background-color: var(--button-primary);
+  color: var(--text-white);
+  font-size: 17px;
+  line-height: 1.47059;
+  font-weight: 500;
+  letter-spacing: -0.022em;
+  padding: 12px 22px;
+  border-radius: 980px;
+  transition: all var(--duration-fast) ease;
+}
+
+.button-primary:hover {
+  background-color: var(--button-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.button-secondary {
+  display: inline-block;
+  background-color: var(--button-secondary);
+  color: var(--button-primary);
+  font-size: 17px;
+  line-height: 1.47059;
+  font-weight: 500;
+  letter-spacing: -0.022em;
+  padding: 12px 22px;
+  border-radius: 980px;
+  transition: all var(--duration-fast) ease;
+}
+
+.button-secondary:hover {
+  background-color: var(--button-secondary-hover);
+}
+
+.button-text {
+  color: var(--button-primary);
+  font-size: 17px;
+  line-height: 1.47059;
+  font-weight: 500;
+  letter-spacing: -0.022em;
+  transition: color var(--duration-fast) ease;
+}
+
+.button-text:hover {
+  color: var(--button-primary-hover);
+  text-decoration: underline;
+}
+
+/* Layout Sections */
+.page-hero {
+  padding: 120px 0 60px;
+  text-align: center;
+}
+
+.section-full {
+  padding: 100px 0;
+}
+
+.section-tight {
+  padding: 60px 0;
+}
+
+/* Card Component */
+.card {
+  background-color: white;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Background Gradients */
+.bg-gradient-white {
+  background-color: var(--background-white);
+  background-image: linear-gradient(180deg, #fbfbfd 0%, var(--background-white) 100%);
+}
+
+.bg-gradient-light {
+  background-color: var(--background-light);
+  background-image: linear-gradient(180deg, #ffffff 0%, var(--background-light) 100%);
+}
+
+.bg-gradient-blue {
+  background: linear-gradient(135deg, #0066cc 0%, #0077ed 50%, #1982f8 100%);
+}
+
+/* Number Circles and Timeline Styles */
+.timeline-wrapper {
+  position: relative;
+  padding: 20px 0;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 60px;
+}
+
+@media (min-width: 768px) {
+  .timeline-item {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  .timeline-item:nth-child(even) {
+    justify-content: flex-end;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-fade {
+  animation: fadeIn var(--duration-normal) ease forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp var(--duration-normal) ease forwards;
+}
+
+.animate-slide-right {
+  animation: slideInRight var(--duration-slow) ease forwards;
+}
+
+.animate-slide-left {
+  animation: slideInLeft var(--duration-slow) ease forwards;
+}
+
+/* Media queries for responsive design */
+@media (max-width: 768px) {
+  h1, .h1 {
+    font-size: 40px;
+  }
+  
+  h2, .h2 {
+    font-size: 32px;
+  }
+  
+  h3, .h3 {
+    font-size: 28px;
+  }
+  
+  .page-hero {
+    padding: 100px 0 40px;
+  }
+  
+  .section-full {
+    padding: 70px 0;
+  }
+  
+  .section-tight {
+    padding: 40px 0;
+  }
+}
+
+/* Number Circles and Timeline Styles */
+.number-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: #0066cc;
+  color: white;
+  font-size: 22px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Ticker Animation */
+@keyframes ticker {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-ticker {
+  animation: ticker 30s linear infinite;
+}
+
+#testimonialTicker:hover .animate-ticker {
+  animation-play-state: paused;
+} 
