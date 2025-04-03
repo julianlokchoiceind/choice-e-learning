@@ -259,15 +259,13 @@ async function getCourse(courseId: string): Promise<Course | undefined> {
   return courses.find(c => c.id === courseId);
 }
 
-interface Props {
-  params: {
-    courseId: string;
-  };
-  searchParams: { [key: string]: string | string[] | undefined };
-}
+type PageProps = {
+  params: { courseId: string };
+  searchParams: Record<string, string | string[] | undefined>;
+};
 
-export default async function CoursePage(props: Props) {
-  const course = await getCourse(props.params.courseId);
+const CoursePage = async ({ params }: PageProps) => {
+  const course = await getCourse(params.courseId);
   
   if (!course) {
     return (
@@ -362,4 +360,6 @@ export default async function CoursePage(props: Props) {
       </section>
     </div>
   );
-} 
+}
+
+export default CoursePage; 
