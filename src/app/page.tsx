@@ -115,50 +115,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Counter Section - Gray Background */}
-      <section className="section-full bg-[#f5f5f7] py-16">
-        <div className="max-w-[980px] mx-auto px-6 md:px-4">
-          <div className="stats-container grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-            <div className="stat-item">
-              <div className="flex justify-center mb-4">
-                <BookOpenIcon className="h-8 w-8 text-[#0066cc]" />
-              </div>
-              <p className="text-[48px] font-semibold text-[#1d1d1f]">
-                <span className="animate-counter" data-target="50">0</span>+
-              </p>
-              <p className="text-[17px] text-[#86868b]">Courses</p>
-            </div>
-            <div className="stat-item">
-              <div className="flex justify-center mb-4">
-                <UserGroupIcon className="h-8 w-8 text-[#0066cc]" />
-              </div>
-              <p className="text-[48px] font-semibold text-[#1d1d1f]">
-                <span className="animate-counter" data-target="25000">0</span>+
-              </p>
-              <p className="text-[17px] text-[#86868b]">Students</p>
-            </div>
-            <div className="stat-item">
-              <div className="flex justify-center mb-4">
-                <AcademicCapIcon className="h-8 w-8 text-[#0066cc]" />
-              </div>
-              <p className="text-[48px] font-semibold text-[#1d1d1f]">
-                <span className="animate-counter" data-target="12">0</span>
-              </p>
-              <p className="text-[17px] text-[#86868b]">Expert Instructors</p>
-            </div>
-            <div className="stat-item">
-              <div className="flex justify-center mb-4">
-                <StarIcon className="h-8 w-8 text-[#0066cc]" />
-              </div>
-              <p className="text-[48px] font-semibold text-[#1d1d1f]">
-                <span className="animate-counter" data-target="98">0</span>%
-              </p>
-              <p className="text-[17px] text-[#86868b]">Satisfaction Rate</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Featured Courses Section - White Background */}
       <section className="section-full py-20 md:py-[120px] bg-white">
         <div className="max-w-[980px] mx-auto px-6 md:px-4">
@@ -228,7 +184,7 @@ export default function Home() {
                 </div>
                 <div className="ml-6 flex-grow">
                   <h3 className="text-[17px] leading-[1.47059] font-semibold group-hover:text-[#0066cc] transition-colors">{course.title}</h3>
-                  <p className="text-[14px] leading-[1.42859] text-[#86868b] mt-1">{course.category} • {course.students.toLocaleString()}+ students</p>
+                  <p className="text-[14px] leading-[1.42859] text-[#86868b] mt-1">{course.category} • {course.students} students</p>
                 </div>
                 <div className="ml-4">
                   <FaChevronRight className="text-[#86868b] group-hover:text-[#0066cc] transition-colors h-[12px] w-[12px]" />
