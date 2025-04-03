@@ -3,14 +3,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { CheckCircleIcon, UserCircleIcon, ClockIcon, BookOpenIcon, StarIcon } from '@heroicons/react/24/solid';
 import { CalendarIcon, PuzzlePieceIcon } from '@heroicons/react/24/outline';
+import { UserIcon, AcademicCapIcon, DevicePhoneMobileIcon, DocumentTextIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 
-type CourseParams = {
+interface CourseParams {
   params: {
     courseId: string;
   };
-};
+  searchParams: { [key: string]: string | string[] | undefined };
+}
 
-export default function CourseDetailPage({ params }: CourseParams) {
+export default function CoursePage({ params, searchParams }: CourseParams) {
   // In a real app, we would fetch the course data from an API 
   // based on the courseId from the URL params
   const courseId = params.courseId;
@@ -29,258 +31,88 @@ export default function CourseDetailPage({ params }: CourseParams) {
   }
 
   return (
-    <div>
-      {/* Course Banner */}
-      <div className="relative h-64 md:h-80 lg:h-96 bg-indigo-900">
-        <Image 
-          src={course.image}
-          alt={course.title}
-          fill
-          className="object-cover opacity-40"
-        />
-        <div className="absolute inset-0 flex items-center">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl">
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{course.title}</h1>
-              <div className="flex flex-wrap items-center gap-4 text-white mb-6">
-                <span className="flex items-center">
-                  <UserCircleIcon className="h-5 w-5 mr-1" />
-                  {course.instructor.name}
-                </span>
-                <span className="flex items-center">
-                  <ClockIcon className="h-5 w-5 mr-1" />
-                  {course.duration}
-                </span>
-                <span className="flex items-center">
-                  <BookOpenIcon className="h-5 w-5 mr-1" />
-                  {course.lessonsCount} lessons
-                </span>
-                <span className="flex items-center">
-                  <CalendarIcon className="h-5 w-5 mr-1" />
-                  Last updated {course.lastUpdated}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                {Array(5).fill(0).map((_, i) => (
-                  <StarIcon 
-                    key={i} 
-                    className={`h-5 w-5 ${i < course.rating ? 'text-yellow-400' : 'text-gray-300'}`} 
-                  />
-                ))}
-                <span className="text-white ml-2">{course.rating.toFixed(1)} ({course.reviewsCount} reviews)</span>
-              </div>
-            </div>
+    <div className="min-h-screen bg-white">
+      {/* Course Hero Section */}
+      <section className="pt-24 pb-12 bg-gradient-to-br from-[#000428] to-[#004e92]">
+        <div className="max-w-[980px] mx-auto px-6 md:px-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            {course.title}
+          </h1>
+          <p className="text-xl text-white/80 max-w-2xl mb-8">
+            {course.description}
+          </p>
+          <div className="flex flex-wrap gap-4 text-white/70">
+            <span className="flex items-center">
+              <UserIcon className="h-5 w-5 mr-2" />
+              {course.instructor.name}
+            </span>
+            <span className="flex items-center">
+              <ClockIcon className="h-5 w-5 mr-2" />
+              {course.duration}
+            </span>
+            <span className="flex items-center">
+              <AcademicCapIcon className="h-5 w-5 mr-2" />
+              {course.level}
+            </span>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Main Content */}
-          <div className="lg:w-2/3">
-            {/* About This Course */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-bold mb-4">About This Course</h2>
-              <p className="text-gray-700 mb-6">{course.description}</p>
-              
-              <h3 className="text-xl font-bold mb-4">What You'll Learn</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-                {course.learningPoints.map((point, index) => (
+      {/* Course Content */}
+      <section className="py-12">
+        <div className="max-w-[980px] mx-auto px-6 md:px-4">
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="md:col-span-2">
+              <h2 className="text-2xl font-bold mb-6">What you'll learn</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                {course.topics.map((topic, index) => (
                   <div key={index} className="flex items-start">
-                    <CheckCircleIcon className="h-5 w-5 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-                    <span>{point}</span>
+                    <CheckCircleIcon className="h-6 w-6 text-[#0066cc] mr-2 flex-shrink-0" />
+                    <span>{topic}</span>
                   </div>
                 ))}
               </div>
-              
-              <h3 className="text-xl font-bold mb-4">Prerequisites</h3>
-              <ul className="list-disc list-inside mb-6 text-gray-700">
-                {course.prerequisites.map((prereq, index) => (
-                  <li key={index}>{prereq}</li>
+
+              <h2 className="text-2xl font-bold mb-6">Requirements</h2>
+              <ul className="list-disc list-inside space-y-2 text-[#1d1d1f]">
+                {course.requirements.map((req, index) => (
+                  <li key={index}>{req}</li>
                 ))}
               </ul>
-            </section>
+            </div>
 
-            {/* Course Content */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-bold mb-4">Course Content</h2>
-              <div className="bg-gray-50 p-4 mb-4 rounded-md">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="font-medium">{course.lessonsCount} lessons</span>
-                    <span className="mx-2">•</span>
-                    <span>{course.totalHours} total hours</span>
-                  </div>
-                  <button className="text-indigo-600 hover:text-indigo-800 font-medium">
-                    Expand All
-                  </button>
-                </div>
+            {/* Sidebar */}
+            <div className="bg-[#f5f5f7] rounded-2xl p-6">
+              <div className="text-center mb-6">
+                <span className="text-3xl font-bold text-[#1d1d1f]">$99.99</span>
+                <p className="text-[#86868b]">Lifetime Access</p>
               </div>
-
-              <div className="border rounded-md divide-y">
-                {course.modules.map((module, idx) => (
-                  <div key={idx} className="p-4">
-                    <div className="flex justify-between items-center cursor-pointer">
-                      <h3 className="font-medium">{module.title}</h3>
-                      <div className="text-sm text-gray-600">
-                        {module.lessons.length} lessons • {module.duration}
-                      </div>
-                    </div>
-                    <div className="mt-4 pl-4 space-y-3">
-                      {module.lessons.map((lesson, lessonIdx) => (
-                        <div key={lessonIdx} className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <PuzzlePieceIcon className="h-4 w-4 text-gray-500 mr-2" />
-                            <span className="text-gray-700">{lesson.title}</span>
-                          </div>
-                          <span className="text-gray-500 text-sm">{lesson.duration}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Instructor */}
-            <section className="mb-12">
-              <h2 className="text-2xl font-bold mb-4">Instructor</h2>
-              <div className="flex items-start gap-4">
-                <div className="relative w-20 h-20 rounded-full overflow-hidden">
-                  <Image
-                    src={course.instructor.avatar}
-                    alt={course.instructor.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium">{course.instructor.name}</h3>
-                  <p className="text-gray-600 mb-2">{course.instructor.role}</p>
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                    <span className="flex items-center">
-                      <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
-                      {course.instructor.rating} Instructor Rating
-                    </span>
-                    <span className="flex items-center">
-                      <UserCircleIcon className="h-4 w-4 mr-1" />
-                      {course.instructor.students.toLocaleString()} Students
-                    </span>
-                    <span className="flex items-center">
-                      <BookOpenIcon className="h-4 w-4 mr-1" />
-                      {course.instructor.courses} Courses
-                    </span>
-                  </div>
-                  <p className="text-gray-700">{course.instructor.bio}</p>
-                </div>
-              </div>
-            </section>
-
-            {/* Reviews */}
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold">Student Reviews</h2>
-                <Link href="#" className="text-indigo-600 hover:text-indigo-800 font-medium">
-                  See all reviews
-                </Link>
-              </div>
-              
-              <div className="flex flex-col md:flex-row gap-8 mb-8">
-                <div className="md:w-1/3 bg-gray-50 p-6 rounded-md text-center">
-                  <div className="text-5xl font-bold text-indigo-600 mb-2">{course.rating.toFixed(1)}</div>
-                  <div className="flex justify-center mb-2">
-                    {Array(5).fill(0).map((_, i) => (
-                      <StarIcon 
-                        key={i} 
-                        className={`h-5 w-5 ${i < course.rating ? 'text-yellow-400' : 'text-gray-300'}`} 
-                      />
-                    ))}
-                  </div>
-                  <p className="text-gray-600">Course Rating</p>
-                </div>
-                
-                <div className="md:w-2/3">
-                  {course.reviews.map((review, idx) => (
-                    <div key={idx} className={`${idx !== 0 ? 'border-t pt-4' : ''} mb-4`}>
-                      <div className="flex items-center mb-2">
-                        <div className="relative w-10 h-10 rounded-full overflow-hidden mr-3">
-                          <Image
-                            src={review.avatar}
-                            alt={review.name}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                        <div>
-                          <h4 className="font-medium">{review.name}</h4>
-                          <div className="flex items-center">
-                            {Array(5).fill(0).map((_, i) => (
-                              <StarIcon 
-                                key={i} 
-                                className={`h-4 w-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`} 
-                              />
-                            ))}
-                            <span className="text-sm text-gray-500 ml-2">{review.date}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-gray-700">{review.comment}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </section>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:w-1/3">
-            <div className="bg-white border rounded-lg shadow-sm p-6 sticky top-20">
-              <div className="text-3xl font-bold mb-4">${course.price}</div>
-              
-              <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-md transition-colors mb-3">
+              <button className="w-full bg-[#0066cc] text-white font-medium py-3 px-6 rounded-full hover:bg-[#0077ed] transition-colors mb-4">
                 Enroll Now
               </button>
-              
-              <button className="w-full border border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-medium py-3 px-4 rounded-md transition-colors mb-6">
+              <button className="w-full bg-white text-[#0066cc] font-medium py-3 px-6 rounded-full border border-[#0066cc] hover:bg-[#f5f5f7] transition-colors">
                 Add to Wishlist
               </button>
-              
-              <div className="mb-6">
-                <h3 className="font-bold text-lg mb-3">This course includes:</h3>
-                <ul className="space-y-2">
-                  <li className="flex items-center">
-                    <BookOpenIcon className="h-5 w-5 text-gray-500 mr-2" />
-                    <span>{course.lessonsCount} lessons</span>
-                  </li>
-                  <li className="flex items-center">
-                    <ClockIcon className="h-5 w-5 text-gray-500 mr-2" />
-                    <span>{course.totalHours} hours of video</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CalendarIcon className="h-5 w-5 text-gray-500 mr-2" />
-                    <span>Full lifetime access</span>
-                  </li>
-                  <li className="flex items-center">
-                    <UserCircleIcon className="h-5 w-5 text-gray-500 mr-2" />
-                    <span>Access on mobile and TV</span>
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircleIcon className="h-5 w-5 text-gray-500 mr-2" />
-                    <span>Certificate of completion</span>
-                  </li>
-                </ul>
-              </div>
-              
-              <div className="text-center">
-                <p className="text-gray-500 text-sm mb-2">Not sure? All courses have a 30-day money-back guarantee</p>
-                <button className="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-                  Gift this course
-                </button>
+
+              <div className="mt-6 space-y-4 text-[#1d1d1f]">
+                <div className="flex items-center">
+                  <DevicePhoneMobileIcon className="h-5 w-5 mr-3 text-[#86868b]" />
+                  <span>Access on mobile and desktop</span>
+                </div>
+                <div className="flex items-center">
+                  <DocumentTextIcon className="h-5 w-5 mr-3 text-[#86868b]" />
+                  <span>Certificate of completion</span>
+                </div>
+                <div className="flex items-center">
+                  <ChatBubbleLeftRightIcon className="h-5 w-5 mr-3 text-[#86868b]" />
+                  <span>Community support</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
