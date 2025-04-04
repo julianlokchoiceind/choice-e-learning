@@ -3,36 +3,22 @@
 @tailwind utilities;
 
 :root {
-  /* Colors */
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 255, 255, 255;
   --background-end-rgb: 255, 255, 255;
   
-  /* Apple-style colors */
-  --apple-bg: 255, 255, 255;
-  --apple-text: 29, 29, 31;
-  --apple-link: 0, 102, 204;
-  --apple-subdued: 134, 134, 139;
-  --apple-highlight: 245, 245, 247;
-  --apple-secondary: 51, 51, 54;
-  --apple-accent: 0, 113, 227;
-  
-  /* Button styles */
-  --btn-primary-bg: 0, 113, 227;
-  --btn-primary-text: 255, 255, 255;
-  --btn-secondary-bg: 245, 245, 247;
-  --btn-secondary-text: 29, 29, 31;
+  /* Colors */
+  --color-primary: #0066cc;
+  --color-primary-hover: #0077ed;
+  --color-background: #ffffff;
+  --color-text: #1d1d1f;
+  --color-text-secondary: #86868b;
+  --color-highlight: #f5f5f7;
   
   /* Animation durations */
-  --animation-slow: 1200ms;
-  --animation-medium: 800ms;
-  --animation-fast: 300ms;
-  
-  /* Card styles */
-  --card-bg: 255, 255, 255;
-  --card-border: 229, 229, 229;
-  --card-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  --card-hover-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  --duration-fast: 300ms;
+  --duration-medium: 500ms;
+  --duration-slow: 1000ms;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -43,14 +29,73 @@
   }
 }
 
+body {
+  color: var(--color-text);
+  background: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold text-[#1d1d1f];
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  p {
+    @apply text-[#86868b];
+  }
+
+  a {
+    @apply text-[#0066cc] no-underline transition-colors hover:text-[#0077ed];
+  }
+}
+
+@layer components {
+  .button-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-[#0066cc] rounded-full transition-all hover:bg-[#0077ed] hover:shadow-lg hover:-translate-y-0.5;
+  }
+
+  .button-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-base font-medium text-[#0066cc] bg-white border border-[#0066cc] rounded-full transition-all hover:bg-[#f5f5f7];
+  }
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
 /* Theme configuration */
 :root {
-  --color-background: var(--background-white);
   --color-foreground: var(--text-primary);
   --color-accent: var(--button-primary);
-  --color-primary: var(--button-primary);
   --color-secondary: var(--button-secondary);
-  --color-highlight: var(--button-primary-hover);
   --font-sans: 'SF Pro Display', 'SF Pro Icons', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
@@ -63,8 +108,6 @@ body {
   line-height: 1.47059;
   font-weight: 400;
   letter-spacing: -0.022em;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Typography */
