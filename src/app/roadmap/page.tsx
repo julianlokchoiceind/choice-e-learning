@@ -4,79 +4,48 @@ import { CheckCircleIcon, ArrowRightIcon, ChevronRightIcon, CodeBracketIcon, Com
 import Image from "next/image";
 import Link from "next/link";
 import { AcademicCapIcon } from "@heroicons/react/24/outline";
+import CounterComponent from '../../components/CounterComponent';
 
 export const metadata: Metadata = {
   title: "Learning Roadmap | Choice E-Learning",
   description: "Your step-by-step guide to becoming a professional through our structured learning paths.",
 };
 
-// Client component for animation counter
-const CounterScript = () => {
-  return (
-    <script
-      dangerouslySetInnerHTML={{
-        __html: `
-        document.addEventListener('DOMContentLoaded', function() {
-          const counters = document.querySelectorAll('.counter-value');
-          const counterSection = document.querySelector('.counter-section');
-          
-          const startCounting = () => {
-            counters.forEach(counter => {
-              const target = parseInt(counter.getAttribute('data-target'), 10);
-              const duration = 2000; // ms
-              const increment = target / (duration / 16);
-              let current = 0;
-              
-              const updateCounter = () => {
-                current += increment;
-                const value = Math.min(Math.round(current), target);
-                counter.textContent = value.toLocaleString();
-                
-                if (value < target) {
-                  requestAnimationFrame(updateCounter);
-                }
-              };
-              
-              updateCounter();
-            });
-          };
-          
-          // Start animation when element is in view
-          const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-              if (entry.isIntersecting) {
-                startCounting();
-                observer.unobserve(entry.target);
-              }
-            });
-          }, { threshold: 0.1 });
-          
-          if (counterSection) {
-            observer.observe(counterSection);
-          }
-        });
-        `
-      }}
-    />
-  );
-};
-
 export default function RoadmapPage() {
   return (
     <>
-      <CounterScript />
-      
-      {/* Enhanced Hero Section */}
-      <section className="page-hero bg-gradient-blue text-white">
-        <div className="max-w-[980px] mx-auto px-6 md:px-4 relative z-10 py-16 md:py-24">
-          <h1 className="h1 text-white text-center max-w-[720px] mx-auto leading-tight">Start Your Learning Journey With a Clear Path</h1>
+      {/* Enhanced Hero Section with Background Image and Overlay */}
+      <section className="page-hero relative overflow-hidden min-h-[500px] flex items-center">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image 
+            src="/images/backgrounds/education-hero.svg" 
+            alt="Education Background" 
+            fill 
+            className="object-cover" 
+            priority
+          />
+          {/* Overlay with site's main blue gradient - semi-transparent for SVG background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0077ed]/40 via-[#1982f8]/35 to-[#2e8ffd]/30"></div>
+        </div>
+        
+        {/* Decorative floating elements */}
+        <div className="absolute top-1/4 right-[15%] w-16 h-16 rounded-lg bg-white/10 backdrop-blur-sm animate-float" style={{ animationDelay: '0s' }}></div>
+        <div className="absolute bottom-1/4 left-[20%] w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm animate-float" style={{ animationDelay: '0.5s' }}></div>
+        <div className="absolute top-1/3 left-[15%] w-8 h-8 rotate-45 bg-white/10 backdrop-blur-sm animate-float" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-1/3 right-[20%] w-10 h-10 rounded-md bg-white/10 backdrop-blur-sm animate-float" style={{ animationDelay: '1.5s' }}></div>
+        
+        <div className="max-w-[980px] mx-auto px-6 md:px-4 relative z-10 py-16 md:py-24 text-center">
+          <h1 className="h1 text-white text-center max-w-[720px] mx-auto leading-tight">
+            Start Your Learning Journey With a Clear Path
+          </h1>
           <p className="text-[21px] leading-[1.381] text-white/90 max-w-[680px] mx-auto mt-6 text-center">
             Follow our expertly designed learning roadmaps and achieve your goals with a structured, step-by-step approach
           </p>
           <div className="flex justify-center mt-10">
             <Link 
               href="#learning-paths" 
-              className="flex items-center space-x-2 bg-white text-[#0066cc] px-6 py-3 rounded-full hover:shadow-lg font-medium transition-transform hover:-translate-y-1"
+              className="flex items-center space-x-2 bg-white text-[#0066cc] px-6 py-3 rounded-full hover:shadow-lg font-medium transition"
             >
               <span>Explore Roadmaps</span>
               <ChevronRightIcon className="h-4 w-4" />
@@ -90,20 +59,16 @@ export default function RoadmapPage() {
         <div className="max-w-[980px] mx-auto px-6 md:px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <div className="text-[42px] md:text-[56px] font-bold text-[#1d1d1f] counter-value" data-target="120">0</div>
-              <div className="text-[17px] text-[#86868b] mt-2">Courses</div>
+              <CounterComponent target={120} label="Courses" />
             </div>
             <div className="text-center">
-              <div className="text-[42px] md:text-[56px] font-bold text-[#1d1d1f] counter-value" data-target="15000">0</div>
-              <div className="text-[17px] text-[#86868b] mt-2">Students</div>
+              <CounterComponent target={150} label="Students" />
             </div>
             <div className="text-center">
-              <div className="text-[42px] md:text-[56px] font-bold text-[#1d1d1f] counter-value" data-target="8">0</div>
-              <div className="text-[17px] text-[#86868b] mt-2">Learning Paths</div>
+              <CounterComponent target={8} label="Learning Paths" />
             </div>
             <div className="text-center">
-              <div className="text-[42px] md:text-[56px] font-bold text-[#1d1d1f] counter-value" data-target="92">0</div>
-              <div className="text-[17px] text-[#86868b] mt-2">Completion Rate %</div>
+              <CounterComponent target={92} label="Completion Rate %" />
             </div>
           </div>
         </div>
@@ -119,7 +84,7 @@ export default function RoadmapPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {pathways.map((pathway, index) => (
-              <div key={index} className="card bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+              <div key={index} className="card bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.03]">
                 <div className="p-8">
                   <div className="w-16 h-16 bg-[#e3efff] rounded-full flex items-center justify-center mb-6">
                     <Image 

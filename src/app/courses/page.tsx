@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MagnifyingGlassIcon, FunnelIcon, AcademicCapIcon, ClockIcon, StarIcon, UserIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, FunnelIcon, AcademicCapIcon, ClockIcon, StarIcon, UserIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 export const metadata = {
   title: 'All Courses | Choice E-Learning',
@@ -26,18 +26,18 @@ export default function CoursesPage() {
             Start your learning journey with our comprehensive collection of expert-led courses
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <a href="#frontend" className="bg-white/20 text-white font-medium px-5 py-2 rounded-full hover:bg-white/30 transition-colors">
+            <div className="bg-white/20 text-white font-medium px-5 py-2 rounded-full">
               Frontend
-            </a>
-            <a href="#backend" className="bg-white/20 text-white font-medium px-5 py-2 rounded-full hover:bg-white/30 transition-colors">
+            </div>
+            <div className="bg-white/20 text-white font-medium px-5 py-2 rounded-full">
               Backend
-            </a>
-            <a href="#fullstack" className="bg-white/20 text-white font-medium px-5 py-2 rounded-full hover:bg-white/30 transition-colors">
+            </div>
+            <div className="bg-white/20 text-white font-medium px-5 py-2 rounded-full">
               Full Stack
-            </a>
-            <a href="#mobile" className="bg-white/20 text-white font-medium px-5 py-2 rounded-full hover:bg-white/30 transition-colors">
+            </div>
+            <div className="bg-white/20 text-white font-medium px-5 py-2 rounded-full">
               Mobile
-            </a>
+            </div>
           </div>
         </div>
       </section>
@@ -107,12 +107,12 @@ export default function CoursesPage() {
 
           {/* Course Categories */}
           <div className="mb-16">
-            <h2 className="text-[32px] font-semibold mb-8 text-[#1d1d1f]">Featured Courses</h2>
+            <h2 className="text-[32px] font-semibold mb-8 text-[#1d1d1f]">All Courses</h2>
             
             {/* Courses Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {courses.filter(course => course.isFeatured).map((course) => (
-                <div key={course.id} className="card hover:shadow-md">
+              {courses.map((course) => (
+                <div key={course.id} className="card group hover:shadow-lg hover:scale-[1.01] transition-all duration-300">
                   <div className="relative">
                     <div className="relative h-48 overflow-hidden rounded-t-lg">
                       <Image
@@ -136,8 +136,17 @@ export default function CoursesPage() {
                         {course.level}
                       </span>
                       <div className="flex items-center text-[#86868b] text-sm">
-                        <ClockIcon className="h-4 w-4 mr-1" />
-                        {course.duration}
+                        {course.isFeatured ? (
+                          <>
+                            <ClockIcon className="h-4 w-4 mr-1" />
+                            {course.duration}
+                          </>
+                        ) : (
+                          <>
+                            <UserIcon className="h-4 w-4 mr-1" />
+                            {course.students} students
+                          </>
+                        )}
                       </div>
                     </div>
                     <h3 className="text-[20px] leading-[1.3] font-semibold mb-3 text-[#1d1d1f]">{course.title}</h3>
@@ -158,63 +167,9 @@ export default function CoursesPage() {
                     </div>
                     <Link 
                       href={`/courses/${course.id}`}
-                      className="block mt-4 text-center text-[#0066cc] bg-[#e3efff] hover:bg-[#cce4ff] font-medium py-2 px-4 rounded-full transition-colors"
+                      className="block mt-4 text-[#0066cc] text-[14px] group-hover:underline flex justify-end items-center"
                     >
-                      View Course
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          {/* All Courses Section */}
-          <div>
-            <h2 className="text-[32px] font-semibold mb-8 text-[#1d1d1f]">All Courses</h2>
-            
-            {/* Courses Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {courses.filter(course => !course.isFeatured).map((course) => (
-                <div key={course.id} className="card hover:shadow-md">
-                  <div className="relative h-48 overflow-hidden rounded-t-lg">
-                    <Image
-                      src={course.image}
-                      alt={course.title}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <div className="flex justify-between items-start mb-3">
-                      <span className="inline-block bg-[#e3efff] text-[#0066cc] text-xs font-medium px-3 py-1 rounded-full">
-                        {course.level}
-                      </span>
-                      <div className="flex items-center text-[#86868b] text-sm">
-                        <UserIcon className="h-4 w-4 mr-1" />
-                        {course.students} students
-                      </div>
-                    </div>
-                    <h3 className="text-[20px] leading-[1.3] font-semibold mb-3 text-[#1d1d1f]">{course.title}</h3>
-                    <p className="text-[#86868b] mb-4 text-[15px] line-clamp-3 min-h-[70px]">{course.description}</p>
-                    <div className="flex justify-between items-center border-t border-[#d2d2d7] pt-4 mt-2">
-                      <div className="flex items-center">
-                        <div className="flex">
-                          {[...Array(5)].map((_, i) => (
-                            <StarIcon 
-                              key={i} 
-                              className={`h-4 w-4 ${i < Math.floor(course.rating) ? 'text-[#fbbf24] fill-[#fbbf24]' : 'text-[#d2d2d7]'}`} 
-                            />
-                          ))}
-                        </div>
-                        <span className="text-[14px] text-[#86868b] ml-2">({course.reviews})</span>
-                      </div>
-                      <span className="text-[#1d1d1f] font-semibold">${course.price}</span>
-                    </div>
-                    <Link 
-                      href={`/courses/${course.id}`}
-                      className="block mt-4 text-center text-[#0066cc] bg-[#e3efff] hover:bg-[#cce4ff] font-medium py-2 px-4 rounded-full transition-colors"
-                    >
-                      View Course
+                      View Course <ChevronRightIcon className="inline-block ml-1 h-[10px] w-[10px]" />
                     </Link>
                   </div>
                 </div>
@@ -248,10 +203,10 @@ export default function CoursesPage() {
               We're constantly adding new courses. Request a topic or check our upcoming course schedule.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/contact" className="bg-white/20 text-white hover:bg-white/30 font-medium py-3 px-6 rounded-full transition-all">
+              <Link href="/contact" className="bg-white/20 text-white font-medium py-3 px-6 rounded-full">
                 Request a Course
               </Link>
-              <Link href="/upcoming" className="bg-white text-[#0066cc] font-medium py-3 px-6 rounded-full hover:shadow-lg transition-transform hover:-translate-y-1">
+              <Link href="/upcoming" className="bg-white text-[#0066cc] font-medium py-3 px-6 rounded-full">
                 View Upcoming Courses
               </Link>
             </div>

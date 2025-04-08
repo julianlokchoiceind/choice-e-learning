@@ -122,7 +122,7 @@ export default function Home() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
             {featuredCourses.map((course) => (
-              <div key={course.id} className="card group hover:shadow-md">
+              <div key={course.id} className="card group hover:shadow-lg hover:scale-[1.01] transition-all duration-300">
                 <div className="relative h-[225px] overflow-hidden rounded-t-lg">
                   <Image
                     src={course.image}
@@ -173,7 +173,7 @@ export default function Home() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {popularCourses.map((course) => (
-              <Link key={course.id} href={`/courses/${course.id}`} className="card flex group items-center p-5 hover:shadow-lg transition-all">
+              <Link key={course.id} href={`/courses/${course.id}`} className="card flex group items-center p-5 hover:shadow-lg hover:scale-[1.01] transition-all duration-300">
                 <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
                   <Image
                     src={course.image}
@@ -209,16 +209,40 @@ export default function Home() {
             Not sure where to start? Follow our curated learning paths to go from beginner to professional developer.
           </p>
           
-          <div className="flex flex-col md:flex-row justify-center gap-8 mb-12">
+          {/* Desktop view */}
+          <div className="hidden md:flex flex-row justify-center items-center gap-8 mb-12 relative">
+            {/* Horizontal connecting lines */}
             {roadmaps.map((roadmap, index) => (
-              <div key={index} className="flex-1 max-w-[280px] relative">
-                <div className={`h-1 absolute top-[28px] left-1/2 w-full ${index < roadmaps.length - 1 ? 'bg-gradient-to-r from-[#0066cc] to-[#2997ff]' : 'hidden'} md:block`}></div>
-                <div className="relative z-10 flex flex-col items-center">
-                  <div className="number-circle mb-5">
+              <div key={index} className="flex-1 max-w-[280px] mx-auto relative z-10">
+                {index < roadmaps.length - 1 && (
+                  <div className="absolute h-1 bg-[#0066cc] top-[28px] left-1/2 w-full z-0"></div>
+                )}
+                <div className="flex flex-col items-center">
+                  <div className="number-circle mb-5 z-10 bg-[#0066cc] relative">
                     {index + 1}
                   </div>
-                  <h3 className="text-[21px] leading-[1.381] font-semibold mb-2">{roadmap.title}</h3>
+                  <h3 className="text-[21px] leading-[1.381] font-semibold mb-2 text-center">{roadmap.title}</h3>
                   <p className="text-[14px] leading-[1.42859] text-[#86868b] text-center">{roadmap.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Mobile view */}
+          <div className="md:hidden flex flex-col items-center gap-0 mb-12">
+            {roadmaps.map((roadmap, index) => (
+              <div key={index} className="w-full flex flex-col items-center relative mb-16 last:mb-0">
+                {/* Vertical connecting line */}
+                {index < roadmaps.length - 1 && (
+                  <div className="absolute w-[2px] bg-[#0066cc] h-[120px]" style={{ top: '56px', left: '50%', transform: 'translateX(-50%)' }}></div>
+                )}
+                
+                <div className="number-circle mb-5 z-10 bg-[#0066cc]">
+                  {index + 1}
+                </div>
+                <div className="text-center relative z-10 bg-white px-2">
+                  <h3 className="text-[21px] leading-[1.381] font-semibold mb-2 text-center">{roadmap.title}</h3>
+                  <p className="text-[14px] leading-[1.42859] text-[#86868b] text-center max-w-[280px]">{roadmap.description}</p>
                 </div>
               </div>
             ))}
@@ -276,7 +300,7 @@ export default function Home() {
                 {/* Double the testimonials for seamless loop */}
                 {[...testimonials, ...testimonials].map((testimonial, i) => (
                   <div key={i} className="flex-shrink-0 w-[350px] m-4">
-                    <div className="card p-8 shadow-lg bg-white rounded-xl hover:shadow-xl transition-shadow h-full">
+                    <div className="card p-8 shadow-lg bg-white rounded-xl hover:shadow-xl hover:scale-[1.01] transition-all duration-300 h-full">
                       <div className="flex items-center mb-6">
                         <div className="relative w-12 h-12 rounded-full overflow-hidden mr-4">
                           <Image

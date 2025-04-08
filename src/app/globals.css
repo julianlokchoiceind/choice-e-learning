@@ -78,6 +78,12 @@ body {
   to { transform: translateY(0); }
 }
 
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
 /* Animation classes */
 .animate-fade {
   animation: fadeIn 0.5s ease-out;
@@ -101,6 +107,10 @@ body {
 
 .animate-ticker {
   animation: ticker 30s linear infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
 
 /* Base styles with Tailwind */
@@ -172,7 +182,7 @@ body {
   }
 
   .bg-gradient-blue {
-    @apply bg-gradient-to-br from-[#0066cc] via-[#0077ed] to-[#1982f8];
+    @apply bg-gradient-to-br from-[#0077ed] via-[#1982f8] to-[#2e8ffd];
   }
 }
 
