@@ -36,6 +36,65 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Custom animations - must be outside @layer */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeSlideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Animation classes */
+.animate-fade {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+.animate-slide-right {
+  animation: slideInRight 1s ease forwards;
+}
+
+.animate-slide-left {
+  animation: slideInLeft 1s ease forwards;
+}
+
+.animate-ticker {
+  animation: ticker 30s linear infinite;
+}
+
+/* Base styles with Tailwind */
 @layer base {
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold text-[#1d1d1f];
@@ -62,6 +121,7 @@ body {
   }
 }
 
+/* Component styles with Tailwind */
 @layer components {
   .button-primary {
     @apply inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-[#0066cc] rounded-full transition-all hover:bg-[#0077ed] hover:shadow-lg hover:-translate-y-0.5;
@@ -70,290 +130,45 @@ body {
   .button-secondary {
     @apply inline-flex items-center justify-center px-6 py-3 text-base font-medium text-[#0066cc] bg-white border border-[#0066cc] rounded-full transition-all hover:bg-[#f5f5f7];
   }
-}
 
-/* Custom animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes fadeSlideIn {
-  from { 
-    opacity: 0;
-    transform: translateY(10px);
+  .card {
+    @apply bg-white rounded-[18px] overflow-hidden shadow-md transition-transform duration-300;
   }
-  to { 
-    opacity: 1;
-    transform: translateY(0);
+
+  .number-circle {
+    @apply w-14 h-14 rounded-full bg-[#0066cc] text-white text-[22px] font-semibold flex items-center justify-center;
+  }
+
+  .page-hero {
+    @apply py-20 md:py-24 text-center;
+  }
+
+  .section-full {
+    @apply py-16 md:py-24;
+  }
+
+  .section-tight {
+    @apply py-10 md:py-16;
   }
 }
 
-.animate-fade {
-  animation: fadeIn 0.5s ease-out;
-}
-
-.animate-slide-up {
-  animation: slideUp 0.5s ease-out;
-}
-
-/* Theme configuration */
-:root {
-  --color-foreground: var(--text-primary);
-  --color-accent: var(--button-primary);
-  --color-secondary: var(--button-secondary);
-  --font-sans: 'SF Pro Display', 'SF Pro Icons', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-}
-
-body {
-  background-color: var(--background-white);
-  color: var(--text-primary);
-  font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", sans-serif;
-  font-size: 17px;
-  line-height: 1.47059;
-  font-weight: 400;
-  letter-spacing: -0.022em;
-}
-
-/* Typography */
-h1, h2, h3, h4, h5, h6 {
-  margin: 0;
-  padding: 0;
-  font-weight: 600;
-  letter-spacing: -0.022em;
-  color: var(--text-primary);
-}
-
-h1, .h1 {
-  font-size: 48px;
-  line-height: 1.08349;
-  font-weight: 700;
-  letter-spacing: -0.003em;
-}
-
-h2, .h2 {
-  font-size: 40px;
-  line-height: 1.1;
-  font-weight: 700;
-  letter-spacing: 0.004em;
-}
-
-h3, .h3 {
-  font-size: 32px;
-  line-height: 1.125;
-  font-weight: 600;
-  letter-spacing: 0.004em;
-}
-
-h4, .h4 {
-  font-size: 24px;
-  line-height: 1.19048;
-  font-weight: 600;
-  letter-spacing: 0.0045em;
-}
-
-h5, .h5 {
-  font-size: 20px;
-  line-height: 1.2381;
-  font-weight: 600;
-  letter-spacing: 0.0045em;
-}
-
-h6, .h6 {
-  font-size: 18px;
-  line-height: 1.33341;
-  font-weight: 600;
-  letter-spacing: 0.004em;
-}
-
-p {
-  margin: 0;
-  color: var(--text-secondary);
-}
-
-a {
-  color: var(--blue);
-  text-decoration: none;
-  transition: color var(--duration-fast) ease;
-}
-
-a:hover {
-  color: var(--accent-blue);
-}
-
-/* Custom Utility Classes */
-.button-primary {
-  display: inline-block;
-  background-color: var(--button-primary);
-  color: var(--text-white);
-  font-size: 17px;
-  line-height: 1.47059;
-  font-weight: 500;
-  letter-spacing: -0.022em;
-  padding: 12px 22px;
-  border-radius: 980px;
-  transition: all var(--duration-fast) ease;
-}
-
-.button-primary:hover {
-  background-color: var(--button-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.button-secondary {
-  display: inline-block;
-  background-color: var(--button-secondary);
-  color: var(--button-primary);
-  font-size: 17px;
-  line-height: 1.47059;
-  font-weight: 500;
-  letter-spacing: -0.022em;
-  padding: 12px 22px;
-  border-radius: 980px;
-  transition: all var(--duration-fast) ease;
-}
-
-.button-secondary:hover {
-  background-color: var(--button-secondary-hover);
-}
-
-.button-text {
-  color: var(--button-primary);
-  font-size: 17px;
-  line-height: 1.47059;
-  font-weight: 500;
-  letter-spacing: -0.022em;
-  transition: color var(--duration-fast) ease;
-}
-
-.button-text:hover {
-  color: var(--button-primary-hover);
-  text-decoration: underline;
-}
-
-/* Layout Sections */
-.page-hero {
-  padding: 120px 0 60px;
-  text-align: center;
-}
-
-.section-full {
-  padding: 100px 0;
-}
-
-.section-tight {
-  padding: 60px 0;
-}
-
-/* Card Component */
-.card {
-  background-color: white;
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-}
-
-/* Background Gradients */
-.bg-gradient-white {
-  background-color: var(--background-white);
-  background-image: linear-gradient(180deg, #fbfbfd 0%, var(--background-white) 100%);
-}
-
-.bg-gradient-light {
-  background-color: var(--background-light);
-  background-image: linear-gradient(180deg, #ffffff 0%, var(--background-light) 100%);
-}
-
-.bg-gradient-blue {
-  background: linear-gradient(135deg, #0066cc 0%, #0077ed 50%, #1982f8 100%);
-}
-
-/* Number Circles and Timeline Styles */
-.timeline-wrapper {
-  position: relative;
-  padding: 20px 0;
-}
-
-.timeline-item {
-  position: relative;
-  margin-bottom: 60px;
-}
-
-@media (min-width: 768px) {
-  .timeline-item {
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
+/* Utility classes with Tailwind */
+@layer utilities {
+  .bg-gradient-white {
+    @apply bg-white bg-gradient-to-b from-[#fbfbfd] to-white;
   }
 
-  .timeline-item:nth-child(even) {
-    justify-content: flex-end;
+  .bg-gradient-light {
+    @apply bg-[#f5f5f7] bg-gradient-to-b from-white to-[#f5f5f7];
+  }
+
+  .bg-gradient-blue {
+    @apply bg-gradient-to-br from-[#0066cc] via-[#0077ed] to-[#1982f8];
   }
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes slideInRight {
-  from { transform: translateX(30px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes slideInLeft {
-  from { transform: translateX(-30px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-.animate-fade {
-  animation: fadeIn var(--duration-normal) ease forwards;
-}
-
-.animate-slide-up {
-  animation: slideUp var(--duration-normal) ease forwards;
-}
-
-.animate-slide-right {
-  animation: slideInRight var(--duration-slow) ease forwards;
-}
-
-.animate-slide-left {
-  animation: slideInLeft var(--duration-slow) ease forwards;
-}
-
-/* Media queries for responsive design */
+/* Mobile responsive */
 @media (max-width: 768px) {
-  h1, .h1 {
-    font-size: 40px;
-  }
-  
-  h2, .h2 {
-    font-size: 32px;
-  }
-  
-  h3, .h3 {
-    font-size: 28px;
-  }
-  
   .page-hero {
     padding: 100px 0 40px;
   }
@@ -367,34 +182,7 @@ a:hover {
   }
 }
 
-/* Number Circles and Timeline Styles */
-.number-circle {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background-color: #0066cc;
-  color: white;
-  font-size: 22px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Ticker Animation */
-@keyframes ticker {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-.animate-ticker {
-  animation: ticker 30s linear infinite;
-}
-
+/* Ticker behaviors */
 #testimonialTicker:hover .animate-ticker {
   animation-play-state: paused;
 } 
