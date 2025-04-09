@@ -1,0 +1,28 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Targeted Modifications Only:
+When you request a file change, only modify the specific file mentioned. If the code in that file is linked to another, adjust only the relevant sections that interact with the related file.
+
+- Avoid Unrelated Modifications:
+Do not alter files that are not part of the requested change. Random modifications might unintentionally break page layouts or interfere with stable, functioning features.
+
+- Run Full Test Suites:
+Always run the complete test suite before and after making any changes to ensure that your modifications do not introduce regressions or break existing functionality.
+
+- Adhere to Coding Standards:
+Follow the project’s established coding conventions, style guides, and best practices to maintain consistency across the codebase.
+
+- Maintain Dependency Integrity:
+If you update project dependencies or configurations, do so cautiously. Verify that these changes do not conflict with the existing code structure or project functionality.
+
+- Avoid Frequent Context Loss:
+Recently, there has been an increase in instances where the context is lost—a problem that was rare in the past. Please ensure you consistently maintain all contextual information.
+
+- Always Preserve Context:
+It is crucial to always remember and retain the context for coherent task execution.
+
+- Eliminate Redundant File and Folder Operations:
+After editing a file, avoid deleting and recreating it unnecessarily. Similarly, if a folder already exists—as confirmed by listing its contents—please do not execute commands to recreate it.

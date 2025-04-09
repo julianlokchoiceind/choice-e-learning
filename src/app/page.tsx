@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import Image from "next/image";
 import Link from "next/link";
 import { FaLaptopCode, FaUserGraduate, FaTrophy, FaRegPaperPlane, FaChevronRight } from "react-icons/fa";
@@ -104,10 +105,10 @@ export default function Home() {
           
           <div className="relative w-full h-[400px] md:h-[500px] mt-12 overflow-hidden rounded-3xl">
             <Image
-              src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97"
-              alt="Coding Education"
+              src="https://images.unsplash.com/photo-1599837565318-67429bde7162?q=80&w=2969&auto=format&fit=crop"
+              alt="Student learning to code"
               fill
-              className="object-cover scale-110"
+              className="object-cover object-center"
               priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
