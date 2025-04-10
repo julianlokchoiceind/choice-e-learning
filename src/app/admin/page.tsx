@@ -59,6 +59,17 @@ interface MessageItemProps {
   image: string;
 }
 
+interface PerformanceTabProps {
+  title: string;
+  value: string;
+  isActive?: boolean;
+}
+
+interface OverviewTabProps {
+  label: string;
+  isActive?: boolean;
+}
+
 export default function AdminDashboardPage() {
   return (
     <div className="flex h-screen bg-gray-100">
@@ -158,6 +169,132 @@ export default function AdminDashboardPage() {
               bgColor="bg-gradient-to-r from-indigo-500 to-indigo-600" 
               icon={<BookOpenIcon className="h-6 w-6 text-white" />} 
             />
+          </div>
+
+          {/* Performance Overview Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {/* School Performance */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h3 className="text-lg font-semibold mb-4">School Performance</h3>
+              <div className="flex space-x-6 mb-4">
+                <PerformanceTab title="This Week" value="1,245" isActive={true} />
+                <PerformanceTab title="Last Week" value="1,356" />
+              </div>
+              <div className="h-64 relative">
+                <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none">
+                  {/* This Week Line */}
+                  <path 
+                    d="M0,180 C50,120 100,160 150,100 C200,40 250,80 300,120 C350,160 400,100 450,120 L450,200 L0,200 Z" 
+                    fill="rgba(79, 70, 229, 0.1)" 
+                    stroke="rgb(79, 70, 229)" 
+                    strokeWidth="2"
+                  />
+                  {/* Last Week Line */}
+                  <path 
+                    d="M0,100 C50,140 100,80 150,120 C200,160 250,80 300,40 C350,80 400,160 450,120" 
+                    fill="none" 
+                    stroke="rgb(249, 115, 22)" 
+                    strokeWidth="2"
+                  />
+                </svg>
+                <div className="grid grid-cols-6 gap-4 absolute bottom-0 w-full text-xs text-gray-500">
+                  <div className="text-center">Week 01</div>
+                  <div className="text-center">Week 02</div>
+                  <div className="text-center">Week 03</div>
+                  <div className="text-center">Week 04</div>
+                  <div className="text-center">Week 05</div>
+                  <div className="text-center">Week 06</div>
+                </div>
+                <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-500">
+                  <div>560k</div>
+                  <div>480k</div>
+                  <div>400k</div>
+                  <div>320k</div>
+                  <div>240k</div>
+                  <div>160k</div>
+                </div>
+              </div>
+            </div>
+            
+            {/* School Overview */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h3 className="text-lg font-semibold mb-4">School Overview</h3>
+              <div className="flex space-x-2 border-b mb-4">
+                <OverviewTab label="Week" isActive={true} />
+                <OverviewTab label="Month" />
+                <OverviewTab label="Year" />
+                <OverviewTab label="All" />
+              </div>
+              <div className="h-64 relative">
+                <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none">
+                  {/* Bar Chart */}
+                  <rect x="20" y="50" width="20" height="150" fill="rgb(79, 70, 229)" />
+                  <rect x="60" y="20" width="20" height="180" fill="rgb(79, 70, 229)" />
+                  <rect x="100" y="70" width="20" height="130" fill="rgb(79, 70, 229)" />
+                  <rect x="140" y="30" width="20" height="170" fill="rgb(79, 70, 229)" />
+                  <rect x="180" y="90" width="20" height="110" fill="rgb(79, 70, 229)" />
+                  <rect x="220" y="60" width="20" height="140" fill="rgb(79, 70, 229)" />
+                  <rect x="260" y="40" width="20" height="160" fill="rgb(79, 70, 229)" />
+                  <rect x="300" y="80" width="20" height="120" fill="rgb(79, 70, 229)" />
+                  <rect x="340" y="20" width="20" height="180" fill="rgb(79, 70, 229)" />
+                  <rect x="380" y="70" width="20" height="130" fill="rgb(79, 70, 229)" />
+                  <rect x="420" y="30" width="20" height="170" fill="rgb(79, 70, 229)" />
+                  <rect x="460" y="10" width="20" height="190" fill="rgb(79, 70, 229)" />
+                  
+                  {/* Revenue Line */}
+                  <path 
+                    d="M30,120 L70,80 L110,100 L150,60 L190,120 L230,90 L270,50 L310,70 L350,40 L390,120 L430,80 L470,50" 
+                    fill="none" 
+                    stroke="rgb(34, 197, 94)" 
+                    strokeWidth="2"
+                  />
+                  
+                  {/* Active Projects Line */}
+                  <path 
+                    d="M30,140 L70,100 L110,130 L150,90 L190,150 L230,120 L270,100 L310,140 L350,110 L390,140 L430,120 L470,90" 
+                    fill="none" 
+                    stroke="rgb(249, 115, 22)" 
+                    strokeWidth="2"
+                    strokeDasharray="4,4"
+                  />
+                </svg>
+                <div className="grid grid-cols-12 gap-1 absolute bottom-0 w-full text-xs text-gray-500">
+                  <div className="text-center">Jan</div>
+                  <div className="text-center">Feb</div>
+                  <div className="text-center">Mar</div>
+                  <div className="text-center">Apr</div>
+                  <div className="text-center">May</div>
+                  <div className="text-center">Jun</div>
+                  <div className="text-center">Jul</div>
+                  <div className="text-center">Aug</div>
+                  <div className="text-center">Sep</div>
+                  <div className="text-center">Oct</div>
+                  <div className="text-center">Nov</div>
+                  <div className="text-center">Dec</div>
+                </div>
+                <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-gray-500">
+                  <div>100</div>
+                  <div>75</div>
+                  <div>50</div>
+                  <div>25</div>
+                  <div>0</div>
+                </div>
+                <div className="absolute right-4 top-2 flex items-center text-xs gap-8">
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full bg-indigo-600 mr-1"></div>
+                    <span>Number of Projects</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
+                    <span>Revenue</span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full bg-orange-500 mr-1"></div>
+                    <span>Active Projects</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Calendar Section */}
@@ -380,12 +517,12 @@ export default function AdminDashboardPage() {
           {/* Recent Students & Messages */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Recent Students */}
-            <div className="col-span-2 bg-white rounded-lg shadow-sm p-6">
+            <div className="col-span-2 bg-white rounded-lg shadow-sm p-6 h-[360px] flex flex-col">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold">Recent Students</h3>
                 <p className="text-sm text-gray-500">You have 456 Students</p>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-4 flex-1 overflow-y-auto">
                 <StudentItem 
                   name="Samantha William"
                   className="Class VII A"
@@ -411,18 +548,18 @@ export default function AdminDashboardPage() {
                   className="Class VII B"
                   image="https://randomuser.me/api/portraits/women/46.jpg"
                 />
-                <div className="flex justify-center mt-4">
-                  <button className="px-4 py-2 text-indigo-600 font-medium hover:bg-indigo-50 rounded-md">
-                    View More
-                  </button>
-                </div>
+              </div>
+              <div className="flex justify-center mt-4">
+                <button className="px-4 py-2 text-indigo-600 font-medium hover:bg-indigo-50 rounded-md">
+                  View More
+                </button>
               </div>
             </div>
             
             {/* Messages */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg shadow-sm p-6 h-[360px] flex flex-col">
               <h3 className="text-lg font-semibold mb-6">Messages</h3>
-              <div className="space-y-4">
+              <div className="space-y-4 flex-1 overflow-y-auto">
                 <MessageItem 
                   name="Samantha William"
                   time="12:45 PM"
@@ -472,7 +609,7 @@ export default function AdminDashboardPage() {
 // Sidebar Link Component
 function SidebarLink({ href, icon, text, active = false, hasChildren = false }: SidebarLinkProps) {
   return (
-    <Link href={href} className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium ${active ? 'bg-indigo-800 text-white' : 'text-white hover:bg-indigo-600'}`}>
+    <Link href={href} className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium ${active ? 'bg-indigo-800 text-white' : 'text-white hover:bg-indigo-600 hover:text-white'}`}>
       <div className="flex items-center">
         <span className="mr-3">{icon}</span>
         <span>{text}</span>
@@ -584,5 +721,31 @@ function MessageItem({ name, time, message, image }: MessageItemProps) {
         <p className="text-sm text-gray-600">{message}</p>
       </div>
     </div>
+  );
+}
+
+// Performance Tab Component
+function PerformanceTab({ title, value, isActive = false }: PerformanceTabProps) {
+  return (
+    <div className={`${isActive ? 'text-indigo-700' : 'text-gray-500'}`}>
+      <div className="flex items-center mb-1">
+        <div className={`w-4 h-4 rounded-full mr-2 ${isActive ? 'bg-indigo-700' : 'bg-orange-500'}`}></div>
+        <span className="text-sm font-medium">{title}</span>
+      </div>
+      <div className="text-xl font-bold">{value}</div>
+    </div>
+  );
+}
+
+// Overview Tab Component
+function OverviewTab({ label, isActive = false }: OverviewTabProps) {
+  return (
+    <button 
+      className={`px-4 py-2 text-sm ${isActive 
+        ? 'text-indigo-700 bg-indigo-50 rounded-t-md border-b-2 border-indigo-700' 
+        : 'text-gray-500 hover:text-gray-700'}`}
+    >
+      {label}
+    </button>
   );
 } 
