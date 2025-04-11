@@ -1,314 +1,338 @@
-import React from 'react';
-import Image from 'next/image';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { 
-  AcademicCapIcon, 
-  BookmarkIcon, 
-  CogIcon, 
-  UserCircleIcon, 
-  BellIcon, 
-  ClockIcon 
+  ArrowRightIcon, 
+  BookOpenIcon, 
+  AcademicCapIcon,
+  UserCircleIcon,
+  FireIcon,
+  CheckCircleIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
-import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
-export const metadata = {
-  title: 'Dashboard | Choice E-Learning',
-  description: 'Track your progress, manage your courses, and update your profile',
-};
+// Import types instead of direct function import
+import { UserCourseStats } from '@/types';
 
-export default function DashboardPage() {
+// Mock data for dashboard (will be replaced with real data where possible)
+const mockEnrolledCourses = [
+  { 
+    id: '1', 
+    title: 'JavaScript Fundamentals', 
+    progress: 65,
+    imageUrl: 'https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?q=80&w=200&auto=format&fit=crop',
+    totalLessons: 12,
+    completedLessons: 8
+  },
+  { 
+    id: '2', 
+    title: 'React for Beginners', 
+    progress: 30,
+    imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=200&auto=format&fit=crop',
+    totalLessons: 10,
+    completedLessons: 3
+  },
+  { 
+    id: '3', 
+    title: 'MongoDB Essentials', 
+    progress: 0,
+    imageUrl: 'https://images.unsplash.com/photo-1489875347897-49f64b51c1f8?q=80&w=200&auto=format&fit=crop',
+    totalLessons: 8,
+    completedLessons: 0
+  }
+];
+
+const mockAchievements = [
+  { id: '1', title: 'First Login', icon: <CheckCircleIcon className="w-6 h-6 text-green-500" />, date: '2023-12-01' },
+  { id: '2', title: 'Course Starter', icon: <BookOpenIcon className="w-6 h-6 text-blue-500" />, date: '2023-12-05' },
+  { id: '3', title: 'Quick Learner', icon: <FireIcon className="w-6 h-6 text-orange-500" />, date: '2023-12-10' },
+];
+
+const mockUpcomingDeadlines = [
+  { id: '1', title: 'Complete JavaScript Assignment', course: 'JavaScript Fundamentals', dueDate: '2024-06-30' },
+  { id: '2', title: 'React Project Submission', course: 'React for Beginners', dueDate: '2024-07-15' },
+];
+
+export default function Dashboard() {
+  const { data: session, status } = useSession();
+  const [stats, setStats] = useState<UserCourseStats>({
+    coursesCompleted: 0,
+    lessonsCompleted: 0,
+    totalHoursLearned: 0,
+    currentStreak: 0
+  });
+
+  const [loading, setLoading] = useState(true);
+  const [enrolledCourses, setEnrolledCourses] = useState(mockEnrolledCourses);
+  
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      try {
+        if (session?.user?.id) {
+          // Use fetch to call the server action from the client component
+          const response = await fetch(`/api/userStats?userId=${session.user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+              setStats(data.stats);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (session?.user) {
+      fetchUserStats();
+    } else {
+      // If not logged in or session loading, just stop loading after 1s
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [session]);
+
+  if (status === 'loading' || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
+  if (status === 'unauthenticated') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <h1 className="text-2xl font-bold mb-4">You need to be logged in to view this page</h1>
+        <Link 
+          href="/login" 
+          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
+        >
+          Log in
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Dashboard Header */}
-      <div className="bg-white shadow rounded-lg mb-8 p-6">
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="relative w-24 h-24 rounded-full overflow-hidden">
-            <Image 
-              src="https://randomuser.me/api/portraits/men/32.jpg"
-              alt="User profile"
-              fill
-              className="object-cover"
-            />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold mb-1">Welcome back, Michael!</h1>
-            <p className="text-gray-600 mb-4">Continue your learning journey and track your progress.</p>
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center">
-                <AcademicCapIcon className="h-5 w-5 text-indigo-600 mr-2" />
-                <span className="text-gray-700">4 Courses Enrolled</span>
-              </div>
-              <div className="flex items-center">
-                <CheckCircleIcon className="h-5 w-5 text-green-600 mr-2" />
-                <span className="text-gray-700">2 Certificates Earned</span>
-              </div>
-              <div className="flex items-center">
-                <ClockIcon className="h-5 w-5 text-indigo-600 mr-2" />
-                <span className="text-gray-700">25 Hours Completed</span>
-              </div>
+    <div className="bg-gray-50 min-h-screen">
+      {/* Header section */}
+      <div className="bg-indigo-600 text-white py-6">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold">
+                Welcome back, {session?.user?.name?.split(' ')[0] || 'Student'}! 👋
+              </h1>
+              <p className="mt-1 text-indigo-100">
+                Track your progress and continue your learning journey
+              </p>
+            </div>
+            <div className="mt-4 md:mt-0">
+              <Link 
+                href="/courses" 
+                className="inline-flex items-center bg-white text-indigo-600 px-4 py-2 rounded-md font-medium hover:bg-indigo-50 transition"
+              >
+                Explore Courses
+                <ArrowRightIcon className="ml-2 h-4 w-4" />
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar Navigation */}
-        <div className="lg:w-1/4">
-          <div className="bg-white shadow rounded-lg p-4">
-            <nav className="space-y-1">
-              <Link 
-                href="/dashboard" 
-                className="flex items-center px-3 py-2 text-gray-900 rounded-md bg-indigo-50 font-medium"
-              >
-                <AcademicCapIcon className="h-5 w-5 text-indigo-600 mr-3" />
-                My Courses
-              </Link>
-              <Link 
-                href="/dashboard/wishlist" 
-                className="flex items-center px-3 py-2 text-gray-600 rounded-md hover:bg-gray-50 hover:text-gray-900"
-              >
-                <BookmarkIcon className="h-5 w-5 text-gray-400 mr-3" />
-                Wishlist
-              </Link>
-              <Link 
-                href="/dashboard/notifications" 
-                className="flex items-center px-3 py-2 text-gray-600 rounded-md hover:bg-gray-50 hover:text-gray-900"
-              >
-                <BellIcon className="h-5 w-5 text-gray-400 mr-3" />
-                Notifications
-                <span className="ml-auto bg-indigo-100 text-indigo-600 text-xs font-medium px-2 py-0.5 rounded-full">
-                  3
-                </span>
-              </Link>
-              <Link 
-                href="/dashboard/profile" 
-                className="flex items-center px-3 py-2 text-gray-600 rounded-md hover:bg-gray-50 hover:text-gray-900"
-              >
-                <UserCircleIcon className="h-5 w-5 text-gray-400 mr-3" />
-                Profile Settings
-              </Link>
-              <Link 
-                href="/dashboard/settings" 
-                className="flex items-center px-3 py-2 text-gray-600 rounded-md hover:bg-gray-50 hover:text-gray-900"
-              >
-                <CogIcon className="h-5 w-5 text-gray-400 mr-3" />
-                Account Settings
-              </Link>
-            </nav>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                <BookOpenIcon className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 font-medium">Courses Completed</p>
+                <p className="text-2xl font-bold">{stats.coursesCompleted}</p>
+              </div>
+            </div>
           </div>
           
-          <div className="bg-indigo-50 rounded-lg p-4 mt-6">
-            <h3 className="font-medium text-indigo-900 mb-2">Need Help?</h3>
-            <p className="text-sm text-indigo-700 mb-3">
-              Our support team is ready to assist you with any questions.
-            </p>
-            <Link 
-              href="/support" 
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-800"
-            >
-              Contact Support →
-            </Link>
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                <AcademicCapIcon className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 font-medium">Lessons Completed</p>
+                <p className="text-2xl font-bold">{stats.lessonsCompleted}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                <ClockIcon className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 font-medium">Hours Learned</p>
+                <p className="text-2xl font-bold">{stats.totalHoursLearned}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+            <div className="flex items-center">
+              <div className="p-3 rounded-full bg-orange-100 text-orange-600 mr-4">
+                <FireIcon className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 font-medium">Current Streak</p>
+                <p className="text-2xl font-bold">{stats.currentStreak} days</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="lg:w-3/4">
-          {/* In Progress Courses */}
-          <section className="mb-8">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">In Progress</h2>
-              <Link 
-                href="/courses" 
-                className="text-sm font-medium text-indigo-600 hover:text-indigo-800"
-              >
-                Browse more courses
-              </Link>
-            </div>
-            
-            <div className="space-y-4">
-              {inProgressCourses.map((course) => (
-                <div key={course.id} className="bg-white shadow-md rounded-xl border border-[#e5e5e5] overflow-hidden">
-                  <div className="p-6">
-                    <div className="flex flex-col md:flex-row gap-6">
-                      <div className="md:w-1/4 relative h-32 md:h-auto rounded-lg overflow-hidden">
-                        <Image
-                          src={course.image}
-                          alt={course.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="md:w-3/4">
-                        <h3 className="text-[20px] font-semibold text-[#1d1d1f] mb-3">{course.title}</h3>
-                        <div className="flex items-center text-sm text-[#86868b] mb-4">
-                          <span className="flex items-center mr-4">
-                            <UserCircleIcon className="h-4 w-4 mr-1" />
-                            {course.instructor}
-                          </span>
-                          <span className="flex items-center">
-                            <ClockIcon className="h-4 w-4 mr-1" />
-                            {course.lastActivity}
-                          </span>
+        {/* Main content area - 2 column layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left column - Your courses */}
+          <div className="lg:col-span-2">
+            <h2 className="text-xl font-bold mb-4">Your Courses</h2>
+            <div className="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
+              {enrolledCourses.length > 0 ? (
+                <div className="divide-y divide-gray-200">
+                  {enrolledCourses.map((course) => (
+                    <div key={course.id} className="p-4 transition hover:bg-gray-50">
+                      <div className="flex flex-col sm:flex-row items-start">
+                        <div className="flex-shrink-0 w-full sm:w-32 h-24 mb-4 sm:mb-0 sm:mr-4">
+                          <img 
+                            src={course.imageUrl} 
+                            alt={course.title}
+                            className="w-full h-full object-cover rounded-md"
+                          />
                         </div>
-                        <div className="mb-5">
-                          <div className="flex justify-between text-sm mb-2">
-                            <span className="text-[#86868b]">Progress</span>
-                            <span className="font-medium text-[#1d1d1f]">{course.progress}%</span>
+                        <div className="flex-1">
+                          <h3 className="font-medium mb-1">{course.title}</h3>
+                          <div className="flex items-center mb-2 text-sm text-gray-500">
+                            <span>{course.completedLessons} of {course.totalLessons} lessons completed</span>
                           </div>
-                          <div className="w-full bg-[#f5f5f7] rounded-full h-2.5">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5 mb-3">
                             <div 
-                              className="bg-[#0066cc] h-2.5 rounded-full" 
+                              className="bg-indigo-600 h-2.5 rounded-full" 
                               style={{ width: `${course.progress}%` }}
                             ></div>
                           </div>
-                        </div>
-                        <div className="flex flex-wrap gap-3">
-                          <Link 
-                            href={`/courses/${course.id}`} 
-                            className="bg-[#0066cc] text-white text-sm font-medium px-5 py-2.5 rounded-full"
-                          >
-                            Continue Learning
-                          </Link>
-                          <Link 
-                            href={`/courses/${course.id}/resources`} 
-                            className="bg-white text-[#0066cc] border border-[#0066cc] text-sm font-medium px-5 py-2.5 rounded-full"
-                          >
-                            Resources
-                          </Link>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-semibold text-indigo-600">{course.progress}% complete</span>
+                            <Link
+                              href={`/courses/${course.id}`}
+                              className="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+                            >
+                              Continue Learning
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     </div>
-                    
-                    {course.nextLesson && (
-                      <div className="mt-5 pt-4 border-t border-[#f5f5f7]">
-                        <p className="text-sm text-[#86868b] mb-1">Next lesson:</p>
-                        <Link 
-                          href={`/courses/${course.id}/lessons/${course.nextLesson.id}`}
-                          className="text-[#0066cc] hover:underline font-medium"
-                        >
-                          {course.nextLesson.title} ({course.nextLesson.duration})
-                        </Link>
-                      </div>
-                    )}
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center">
+                  <BookOpenIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-lg font-medium text-gray-900">No courses yet</h3>
+                  <p className="mt-1 text-sm text-gray-500">You haven't enrolled in any courses yet.</p>
+                  <div className="mt-6">
+                    <Link
+                      href="/courses"
+                      className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700"
+                    >
+                      Browse Courses
+                    </Link>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
-          </section>
+          </div>
           
-          {/* Completed Courses */}
-          <section className="mb-8">
-            <h2 className="text-xl font-bold mb-4">Completed Courses</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {completedCourses.map((course) => (
-                <div key={course.id} className="bg-white shadow-md rounded-xl border border-[#e5e5e5] overflow-hidden">
-                  <div className="p-5">
-                    <div className="flex items-start gap-4">
-                      <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
-                        <Image
-                          src={course.image}
-                          alt={course.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div>
-                        <h3 className="text-[18px] font-semibold text-[#1d1d1f] mb-1">{course.title}</h3>
-                        <div className="flex items-center text-sm text-[#86868b] mb-2">
-                          <span className="flex items-center">
-                            <UserCircleIcon className="h-4 w-4 mr-1" />
-                            {course.instructor}
-                          </span>
-                        </div>
-                        <div className="flex items-center text-sm">
-                          <CheckCircleIcon className="h-4 w-4 text-green-500 mr-1" />
-                          <span className="text-green-600 font-medium">Completed on {course.completedDate}</span>
-                        </div>
-                        {course.certificateUrl && (
-                          <Link 
-                            href={course.certificateUrl}
-                            className="mt-2 inline-block text-sm text-[#0066cc] hover:underline font-medium"
-                          >
-                            View Certificate
-                          </Link>
-                        )}
-                      </div>
+          {/* Right column - Achievements and deadlines */}
+          <div className="space-y-8">
+            {/* Achievements section */}
+            <div>
+              <h2 className="text-xl font-bold mb-4">Your Achievements</h2>
+              <div className="bg-white shadow-sm rounded-lg border border-gray-100 p-4">
+                {mockAchievements.map((achievement) => (
+                  <div key={achievement.id} className="flex items-center py-3 border-b border-gray-100 last:border-0">
+                    <div className="mr-3">
+                      {achievement.icon}
+                    </div>
+                    <div>
+                      <p className="font-medium">{achievement.title}</p>
+                      <p className="text-sm text-gray-500">
+                        Earned on {new Date(achievement.date).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </section>
-          
-          {/* Learning Stats */}
-          <section>
-            <h2 className="text-xl font-bold mb-4">Your Learning Stats</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div className="bg-white shadow-md rounded-xl border border-[#e5e5e5] p-5">
-                <div className="text-3xl font-bold text-[#0066cc]">25</div>
-                <div className="text-[#86868b]">Hours Spent Learning</div>
-              </div>
-              <div className="bg-white shadow-md rounded-xl border border-[#e5e5e5] p-5">
-                <div className="text-3xl font-bold text-[#0066cc]">67</div>
-                <div className="text-[#86868b]">Lessons Completed</div>
-              </div>
-              <div className="bg-white shadow-md rounded-xl border border-[#e5e5e5] p-5">
-                <div className="text-3xl font-bold text-[#0066cc]">2</div>
-                <div className="text-[#86868b]">Certificates Earned</div>
+                ))}
+                {mockAchievements.length === 0 && (
+                  <div className="text-center py-6">
+                    <p className="text-gray-500">Complete courses to earn achievements</p>
+                  </div>
+                )}
               </div>
             </div>
-          </section>
+            
+            {/* Upcoming deadlines */}
+            <div>
+              <h2 className="text-xl font-bold mb-4">Upcoming Deadlines</h2>
+              <div className="bg-white shadow-sm rounded-lg border border-gray-100 p-4">
+                {mockUpcomingDeadlines.map((deadline) => (
+                  <div key={deadline.id} className="py-3 border-b border-gray-100 last:border-0">
+                    <p className="font-medium">{deadline.title}</p>
+                    <p className="text-sm text-gray-500 mb-1">Course: {deadline.course}</p>
+                    <div className="flex items-center text-sm">
+                      <ClockIcon className="h-4 w-4 text-red-500 mr-1" />
+                      <span className="text-red-500">
+                        Due {new Date(deadline.dueDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                {mockUpcomingDeadlines.length === 0 && (
+                  <div className="text-center py-6">
+                    <p className="text-gray-500">No upcoming deadlines</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Continue learning suggestion */}
+            <div className="bg-gradient-to-br from-indigo-100 to-purple-100 p-6 rounded-lg shadow-sm border border-indigo-200">
+              <h3 className="font-semibold text-lg text-indigo-800 mb-2">Ready to continue?</h3>
+              <p className="text-indigo-700 mb-4">Pick up where you left off or explore new courses.</p>
+              <div className="flex space-x-3">
+                <Link 
+                  href="/courses/my"
+                  className="bg-indigo-600 text-white text-sm px-4 py-2 rounded-md hover:bg-indigo-700 transition"
+                >
+                  My Courses
+                </Link>
+                <Link 
+                  href="/courses"
+                  className="bg-white text-indigo-600 text-sm px-4 py-2 rounded-md hover:bg-indigo-50 transition"
+                >
+                  Explore
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-}
-
-// Mock data for dashboard
-const inProgressCourses = [
-  {
-    id: 'react-masterclass',
-    title: 'React Masterclass',
-    instructor: 'Michael Johnson',
-    image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop',
-    progress: 65,
-    lastActivity: '2 days ago',
-    nextLesson: {
-      id: 'redux-fundamentals',
-      title: 'Redux Fundamentals',
-      duration: '50:00'
-    }
-  },
-  {
-    id: 'node-backend',
-    title: 'Node.js Backend Development',
-    instructor: 'Sarah Wilson',
-    image: 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?q=80&w=1974&auto=format&fit=crop',
-    progress: 30,
-    lastActivity: '1 week ago',
-    nextLesson: {
-      id: 'middleware',
-      title: 'Middleware in Express',
-      duration: '35:00'
-    }
-  }
-];
-
-const completedCourses = [
-  {
-    id: 'html-css-fundamentals',
-    title: 'HTML & CSS Fundamentals',
-    instructor: 'Jennifer Lee',
-    image: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=2070&auto=format&fit=crop',
-    completedDate: 'March 15, 2023',
-    certificateUrl: '/certificates/html-css-fundamentals'
-  },
-  {
-    id: 'javascript-basics',
-    title: 'JavaScript Basics',
-    instructor: 'David Kim',
-    image: 'https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?q=80&w=2070&auto=format&fit=crop',
-    completedDate: 'January 20, 2023',
-    certificateUrl: '/certificates/javascript-basics'
-  }
-]; 
+} 

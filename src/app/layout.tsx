@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
+import AuthSessionProvider from "@/components/providers/SessionProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,9 +28,11 @@ export default function RootLayout({
           MozOsxFontSmoothing: 'grayscale'
         }}
       >
-        <ConditionalLayout>
-          {children}
-        </ConditionalLayout>
+        <AuthSessionProvider>
+          <ConditionalLayout>
+            {children}
+          </ConditionalLayout>
+        </AuthSessionProvider>
       </body>
     </html>
   );
