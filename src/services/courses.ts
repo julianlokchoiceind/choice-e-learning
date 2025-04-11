@@ -1,6 +1,6 @@
 "use server";
 
-import { getCollection } from '@/lib/db';
+import { getCollection } from '@/lib/db/mongodb';
 import { CourseListItem, CourseDetails, UserCourseStats } from '@/types';
 import { ObjectId } from 'mongodb';
 

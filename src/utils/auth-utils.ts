@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/db';
+import { getCollection } from '@/lib/db/mongodb';
 import { Role } from '@/lib/auth/auth-options';
 
 /**
@@ -56,31 +57,46 @@ export async function createUser(
   password: string,
   role: Role = Role.student
 ) {
-  // Check if user with email already exists
-  const existingUser = await prisma.user.findUnique({
-    where: { email },
-  });
+  try {
+    const usersCollection = await getCollection('users');
+    
+    // Check if user with email already exists
+    const existingUser = await usersCollection.findOne({ email });
+    if (existingUser) {
+      throw new Error('User with this email already exists');
+    }
 
-  if (existingUser) {
-    throw new Error('User with this email already exists');
-  }
+    // Hash the password
+    const hashedPassword = await hashPassword(password);
 
-  // Hash the password
-  const hashedPassword = await hashPassword(password);
-
-  // Create the user
-  const user = await prisma.user.create({
-    data: {
+    // Create the user
+    const now = new Date();
+    const result = await usersCollection.insertOne({
       name,
       email,
       password: hashedPassword,
       role,
-    },
-  });
+      createdAt: now,
+      updatedAt: now,
+    });
+    
+    if (!result.acknowledged) {
+      throw new Error('Failed to create user');
+    }
 
-  // Return user without password
-  const { password: _, ...userWithoutPassword } = user;
-  return userWithoutPassword;
+    // Return user without password
+    return {
+      id: result.insertedId.toString(),
+      name,
+      email,
+      role,
+      createdAt: now,
+      updatedAt: now
+    };
+  } catch (error) {
+    console.error('Error creating user:', error);
+    throw new Error(`Failed to create user: ${(error as Error).message}`);
+  }
 }
 
 /**

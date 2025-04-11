@@ -1,7 +1,6 @@
 "use server";
 
-import { getCollection } from '@/lib/db';
-import { createUserDirectly } from '@/lib/db';
+import { getCollection, createUserDirectly } from '@/lib/db/mongodb';
 import { hashPassword, comparePasswords } from '@/utils/auth-utils';
 import { ObjectId } from 'mongodb';
 

@@ -1,7 +1,7 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { comparePasswords } from '@/utils/auth-utils';
-import { getCollection } from '../db';
+import { getCollection } from '../db/mongodb';
 import { ObjectId } from 'mongodb';
 
 // Define Role enum

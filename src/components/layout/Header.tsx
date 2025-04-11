@@ -52,9 +52,10 @@ const LoadingHeader = () => (
           ))}
         </ul>
         
-        {/* Simplified right side while loading */}
-        <div className="flex items-center">
-          <div className="h-4 w-20 bg-gray-800 animate-pulse rounded"></div>
+        {/* Placeholder for authentication UI with same dimensions */}
+        <div className="flex items-center space-x-4">
+          <div className="hidden md:block w-[50px] h-[26px] bg-gray-800/50 animate-pulse rounded-full"></div>
+          <div className="hidden md:block w-[60px] h-[26px] bg-gray-800/50 animate-pulse rounded-full"></div>
         </div>
       </nav>
     </div>
@@ -74,21 +75,11 @@ const Header = () => {
 
   // Track if component is mounted to prevent hydration errors
   const [isMounted, setIsMounted] = useState(false);
-  
-  // Track if session is fully initialized
-  const [isSessionInitialized, setIsSessionInitialized] = useState(false);
 
   // Safely set mounted state after render
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  // Track when session is fully loaded
-  useEffect(() => {
-    if (status !== 'loading') {
-      setIsSessionInitialized(true);
-    }
-  }, [status]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -125,15 +116,15 @@ const Header = () => {
     }
   };
 
-  // Don't render authentication-dependent content until everything is loaded
-  // This prevents client-side hydration errors and "Cannot read properties of undefined"
-  if (!isMounted || !isSessionInitialized || status === 'loading') {
+  // Only check client-side mounting, show auth buttons by default
+  // This prevents the delay of loading -> showing buttons
+  if (!isMounted) {
     return <LoadingHeader />;
   }
 
-  // Proper authentication check that handles all states
-  // Double-check session exists and user object exists
-  const isAuthenticated = status === 'authenticated' && session !== null && !!session?.user;
+  // Default to unauthenticated state during loading
+  // This will show the Sign In/Sign Up buttons immediately
+  const isAuthenticated = status === 'authenticated' && !!session?.user;
   
   // Only try to access user properties if we're authenticated
   // Use nullish coalescing for additional safety
@@ -184,8 +175,8 @@ const Header = () => {
               ))}
             </ul>
             
-            {/* Right Side Links */}
-            <div className="flex items-center space-x-4">
+            {/* Right Side Links - with fixed width containers to prevent layout shifts */}
+            <div className="flex items-center space-x-4 min-w-[120px] justify-end">
               {isAuthenticated ? (
                 <>
                   <Link href="/dashboard" aria-label="Dashboard" className="text-white/80 hover:text-white transition-colors">

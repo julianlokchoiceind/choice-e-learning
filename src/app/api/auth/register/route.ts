@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { registerUserSchema } from '@/utils/validation';
-import { createUserDirectly } from '@/lib/db';
+import { createUserDirectly } from '@/lib/db/mongodb';
 import { hashPassword } from '@/utils/auth-utils';
 
 export async function POST(req: NextRequest) {
