@@ -4,15 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "node scripts/clean-prisma.js && prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "node scripts/clean-prisma.js && prisma generate",
+    "vercel-build": "node scripts/clean-prisma.js && prisma generate && next build"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.1.1",
     "@prisma/client": "^6.6.0",
+    "@types/uuid": "^9.0.8",
     "bcryptjs": "^3.0.2",
     "jose": "^6.0.10",
     "next": "14.0.4",
@@ -22,6 +24,7 @@
     "react-error-boundary": "^5.0.0",
     "react-hook-form": "^7.49.3",
     "react-icons": "^4.12.0",
+    "uuid": "^9.0.1",
     "zod": "^3.24.2"
   },
   "devDependencies": {

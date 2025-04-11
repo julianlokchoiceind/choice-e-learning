@@ -123,4 +123,18 @@ export async function hasPermission(
 
   // Users can only modify their own resources
   return userId === resourceOwnerId;
+}
+
+// If we need to use Prisma, we should wrap it in a function that checks if Prisma is available
+export async function findUserWithPrisma(email: string) {
+  // If Prisma is not available, fall back to MongoDB
+  if (!prisma) {
+    const usersCollection = await getCollection('users');
+    return usersCollection.findOne({ email });
+  }
+  
+  // Use Prisma if available
+  return prisma.user.findUnique({
+    where: { email }
+  });
 } 
