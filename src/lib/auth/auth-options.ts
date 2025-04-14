@@ -1,5 +1,7 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
+import GitHubProvider from 'next-auth/providers/github';
 import { comparePasswords } from '@/utils/auth-utils';
 import { getCollection } from '../db/mongodb';
 import { ObjectId } from 'mongodb';
@@ -92,16 +94,146 @@ export const authOptions: NextAuthOptions = {
         }
       },
     }),
+    
+    // Add Google Provider
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
+    }),
+    
+    // Add GitHub Provider
+    GitHubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID || '',
+      clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
+    }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ user, account, profile }) {
+      const usersCollection = await getCollection('users');
+      
+      try {
+        // For OAuth providers
+        if (account && account.provider && account.provider !== 'credentials') {
+          if (!user.email) {
+            console.error('OAuth account missing email');
+            return false;
+          }
+          
+          // Check if user already exists
+          const existingUser = await usersCollection.findOne({ email: user.email });
+          
+          if (existingUser) {
+            // User exists, update their OAuth info and login history
+            console.log(`Existing user ${user.email} signed in via ${account.provider}`);
+            
+            // Update login history
+            await usersCollection.updateOne(
+              { _id: existingUser._id },
+              { 
+                $set: { 
+                  lastLogin: new Date(),
+                  authProvider: account.provider,
+                },
+                $addToSet: { "loginHistory": new Date() }
+              }
+            );
+            
+          } else {
+            // Create a new user from OAuth data
+            console.log(`Creating new user from ${account.provider} OAuth:`, user.email);
+            
+            const now = new Date();
+            const result = await usersCollection.insertOne({
+              name: user.name || 'OAuth User',
+              email: user.email,
+              image: user.image || null,
+              role: Role.student, // Default role for OAuth users
+              password: null, // OAuth users don't have passwords
+              createdAt: now,
+              updatedAt: now,
+              lastLogin: now,
+              loginHistory: [now],
+              authProvider: account.provider,
+            });
+            
+            if (!result.acknowledged) {
+              console.error('Failed to create user from OAuth');
+              return false;
+            }
+            
+            console.log('Created new user from OAuth:', result.insertedId.toString());
+            
+            // Update user ID to match the newly created user
+            user.id = result.insertedId.toString();
+          }
+        } else if (account && account.provider === 'credentials') {
+          // For credentials login, update login history
+          try {
+            const existingUser = await usersCollection.findOne({ email: user.email });
+            if (existingUser) {
+              await usersCollection.updateOne(
+                { _id: existingUser._id },
+                { 
+                  $set: { lastLogin: new Date() },
+                  $addToSet: { "loginHistory": new Date() }
+                }
+              );
+              
+              // Check and award achievements for login
+              try {
+                // We need to dynamically import this to avoid circular dependencies
+                const { checkAndAwardAchievements } = await import('@/services/achievements');
+                await checkAndAwardAchievements(existingUser._id.toString());
+              } catch (achievementError) {
+                console.error('Error checking achievements:', achievementError);
+                // Don't fail login if achievements check fails
+              }
+            }
+          } catch (error) {
+            console.error('Error updating login history:', error);
+            // Don't prevent login if this fails
+          }
+        }
+        
+        return true;
+      } catch (error) {
+        console.error('Error in signIn callback:', error);
+        // If there's an error, we'll still allow sign in in most cases
+        // to avoid locking users out
+        return true;
+      }
+    },
+    
+    async jwt({ token, user, account }) {
       // Add custom user data to the token
       if (user) {
         token.id = user.id;
-        token.role = user.role;
+        token.role = user.role || Role.student; // Default role if not present
+        
+        // If coming from OAuth and we don't have role info yet, fetch from DB
+        if (account && account.provider && account.provider !== 'credentials' && !user.role) {
+          try {
+            const usersCollection = await getCollection('users');
+            const dbUser = await usersCollection.findOne({ email: user.email });
+            if (dbUser) {
+              token.id = dbUser._id.toString();
+              token.role = dbUser.role || Role.student;
+            }
+          } catch (error) {
+            console.error('Error fetching user role from DB:', error);
+          }
+        }
       }
       return token;
     },
+    
     async session({ session, token }) {
       // Add custom user data to the session
       if (session?.user) {

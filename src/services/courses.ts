@@ -216,14 +216,104 @@ export async function getUserStats(userId: string): Promise<UserCourseStats> {
     }
     
     // Get courses user is enrolled in
-    const enrolledCount = Array.isArray(user.enrolledIds) ? user.enrolledIds.length : 0;
+    const enrolledIds = Array.isArray(user.enrolledIds) ? user.enrolledIds : [];
     
-    // In a real app, you would calculate these values based on course progress
+    if (enrolledIds.length === 0) {
+      return {
+        coursesCompleted: 0,
+        lessonsCompleted: 0,
+        totalHoursLearned: 0,
+        currentStreak: 0,
+      };
+    }
+    
+    // Get data for each enrolled course
+    const coursesCollection = await getCollection('courses');
+    const lessonsCollection = await getCollection('lessons');
+    const userProgressCollection = await getCollection('userProgress');
+    
+    // Get user progress records
+    const userProgress = await userProgressCollection.find({ 
+      userId: userId 
+    }).toArray();
+    
+    let completedLessons = 0;
+    let totalLessons = 0;
+    let coursesCompleted = 0;
+    let totalHoursLearned = 0;
+    
+    // Process each enrolled course
+    for (const courseId of enrolledIds) {
+      // Get all lessons for this course
+      const courseLessons = await lessonsCollection.find({ 
+        courseId: courseId.toString() 
+      }).toArray();
+      
+      // Count total lessons
+      const courseTotalLessons = courseLessons.length;
+      totalLessons += courseTotalLessons;
+      
+      // Get completed lessons for this course
+      const courseCompletedLessons = userProgress.filter(progress => 
+        progress.courseId === courseId.toString() && 
+        progress.completed === true
+      ).length;
+      
+      // Add to total completed lessons
+      completedLessons += courseCompletedLessons;
+      
+      // Calculate hours based on lessons (assuming 30 minutes per lesson)
+      totalHoursLearned += (courseCompletedLessons * 0.5);
+      
+      // Check if course is completed
+      if (courseTotalLessons > 0 && courseCompletedLessons === courseTotalLessons) {
+        coursesCompleted++;
+      }
+    }
+    
+    // Calculate streak based on login history or activity dates
+    let currentStreak = 0;
+    if (user.loginHistory && Array.isArray(user.loginHistory)) {
+      // Sort login dates in descending order
+      const sortedLoginDates = [...user.loginHistory].sort((a, b) => 
+        new Date(b).getTime() - new Date(a).getTime()
+      );
+      
+      if (sortedLoginDates.length > 0) {
+        // Check if most recent login is today or yesterday
+        const now = new Date();
+        const mostRecentLogin = new Date(sortedLoginDates[0]);
+        const isRecentLogin = 
+          mostRecentLogin.toDateString() === now.toDateString() || 
+          mostRecentLogin.toDateString() === new Date(now.setDate(now.getDate() - 1)).toDateString();
+        
+        if (isRecentLogin) {
+          currentStreak = 1; // Start with 1 for today/yesterday
+          
+          // Check consecutive days before today/yesterday
+          let prevDate = new Date(mostRecentLogin);
+          prevDate.setDate(prevDate.getDate() - 1);
+          
+          for (let i = 1; i < sortedLoginDates.length; i++) {
+            const loginDate = new Date(sortedLoginDates[i]);
+            
+            // If this login is 1 day before the previous one we checked, increment streak
+            if (loginDate.toDateString() === prevDate.toDateString()) {
+              currentStreak++;
+              prevDate.setDate(prevDate.getDate() - 1);
+            } else {
+              break; // Streak broken
+            }
+          }
+        }
+      }
+    }
+    
     return {
-      coursesCompleted: enrolledCount > 0 ? Math.floor(enrolledCount * 0.3) : 0,
-      lessonsCompleted: enrolledCount > 0 ? enrolledCount * 8 : 0,
-      totalHoursLearned: enrolledCount > 0 ? enrolledCount * 4 : 0,
-      currentStreak: enrolledCount > 0 ? Math.min(enrolledCount, 10) : 0,
+      coursesCompleted,
+      lessonsCompleted: completedLessons,
+      totalHoursLearned: parseFloat(totalHoursLearned.toFixed(1)),
+      currentStreak,
     };
   } catch (error) {
     console.error('Error getting user stats:', error);

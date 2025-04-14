@@ -67,55 +67,40 @@ export function useAuth() {
         throw new Error(errorMessage);
       }
       
-      // Auto-login after successful registration
+      // Auto-login after successful registration using the same approach as OAuth providers
       console.log('Registration successful, attempting auto-login');
       
       try {
+        // Use callbackUrl and redirect: true to ensure consistent behavior with OAuth
         const result = await signIn('credentials', {
           email: credentials.email,
           password: credentials.password,
-          redirect: false,
+          callbackUrl: '/dashboard',
+          redirect: true,
         });
+        
+        // Due to the redirect: true, code below this point won't execute
+        // But we'll keep it as a fallback
         
         if (result?.error) {
           console.error('Auto-login failed:', result.error);
-          // Instead of throwing an error, we'll show a success message for registration
-          // and prompt the user to login manually
-          setError({
-            message: 'Registration successful! Please sign in with your credentials.',
-            status: 200 // Using 200 to indicate this is an informational message, not an error
-          });
-          
-          // Redirect to login page after a delay
-          setTimeout(() => {
-            router.push('/login');
-          }, 1500);
-          
-          return true;
+          throw new Error('Auto-login failed: ' + result.error);
         }
         
-        console.log('Auto-login successful, redirecting to dashboard');
-        
-        // Wait for the session to be updated before redirecting
-        // Use a longer timeout to ensure session is properly established
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 1000);
-        
+        console.log('Auto-login successful');
+        router.push('/dashboard');
         return true;
       } catch (loginError) {
+        // This catch block is unlikely to execute due to redirect: true
         console.error('Error during auto-login:', loginError);
-        // Still consider registration successful even if auto-login fails
+        
+        // If auto-login fails, redirect to login page with a success message
         setError({
           message: 'Account created successfully! Please log in with your credentials.',
           status: 200
         });
         
-        // Redirect to login page
-        setTimeout(() => {
-          router.push('/login');
-        }, 1500);
-        
+        router.push(`/login?registered=true&email=${encodeURIComponent(credentials.email)}`);
         return true;
       }
     } catch (err) {

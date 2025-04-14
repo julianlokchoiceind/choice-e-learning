@@ -92,4 +92,16 @@ export interface UserCourseStats {
   lessonsCompleted: number;
   totalHoursLearned: number;
   currentStreak: number;
+}
+
+/**
+ * Enrolled course interface for dashboard display
+ */
+export interface EnrolledCourse {
+  id: string;
+  title: string;
+  progress: number;
+  imageUrl: string;
+  totalLessons: number;
+  completedLessons: number;
 } 

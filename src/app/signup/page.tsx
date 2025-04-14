@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
 import { useAuth, RegisterCredentials } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import Notification from '@/components/ui/Notification';
 
 export default function SignUpPage() {
@@ -154,13 +155,10 @@ export default function SignUpPage() {
           show: true,
           type: 'success',
           message: 'Your account was created successfully!',
-          details: 'Redirecting to login page...'
+          details: 'Redirecting to dashboard...'
         });
         
-        // Delay redirect to ensure notification is visible
-        setTimeout(() => {
-          router.push('/login');
-        }, 1500);
+        // The register function in useAuth now handles the redirect to dashboard
       }
     } catch (err) {
       console.error('Registration error:', err);
@@ -182,6 +180,30 @@ export default function SignUpPage() {
       });
     }
   }, [error]);
+
+  // Handle social signup/login with provider
+  const handleSocialLogin = async (provider: string) => {
+    try {
+      setNotification({
+        show: true,
+        type: 'info',
+        message: `Signing in with ${provider}...`
+      });
+      
+      await signIn(provider, {
+        callbackUrl: '/dashboard',
+      });
+      
+      // Note: The rest of this function might not execute due to page redirect
+    } catch (error) {
+      console.error(`${provider} login error:`, error);
+      setNotification({
+        show: true,
+        type: 'error',
+        message: `${provider} login failed. Please try another method.`
+      });
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -342,47 +364,42 @@ export default function SignUpPage() {
           <div>
             <button
               type="submit"
-              disabled={isLoading || notification?.show}
-              className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-75"
+              disabled={isLoading}
+              className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
             >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Creating account...
-                </>
-              ) : (
-                'Create account'
-              )}
+              {isLoading ? 'Creating account...' : 'Sign up'}
             </button>
           </div>
           
-          <div className="relative mt-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white px-2 text-gray-500">Or continue with</span>
+              </div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-gray-500">Or continue with</span>
+            
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <button
+                onClick={() => handleSocialLogin('google')}
+                disabled={isLoading}
+                className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-500 shadow-sm hover:bg-gray-50"
+              >
+                <span className="sr-only">Sign up with Google</span>
+                <FaGoogle className="h-5 w-5 text-red-500" />
+              </button>
+              
+              <button
+                onClick={() => handleSocialLogin('github')}
+                disabled={isLoading}
+                className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-500 shadow-sm hover:bg-gray-50"
+              >
+                <span className="sr-only">Sign up with GitHub</span>
+                <FaGithub className="h-5 w-5" />
+              </button>
             </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-500 shadow-sm hover:bg-gray-50"
-            >
-              <FaGoogle className="h-5 w-5 mr-2" />
-              Google
-            </button>
-            <button
-              type="button"
-              className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-500 shadow-sm hover:bg-gray-50"
-            >
-              <FaGithub className="h-5 w-5 mr-2" />
-              GitHub
-            </button>
           </div>
         </form>
       </div>

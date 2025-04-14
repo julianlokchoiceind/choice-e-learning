@@ -12,44 +12,10 @@ import {
   CheckCircleIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
+import { getUserStats } from '@/services/courses';
+import { EnrolledCourse, UserCourseStats, UserAchievement } from '@/types';
 
-// Import types instead of direct function import
-import { UserCourseStats } from '@/types';
-
-// Mock data for dashboard (will be replaced with real data where possible)
-const mockEnrolledCourses = [
-  { 
-    id: '1', 
-    title: 'JavaScript Fundamentals', 
-    progress: 65,
-    imageUrl: 'https://images.unsplash.com/photo-1579468118864-1b9ea3c0db4a?q=80&w=200&auto=format&fit=crop',
-    totalLessons: 12,
-    completedLessons: 8
-  },
-  { 
-    id: '2', 
-    title: 'React for Beginners', 
-    progress: 30,
-    imageUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=200&auto=format&fit=crop',
-    totalLessons: 10,
-    completedLessons: 3
-  },
-  { 
-    id: '3', 
-    title: 'MongoDB Essentials', 
-    progress: 0,
-    imageUrl: 'https://images.unsplash.com/photo-1489875347897-49f64b51c1f8?q=80&w=200&auto=format&fit=crop',
-    totalLessons: 8,
-    completedLessons: 0
-  }
-];
-
-const mockAchievements = [
-  { id: '1', title: 'First Login', icon: <CheckCircleIcon className="w-6 h-6 text-green-500" />, date: '2023-12-01' },
-  { id: '2', title: 'Course Starter', icon: <BookOpenIcon className="w-6 h-6 text-blue-500" />, date: '2023-12-05' },
-  { id: '3', title: 'Quick Learner', icon: <FireIcon className="w-6 h-6 text-orange-500" />, date: '2023-12-10' },
-];
-
+// Mock data for upcoming deadlines (will be replaced with real data later)
 const mockUpcomingDeadlines = [
   { id: '1', title: 'Complete JavaScript Assignment', course: 'JavaScript Fundamentals', dueDate: '2024-06-30' },
   { id: '2', title: 'React Project Submission', course: 'React for Beginners', dueDate: '2024-07-15' },
@@ -65,7 +31,8 @@ export default function Dashboard() {
   });
 
   const [loading, setLoading] = useState(true);
-  const [enrolledCourses, setEnrolledCourses] = useState(mockEnrolledCourses);
+  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
+  const [achievements, setAchievements] = useState<UserAchievement[]>([]);
   
   useEffect(() => {
     const fetchUserStats = async () => {
@@ -87,8 +54,42 @@ export default function Dashboard() {
       }
     };
     
+    const fetchEnrolledCourses = async () => {
+      try {
+        if (session?.user?.id) {
+          const response = await fetch(`/api/enrolledCourses?userId=${session.user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.courses) {
+              setEnrolledCourses(data.courses);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching enrolled courses:', error);
+      }
+    };
+    
+    const fetchAchievements = async () => {
+      try {
+        if (session?.user?.id) {
+          const response = await fetch('/api/achievements');
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.achievements) {
+              setAchievements(data.achievements);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching achievements:', error);
+      }
+    };
+    
     if (session?.user) {
       fetchUserStats();
+      fetchEnrolledCourses();
+      fetchAchievements();
     } else {
       // If not logged in or session loading, just stop loading after 1s
       const timer = setTimeout(() => {
@@ -119,6 +120,24 @@ export default function Dashboard() {
       </div>
     );
   }
+
+  // Helper function to get icon for achievement
+  const getAchievementIcon = (type: string) => {
+    switch (type) {
+      case 'first_login':
+        return <CheckCircleIcon className="w-6 h-6 text-green-500" />;
+      case 'course_started':
+        return <BookOpenIcon className="w-6 h-6 text-blue-500" />;
+      case 'course_completed':
+        return <AcademicCapIcon className="w-6 h-6 text-purple-500" />;
+      case 'quick_learner':
+        return <FireIcon className="w-6 h-6 text-orange-500" />;
+      case 'streak':
+        return <FireIcon className="w-6 h-6 text-red-500" />;
+      default:
+        return <CheckCircleIcon className="w-6 h-6 text-gray-500" />;
+    }
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -266,22 +285,27 @@ export default function Dashboard() {
             <div>
               <h2 className="text-xl font-bold mb-4">Your Achievements</h2>
               <div className="bg-white shadow-sm rounded-lg border border-gray-100 p-4">
-                {mockAchievements.map((achievement) => (
-                  <div key={achievement.id} className="flex items-center py-3 border-b border-gray-100 last:border-0">
-                    <div className="mr-3">
-                      {achievement.icon}
-                    </div>
-                    <div>
-                      <p className="font-medium">{achievement.title}</p>
-                      <p className="text-sm text-gray-500">
-                        Earned on {new Date(achievement.date).toLocaleDateString()}
-                      </p>
-                    </div>
+                {achievements.length > 0 ? (
+                  <div className="divide-y divide-gray-100">
+                    {achievements.map((achievement) => (
+                      <div key={achievement.id} className="flex items-center py-3 border-b border-gray-100 last:border-0">
+                        <div className="mr-3">
+                          {getAchievementIcon(achievement.type)}
+                        </div>
+                        <div>
+                          <p className="font-medium">{achievement.title}</p>
+                          <p className="text-sm text-gray-500">
+                            Earned on {new Date(achievement.earnedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-                {mockAchievements.length === 0 && (
+                ) : (
                   <div className="text-center py-6">
-                    <p className="text-gray-500">Complete courses to earn achievements</p>
+                    <AcademicCapIcon className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-lg font-medium text-gray-900">No achievements yet</h3>
+                    <p className="text-sm text-gray-500">Complete courses to earn achievements</p>
                   </div>
                 )}
               </div>
