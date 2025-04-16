@@ -2,9 +2,39 @@ import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import GitHubProvider from 'next-auth/providers/github';
+import FacebookProvider from 'next-auth/providers/facebook';
+import MicrosoftProvider from 'next-auth/providers/azure-ad';
 import { comparePasswords } from '@/utils/auth-utils';
 import { getCollection } from '../db/mongodb';
 import { ObjectId } from 'mongodb';
+
+// Check if environment variables are set
+function validateEnvVariables() {
+  const requiredVars = [
+    { key: 'NEXTAUTH_SECRET', value: process.env.NEXTAUTH_SECRET },
+    { key: 'NEXTAUTH_URL', value: process.env.NEXTAUTH_URL },
+    { key: 'FACEBOOK_CLIENT_ID', value: process.env.FACEBOOK_CLIENT_ID },
+    { key: 'FACEBOOK_CLIENT_SECRET', value: process.env.FACEBOOK_CLIENT_SECRET },
+    { key: 'MICROSOFT_CLIENT_ID', value: process.env.MICROSOFT_CLIENT_ID },
+    { key: 'MICROSOFT_CLIENT_SECRET', value: process.env.MICROSOFT_CLIENT_SECRET },
+  ];
+  
+  const missingVars = requiredVars.filter(v => !v.value);
+  
+  if (missingVars.length > 0) {
+    console.error('Missing required environment variables:', missingVars.map(v => v.key));
+  } else {
+    console.log('All required environment variables are set');
+  }
+  
+  // Log provider details for debugging
+  console.log('OAuth Provider Details:');
+  console.log('- Facebook Client ID:', process.env.FACEBOOK_CLIENT_ID?.substring(0, 5) + '...');
+  console.log('- Microsoft Client ID:', process.env.MICROSOFT_CLIENT_ID?.substring(0, 5) + '...');
+}
+
+// Validate environment variables on startup
+validateEnvVariables();
 
 // Define Role enum
 export enum Role {
@@ -113,87 +143,219 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GITHUB_CLIENT_ID || '',
       clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
     }),
+    
+    // Add Facebook Provider
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID || '',
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || '',
+      version: "12.0", // Set latest API version
+      authorization: {
+        params: {
+          scope: "email,public_profile",
+          display: "popup",
+          auth_type: "rerequest"
+        },
+      },
+      userinfo: {
+        url: "https://graph.facebook.com/me",
+        params: { 
+          fields: "id,name,email,picture" 
+        },
+      },
+      profile(profile) {
+        console.log('Facebook profile data:', profile);
+        return {
+          id: profile.id,
+          name: profile.name,
+          email: profile.email || `${profile.id}@facebook.com`, // Provide fallback email
+          image: profile.picture?.data?.url,
+          role: Role.student,
+        };
+      },
+      checks: ["state"],
+    }),
+    
+    // Add Microsoft Provider (via Azure AD)
+    MicrosoftProvider({
+      clientId: process.env.MICROSOFT_CLIENT_ID || '',
+      clientSecret: process.env.MICROSOFT_CLIENT_SECRET || '',
+      tenantId: process.env.MICROSOFT_TENANT_ID || "organizations", // Change from "common" to "organizations" 
+      authorization: {
+        params: {
+          scope: "openid profile email User.Read",
+        },
+      },
+      profile(profile) {
+        console.log('Microsoft profile data:', profile);
+        return {
+          id: profile.sub || profile.oid,
+          name: profile.name || profile.preferred_username,
+          email: profile.email || profile.preferred_username || `${profile.sub || profile.oid}@microsoft.com`, // Provide fallback email
+          image: null,
+          role: Role.student,
+        };
+      },
+      checks: ["pkce", "state"],
+    }),
   ],
   callbacks: {
-    async signIn({ user, account, profile }) {
-      const usersCollection = await getCollection('users');
-      
+    async signIn({ user, account, profile, email }) {
       try {
+        console.log('SignIn callback triggered:', { 
+          provider: account?.provider,
+          hasUser: !!user,
+          hasProfile: !!profile
+        });
+        
         // For OAuth providers
         if (account && account.provider && account.provider !== 'credentials') {
-          if (!user.email) {
-            console.error('OAuth account missing email');
-            return false;
+          console.log(`OAuth login attempt with ${account.provider}:`, {
+            accountType: account.type,
+            accountId: account.providerAccountId,
+            hasTokens: !!account.access_token
+          });
+          
+          // Special handling for Microsoft provider
+          if (account.provider === 'azure-ad') {
+            console.log('Microsoft login details:', {
+              tokenType: account.token_type,
+              scopes: account.scope,
+              expiresAt: account.expires_at
+            });
+          }
+          
+          // Special handling for Facebook provider
+          if (account.provider === 'facebook') {
+            console.log('Facebook login details:', {
+              tokenType: account.token_type,
+              scopes: account.scope,
+              expiresAt: account.expires_at
+            });
+          }
+          
+          // Validate email presence
+          let userEmail = user.email || profile?.email || email;
+          if (!userEmail || typeof userEmail !== 'string') {
+            console.error('OAuth account missing email:', { 
+              provider: account.provider, 
+              user,
+              profile,
+              email 
+            });
+            // Instead of throwing an error, continue with a generated email
+            if (account.provider === 'facebook') {
+              user.email = `${user.id}@facebook.com`;
+              userEmail = user.email;
+              console.log('Using generated email for Facebook:', user.email);
+            } else if (account.provider === 'azure-ad') {
+              user.email = `${user.id}@microsoft.com`;
+              userEmail = user.email;
+              console.log('Using generated email for Microsoft:', user.email);
+            } else {
+              throw new Error('Email is required for authentication');
+            }
+          }
+          
+          // Ensure userEmail is a string for database operations
+          const normalizedEmail = typeof userEmail === 'string' ? userEmail.toLowerCase() : 
+                                 (typeof user.email === 'string' ? user.email.toLowerCase() : '');
+          
+          const usersCollection = await getCollection('users');
+          if (!usersCollection) {
+            console.error('Failed to get users collection');
+            throw new Error('Database connection failed');
           }
           
           // Check if user already exists
-          const existingUser = await usersCollection.findOne({ email: user.email });
+          const existingUser = await usersCollection.findOne({ 
+            email: normalizedEmail
+          });
           
           if (existingUser) {
             // User exists, update their OAuth info and login history
-            console.log(`Existing user ${user.email} signed in via ${account.provider}`);
+            console.log(`Existing user ${normalizedEmail} signed in via ${account.provider}`);
             
-            // Update login history
-            await usersCollection.updateOne(
-              { _id: existingUser._id },
-              { 
-                $set: { 
-                  lastLogin: new Date(),
-                  authProvider: account.provider,
-                },
-                $addToSet: { "loginHistory": new Date() }
-              }
-            );
+            try {
+              // Update login history
+              await usersCollection.updateOne(
+                { _id: existingUser._id },
+                { 
+                  $set: { 
+                    lastLogin: new Date(),
+                    authProvider: account.provider,
+                    name: user.name || existingUser.name,
+                    image: user.image || existingUser.image,
+                  },
+                  $addToSet: { "loginHistory": new Date() }
+                }
+              );
+            } catch (updateError) {
+              console.error('Error updating user login history:', updateError);
+              // Continue with sign in even if update fails
+            }
+            
+            // Set the user ID for the session
+            user.id = existingUser._id.toString();
+            user.role = existingUser.role;
             
           } else {
             // Create a new user from OAuth data
-            console.log(`Creating new user from ${account.provider} OAuth:`, user.email);
+            console.log(`Creating new user from ${account.provider} OAuth:`, userEmail);
             
             const now = new Date();
-            const result = await usersCollection.insertOne({
-              name: user.name || 'OAuth User',
-              email: user.email,
+            const newUser = {
+              name: user.name || profile?.name || 'OAuth User',
+              email: userEmail.toLowerCase(),
               image: user.image || null,
-              role: Role.student, // Default role for OAuth users
-              password: null, // OAuth users don't have passwords
+              role: Role.student,
+              password: null,
               createdAt: now,
               updatedAt: now,
               lastLogin: now,
               loginHistory: [now],
               authProvider: account.provider,
-            });
+              emailVerified: true, // OAuth emails are typically verified
+            };
             
-            if (!result.acknowledged) {
-              console.error('Failed to create user from OAuth');
-              return false;
+            try {
+              const result = await usersCollection.insertOne(newUser);
+              if (!result.acknowledged) {
+                throw new Error('Failed to create user record');
+              }
+              
+              console.log('Created new user from OAuth:', result.insertedId.toString());
+              user.id = result.insertedId.toString();
+              user.role = Role.student;
+              
+            } catch (createError) {
+              console.error('Error creating new user:', createError);
+              throw new Error('Failed to create user account');
             }
-            
-            console.log('Created new user from OAuth:', result.insertedId.toString());
-            
-            // Update user ID to match the newly created user
-            user.id = result.insertedId.toString();
           }
         } else if (account && account.provider === 'credentials') {
           // For credentials login, update login history
           try {
-            const existingUser = await usersCollection.findOne({ email: user.email });
-            if (existingUser) {
-              await usersCollection.updateOne(
-                { _id: existingUser._id },
-                { 
-                  $set: { lastLogin: new Date() },
-                  $addToSet: { "loginHistory": new Date() }
+            const credentialsUsersCollection = await getCollection('users');
+            if (credentialsUsersCollection) {
+              const existingUser = await credentialsUsersCollection.findOne({ email: user.email });
+              if (existingUser) {
+                await credentialsUsersCollection.updateOne(
+                  { _id: existingUser._id },
+                  { 
+                    $set: { lastLogin: new Date() },
+                    $addToSet: { "loginHistory": new Date() }
+                  }
+                );
+                
+                // Check and award achievements for login
+                try {
+                  // We need to dynamically import this to avoid circular dependencies
+                  const { checkAndAwardAchievements } = await import('@/services/achievements');
+                  await checkAndAwardAchievements(existingUser._id.toString());
+                } catch (achievementError) {
+                  console.error('Error checking achievements:', achievementError);
+                  // Don't fail login if achievements check fails
                 }
-              );
-              
-              // Check and award achievements for login
-              try {
-                // We need to dynamically import this to avoid circular dependencies
-                const { checkAndAwardAchievements } = await import('@/services/achievements');
-                await checkAndAwardAchievements(existingUser._id.toString());
-              } catch (achievementError) {
-                console.error('Error checking achievements:', achievementError);
-                // Don't fail login if achievements check fails
               }
             }
           } catch (error) {
@@ -205,65 +367,80 @@ export const authOptions: NextAuthOptions = {
         return true;
       } catch (error) {
         console.error('Error in signIn callback:', error);
-        // If there's an error, we'll still allow sign in in most cases
-        // to avoid locking users out
-        return true;
+        return false;
       }
     },
     
     async jwt({ token, user, account }) {
-      // Add custom user data to the token
       if (user) {
         token.id = user.id;
-        token.role = user.role || Role.student; // Default role if not present
-        
-        // If coming from OAuth and we don't have role info yet, fetch from DB
-        if (account && account.provider && account.provider !== 'credentials' && !user.role) {
-          try {
-            const usersCollection = await getCollection('users');
-            const dbUser = await usersCollection.findOne({ email: user.email });
-            if (dbUser) {
-              token.id = dbUser._id.toString();
-              token.role = dbUser.role || Role.student;
-            }
-          } catch (error) {
-            console.error('Error fetching user role from DB:', error);
-          }
-        }
+        token.role = user.role || Role.student;
       }
       return token;
     },
     
     async session({ session, token }) {
-      // Add custom user data to the session
-      if (session?.user) {
+      if (session.user) {
         session.user.id = token.id;
         session.user.role = token.role;
       }
       return session;
+    },
+    
+    async redirect({ url, baseUrl }) {
+      console.log('Redirect callback called with:', { url, baseUrl });
+      
+      try {
+        // Handle redirect after sign in
+        if (url.startsWith('/')) {
+          // For relative URLs, prefix with base URL
+          return `${baseUrl}${url}`;
+        } else if (new URL(url).origin === baseUrl) {
+          // Allow redirects to same origin
+          return url;
+        }
+        // Default to dashboard for all other cases
+        return `${baseUrl}/dashboard`;
+      } catch (error) {
+        console.error('Error in redirect callback:', error);
+        return `${baseUrl}/dashboard`;
+      }
     },
   },
   pages: {
     signIn: '/login',
     signOut: '/',
     error: '/login',
+    verifyRequest: '/login',
+    newUser: '/dashboard'
   },
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === 'development',
+  debug: false,
   logger: {
     error: (code, metadata) => {
-      console.error(`[NextAuth][Error][${code}]:`, metadata);
+      if (code !== 'DEBUG_ENABLED') {
+        console.error(`[NextAuth][Error][${code}]:`, metadata);
+      }
     },
     warn: (code) => {
-      console.warn(`[NextAuth][Warning][${code}]`);
+      if (code !== 'DEBUG_ENABLED') {
+        console.warn(`[NextAuth][Warning][${code}]`);
+      }
     },
-    debug: (code, metadata) => {
-      console.log(`[NextAuth][Debug][${code}]:`, metadata);
+    debug: () => {
     },
+  },
+  events: {
+    async signIn({ user, account, isNewUser }) {
+      console.log(`User ${user.email} signed in via ${account?.provider}`, {
+        isNewUser,
+        userId: user.id
+      });
+    }
   },
 };
 

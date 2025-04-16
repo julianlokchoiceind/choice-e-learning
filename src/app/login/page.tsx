@@ -2,10 +2,11 @@
 
 import React, { useState, FormEvent, useEffect } from 'react';
 import Link from 'next/link';
-import { FaGoogle, FaGithub } from 'react-icons/fa';
+import { FaGoogle, FaGithub, FaFacebook } from 'react-icons/fa';
+import { FaMicrosoft } from 'react-icons/fa6';
 import { useAuth, LoginCredentials } from '@/hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import { signIn, getProviders } from 'next-auth/react';
 import Notification from '@/components/ui/Notification';
 
 export default function LoginPage() {
@@ -29,6 +30,20 @@ export default function LoginPage() {
     type: 'success' | 'error' | 'info';
     message: string;
   } | null>(null);
+  
+  // Add a useEffect to check available providers on component mount
+  useEffect(() => {
+    async function checkProviders() {
+      try {
+        const providers = await getProviders();
+        console.log('Available NextAuth providers:', providers);
+      } catch (err) {
+        console.error('Error fetching providers:', err);
+      }
+    }
+    
+    checkProviders();
+  }, []);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -119,17 +134,51 @@ export default function LoginPage() {
   // Handle social login with provider
   const handleSocialLogin = async (provider: string) => {
     try {
+      console.log(`Initiating ${provider} login flow`);
+      
       setNotification({
         show: true,
         type: 'info',
         message: `Signing in with ${provider}...`
       });
       
-      await signIn(provider, {
+      // Add additional debugging for Facebook and Microsoft
+      if (provider === 'facebook' || provider === 'azure-ad') {
+        console.log(`Enhanced debugging for ${provider} authentication:`, {
+          returnUrl: '/dashboard',
+          currentUrl: window.location.href,
+          timestamp: new Date().toISOString()
+        });
+      }
+      
+      // For Facebook and Microsoft, use direct signIn call with specific options
+      if (provider === 'facebook') {
+        console.log('Starting Facebook authentication flow');
+        await signIn('facebook', {
+          callbackUrl: '/dashboard',
+          redirect: true,
+        });
+        return; // The rest won't execute due to redirect
+      }
+      
+      if (provider === 'azure-ad') {
+        console.log('Starting Microsoft authentication flow');
+        await signIn('azure-ad', {
+          callbackUrl: '/dashboard',
+          redirect: true,
+        });
+        return; // The rest won't execute due to redirect
+      }
+      
+      // For other providers, use standard NextAuth flow
+      console.log(`Calling signIn with provider: ${provider}`);
+      const result = await signIn(provider, {
         callbackUrl: '/dashboard',
+        redirect: true,
       });
       
-      // Note: The rest of this function might not execute due to page redirect
+      console.log('SignIn result:', result);
+      // Note: The rest of this function might not execute due to redirect: true
     } catch (error) {
       console.error(`${provider} login error:`, error);
       setNotification({
@@ -309,23 +358,41 @@ export default function LoginPage() {
             </div>
           </div>
           
-          <div className="mt-6 grid grid-cols-2 gap-3">
+          <div className="mt-6 flex flex-col space-y-3">
             <button
               onClick={() => handleSocialLogin('google')}
               disabled={isLoading}
-              className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-500 shadow-sm hover:bg-gray-50"
+              className="flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              <span className="sr-only">Sign in with Google</span>
-              <FaGoogle className="h-5 w-5 text-red-500" />
+              <FaGoogle className="h-5 w-5 text-red-500 mr-3" />
+              <span>Continue with Google</span>
             </button>
             
             <button
               onClick={() => handleSocialLogin('github')}
               disabled={isLoading}
-              className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-500 shadow-sm hover:bg-gray-50"
+              className="flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              <span className="sr-only">Sign in with GitHub</span>
-              <FaGithub className="h-5 w-5" />
+              <FaGithub className="h-5 w-5 text-gray-900 mr-3" />
+              <span>Continue with GitHub</span>
+            </button>
+            
+            <button
+              onClick={() => handleSocialLogin('facebook')}
+              disabled={isLoading}
+              className="flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              <FaFacebook className="h-5 w-5 text-[#1877F2] mr-3" />
+              <span>Continue with Facebook</span>
+            </button>
+            
+            <button
+              onClick={() => handleSocialLogin('azure-ad')}
+              disabled={isLoading}
+              className="flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              <FaMicrosoft className="h-5 w-5 text-[#00A4EF] mr-3" />
+              <span>Continue with Microsoft</span>
             </button>
           </div>
         </div>

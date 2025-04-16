@@ -32,48 +32,13 @@ const instructorRoutes = [
  * Next.js middleware for authentication and authorization
  */
 export async function middleware(request: NextRequest) {
-  // Start with logging
-  const startTime = Date.now();
-  const method = request.method;
-  const url = request.url;
-  console.log(`[${new Date().toISOString()}] ${method} ${url}`);
-  
   const { pathname } = request.nextUrl;
-  
-  // CORS handling
-  const origin = request.headers.get('origin') || '';
-  const allowedOrigins = ['http://localhost:3000', process.env.NEXTAUTH_URL || ''];
-  
-  const corsHeaders = {
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  } as Record<string, string>;
-  
-  if (allowedOrigins.includes(origin)) {
-    corsHeaders['Access-Control-Allow-Origin'] = origin;
-  }
-  
-  // Handle preflight requests
-  if (request.method === 'OPTIONS') {
-    return NextResponse.json({}, { headers: corsHeaders, status: 200 });
-  }
   
   // Allow public routes
   if (!authRoutes.some(route => pathname.startsWith(route)) &&
       !adminRoutes.some(route => pathname.startsWith(route)) &&
       !instructorRoutes.some(route => pathname.startsWith(route))) {
-    const response = NextResponse.next();
-    
-    // Add CORS headers to the response
-    Object.entries(corsHeaders).forEach(([key, value]) => {
-      response.headers.set(key, value);
-    });
-    
-    // Add timing metrics
-    const duration = Date.now() - startTime;
-    response.headers.set('X-Response-Time', `${duration}ms`);
-    
-    return response;
+    return NextResponse.next();
   }
   
   // Get the JWT token from the session
@@ -105,19 +70,7 @@ export async function middleware(request: NextRequest) {
     }
   }
   
-  const response = NextResponse.next();
-  
-  // Add CORS headers to the response
-  Object.entries(corsHeaders).forEach(([key, value]) => {
-    response.headers.set(key, value);
-  });
-  
-  // Add timing metrics
-  const duration = Date.now() - startTime;
-  response.headers.set('X-Response-Time', `${duration}ms`);
-  console.log(`Request to ${request.url} took ${duration}ms`);
-  
-  return response;
+  return NextResponse.next();
 }
 
 /**

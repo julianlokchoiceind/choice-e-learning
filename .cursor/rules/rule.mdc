@@ -15,3 +15,4 @@ alwaysApply: true
 - Maintain Context: Always retain the complete context to execute tasks coherently.
 - Minimize Operations: Avoid unnecessary file deletion and recreation when making edits.
 - Targeted Modifications: When modifying a file, change only the specific file mentioned. If the code interacts with other files, adjust only the relevant connecting sections.
+- Do not include any placeholder code in your changes - implement the full working solution.

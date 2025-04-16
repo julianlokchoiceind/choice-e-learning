@@ -1,7 +1,74 @@
-# E-Learning Platform Backend Requirements
+# E-Learning Platform Requirements
 
 ## Project Overview
-This document outlines the backend requirements for our Next.js e-learning platform. The frontend UI is already developed, and we need to implement the backend functionality according to the structure below.
+A comprehensive e-learning platform built with Next.js, featuring both robust frontend UI and backend functionality similar to Nomad Coders.
+
+## Frontend Requirements
+
+### Core Pages
+1. **Home Page:** Modern landing page with featured courses and call-to-action elements
+2. **Course Listing Page:** Grid layout with search and filtering capabilities
+3. **Challenges Page:** Coding exercises and community challenges
+4. **Reviews Page:** User testimonials and feedback
+5. **FAQ Page:** Frequently asked questions with expandable sections
+6. **Roadmap Page:** Learning path visualization
+7. **Course Detail Page:** Comprehensive course information including:
+   - Course banner and description
+   - Instructor information
+   - Lesson list and curriculum
+   - Student reviews
+8. **Login/Signup Page:** Authentication with multiple options
+9. **User Dashboard:** Track progress and manage account
+10. **Admin Dashboard:** Manage platform content and users
+
+### Frontend Technical Stack
+- **Framework:** Next.js with App Router
+- **Styling:** Tailwind CSS
+- **State Management:** React Query for server state, Context API/Zustand for client state
+- **UI Components:** Custom components with Framer Motion animations
+- **Responsive Design:** Mobile-first approach
+
+## Backend Requirements
+
+### Database Structure
+**MongoDB Atlas** (cloud-hosted MongoDB) with Prisma ORM will be used for all data storage needs.
+
+### MongoDB Atlas Integration
+- Cloud-based database deployment
+- Automatic scaling and backups
+- Database monitoring and alerts
+- Connection string management via environment variables
+- Secure network access configuration
+
+### Core Backend Components
+
+#### 1. Database Models
+- **User Model:** Authentication, profile, and role management
+- **Course Model:** Course content, metadata, and relationships
+- **Challenge Model:** Interactive coding exercises
+- **Review Model:** User feedback and ratings
+- **FAQ Model:** Platform documentation
+- **Roadmap Model:** Learning path information
+
+#### 2. API Routes Implementation
+- Authentication endpoints
+- Course management endpoints
+- User progress tracking
+- Challenge submission and evaluation
+- Review submission and display
+- Administrative functions
+
+#### 3. Authentication System
+- NextAuth.js integration
+- Email/password authentication
+- OAuth providers (Google, GitHub)
+- Role-based access control
+
+### Backend Technical Stack
+- **Database:** MongoDB Atlas with Prisma ORM
+- **Authentication:** NextAuth.js
+- **File Storage:** AWS S3 or similar cloud storage
+- **API Architecture:** RESTful endpoints in Next.js API routes
 
 ## Backend Structure
 ```
@@ -9,186 +76,43 @@ This document outlines the backend requirements for our Next.js e-learning platf
   /app
     /api
       /auth
-        /[...nextauth]
-          route.ts         # Authentication routes
       /courses
-        route.ts           # GET: list courses, POST: create course
-        /[id]
-          route.ts         # GET, PUT, DELETE for single course
       /challenges
-        route.ts           # GET: list challenges, POST: create challenge
-        /[id]
-          route.ts         # GET, PUT, DELETE for single challenge
       /reviews
-        route.ts           # GET: list reviews, POST: create review
-        /[id]
-          route.ts         # GET, PUT, DELETE for single review
       /faq
-        route.ts           # GET: list FAQs, POST: create FAQ
       /roadmap
-        route.ts           # GET: fetch roadmap data, POST: update roadmap
       /admin
-        /courses
-          route.ts         # Admin course management
-        /challenges
-          route.ts         # Admin challenge management
-        /users
-          route.ts         # Admin user management
-
   /lib
     /db
-      index.ts             # Database connection
-      schema.prisma        # Prisma schema definitions
     /auth
-      auth-options.ts      # NextAuth.js configuration
-      session.ts           # Session management
-      middleware.ts        # Auth middleware
-
   /services
-    user-service.ts        # User-related business logic
-    course-service.ts      # Course-related business logic
-    challenge-service.ts   # Challenge-related business logic
-    review-service.ts      # Review-related business logic
-    faq-service.ts         # FAQ-related business logic
-    roadmap-service.ts     # Roadmap-related business logic
-
   /types
-    index.ts               # Type exports
-    user.ts                # User-related types
-    course.ts              # Course-related types
-    challenge.ts           # Challenge-related types
-    review.ts              # Review-related types
-    faq.ts                 # FAQ-related types
-    roadmap.ts             # Roadmap-related types
-
   /utils
-    validation.ts          # Input validation helpers
-    auth-utils.ts          # Authentication helpers
-    pagination.ts          # Pagination helpers
-    file-upload.ts         # File upload utilities
-
   /config
-    database.ts            # Database configuration
-    auth.ts                # Auth configuration
-    storage.ts             # Storage configuration
-
   /middleware
-    index.ts               # Global middleware
 ```
 
-## Technology Stack
-- **Framework**: Next.js with App Router
-- **Database**: MongoDB with Prisma ORM
-- **Authentication**: NextAuth.js
-- **File Storage**: AWS S3 or similar cloud storage
+## Implementation Priority
+⓵ PHASE 1: Core Infrastructure (MongoDB Atlas setup, DB connection, Auth configuration)
+⓶ PHASE 2: Data Models & Types
+⓷ PHASE 3: Authentication & User Management
+⓸ PHASE 4: Course Functionality
+⓹ PHASE 5: Supporting Features (Challenges, Reviews, FAQ, Roadmap)
+⓺ PHASE 6: Admin Functionality
 
-## Implementation Requirements
-
-### 1. Database Models
-
-#### User Model
-```typescript
-// Required fields for User model
-- id: string
-- name: string
-- email: string
-- password: string (hashed)
-- role: enum ('student', 'instructor', 'admin')
-- createdAt: Date
-- updatedAt: Date
-```
-
-#### Course Model
-```typescript
-// Required fields for Course model
-- id: string
-- title: string
-- description: string
-- instructorId: string (ref: User)
-- price: number
-- imageUrl: string
-- level: enum ('beginner', 'intermediate', 'advanced')
-- topics: string[]
-- lessons: Lesson[] (sub-document or relation)
-- createdAt: Date
-- updatedAt: Date
-```
-
-#### Challenge Model
-```typescript
-// Required fields for Challenge model
-- id: string
-- title: string
-- description: string
-- difficulty: enum ('easy', 'medium', 'hard')
-- startDate: Date
-- endDate: Date
-- submissions: Submission[] (sub-document or relation)
-- createdAt: Date
-- updatedAt: Date
-```
-
-#### Review Model
-```typescript
-// Required fields for Review model
-- id: string
-- userId: string (ref: User)
-- courseId: string (ref: Course)
-- rating: number (1-5)
-- comment: string
-- createdAt: Date
-- updatedAt: Date
-```
-
-#### FAQ Model
-```typescript
-// Required fields for FAQ model
-- id: string
-- question: string
-- answer: string
-- category: string
-- createdAt: Date
-- updatedAt: Date
-```
-
-#### Roadmap Model
-```typescript
-// Required fields for Roadmap model
-- id: string
-- title: string
-- description: string
-- steps: RoadmapStep[] (sub-document)
-- createdAt: Date
-- updatedAt: Date
-```
-
-### 2. API Routes Implementation
-
-For each endpoint, implement:
-- Data validation
-- Authentication/authorization checks
-- Error handling
-- Success responses
-
-### 3. Authentication Requirements
-- Secure password hashing
-- JWT token-based authentication
-- Role-based access control
-- Protected routes for admin and authenticated users
-
-### 4. Implementation Order
-1. Set up database connection and schema
-2. Implement authentication system
-3. Create course-related functionality
-4. Add challenge system
-5. Implement reviews functionality
-6. Add FAQ and roadmap features
-7. Develop admin functionality
-
-## Testing Requirements
-Each API endpoint should include appropriate tests.
+## MongoDB Atlas Configuration
+- Create MongoDB Atlas account and project
+- Set up cluster with appropriate tier (start with free tier for development)
+- Configure network access (IP whitelisting)
+- Create database user with appropriate permissions
+- Obtain connection string for application
+- Configure environment variables in Next.js application
+- Set up database indexes for performance optimization
 
 ## Security Requirements
 - Input validation for all endpoints
-- Protection against common vulnerabilities (CSRF, XSS)
+- Protection against common vulnerabilities
 - Secure storage of sensitive data
+- HTTPS enforcement
+- MongoDB Atlas network security configuration
+- Environment variable management for database credentials
