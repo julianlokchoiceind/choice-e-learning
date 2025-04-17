@@ -22,15 +22,6 @@ const adminRoutes: string[] = [
 ];
 
 /**
- * Paths that require instructor role
- */
-const instructorRoutes = [
-  '/instructor',
-  '/courses/create',
-  '/courses/edit',
-];
-
-/**
  * Next.js middleware for authentication and authorization
  */
 export async function middleware(request: NextRequest) {
@@ -44,8 +35,7 @@ export async function middleware(request: NextRequest) {
   
   // Allow public routes
   if (!authRoutes.some(route => pathname.startsWith(route)) &&
-      !adminRoutes.some(route => pathname.startsWith(route)) &&
-      !instructorRoutes.some(route => pathname.startsWith(route))) {
+      !adminRoutes.some(route => pathname.startsWith(route))) {
     return NextResponse.next();
   }
   
@@ -70,14 +60,6 @@ export async function middleware(request: NextRequest) {
     }
   }
   
-  // Check instructor routes
-  if (token && instructorRoutes.some(route => pathname.startsWith(route))) {
-    // Redirect if not instructor or admin
-    if (token.role !== 'instructor' && token.role !== 'admin') {
-      return NextResponse.redirect(new URL('/unauthorized', request.url));
-    }
-  }
-  
   return NextResponse.next();
 }
 
@@ -96,4 +78,4 @@ export const config = {
      */
     '/((?!_next/static|_next/image|favicon.ico|public|api).*)',
   ],
-}; 
+};

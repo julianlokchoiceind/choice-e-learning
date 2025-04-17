@@ -23,7 +23,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  courses    Course[]    @relation("InstructorCourses")
   reviews    Review[]
   enrolledIn Course[]    @relation("EnrolledStudents", fields: [enrolledIds], references: [id])
   enrolledIds String[]   @db.ObjectId
@@ -41,8 +40,6 @@ model Course {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String
-  instructorId String   @db.ObjectId
-  instructor  User      @relation("InstructorCourses", fields: [instructorId], references: [id])
   price       Float
   imageUrl    String?
   level       Level

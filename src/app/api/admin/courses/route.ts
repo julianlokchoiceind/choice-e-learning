@@ -22,6 +22,11 @@ const courseSchema = z.object({
 export async function POST(req: Request) {
   try {
     const user = await getCurrentUser();
+
+    // Thêm các dòng log này
+    console.log('Current user:', user);
+    console.log('Current user role:', user?.role);
+    console.log('Is user admin?', isAdmin(user));
     
     if (!user) {
       return NextResponse.json(

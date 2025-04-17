@@ -8,6 +8,12 @@ import { User } from 'next-auth';
  */
 export function isAdmin(user: User | null | undefined): boolean {
   if (!user) return false;
+   // Thêm log chi tiết
+   console.log('isAdmin check:', {
+    userExists: !!user,
+    userRole: user?.role,
+    isAdminCheck: user?.role === Role.admin
+  });
   return user.role === Role.admin;
 }
 
@@ -29,3 +35,4 @@ export function isStudent(user: User | null | undefined): boolean {
 export function isAuthenticated(user: User | null | undefined): boolean {
   return !!user;
 } 
+
