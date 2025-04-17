@@ -154,23 +154,11 @@ export async function authenticateUser(email: string, password: string) {
  */
 export async function isAdmin(userId: string) {
   try {
-    const user = await getUserById(userId);
+    const usersCollection = await getCollection('users');
+    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
     return user?.role === 'admin';
   } catch (error) {
     console.error('Error in isAdmin check:', error);
-    return false;
-  }
-}
-
-/**
- * Check if the user has instructor role
- */
-export async function isInstructor(userId: string) {
-  try {
-    const user = await getUserById(userId);
-    return user?.role === 'instructor' || user?.role === 'admin';
-  } catch (error) {
-    console.error('Error in isInstructor check:', error);
     return false;
   }
 } 

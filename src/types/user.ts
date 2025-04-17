@@ -61,7 +61,6 @@ export interface UpdateUserRequest {
 export interface UserProfile extends User {
   coursesEnrolled?: number;
   challengesCompleted?: number;
-  instructorCourses?: number;
 }
 
 /**

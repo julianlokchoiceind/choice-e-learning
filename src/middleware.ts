@@ -9,16 +9,14 @@ const authRoutes = [
   '/dashboard',
   '/profile',
   '/courses/my',
-  // Temporarily commented out to fix admin access
-  // '/admin',
+  '/admin',
 ];
 
 /**
  * Paths that require admin role
  */
-const adminRoutes: string[] = [
-  // Temporarily commented out to fix admin access
-  // '/admin',
+const adminRoutes = [
+  '/admin',
 ];
 
 /**
@@ -26,12 +24,6 @@ const adminRoutes: string[] = [
  */
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
-  // TEMPORARY FIX: Allow direct access to admin routes
-  if (pathname.startsWith('/admin')) {
-    console.log('ADMIN ACCESS BYPASS ENABLED - Remove this in production');
-    return NextResponse.next();
-  }
   
   // Allow public routes
   if (!authRoutes.some(route => pathname.startsWith(route)) &&

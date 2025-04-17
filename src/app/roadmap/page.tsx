@@ -4,7 +4,6 @@ import { CheckCircleIcon, ArrowRightIcon, ChevronRightIcon, CodeBracketIcon, Com
 import Image from "next/image";
 import Link from "next/link";
 import { AcademicCapIcon } from "@heroicons/react/24/outline";
-import CounterComponent from '../../components/CounterComponent';
 
 export const metadata: Metadata = {
   title: "Learning Roadmap | Choice E-Learning",
@@ -54,21 +53,25 @@ export default function RoadmapPage() {
         </div>
       </section>
       
-      {/* Statistics Counter */}
+      {/* Statistics Counter - Replaced with static stats */}
       <section className="counter-section section-tight bg-white py-16">
         <div className="max-w-[980px] mx-auto px-6 md:px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center">
-              <CounterComponent target={120} label="Courses" />
+              <div className="text-4xl font-bold text-[#0066cc]">120+</div>
+              <div className="text-lg text-gray-600 mt-2">Courses</div>
             </div>
             <div className="text-center">
-              <CounterComponent target={150} label="Students" />
+              <div className="text-4xl font-bold text-[#0066cc]">150+</div>
+              <div className="text-lg text-gray-600 mt-2">Students</div>
             </div>
             <div className="text-center">
-              <CounterComponent target={8} label="Learning Paths" />
+              <div className="text-4xl font-bold text-[#0066cc]">8</div>
+              <div className="text-lg text-gray-600 mt-2">Learning Paths</div>
             </div>
             <div className="text-center">
-              <CounterComponent target={92} label="Completion Rate %" />
+              <div className="text-4xl font-bold text-[#0066cc]">92%</div>
+              <div className="text-lg text-gray-600 mt-2">Completion Rate</div>
             </div>
           </div>
         </div>
@@ -262,4 +265,4 @@ const webDevSteps = [
     description: "Prepare for the job market and explore specialized topics in web development to stand out from the crowd.",
     skills: ["Portfolio Building", "Technical Interviews", "DevOps Basics", "GraphQL", "Serverless Architecture"]
   },
-]; 
+];

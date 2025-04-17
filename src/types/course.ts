@@ -37,9 +37,9 @@ export interface CourseDetails {
   reviewsCount: number;
   isFeatured: boolean;
   learningPoints: string[];
-  prerequisites: string[];
-  modules: CourseModule[];
-  instructor: Instructor;
+  prerequisites?: string[];
+  modules?: CourseModule[];
+  instructor: CourseCreator;
   reviews: CourseReview[];
 }
 
@@ -61,9 +61,9 @@ export interface CourseLesson {
 }
 
 /**
- * Instructor interface
+ * Course creator interface (previously Instructor)
  */
-export interface Instructor {
+export interface CourseCreator {
   name: string;
   role: string;
   bio: string;

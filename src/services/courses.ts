@@ -12,13 +12,13 @@ export async function getAllCourses(): Promise<CourseListItem[]> {
     const coursesCollection = await getCollection('courses');
     const courses = await coursesCollection.find().toArray();
     
-    const instructorsCollection = await getCollection('users');
+    const usersCollection = await getCollection('users');
 
     // Process the courses to match our CourseListItem interface
     const processedCourses = await Promise.all(
       courses.map(async (course) => {
-        // Get instructor
-        const instructor = await instructorsCollection.findOne({ _id: new ObjectId(course.instructorId) });
+        // Get creator info (previously called instructor)
+        const creator = await usersCollection.findOne({ _id: new ObjectId(course.creatorId || course.instructorId) });
         
         // Count students
         const studentsCount = Array.isArray(course.studentIds) ? course.studentIds.length : 0;
@@ -47,7 +47,7 @@ export async function getAllCourses(): Promise<CourseListItem[]> {
           students: studentsCount,
           rating: rating,
           reviews: reviews.length,
-          instructorName: instructor?.name || 'Unknown Instructor',
+          instructorName: creator?.name || 'Administrator',
         };
       })
     );
@@ -69,9 +69,9 @@ export async function getCourseById(courseId: string) {
     
     if (!course) return null;
     
-    // Get instructor
-    const instructorsCollection = await getCollection('users');
-    const instructor = await instructorsCollection.findOne({ _id: new ObjectId(course.instructorId) });
+    // Get creator info (previously instructor)
+    const usersCollection = await getCollection('users');
+    const creator = await usersCollection.findOne({ _id: new ObjectId(course.creatorId || course.instructorId) });
     
     // Get lessons
     const lessonsCollection = await getCollection('lessons');
@@ -84,7 +84,7 @@ export async function getCourseById(courseId: string) {
     // Process reviews to include user names
     const processedReviews = await Promise.all(
       reviews.map(async (review) => {
-        const user = await instructorsCollection.findOne({ _id: new ObjectId(review.userId) });
+        const user = await usersCollection.findOne({ _id: new ObjectId(review.userId) });
         return {
           name: user?.name || 'Anonymous',
           rating: review.rating,
@@ -117,57 +117,19 @@ export async function getCourseById(courseId: string) {
       isFeatured: Array.isArray(course.topics) && course.topics.includes('featured'),
       learningPoints: course.topics || [],
       instructor: {
-        name: instructor?.name || 'Unknown Instructor',
-        role: instructor?.role === 'instructor' ? 'Senior Instructor' : 'Instructor',
-        bio: 'Experienced instructor with a passion for teaching',
+        name: creator?.name || 'Administrator',
+        role: 'Course Creator',
+        bio: 'Course creator and educator',
         avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
         rating: 4.9,
-        students: await getInstructorStudentCount(course.instructorId),
-        courses: await getInstructorCourseCount(course.instructorId),
+        students: course.studentIds?.length || 0,
+        courses: 1, // Simplified
       },
       reviews: processedReviews,
     };
   } catch (error) {
     console.error('Error fetching course by ID:', error);
     return null;
-  }
-}
-
-/**
- * Get total number of students for an instructor
- */
-async function getInstructorStudentCount(instructorId: string): Promise<number> {
-  try {
-    const coursesCollection = await getCollection('courses');
-    const courses = await coursesCollection.find({ instructorId }).toArray();
-    
-    // Count unique students across all courses
-    const uniqueStudentIds = new Set<string>();
-    courses.forEach(course => {
-      if (Array.isArray(course.studentIds)) {
-        course.studentIds.forEach((studentId: string) => {
-          uniqueStudentIds.add(studentId);
-        });
-      }
-    });
-    
-    return uniqueStudentIds.size;
-  } catch (error) {
-    console.error('Error getting instructor student count:', error);
-    return 0;
-  }
-}
-
-/**
- * Get course count for an instructor
- */
-async function getInstructorCourseCount(instructorId: string): Promise<number> {
-  try {
-    const coursesCollection = await getCollection('courses');
-    return coursesCollection.countDocuments({ instructorId });
-  } catch (error) {
-    console.error('Error getting instructor course count:', error);
-    return 0;
   }
 }
 
@@ -228,7 +190,6 @@ export async function getUserStats(userId: string): Promise<UserCourseStats> {
     }
     
     // Get data for each enrolled course
-    const coursesCollection = await getCollection('courses');
     const lessonsCollection = await getCollection('lessons');
     const userProgressCollection = await getCollection('userProgress');
     
@@ -249,71 +210,37 @@ export async function getUserStats(userId: string): Promise<UserCourseStats> {
         courseId: courseId.toString() 
       }).toArray();
       
-      // Count total lessons
-      const courseTotalLessons = courseLessons.length;
-      totalLessons += courseTotalLessons;
+      totalLessons += courseLessons.length;
       
-      // Get completed lessons for this course
-      const courseCompletedLessons = userProgress.filter(progress => 
-        progress.courseId === courseId.toString() && 
-        progress.completed === true
-      ).length;
-      
-      // Add to total completed lessons
-      completedLessons += courseCompletedLessons;
-      
-      // Calculate hours based on lessons (assuming 30 minutes per lesson)
-      totalHoursLearned += (courseCompletedLessons * 0.5);
+      // Count completed lessons
+      let courseCompletedLessons = 0;
+      courseLessons.forEach(lesson => {
+        const progressEntry = userProgress.find(p => 
+          p.courseId === courseId.toString() && p.lessonId === lesson._id.toString()
+        );
+        
+        if (progressEntry && progressEntry.completed) {
+          completedLessons++;
+          courseCompletedLessons++;
+          // Add time spent to total hours
+          totalHoursLearned += (progressEntry.timeSpent || 0) / 3600; // Convert seconds to hours
+        }
+      });
       
       // Check if course is completed
-      if (courseTotalLessons > 0 && courseCompletedLessons === courseTotalLessons) {
+      if (courseCompletedLessons === courseLessons.length && courseLessons.length > 0) {
         coursesCompleted++;
       }
     }
     
-    // Calculate streak based on login history or activity dates
-    let currentStreak = 0;
-    if (user.loginHistory && Array.isArray(user.loginHistory)) {
-      // Sort login dates in descending order
-      const sortedLoginDates = [...user.loginHistory].sort((a, b) => 
-        new Date(b).getTime() - new Date(a).getTime()
-      );
-      
-      if (sortedLoginDates.length > 0) {
-        // Check if most recent login is today or yesterday
-        const now = new Date();
-        const mostRecentLogin = new Date(sortedLoginDates[0]);
-        const isRecentLogin = 
-          mostRecentLogin.toDateString() === now.toDateString() || 
-          mostRecentLogin.toDateString() === new Date(now.setDate(now.getDate() - 1)).toDateString();
-        
-        if (isRecentLogin) {
-          currentStreak = 1; // Start with 1 for today/yesterday
-          
-          // Check consecutive days before today/yesterday
-          let prevDate = new Date(mostRecentLogin);
-          prevDate.setDate(prevDate.getDate() - 1);
-          
-          for (let i = 1; i < sortedLoginDates.length; i++) {
-            const loginDate = new Date(sortedLoginDates[i]);
-            
-            // If this login is 1 day before the previous one we checked, increment streak
-            if (loginDate.toDateString() === prevDate.toDateString()) {
-              currentStreak++;
-              prevDate.setDate(prevDate.getDate() - 1);
-            } else {
-              break; // Streak broken
-            }
-          }
-        }
-      }
-    }
+    // Calculate current streak
+    const streakDays = calculateStreak(userProgress);
     
     return {
       coursesCompleted,
       lessonsCompleted: completedLessons,
-      totalHoursLearned: parseFloat(totalHoursLearned.toFixed(1)),
-      currentStreak,
+      totalHoursLearned: Math.round(totalHoursLearned * 10) / 10, // Round to 1 decimal place
+      currentStreak: streakDays,
     };
   } catch (error) {
     console.error('Error getting user stats:', error);
@@ -324,4 +251,64 @@ export async function getUserStats(userId: string): Promise<UserCourseStats> {
       currentStreak: 0,
     };
   }
+}
+
+/**
+ * Calculate user streak based on user progress
+ */
+function calculateStreak(userProgress: any[]): number {
+  if (!userProgress || userProgress.length === 0) {
+    return 0;
+  }
+  
+  // Get all dates when user completed lessons
+  const completionDates = userProgress
+    .filter(p => p.completed)
+    .map(p => new Date(p.completedAt || p.updatedAt))
+    .sort((a, b) => b.getTime() - a.getTime()); // Sort in descending order
+  
+  if (completionDates.length === 0) {
+    return 0;
+  }
+  
+  // Check if user has completed anything today
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const mostRecentDate = new Date(completionDates[0]);
+  mostRecentDate.setHours(0, 0, 0, 0);
+  
+  // If most recent activity was before yesterday, streak is broken
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  if (mostRecentDate < yesterday) {
+    return 0;
+  }
+  
+  // Calculate streak by counting consecutive days
+  let streak = 1; // Start with 1 for the most recent day
+  let currentDate = mostRecentDate;
+  
+  for (let i = 1; i < completionDates.length; i++) {
+    const prevDate = new Date(completionDates[i]);
+    prevDate.setHours(0, 0, 0, 0);
+    
+    // Check if this date is the previous day
+    const expectedPrevDate = new Date(currentDate);
+    expectedPrevDate.setDate(expectedPrevDate.getDate() - 1);
+    
+    if (prevDate.getTime() === expectedPrevDate.getTime()) {
+      streak++;
+      currentDate = prevDate;
+    } else if (prevDate.getTime() === currentDate.getTime()) {
+      // Same day activity, skip
+      continue;
+    } else {
+      // Break in streak
+      break;
+    }
+  }
+  
+  return streak;
 } 

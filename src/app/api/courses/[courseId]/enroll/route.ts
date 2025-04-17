@@ -79,10 +79,8 @@ export async function POST(
 
     // Check if updates were successful
     if (updateUserResult.modifiedCount === 0 || updateCourseResult.modifiedCount === 0) {
-      console.error('Failed to update one or both collections during enrollment');
       // Try to rollback changes if only one update succeeded
       if (updateUserResult.modifiedCount === 1) {
-        // Properly format $pull operation for MongoDB
         await usersCollection.updateOne(
           { _id: new ObjectId(userId) },
           { $pull: { enrolledIds: courseId } as any }
@@ -90,7 +88,6 @@ export async function POST(
       }
       
       if (updateCourseResult.modifiedCount === 1) {
-        // Properly format $pull operation for MongoDB
         await coursesCollection.updateOne(
           { _id: new ObjectId(courseId) },
           { $pull: { studentIds: userId } as any }
@@ -204,7 +201,6 @@ export async function DELETE(
 
     // Check if updates were successful
     if (updateUserResult.modifiedCount === 0 || updateCourseResult.modifiedCount === 0) {
-      console.error('Failed to update one or both collections during unenrollment');
       return NextResponse.json(
         { success: false, error: 'Failed to unenroll from course' },
         { status: 500 }
