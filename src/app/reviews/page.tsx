@@ -72,17 +72,17 @@ export default function ReviewsPage() {
       <CounterScript />
       
       {/* Hero Section with Gradient Background */}
-      <section className="min-h-[40vh] flex items-center justify-center overflow-hidden" 
+      <section className="min-h-[500px] flex items-center justify-center overflow-hidden" 
                style={{ 
-                 background: 'linear-gradient(180deg, #000428 0%, #004e92 100%)',
-                 paddingTop: '120px',
+                 background: 'linear-gradient(180deg, #1e2a78 0%, #0b1120 100%)',
+                 paddingTop: '100px',
                  paddingBottom: '60px'
                }}>
         <div className="max-w-[980px] mx-auto px-4 text-center">
-          <h1 className="text-[48px] md:text-[56px] font-bold text-white mb-4 tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight">
             Student Reviews
           </h1>
-          <p className="text-[21px] leading-[1.381] text-white/80 max-w-[680px] mx-auto">
+          <p className="text-base md:text-lg text-white/80 max-w-[680px] mx-auto">
             Hear from our students about their experiences with Choice E-Learning courses.
             Join thousands of successful students who have transformed their skills and careers.
           </p>
@@ -137,7 +137,7 @@ export default function ReviewsPage() {
             {featuredReviews.map((review) => (
               <div 
                 key={review.id} 
-                className="card hover:shadow-lg transition-transform hover:-translate-y-1"
+                className="card hover:shadow-lg hover:scale-[1.01] transition-all duration-300"
               >
                 <div className="p-6">
                   <div className="flex items-center mb-4">
@@ -197,7 +197,7 @@ export default function ReviewsPage() {
         
         {/* Reviews by Course */}
         <section className="mb-16">
-          <h2 className="text-[32px] font-semibold mb-8 text-[#1d1d1f]">Reviews by Course</h2>
+          <h2 className="text-xl md:text-2xl font-semibold mb-8 text-[#1d1d1f]">Reviews by Course</h2>
           
           <div className="bg-white rounded-xl overflow-hidden shadow-md">
             {courseReviews.map((course, idx) => (
@@ -214,7 +214,7 @@ export default function ReviewsPage() {
                         />
                       </div>
                       <div>
-                        <h3 className="font-medium text-[#1d1d1f]">{course.name}</h3>
+                        <h3 className="font-medium text-lg">{course.name}</h3>
                         <div className="flex items-center">
                           <div className="flex mr-2">
                             {Array(5).fill(0).map((_, i) => (
@@ -240,7 +240,8 @@ export default function ReviewsPage() {
         </section>
         
         {/* Submit Review CTA */}
-        <section className="bg-gradient-to-r from-[#004e92] to-[#000428] rounded-2xl p-10 text-center">
+        <section className="rounded-2xl p-10 text-center"
+                 style={{ background: 'linear-gradient(180deg, #3b82f6 0%, #1e40af 100%)' }}>
           <h2 className="text-2xl font-bold mb-3 text-white">Share Your Experience</h2>
           <p className="text-white/80 mb-6 max-w-2xl mx-auto">
             Your feedback helps other students make informed decisions and helps us improve our courses.

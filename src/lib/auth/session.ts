@@ -34,11 +34,6 @@ export async function checkUserRole(requiredRole: Role) {
     return user.role === Role.admin;
   }
   
-  // If instructor role is required, both admin and instructor can access
-  if (requiredRole === Role.instructor) {
-    return user.role === Role.admin || user.role === Role.instructor;
-  }
-  
   // If student role is required, anyone authenticated can access
   return true;
 }
@@ -58,14 +53,6 @@ export async function isAuthenticated() {
  */
 export async function isAdmin() {
   return await checkUserRole(Role.admin);
-}
-
-/**
- * Check if the current user is an instructor
- * @returns True if instructor or admin, false otherwise
- */
-export async function isInstructor() {
-  return await checkUserRole(Role.instructor);
 }
 
 /**

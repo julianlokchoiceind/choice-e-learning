@@ -18,7 +18,7 @@ export default function NotFound() {
         <div className="flex flex-col md:flex-row gap-4 justify-center mt-8">
           <Link 
             href="/"
-            className="inline-flex items-center justify-center px-6 py-3 rounded-lg gradient-primary text-white font-medium transition-all hover:shadow-lg"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-white border border-gray-200 font-medium transition-all hover:shadow-lg"
           >
             <HomeIcon className="w-5 h-5 mr-2" />
             Go to Homepage
@@ -26,7 +26,7 @@ export default function NotFound() {
           
           <Link 
             href="/courses"
-            className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-white border border-gray-200 dark:border-gray-700 dark:bg-gray-800 font-medium transition-all hover:shadow-lg"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-white border border-gray-200 font-medium transition-all hover:shadow-lg"
           >
             Browse Courses
           </Link>

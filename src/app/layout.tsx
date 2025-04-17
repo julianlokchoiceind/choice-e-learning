@@ -1,33 +1,27 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import { Inter } from 'next/font/google';
+import './globals.css';
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
 import AuthSessionProvider from "@/components/providers/SessionProvider";
 
 const inter = Inter({
-  subsets: ["latin"],
+  subsets: ['latin'],
   display: 'swap',
+  variable: '--font-inter',
 });
 
-export const metadata: Metadata = {
-  title: "Choice E-Learning | Learn Modern Web Development",
-  description: "Learn modern web development with practical projects and real-world applications",
+export const metadata = {
+  title: 'Choice E-Learning',
+  description: 'Online learning platform for everyone',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.className} antialiased min-h-screen flex flex-col`}
-        style={{ 
-          WebkitFontSmoothing: 'antialiased',
-          MozOsxFontSmoothing: 'grayscale'
-        }}
-      >
+      <body className={`${inter.className} bg-slate-50 text-slate-900`}>
         <AuthSessionProvider>
           <ConditionalLayout>
             {children}

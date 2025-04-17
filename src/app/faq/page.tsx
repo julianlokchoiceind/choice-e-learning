@@ -10,10 +10,10 @@ export default function FAQPage() {
   return (
     <>
       {/* Hero Section with Gradient Background */}
-      <section className="min-h-[40vh] flex items-center justify-center overflow-hidden" 
+      <section className="min-h-[500px] flex items-center justify-center overflow-hidden" 
               style={{ 
-                background: 'linear-gradient(180deg, #000428 0%, #004e92 100%)',
-                paddingTop: '120px',
+                background: 'linear-gradient(180deg, #1e2a78 0%, #0b1120 100%)',
+                paddingTop: '100px',
                 paddingBottom: '60px'
               }}>
         <div className="max-w-[980px] mx-auto px-4 text-center">
@@ -30,7 +30,7 @@ export default function FAQPage() {
         <div className="max-w-3xl mx-auto">
           <div className="space-y-6">
             {faqItems.map((item, index) => (
-              <div key={index} className="card p-6 overflow-hidden shadow-md rounded-xl hover:shadow-lg transition-shadow">
+              <div key={index} className="card p-6 overflow-hidden shadow-md rounded-xl hover:shadow-lg hover:scale-[1.01] transition-all duration-300">
                 <details className="group">
                   <summary className="flex justify-between items-center cursor-pointer list-none">
                     <h3 className="font-semibold text-xl text-[#1d1d1f]">{item.question}</h3>
@@ -45,12 +45,13 @@ export default function FAQPage() {
           </div>
         </div>
         
-        <div className="mt-16 text-center">
-          <h2 className="text-[32px] font-semibold mb-6 text-[#1d1d1f]">Still have questions?</h2>
-          <p className="mb-8 text-lg text-[#424245]">Our team is here to help you with any other questions you might have.</p>
+        <div className="mt-16 text-center rounded-2xl p-10"
+             style={{ background: 'linear-gradient(180deg, #3b82f6 0%, #1e40af 100%)' }}>
+          <h2 className="text-[32px] font-semibold mb-6 text-white">Still have questions?</h2>
+          <p className="mb-8 text-lg text-white/80">Our team is here to help you with any other questions you might have.</p>
           <a 
             href="mailto:support@choice-e-learning.com" 
-            className="inline-block px-8 py-4 rounded-full bg-[#0066cc] text-white font-medium hover:bg-[#0055b3] transition-colors"
+            className="inline-block px-8 py-4 rounded-full bg-white text-blue-600 font-medium hover:bg-blue-50 transition-colors"
           >
             Contact Support
           </a>

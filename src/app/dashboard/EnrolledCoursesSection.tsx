@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface EnrolledCourse {
   id: string;
@@ -14,10 +15,51 @@ interface EnrolledCoursesSectionProps {
   courses: EnrolledCourse[];
 }
 
-export default function EnrolledCoursesSection({ courses }: EnrolledCoursesSectionProps) {
+export default function EnrolledCoursesSection({ courses: initialCourses }: EnrolledCoursesSectionProps) {
+  const router = useRouter();
+  const [courses, setCourses] = useState(initialCourses);
+  const [unenrollingCourseId, setUnenrollingCourseId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleUnenroll = async (courseId: string) => {
+    if (!confirm('Are you sure you want to unenroll from this course? Your progress will be saved if you decide to re-enroll later.')) {
+      return;
+    }
+    
+    setUnenrollingCourseId(courseId);
+    setError(null);
+    
+    try {
+      const response = await fetch(`/api/courses/${courseId}/enroll`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Remove the course from the local state
+        setCourses(courses.filter(course => course.id !== courseId));
+      } else {
+        setError(data.error || 'Failed to unenroll from course');
+      }
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setUnenrollingCourseId(null);
+    }
+  };
+
   return (
     <div>
       <h2 className="text-xl font-bold mb-4">Your Courses</h2>
+      {error && (
+        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
       <div className="bg-white shadow-sm rounded-lg border border-gray-100 overflow-hidden">
         {courses.length > 0 ? (
           <div className="divide-y divide-gray-200">
@@ -42,14 +84,23 @@ export default function EnrolledCoursesSection({ courses }: EnrolledCoursesSecti
                         style={{ width: `${course.progress}%` }}
                       ></div>
                     </div>
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-wrap justify-between items-center gap-2">
                       <span className="text-sm font-semibold text-indigo-600">{course.progress}% complete</span>
-                      <Link
-                        href={`/courses/${course.id}`}
-                        className="text-sm font-medium text-indigo-600 hover:text-indigo-800"
-                      >
-                        Continue Learning
-                      </Link>
+                      <div className="flex gap-2">
+                        <Link
+                          href={`/courses/${course.id}/learn`}
+                          className="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+                        >
+                          Continue Learning
+                        </Link>
+                        <button
+                          onClick={() => handleUnenroll(course.id)}
+                          disabled={unenrollingCourseId === course.id}
+                          className="text-sm font-medium text-red-600 hover:text-red-800"
+                        >
+                          {unenrollingCourseId === course.id ? 'Unenrolling...' : 'Unenroll'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

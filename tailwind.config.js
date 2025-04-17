@@ -88,6 +88,12 @@ module.exports = {
       animation: {
         fadeIn: 'fadeIn 0.5s ease-out',
         fadeInDown: 'fadeInDown 0.5s ease-out',
+        float: 'float 5s ease-in-out infinite',
+        'float-slow': 'float-slow 7s ease-in-out infinite',
+        'float-slow-reverse': 'float-slow-reverse 8s ease-in-out infinite',
+        'float-slow-alt': 'float-slow-alt 9s ease-in-out infinite',
+        'float-alt': 'float-alt 6s ease-in-out infinite',
+        ticker: 'ticker 30s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -103,6 +109,30 @@ module.exports = {
             opacity: 1,
             transform: 'translateY(0)'
           },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        'float-slow': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-15px)' },
+        },
+        'float-slow-reverse': {
+          '0%, 100%': { transform: 'translateY(0) rotate(5deg)' },
+          '50%': { transform: 'translateY(-12px) rotate(-2deg)' },
+        },
+        'float-slow-alt': {
+          '0%, 100%': { transform: 'translateY(0) rotate(-3deg)' },
+          '50%': { transform: 'translateY(-15px) rotate(3deg)' },
+        },
+        'float-alt': {
+          '0%, 100%': { transform: 'translateY(0) rotate(3deg)' },
+          '50%': { transform: 'translateY(-10px) rotate(-3deg)' },
+        },
+        ticker: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
         },
       },
     },

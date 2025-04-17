@@ -72,11 +72,11 @@ interface OverviewTabProps {
 
 export default function AdminDashboardPage() {
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className="w-64 bg-indigo-700 text-white flex flex-col">
-        <div className="p-5 flex items-center border-b border-indigo-600">
-          <div className="flex items-center justify-center h-10 w-10 rounded-full bg-white text-indigo-700 font-bold text-xl mr-3">A</div>
+      <div className="w-64 text-white flex flex-col bg-gradient-to-b from-indigo-500 via-indigo-600 to-indigo-800 shadow-lg">
+        <div className="p-5 flex items-center border-b border-indigo-400/30">
+          <div className="flex items-center justify-center h-10 w-10 rounded-full bg-white text-indigo-700 font-bold text-xl mr-3 shadow-md">A</div>
           <h1 className="text-xl font-bold text-white">Administrator</h1>
         </div>
         
@@ -87,12 +87,11 @@ export default function AdminDashboardPage() {
             </div>
             
             <div className="mt-8">
-              <h3 className="px-3 text-xs font-semibold text-white uppercase tracking-wider">
+              <h3 className="px-3 text-xs font-semibold text-indigo-100 uppercase tracking-wider">
                 Management
               </h3>
               <div className="mt-2 space-y-1">
                 <SidebarLink href="/admin/student" icon={<AcademicCapIcon className="h-5 w-5" />} text="Student" hasChildren />
-                <SidebarLink href="/admin/teacher" icon={<UsersIcon className="h-5 w-5" />} text="Teacher" hasChildren />
                 <SidebarLink href="/admin/courses" icon={<BookOpenIcon className="h-5 w-5" />} text="Courses" hasChildren />
                 <SidebarLink href="/admin/calendar" icon={<ClockIcon className="h-5 w-5" />} text="Calendar" hasChildren />
                 <SidebarLink href="/admin/chat" icon={<EnvelopeIcon className="h-5 w-5" />} text="Chat" hasChildren />
@@ -103,17 +102,17 @@ export default function AdminDashboardPage() {
           </div>
         </nav>
 
-        <div className="p-5 border-t border-indigo-600">
+        <div className="p-5 border-t border-indigo-400/30 mt-auto">
           <div className="text-center">
-            <p className="text-sm text-indigo-200 mb-2">School Admission Dashboard</p>
+            <p className="text-sm text-indigo-100 mb-2">School Admission Dashboard</p>
           </div>
         </div>
       </div>
       
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden bg-white shadow-sm">
         {/* Header */}
-        <header className="bg-white border-b px-6 py-4">
+        <header className="bg-white border-b px-6 py-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <button className="text-gray-500 focus:outline-none">
@@ -142,20 +141,14 @@ export default function AdminDashboardPage() {
         </header>
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-4">
+        <main className="flex-1 overflow-y-auto p-6 bg-white">
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatsCard 
               title="Students" 
               count="932" 
               bgColor="bg-gradient-to-r from-blue-500 to-blue-600" 
               icon={<AcademicCapIcon className="h-6 w-6 text-white" />} 
-            />
-            <StatsCard 
-              title="Teachers" 
-              count="754" 
-              bgColor="bg-gradient-to-r from-green-500 to-green-600" 
-              icon={<UsersIcon className="h-6 w-6 text-white" />} 
             />
             <StatsCard 
               title="Events" 
@@ -169,16 +162,34 @@ export default function AdminDashboardPage() {
               bgColor="bg-gradient-to-r from-indigo-500 to-indigo-600" 
               icon={<BookOpenIcon className="h-6 w-6 text-white" />} 
             />
+            <StatsCard 
+              title="Revenue" 
+              count="$12,430" 
+              bgColor="bg-gradient-to-r from-green-500 to-green-600" 
+              icon={<BanknotesIcon className="h-6 w-6 text-white" />} 
+            />
           </div>
 
           {/* Performance Overview Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             {/* School Performance */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold mb-4">School Performance</h3>
+            <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">School Performance</h3>
               <div className="flex space-x-6 mb-4">
-                <PerformanceTab title="This Week" value="1,245" isActive={true} />
-                <PerformanceTab title="Last Week" value="1,356" />
+                <div className="text-indigo-700">
+                  <div className="flex items-center mb-1">
+                    <div className="w-4 h-4 rounded-full mr-2 bg-indigo-700"></div>
+                    <span className="text-sm font-medium">This Week</span>
+                  </div>
+                  <div className="text-xl font-bold">1,245</div>
+                </div>
+                <div className="text-gray-500">
+                  <div className="flex items-center mb-1">
+                    <div className="w-4 h-4 rounded-full mr-2 bg-orange-500"></div>
+                    <span className="text-sm font-medium">Last Week</span>
+                  </div>
+                  <div className="text-xl font-bold">1,356</div>
+                </div>
               </div>
               <div className="h-64 relative">
                 <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none">
@@ -217,13 +228,21 @@ export default function AdminDashboardPage() {
             </div>
             
             {/* School Overview */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold mb-4">School Overview</h3>
+            <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">School Overview</h3>
               <div className="flex space-x-2 border-b mb-4">
-                <OverviewTab label="Week" isActive={true} />
-                <OverviewTab label="Month" />
-                <OverviewTab label="Year" />
-                <OverviewTab label="All" />
+                <button className="px-4 py-2 text-sm transition-colors duration-150 text-indigo-700 bg-indigo-50 rounded-t-md border-b-2 border-indigo-700">
+                  Week
+                </button>
+                <button className="px-4 py-2 text-sm transition-colors duration-150 text-gray-600 hover:text-gray-800">
+                  Month
+                </button>
+                <button className="px-4 py-2 text-sm transition-colors duration-150 text-gray-600 hover:text-gray-800">
+                  Year
+                </button>
+                <button className="px-4 py-2 text-sm transition-colors duration-150 text-gray-600 hover:text-gray-800">
+                  All
+                </button>
               </div>
               <div className="h-64 relative">
                 <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none">
@@ -298,10 +317,10 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Calendar Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             {/* Calendar */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold mb-4">School Calendar</h3>
+            <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">School Calendar</h3>
               <div className="grid grid-cols-7 gap-1 text-center">
                 <div className="p-2 text-sm text-gray-500">Su</div>
                 <div className="p-2 text-sm text-gray-500">Mo</div>
@@ -349,73 +368,67 @@ export default function AdminDashboardPage() {
               </div>
             </div>
             
-            {/* Teacher Details */}
-            <div className="bg-white rounded-lg shadow-sm p-6 col-span-2">
-              <h3 className="text-lg font-semibold mb-4">Teacher Details</h3>
+            {/* Course Information Section (replacing Teacher Details) */}
+            <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100 col-span-2">
+              <h3 className="text-lg font-semibold mb-4 text-gray-800">Course Information</h3>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead>
                     <tr>
                       <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-indigo-600 uppercase tracking-wider">
-                        Name
+                        Course Title
                       </th>
                       <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-indigo-600 uppercase tracking-wider">
-                        Subject
+                        Level
                       </th>
                       <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-indigo-600 uppercase tracking-wider">
-                        Qualification
+                        Students
                       </th>
                       <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-indigo-600 uppercase tracking-wider">
-                        Fees
+                        Price
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    <tr>
-                      <td className="px-4 py-3 whitespace-nowrap">Harry John</td>
-                      <td className="px-4 py-3 whitespace-nowrap">History</td>
-                      <td className="px-4 py-3 whitespace-nowrap">B.Tech</td>
-                      <td className="px-4 py-3 whitespace-nowrap">$ 18.70</td>
+                    <tr className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-800">Advanced React and NextJS</td>
+                      <td className="px-4 py-4 whitespace-nowrap"><span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">Advanced</span></td>
+                      <td className="px-4 py-4 whitespace-nowrap text-gray-700">47</td>
+                      <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-800">$129.99</td>
                     </tr>
-                    <tr>
-                      <td className="px-4 py-3 whitespace-nowrap">Jack Xarma</td>
-                      <td className="px-4 py-3 whitespace-nowrap">Programming</td>
-                      <td className="px-4 py-3 whitespace-nowrap">B.Tech</td>
-                      <td className="px-4 py-3 whitespace-nowrap">$ 192.70</td>
+                    <tr className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-800">JavaScript Fundamentals</td>
+                      <td className="px-4 py-4 whitespace-nowrap"><span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Beginner</span></td>
+                      <td className="px-4 py-4 whitespace-nowrap text-gray-700">132</td>
+                      <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-800">$89.99</td>
                     </tr>
-                    <tr>
-                      <td className="px-4 py-3 whitespace-nowrap">James</td>
-                      <td className="px-4 py-3 whitespace-nowrap">History</td>
-                      <td className="px-4 py-3 whitespace-nowrap">B.Com</td>
-                      <td className="px-4 py-3 whitespace-nowrap">$ 21.70</td>
+                    <tr className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-800">Node.js Backend Development</td>
+                      <td className="px-4 py-4 whitespace-nowrap"><span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">Intermediate</span></td>
+                      <td className="px-4 py-4 whitespace-nowrap text-gray-700">86</td>
+                      <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-800">$99.99</td>
                     </tr>
-                    <tr>
-                      <td className="px-4 py-3 whitespace-nowrap">James Brown</td>
-                      <td className="px-4 py-3 whitespace-nowrap">History</td>
-                      <td className="px-4 py-3 whitespace-nowrap">B.Com</td>
-                      <td className="px-4 py-3 whitespace-nowrap">$ 15.70</td>
-                    </tr>
-                    <tr>
-                      <td className="px-4 py-3 whitespace-nowrap">Janny</td>
-                      <td className="px-4 py-3 whitespace-nowrap">Basic Algorithm</td>
-                      <td className="px-4 py-3 whitespace-nowrap">B.Tech</td>
-                      <td className="px-4 py-3 whitespace-nowrap">$ 21.70</td>
+                    <tr className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-800">Full Stack Development Bootcamp</td>
+                      <td className="px-4 py-4 whitespace-nowrap"><span className="px-2 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs">All Levels</span></td>
+                      <td className="px-4 py-4 whitespace-nowrap text-gray-700">215</td>
+                      <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-800">$199.99</td>
                     </tr>
                   </tbody>
                 </table>
                 <div className="flex items-center justify-between mt-4 px-4">
-                  <div className="text-sm text-gray-500">Showing 1 to 8 of 16 entries</div>
+                  <div className="text-sm text-gray-600">Showing 1 to 4 of 16 courses</div>
                   <div className="flex space-x-1">
-                    <button className="p-2 text-gray-400 hover:text-gray-600">
+                    <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-150">
                       <ChevronLeftIcon className="h-5 w-5" />
                     </button>
                     <button className="w-8 h-8 bg-indigo-600 text-white rounded-md flex items-center justify-center">
                       1
                     </button>
-                    <button className="w-8 h-8 text-gray-500 bg-gray-100 rounded-md flex items-center justify-center">
+                    <button className="w-8 h-8 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center transition-colors duration-150">
                       2
                     </button>
-                    <button className="p-2 text-gray-400 hover:text-gray-600">
+                    <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-150">
                       <ChevronRightIcon className="h-5 w-5" />
                     </button>
                   </div>
@@ -424,9 +437,17 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           
-          {/* Unpaid Student Intuition */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h3 className="text-lg font-semibold mb-4">Unpaid Student Intuition</h3>
+          {/* Student Enrollment Section */}
+          <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100 mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Student Enrollment Overview</h3>
+              <Link 
+                href="/admin/students" 
+                className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-md hover:bg-indigo-100 transition-colors duration-150 text-sm font-medium"
+              >
+                View All Students
+              </Link>
+            </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -438,16 +459,16 @@ export default function AdminDashboardPage() {
                       ID <span className="text-indigo-600">↕</span>
                     </th>
                     <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-indigo-600 uppercase tracking-wider">
-                      Class <span className="text-indigo-600">↕</span>
+                      Courses <span className="text-indigo-600">↕</span>
                     </th>
                     <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-indigo-600 uppercase tracking-wider">
                       Fees <span className="text-indigo-600">↕</span>
                     </th>
                     <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-indigo-600 uppercase tracking-wider">
-                      Rank <span className="text-indigo-600">↕</span>
+                      Status <span className="text-indigo-600">↕</span>
                     </th>
                     <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-indigo-600 uppercase tracking-wider">
-                      Action <span className="text-indigo-600">↕</span>
+                      Action
                     </th>
                   </tr>
                 </thead>
@@ -455,58 +476,42 @@ export default function AdminDashboardPage() {
                   <StudentRow 
                     name="Jordan Nico" 
                     id="ID 1234567811" 
-                    className="Class VII B" 
+                    className="Frontend Development" 
                     fees="$ 52,036" 
-                    rank="First" 
-                    image="/images/students/1.jpg"
-                  />
-                  <StudentRow 
-                    name="Jordan Nico" 
-                    id="ID 1234567811" 
-                    className="Class VII B" 
-                    fees="$ 52,036" 
-                    rank="First" 
-                    image="/images/students/1.jpg"
+                    rank="Active" 
+                    image="https://randomuser.me/api/portraits/men/45.jpg"
                   />
                   <StudentRow 
                     name="Karen Hope" 
                     id="ID 1234567812" 
-                    className="Class VII A" 
+                    className="UX/UI Design" 
                     fees="$ 53,036" 
-                    rank="First" 
-                    image="/images/students/2.jpg"
-                  />
-                  <StudentRow 
-                    name="Karen Hope" 
-                    id="ID 1234567812" 
-                    className="Class VII A" 
-                    fees="$ 53,036" 
-                    rank="First" 
-                    image="/images/students/2.jpg"
+                    rank="Active" 
+                    image="https://randomuser.me/api/portraits/women/44.jpg"
                   />
                   <StudentRow 
                     name="Nadila Adja" 
                     id="ID 1234567813" 
-                    className="Class VII B" 
+                    className="Full Stack Web Development" 
                     fees="$ 54,036" 
-                    rank="First" 
-                    image="/images/students/3.jpg"
+                    rank="Inactive" 
+                    image="https://randomuser.me/api/portraits/women/46.jpg"
                   />
                 </tbody>
               </table>
               <div className="flex items-center justify-between mt-4 px-4">
-                <div className="text-sm text-gray-500">Showing 1 to 5 of 10 entries</div>
+                <div className="text-sm text-gray-600">Showing 1 to 3 of 10 entries</div>
                 <div className="flex space-x-1">
-                  <button className="p-2 text-gray-400 hover:text-gray-600">
+                  <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-150">
                     <ChevronLeftIcon className="h-5 w-5" />
                   </button>
                   <button className="w-8 h-8 bg-indigo-600 text-white rounded-md flex items-center justify-center">
                     1
                   </button>
-                  <button className="w-8 h-8 text-gray-500 bg-gray-100 rounded-md flex items-center justify-center">
+                  <button className="w-8 h-8 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center transition-colors duration-150">
                     2
                   </button>
-                  <button className="p-2 text-gray-400 hover:text-gray-600">
+                  <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-150">
                     <ChevronRightIcon className="h-5 w-5" />
                   </button>
                 </div>
@@ -514,80 +519,80 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           
-          {/* Recent Students & Messages */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Recent Activity */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Recent Students */}
-            <div className="col-span-2 bg-white rounded-lg shadow-sm p-6 h-[360px] flex flex-col">
+            <div className="col-span-2 bg-white rounded-lg shadow-md p-6 border border-gray-100 h-[360px] flex flex-col">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-semibold">Recent Students</h3>
-                <p className="text-sm text-gray-500">You have 456 Students</p>
+                <h3 className="text-lg font-semibold text-gray-800">Recent Students</h3>
+                <p className="text-sm text-gray-600">You have 456 Students</p>
               </div>
               <div className="space-y-4 flex-1 overflow-y-auto">
                 <StudentItem 
                   name="Samantha William"
-                  className="Class VII A"
+                  className="Frontend Development"
                   image="https://randomuser.me/api/portraits/women/67.jpg"
                 />
                 <StudentItem 
                   name="Tony Soap"
-                  className="Class VII B"
+                  className="UX/UI Design"
                   image="https://randomuser.me/api/portraits/men/91.jpg"
                 />
                 <StudentItem 
                   name="Karen Hope"
-                  className="Web Developer"
+                  className="Web Development"
                   image="https://randomuser.me/api/portraits/women/44.jpg"
                 />
                 <StudentItem 
                   name="Jordan Nico"
-                  className="Class VII A"
+                  className="Data Science"
                   image="https://randomuser.me/api/portraits/men/45.jpg"
                 />
                 <StudentItem 
                   name="Nadila Adja"
-                  className="Class VII B"
+                  className="Mobile Development"
                   image="https://randomuser.me/api/portraits/women/46.jpg"
                 />
               </div>
               <div className="flex justify-center mt-4">
-                <button className="px-4 py-2 text-indigo-600 font-medium hover:bg-indigo-50 rounded-md">
+                <button className="px-4 py-2 text-indigo-600 font-medium hover:bg-indigo-50 rounded-md transition-colors duration-150">
                   View More
                 </button>
               </div>
             </div>
             
             {/* Messages */}
-            <div className="bg-white rounded-lg shadow-sm p-6 h-[360px] flex flex-col">
-              <h3 className="text-lg font-semibold mb-6">Messages</h3>
+            <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100 h-[360px] flex flex-col">
+              <h3 className="text-lg font-semibold mb-6 text-gray-800">Messages</h3>
               <div className="space-y-4 flex-1 overflow-y-auto">
                 <MessageItem 
                   name="Samantha William"
                   time="12:45 PM"
-                  message="Lorem ipsum dolor sit"
+                  message="Just completed the React course. Amazing content!"
                   image="https://randomuser.me/api/portraits/women/67.jpg"
                 />
                 <MessageItem 
                   name="Tony Soap"
-                  time="12:45 PM"
-                  message="Lorem ipsum dolor sit"
+                  time="11:23 AM"
+                  message="When will the NodeJS advanced course be available?"
                   image="https://randomuser.me/api/portraits/men/91.jpg"
                 />
                 <MessageItem 
-                  name="Tony Soap"
-                  time="12:45 PM"
-                  message="Lorem ipsum dolor sit"
-                  image="https://randomuser.me/api/portraits/men/91.jpg"
+                  name="Karen Hope"
+                  time="Yesterday"
+                  message="Thank you for the feedback on my project submission."
+                  image="https://randomuser.me/api/portraits/women/44.jpg"
                 />
                 <MessageItem 
                   name="Jordan Nico"
-                  time="12:45 PM"
-                  message="Lorem ipsum dolor sit"
+                  time="Yesterday"
+                  message="I'm having trouble with the assignment in module 5."
                   image="https://randomuser.me/api/portraits/men/45.jpg"
                 />
                 <MessageItem 
                   name="Nadila Adja"
-                  time="12:45 PM"
-                  message="Lorem ipsum dolor sit"
+                  time="2 days ago"
+                  message="Can you provide more resources for MongoDB?"
                   image="https://randomuser.me/api/portraits/women/46.jpg"
                 />
               </div>
@@ -596,9 +601,9 @@ export default function AdminDashboardPage() {
         </main>
         
         {/* Footer */}
-        <footer className="bg-white py-3 px-6 border-t">
-          <div className="text-center text-sm text-gray-500">
-            Copyright © Designed & Developed by <a href="https://choiceind.com" className="text-indigo-600 hover:underline">Choiceind.com</a> 2025
+        <footer className="bg-white py-4 px-6 border-t">
+          <div className="text-center text-sm text-gray-600">
+            Copyright © Designed & Developed by <a href="https://choiceind.com" className="text-indigo-600 hover:underline transition-colors duration-150">Choiceind.com</a> 2025
           </div>
         </footer>
       </div>
@@ -609,7 +614,11 @@ export default function AdminDashboardPage() {
 // Sidebar Link Component
 function SidebarLink({ href, icon, text, active = false, hasChildren = false }: SidebarLinkProps) {
   return (
-    <Link href={href} className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium ${active ? 'bg-indigo-800 text-white' : 'text-white hover:bg-indigo-600 hover:text-white'}`}>
+    <Link href={href} className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-all duration-150 ${
+      active 
+        ? 'bg-indigo-700/70 text-white shadow-sm' 
+        : 'text-white hover:bg-indigo-600/50 hover:text-white hover:shadow-sm'
+    }`}>
       <div className="flex items-center">
         <span className="mr-3">{icon}</span>
         <span>{text}</span>
@@ -624,7 +633,7 @@ function SidebarLink({ href, icon, text, active = false, hasChildren = false }: 
 // Stats Card Component
 function StatsCard({ title, count, bgColor, icon }: StatsCardProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
       <div className={`p-4 ${bgColor}`}>
         <div className="flex justify-between items-center">
           <div>
@@ -652,32 +661,36 @@ interface StudentRowProps {
 
 function StudentRow({ name, id, className, fees, rank, image }: StudentRowProps) {
   return (
-    <tr className="hover:bg-gray-50">
-      <td className="px-4 py-3">
+    <tr className="hover:bg-gray-50 transition-colors duration-150">
+      <td className="px-4 py-4">
         <div className="flex items-center">
           <div className="h-10 w-10 rounded-full overflow-hidden mr-3 bg-gray-200 flex items-center justify-center">
             <Image src={image || "https://randomuser.me/api/portraits/men/1.jpg"} alt={name} width={40} height={40} />
           </div>
-          <span className="font-medium">{name}</span>
+          <span className="font-medium text-gray-800">{name}</span>
         </div>
       </td>
-      <td className="px-4 py-3 whitespace-nowrap">{id}</td>
-      <td className="px-4 py-3 whitespace-nowrap">
-        <span className="px-3 py-1 bg-orange-100 text-orange-600 rounded-full">
+      <td className="px-4 py-4 whitespace-nowrap text-gray-700">{id}</td>
+      <td className="px-4 py-4 whitespace-nowrap">
+        <span className="px-2 py-1 bg-orange-100 text-orange-600 rounded-full text-xs">
           {className}
         </span>
       </td>
-      <td className="px-4 py-3 whitespace-nowrap font-medium">{fees}</td>
-      <td className="px-4 py-3 whitespace-nowrap text-gray-500">{rank}</td>
-      <td className="px-4 py-3 whitespace-nowrap">
+      <td className="px-4 py-4 whitespace-nowrap font-medium text-gray-800">{fees}</td>
+      <td className="px-4 py-4 whitespace-nowrap">
+        <span className={`px-2 py-1 rounded-full text-xs ${rank === 'Active' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}`}>
+          {rank}
+        </span>
+      </td>
+      <td className="px-4 py-4 whitespace-nowrap">
         <div className="flex space-x-2">
-          <button className="p-1 bg-gray-100 rounded-md text-gray-500 hover:bg-gray-200">
+          <button className="p-1 bg-gray-100 rounded-md text-gray-500 hover:bg-gray-200 transition-colors duration-150" aria-label="Edit">
             <PencilSquareIcon className="h-5 w-5" />
           </button>
-          <button className="p-1 bg-gray-100 rounded-md text-gray-500 hover:bg-gray-200">
+          <button className="p-1 bg-gray-100 rounded-md text-gray-500 hover:bg-gray-200 transition-colors duration-150" aria-label="Delete">
             <TrashIcon className="h-5 w-5" />
           </button>
-          <button className="p-1 bg-gray-100 rounded-md text-gray-500 hover:bg-gray-200">
+          <button className="p-1 bg-gray-100 rounded-md text-gray-500 hover:bg-gray-200 transition-colors duration-150" aria-label="Settings">
             <Cog8ToothIcon className="h-5 w-5" />
           </button>
         </div>
@@ -689,17 +702,17 @@ function StudentRow({ name, id, className, fees, rank, image }: StudentRowProps)
 // Student Item Component
 function StudentItem({ name, className, image }: StudentItemProps) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors duration-150">
       <div className="flex items-center">
         <div className="h-10 w-10 rounded-full overflow-hidden mr-3 bg-gray-200 flex items-center justify-center">
           <Image src={image || "https://randomuser.me/api/portraits/men/1.jpg"} alt={name} width={40} height={40} />
         </div>
         <div>
-          <h4 className="font-medium">{name}</h4>
-          <p className="text-sm text-gray-500">{className}</p>
+          <h4 className="font-medium text-gray-800">{name}</h4>
+          <p className="text-sm text-gray-600">{className}</p>
         </div>
       </div>
-      <button className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-indigo-100 hover:text-indigo-600">
+      <button className="p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-indigo-100 hover:text-indigo-600 transition-colors duration-150" aria-label="Message">
         <EnvelopeIcon className="h-5 w-5" />
       </button>
     </div>
@@ -709,43 +722,17 @@ function StudentItem({ name, className, image }: StudentItemProps) {
 // Message Item Component
 function MessageItem({ name, time, message, image }: MessageItemProps) {
   return (
-    <div className="flex items-start space-x-3">
+    <div className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg transition-colors duration-150">
       <div className="h-10 w-10 rounded-full overflow-hidden flex-shrink-0 bg-gray-200 flex items-center justify-center">
         <Image src={image || "https://randomuser.me/api/portraits/men/1.jpg"} alt={name} width={40} height={40} />
       </div>
       <div className="flex-1">
         <div className="flex justify-between items-center">
-          <h4 className="font-medium">{name}</h4>
+          <h4 className="font-medium text-gray-800">{name}</h4>
           <span className="text-xs text-gray-500">{time}</span>
         </div>
-        <p className="text-sm text-gray-600">{message}</p>
+        <p className="text-sm text-gray-600 line-clamp-2">{message}</p>
       </div>
     </div>
-  );
-}
-
-// Performance Tab Component
-function PerformanceTab({ title, value, isActive = false }: PerformanceTabProps) {
-  return (
-    <div className={`${isActive ? 'text-indigo-700' : 'text-gray-500'}`}>
-      <div className="flex items-center mb-1">
-        <div className={`w-4 h-4 rounded-full mr-2 ${isActive ? 'bg-indigo-700' : 'bg-orange-500'}`}></div>
-        <span className="text-sm font-medium">{title}</span>
-      </div>
-      <div className="text-xl font-bold">{value}</div>
-    </div>
-  );
-}
-
-// Overview Tab Component
-function OverviewTab({ label, isActive = false }: OverviewTabProps) {
-  return (
-    <button 
-      className={`px-4 py-2 text-sm ${isActive 
-        ? 'text-indigo-700 bg-indigo-50 rounded-t-md border-b-2 border-indigo-700' 
-        : 'text-gray-500 hover:text-gray-700'}`}
-    >
-      {label}
-    </button>
   );
 } 

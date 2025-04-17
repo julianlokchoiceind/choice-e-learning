@@ -18,8 +18,8 @@ export default function ChallengesPage() {
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="text-center mb-12">
-        <h1 className="section-heading text-4xl font-bold mb-4">Coding Challenges</h1>
-        <p className="text-lg max-w-2xl mx-auto opacity-80">
+        <h1 className="text-2xl md:text-3xl font-bold mb-4">Coding Challenges</h1>
+        <p className="text-base max-w-2xl mx-auto opacity-80">
           Put your skills to the test with our interactive coding challenges and compete with other learners.
         </p>
       </div>
@@ -40,7 +40,7 @@ export default function ChallengesPage() {
                 Featured Challenge
               </span>
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Build a Real-time Chat Application</h2>
-              <p className="text-white/90 mb-4">Create a functional chat application using WebSockets and React in 48 hours.</p>
+              <p className="text-base text-white/90 mb-4">Create a functional chat application using WebSockets and React in 48 hours.</p>
               <a href="#" className="inline-flex items-center text-white font-medium hover:underline">
                 Join Challenge <ArrowRightIcon className="w-4 h-4 ml-1" />
               </a>
@@ -51,19 +51,19 @@ export default function ChallengesPage() {
       
       {/* Challenge Categories */}
       <div className="mb-12">
-        <h2 className="text-2xl font-bold mb-6">Challenge Categories</h2>
+        <h2 className="text-xl md:text-2xl font-bold mb-6">Challenge Categories</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {categories.map((category, index) => (
             <a 
               key={index} 
               href={`#${category.id}`} 
-              className="card p-4 text-center transition-all"
+              className="card p-4 text-center transition-all hover:shadow-lg hover:scale-[1.01] duration-300"
             >
               <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-3 ${category.bgColor}`}>
                 <category.icon className="w-6 h-6 text-white" />
               </div>
-              <h3 className="font-medium">{category.name}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{category.count} challenges</p>
+              <h3 className="text-lg font-medium">{category.name}</h3>
+              <p className="text-sm text-gray-500">{category.count} challenges</p>
             </a>
           ))}
         </div>
@@ -72,15 +72,15 @@ export default function ChallengesPage() {
       {/* Weekly Challenges */}
       <div className="mb-16">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Weekly Challenges</h2>
-          <a href="#" className="text-blue-600 dark:text-blue-400 font-medium flex items-center hover:underline">
+          <h2 className="text-xl md:text-2xl font-bold">Weekly Challenges</h2>
+          <a href="#" className="text-blue-600 font-medium flex items-center hover:underline">
             View All <ArrowRightIcon className="w-4 h-4 ml-1" />
           </a>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {challenges.map((challenge, index) => (
-            <div key={index} className="card group overflow-hidden">
+            <div key={index} className="card group overflow-hidden hover:shadow-lg hover:scale-[1.01] transition-all duration-300">
               <div className="relative h-48">
                 <Image 
                   src={challenge.image} 
@@ -89,7 +89,7 @@ export default function ChallengesPage() {
                   className="object-cover transition-transform duration-300"
                 />
                 <div className={`absolute top-0 left-0 w-full h-full ${challenge.gradient} opacity-60 mix-blend-multiply`}></div>
-                <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 rounded-full p-2">
+                <div className="absolute top-4 right-4 bg-white rounded-full p-2">
                   <TrophyIcon className={`w-5 h-5 ${challenge.difficulty.color}`} />
                 </div>
               </div>
@@ -99,19 +99,19 @@ export default function ChallengesPage() {
                   <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${challenge.difficulty.bgColor} ${challenge.difficulty.textColor}`}>
                     {challenge.difficulty.label}
                   </span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto flex items-center">
+                  <span className="text-xs text-gray-500 ml-auto flex items-center">
                     <ClockIcon className="w-4 h-4 mr-1" /> {challenge.timeLimit}
                   </span>
                 </div>
                 
-                <h3 className="font-bold text-lg mb-2">{challenge.title}</h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">{challenge.description}</p>
+                <h3 className="text-lg font-medium mb-2">{challenge.title}</h3>
+                <p className="text-sm text-gray-600 mb-4">{challenge.description}</p>
                 
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center text-sm text-gray-500">
                     <UserGroupIcon className="w-4 h-4 mr-1" /> {challenge.participants} participants
                   </div>
-                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center text-sm text-gray-500">
                     <TagIcon className="w-4 h-4 mr-1" /> {challenge.category}
                   </div>
                 </div>
@@ -130,22 +130,22 @@ export default function ChallengesPage() {
       
       {/* Leaderboard Section */}
       <div>
-        <h2 className="text-2xl font-bold mb-6">Top Challengers This Month</h2>
-        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+        <h2 className="text-xl md:text-2xl font-bold mb-6">Top Challengers This Month</h2>
+        <div className="overflow-hidden rounded-lg border border-gray-200">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rank</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Challenges Completed</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Points</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Challenges Completed</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Points</th>
               </tr>
             </thead>
-            <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-800">
+            <tbody className="bg-white divide-y divide-gray-200">
               {leaderboard.map((entry, index) => (
-                <tr key={index} className={index < 3 ? 'bg-yellow-50 dark:bg-yellow-900/20' : ''}>
+                <tr key={index} className={index < 3 ? 'bg-yellow-50' : ''}>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className={`text-sm font-medium ${index < 3 ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-900 dark:text-white'}`}>
+                    <div className={`text-sm font-medium ${index < 3 ? 'text-yellow-600' : 'text-gray-900'}`}>
                       #{index + 1}
                     </div>
                   </td>
@@ -165,16 +165,16 @@ export default function ChallengesPage() {
                         )}
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">{entry.name}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">@{entry.username}</div>
+                        <div className="text-sm font-medium text-gray-900">{entry.name}</div>
+                        <div className="text-sm text-gray-500">@{entry.username}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">{entry.challengesCompleted}</div>
+                    <div className="text-sm text-gray-900">{entry.challengesCompleted}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-bold text-gray-900 dark:text-white">{entry.points.toLocaleString()}</div>
+                    <div className="text-sm font-bold text-gray-900">{entry.points.toLocaleString()}</div>
                   </td>
                 </tr>
               ))}
@@ -183,16 +183,19 @@ export default function ChallengesPage() {
         </div>
       </div>
       
-      <div className="text-center mt-16">
-        <h2 className="text-2xl font-bold mb-4">Ready to challenge yourself?</h2>
-        <p className="mb-8 max-w-2xl mx-auto">Join our community of coders and test your skills with our weekly challenges.</p>
-        <a 
-          href="#" 
-          className="inline-block px-8 py-3 rounded-lg gradient-accent text-white font-medium hover:opacity-90 transition-opacity"
-        >
-          Start Your First Challenge
-        </a>
-      </div>
+      <section className="mt-16 py-16 px-4 rounded-2xl"
+               style={{ background: 'linear-gradient(180deg, #0a84ff 0%, #0060df 100%)' }}>
+        <div className="text-center">
+          <h2 className="text-xl md:text-2xl font-bold mb-4 text-white">Ready to challenge yourself?</h2>
+          <p className="text-sm md:text-base text-white/90 mb-8 max-w-2xl mx-auto">Join our community of coders and test your skills with our weekly challenges.</p>
+          <a 
+            href="#" 
+            className="inline-block px-8 py-3 rounded-lg bg-white text-blue-600 font-medium hover:bg-blue-50 transition-colors"
+          >
+            Start Your First Challenge
+          </a>
+        </div>
+      </section>
     </div>
   );
 }

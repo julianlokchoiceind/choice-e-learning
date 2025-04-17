@@ -1,7 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['images.unsplash.com', 'randomuser.me'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com'
+      },
+      {
+        protocol: 'https',
+        hostname: 'randomuser.me'
+      }
+    ]
   },
   // Tắt tất cả console log kể cả từ NextAuth và Fast Refresh
   compiler: {
@@ -15,6 +24,8 @@ const nextConfig = {
     },
     incomingRequests: false,
   },
+  // Add assetPrefix for handling font loading
+  assetPrefix: process.env.NODE_ENV === 'production' ? '/_next' : '',
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Don't resolve 'fs', 'net', and other Node.js builtins on the client side
@@ -28,6 +39,31 @@ const nextConfig = {
         tty: false
       };
     }
+    
+    // Add rule for font files with proper file-loader configuration
+    config.module.rules.push({
+      test: /\.(woff|woff2|eot|ttf|otf)$/,
+      use: [
+        {
+          loader: 'file-loader',
+          options: {
+            name: '[name].[hash:8].[ext]',
+            publicPath: '/_next/static/media/',
+            outputPath: 'static/media/',
+            emitFile: !isServer,
+          },
+        },
+      ],
+    });
+
+    // Fix for @vercel/og font loading
+    if (isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@vercel/og': '@vercel/og',
+      };
+    }
+    
     return config;
   },
 };

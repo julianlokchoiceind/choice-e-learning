@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { registerUserSchema } from '@/utils/validation';
 import { createUserDirectly } from '@/lib/db/mongodb';
 import { hashPassword } from '@/utils/auth-utils';
+import { Role } from '@/lib/auth/auth-options';
 
 export async function POST(req: NextRequest) {
   console.log('=========== REGISTER API CALLED ===========');
@@ -57,7 +58,14 @@ export async function POST(req: NextRequest) {
     console.log('Input data valid');
     
     // Extract validated data
-    const { name, email, password, role = 'student' } = validation.data;
+    let { name, email, password, role = 'student' } = validation.data;
+    
+    // Validate role - ensure only students and instructors can register directly
+    if (role !== Role.student && role !== Role.instructor) {
+      console.log('Role validation: forcing student role for security');
+      role = Role.student; // Force 'student' role for security
+    }
+    
     console.log('Creating user with email:', email);
     
     try {

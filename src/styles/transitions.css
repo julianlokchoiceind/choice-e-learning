@@ -1,0 +1,109 @@
+/* 
+ * UI Element Transitions
+ * Provides smooth animations for interactive UI elements
+ */
+
+/* Button transitions */
+button, 
+.btn,
+a[role="button"],
+a.btn,
+input[type="submit"],
+input[type="button"] {
+  transition: all 200ms ease-in-out;
+}
+
+button:hover, 
+.btn:hover,
+a[role="button"]:hover,
+a.btn:hover {
+  transform: translateY(-1px);
+}
+
+button:active, 
+.btn:active,
+a[role="button"]:active,
+a.btn:active {
+  transform: translateY(1px);
+}
+
+/* Link transitions */
+a {
+  transition: color 150ms ease-in-out;
+}
+
+/* Form input transitions */
+input,
+select,
+textarea {
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+/* Dropdown/menu transitions */
+.dropdown-content,
+.menu-content {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 250ms ease-out, transform 250ms ease-out;
+}
+
+.dropdown:hover .dropdown-content,
+.menu:hover .menu-content,
+.dropdown-content.show,
+.menu-content.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Modal transitions */
+.modal {
+  opacity: 0;
+  transform: scale(0.98);
+  transition: opacity 200ms ease-out, transform 200ms ease-out;
+}
+
+.modal.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Card hover effects */
+.card {
+  transition: transform 250ms ease-out, box-shadow 250ms ease-out;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Accordion transitions */
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 300ms ease-out;
+}
+
+.accordion.open .accordion-content {
+  max-height: 1000px; /* Arbitrary large value - will transition to actual height */
+}
+
+/* Sidebar/panel slide transitions */
+.sidebar {
+  transform: translateX(-100%);
+  transition: transform 300ms ease-in-out;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+/* Fade transitions for elements that appear/disappear */
+.fade-element {
+  opacity: 0;
+  transition: opacity 200ms ease-in-out;
+}
+
+.fade-element.visible {
+  opacity: 1;
+} 

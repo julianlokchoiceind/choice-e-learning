@@ -26,7 +26,7 @@ export default function RoadmapPage() {
             priority
           />
           {/* Overlay with site's main blue gradient - semi-transparent for SVG background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0077ed]/40 via-[#1982f8]/35 to-[#2e8ffd]/30"></div>
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, #1e2a78 0%, #0b1120 100%)' }}></div>
         </div>
         
         {/* Decorative floating elements */}
@@ -183,7 +183,8 @@ export default function RoadmapPage() {
       </section>
       
       {/* CTA Section */}
-      <section className="section-tight bg-gradient-blue rounded-none py-20">
+      <section className="section-tight py-20"
+               style={{ background: 'linear-gradient(180deg, #3b82f6 0%, #1e40af 100%)' }}>
         <div className="max-w-[700px] mx-auto px-6 md:px-4 text-center">
           <h2 className="text-[32px] text-white font-bold mb-6">Ready to Start Your Learning Journey?</h2>
           <p className="text-[19px] leading-[1.47059] text-white/90 mb-8">

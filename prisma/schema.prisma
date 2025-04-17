@@ -34,7 +34,6 @@ model User {
 
 enum Role {
   student
-  instructor
   admin
 }
 

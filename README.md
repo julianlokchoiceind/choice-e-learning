@@ -56,8 +56,21 @@ Truy cập [http://localhost:3000](http://localhost:3000) để xem kết quả.
 - Đăng ký và đăng nhập người dùng
 - Phân quyền (Học viên, Giảng viên, Admin)
 - Khóa học với bài giảng và thử thách
+- Đăng ký và hủy đăng ký khóa học
 - Hệ thống đánh giá và nhận xét
 - Bảng điều khiển quản trị
+
+## Quản lý khóa học
+
+### Đăng ký khóa học
+Học viên có thể đăng ký khóa học từ trang chi tiết khóa học. Sau khi đăng ký, họ sẽ có quyền truy cập vào nội dung của khóa học.
+
+### Hủy đăng ký khóa học
+Học viên có thể hủy đăng ký khóa học từ:
+1. Trang chi tiết khóa học - bằng cách nhấn nút "Unenroll from Course"
+2. Trang bảng điều khiển - bằng cách nhấn nút "Unenroll" bên cạnh khóa học
+
+Lưu ý: Tiến trình học tập sẽ được giữ lại nếu học viên quyết định đăng ký lại khóa học trong tương lai.
 
 ## Xử lý sự cố
 

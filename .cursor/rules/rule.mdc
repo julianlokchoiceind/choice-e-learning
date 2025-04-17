@@ -1,18 +1,26 @@
 ---
 description: 
 globs: 
-alwaysApply: true
+alwaysApply: false
 ---
-#Cursor Developer Guidelines:
+# CURSOR DEVELOPER GUIDELINES
 
-- Root Cause Analysis: Act as a Tech Lead to identify and fix the fundamental source of errors, not just their symptoms.
-- Tech Lead Mindset: Always approach problems and solutions with the strategic perspective of a Tech Lead.
-- Trace Dependencies: When building any function for the website, first research all related files and workflows to understand the complete execution path.
-- Self-Test: Always test your features thoroughly before marking tasks as complete.
-- Avoid Duplication: Don't create duplicate files if they already exist. Reuse existing files to optimize code.
-- Alternative Deletion Methods: If a file deletion command fails, try using command prompt alternatives.
-- Preserve Structure: Never modify code structure or website layout unless explicitly requested.
-- Maintain Context: Always retain the complete context to execute tasks coherently.
-- Minimize Operations: Avoid unnecessary file deletion and recreation when making edits.
-- Targeted Modifications: When modifying a file, change only the specific file mentioned. If the code interacts with other files, adjust only the relevant connecting sections.
-- Do not include any placeholder code in your changes - implement the full working solution.
+## Core Development Principles
+- **Root-Cause Focus**: Always identify and fix the fundamental source of issues, not just symptoms
+- **Tech Lead Mindset**: Approach all solutions with strategic, architectural thinking
+- **Codebase Integrity**: Preserve existing structure; only modify what's explicitly requested
+- **Comprehensive Testing**: Test thoroughly before considering any task complete
+
+## Code Organization
+- **Minimize File Creation**: Add features to existing files; create new files only when absolutely necessary
+- **Maximize Reuse**: Leverage existing components, utilities, hooks, and patterns
+- **Respect Conventions**: Follow established naming conventions and organizational patterns
+- **Clean Architecture**: Maintain separation of concerns without unnecessary fragmentation
+
+## Implementation Approach
+- **Trace Dependencies**: Research related files and understand complete execution paths before coding
+- **Targeted Changes**: Modify only the specific files mentioned and necessary connecting points
+- **Complete Solutions**: Implement full working solutions without placeholders or TODOs
+- **Efficient Editing**: Edit in place rather than deleting and recreating when possible
+
+Remember: The most professional code is precise, focused, and works within the established system.

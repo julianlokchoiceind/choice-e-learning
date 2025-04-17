@@ -39,7 +39,6 @@ validateEnvVariables();
 // Define Role enum
 export enum Role {
   student = 'student',
-  instructor = 'instructor',
   admin = 'admin'
 }
 
