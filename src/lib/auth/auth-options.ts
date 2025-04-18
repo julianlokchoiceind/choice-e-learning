@@ -7,6 +7,7 @@ import MicrosoftProvider from 'next-auth/providers/azure-ad';
 import { comparePasswords } from './utils/password-utils';
 import { findUserByEmail, updateUserLoginInfo } from '@/lib/db/services/user-service';
 import prisma from '@/lib/db';
+import { Role } from '@/types/auth/roles';
 
 // Check if environment variables are set
 function validateEnvVariables() {
@@ -35,13 +36,6 @@ function validateEnvVariables() {
 
 // Validate environment variables on startup
 validateEnvVariables();
-
-// Define Role enum
-export enum Role {
-  student = 'student',
-  instructor = 'instructor',
-  admin = 'admin'
-}
 
 // Extend the built-in session types
 declare module "next-auth" {

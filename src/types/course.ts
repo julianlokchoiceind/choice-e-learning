@@ -1,9 +1,35 @@
 /**
- * Type definitions for course-related data
+ * @file Course type definitions
+ * @description Type definitions for courses, lessons, and related features
  */
 
 /**
- * Represents a featured course displayed in the featured courses section
+ * Course difficulty level
+ * @enum {string}
+ */
+export enum CourseLevel {
+  BEGINNER = 'beginner',
+  INTERMEDIATE = 'intermediate',
+  ADVANCED = 'advanced'
+}
+
+/**
+ * Basic course interface
+ */
+export interface Course {
+  id: string;
+  title: string;
+  description: string;
+  image?: string;
+  level: string;
+  price: number;
+  topics: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Featured course interface
  */
 export interface FeaturedCourse {
   id: string;
@@ -16,7 +42,7 @@ export interface FeaturedCourse {
 }
 
 /**
- * Represents a popular course displayed in the popular courses section
+ * Popular course interface
  */
 export interface PopularCourse {
   id: string;
@@ -24,6 +50,62 @@ export interface PopularCourse {
   category: string;
   students: number;
   image: string;
+}
+
+/**
+ * Course creation parameters
+ */
+export interface CreateCourseParams {
+  title: string;
+  description: string;
+  price: number;
+  imageUrl?: string;
+  level: string;
+  topics: string[];
+}
+
+/**
+ * Course update parameters
+ */
+export interface UpdateCourseParams {
+  title?: string;
+  description?: string;
+  price?: number;
+  imageUrl?: string;
+  level?: string;
+  topics?: string[];
+}
+
+/**
+ * Lesson interface
+ */
+export interface Lesson {
+  id: string;
+  title: string;
+  content: string;
+  videoUrl?: string;
+  order: number;
+  courseId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Lesson creation parameters
+ */
+export interface CreateLessonParams {
+  title: string;
+  content: string;
+  videoUrl?: string;
+  order: number;
+  courseId: string;
+}
+
+/**
+ * Course with lessons interface
+ */
+export interface CourseWithLessons extends Course {
+  lessons: Lesson[];
 }
 
 /**

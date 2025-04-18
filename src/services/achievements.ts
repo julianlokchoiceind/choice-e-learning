@@ -1,16 +1,28 @@
 "use server";
 
 import prisma from '@/lib/db';
-import { UserAchievement, AchievementType } from '@/types';
+import { safeFindMany, safeFindFirst, safeFindUnique, safeCreate } from '@/lib/db/prisma-helper';
+import { UserAchievement, AchievementType, CreateAchievementParams } from '@/types/achievement';
 
 /**
  * Get all achievements for a user
  */
 export async function getUserAchievements(userId: string): Promise<UserAchievement[]> {
   try {
-    const achievements = await prisma.achievement.findMany({
+    if (!userId) {
+      console.warn('getUserAchievements called with empty userId');
+      return [];
+    }
+
+    // Use safeFindMany instead of direct prisma call
+    const achievements = await safeFindMany(prisma.achievement, {
       where: { userId }
     });
+    
+    if (!achievements || !Array.isArray(achievements)) {
+      console.warn('No achievements found or invalid response format');
+      return [];
+    }
     
     return achievements.map(achievement => ({
       id: achievement.id,
@@ -38,8 +50,13 @@ export async function createAchievement(
   icon: string
 ): Promise<UserAchievement | null> {
   try {
-    // Check if user already has this achievement
-    const existingAchievement = await prisma.achievement.findFirst({
+    if (!userId || !type) {
+      console.warn('createAchievement called with missing parameters');
+      return null;
+    }
+    
+    // Check if user already has this achievement using safeFindFirst
+    const existingAchievement = await safeFindFirst(prisma.achievement, {
       where: {
         userId,
         type
@@ -59,9 +76,9 @@ export async function createAchievement(
       };
     }
     
-    // Create new achievement
+    // Create new achievement using safeCreate
     const now = new Date();
-    const achievement = await prisma.achievement.create({
+    const achievement = await safeCreate(prisma.achievement, {
       data: {
         userId,
         type,
@@ -92,7 +109,8 @@ export async function createAchievement(
  */
 export async function checkAndAwardAchievements(userId: string): Promise<UserAchievement[]> {
   try {
-    const user = await prisma.user.findUnique({
+    // Use safeFindUnique instead of direct prisma call
+    const user = await safeFindUnique(prisma.user, {
       where: { id: userId },
       include: {
         enrolledIn: true
@@ -134,7 +152,7 @@ export async function checkAndAwardAchievements(userId: string): Promise<UserAch
     }
     
     // Check for course completion achievement
-    const userProgress = await prisma.userProgress.findMany({
+    const userProgress = await safeFindMany(prisma.userProgress, {
       where: { userId }
     });
     
@@ -142,8 +160,8 @@ export async function checkAndAwardAchievements(userId: string): Promise<UserAch
       // Get all courses enrolled in
       const enrolledCourseIds = user.enrolledIds || [];
       
-      // Get all lessons for these courses
-      const lessons = await prisma.lesson.findMany({
+      // Get all lessons for these courses using safeFindMany
+      const lessons = await safeFindMany(prisma.lesson, {
         where: {
           courseId: {
             in: enrolledCourseIds
@@ -153,21 +171,25 @@ export async function checkAndAwardAchievements(userId: string): Promise<UserAch
       
       // Group lessons by courseId
       const courseLessons: Record<string, number> = {};
-      for (const lesson of lessons) {
-        if (!courseLessons[lesson.courseId]) {
-          courseLessons[lesson.courseId] = 0;
+      if (lessons && Array.isArray(lessons)) {
+        for (const lesson of lessons) {
+          if (!courseLessons[lesson.courseId]) {
+            courseLessons[lesson.courseId] = 0;
+          }
+          courseLessons[lesson.courseId]++;
         }
-        courseLessons[lesson.courseId]++;
       }
       
       // Count completed lessons per course
       const courseProgress: Record<string, number> = {};
-      for (const progress of userProgress) {
-        if (progress.completed) {
-          if (!courseProgress[progress.courseId]) {
-            courseProgress[progress.courseId] = 0;
+      if (userProgress && Array.isArray(userProgress)) {
+        for (const progress of userProgress) {
+          if (progress.completed) {
+            if (!courseProgress[progress.courseId]) {
+              courseProgress[progress.courseId] = 0;
+            }
+            courseProgress[progress.courseId]++;
           }
-          courseProgress[progress.courseId]++;
         }
       }
       
@@ -193,7 +215,7 @@ export async function checkAndAwardAchievements(userId: string): Promise<UserAch
       }
       
       // Quick Learner achievement - X lessons in Y days
-      const completedLessons = userProgress.filter(p => p.completed);
+      const completedLessons = userProgress && Array.isArray(userProgress) ? userProgress.filter(p => p.completed) : [];
       const completedLessonCount = completedLessons.length;
       
       if (completedLessonCount >= 10) {
@@ -233,4 +255,4 @@ export async function checkAndAwardAchievements(userId: string): Promise<UserAch
     console.error('Error checking and awarding achievements:', error);
     return [];
   }
-} 
+}

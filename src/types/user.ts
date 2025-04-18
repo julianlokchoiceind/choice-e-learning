@@ -1,4 +1,9 @@
-import { Role } from '@/lib/auth/auth-options';
+/**
+ * @file User type definitions
+ * @description Type definitions for users, accounts, and profiles
+ */
+
+import { Role } from './auth/roles';
 
 /**
  * User interface
@@ -13,7 +18,7 @@ export interface User {
 }
 
 /**
- * User with password interface
+ * User with password interface - for internal use only
  */
 export interface UserWithPassword extends User {
   password: string;
@@ -30,22 +35,6 @@ export interface CreateUserRequest {
 }
 
 /**
- * User login request interface
- */
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-/**
- * User login response interface
- */
-export interface LoginResponse {
-  user: User;
-  token: string;
-}
-
-/**
  * User update request interface
  */
 export interface UpdateUserRequest {
@@ -56,21 +45,10 @@ export interface UpdateUserRequest {
 }
 
 /**
- * User profile interface
+ * User profile interface - expanded user info for profile pages
  */
 export interface UserProfile extends User {
+  image?: string | null;
   coursesEnrolled?: number;
   challengesCompleted?: number;
 }
-
-/**
- * User stats interface
- */
-export interface UserStats {
-  totalCourses: number;
-  completedCourses: number;
-  inProgressCourses: number;
-  totalChallenges: number;
-  completedChallenges: number;
-  averageRating?: number;
-} 

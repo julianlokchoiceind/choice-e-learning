@@ -13,17 +13,27 @@ export async function GET(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const stats = await getUserStats(userId);
+    console.log(`Fetching user stats for userId: ${userId}`);
+    const stats = await getUserStats(userId).catch(err => {
+      console.error('Error from getUserStats:', err);
+      throw err;
+    });
     
+    console.log(`Successfully retrieved stats:`, stats);
     return NextResponse.json({ 
       success: true, 
       stats 
     });
   } catch (error) {
     console.error('Error in userStats API route:', error);
+    // Include error details in development mode
+    const errorDetails = process.env.NODE_ENV === 'development' ? 
+      { details: (error as Error).message, stack: (error as Error).stack } : undefined;
+      
     return NextResponse.json({ 
       success: false, 
-      error: 'Failed to fetch user statistics' 
+      error: 'Failed to fetch user statistics',
+      ...(errorDetails && { debug: errorDetails })
     }, { status: 500 });
   }
 } 

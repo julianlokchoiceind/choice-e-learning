@@ -1,11 +1,18 @@
 {
+  "/roadmap/page": "app/roadmap/page.js",
   "/dashboard/page": "app/dashboard/page.js",
   "/admin/page": "app/admin/page.js",
-  "/admin/courses/page": "app/admin/courses/page.js",
-  "/api/courses/route": "app/api/courses/route.js",
+  "/faq/page": "app/faq/page.js",
   "/api/userStats/route": "app/api/userStats/route.js",
   "/api/enrolledCourses/route": "app/api/enrolledCourses/route.js",
   "/api/achievements/route": "app/api/achievements/route.js",
+  "/api/users/me/courses/route": "app/api/users/me/courses/route.js",
+  "/not-found": "app/not-found.js",
+  "/api/courses/route": "app/api/courses/route.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/page": "app/page.js",
+  "/api/auth/session/route": "app/api/auth/session/route.js",
+  "/courses/page": "app/courses/page.js",
   "/login/page": "app/login/page.js",
-  "/courses/page": "app/courses/page.js"
+  "/courses/[courseId]/page": "app/courses/[courseId]/page.js"
 }

@@ -1,15 +1,14 @@
 import { Metadata } from 'next';
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { ObjectId } from 'mongodb';
-import { getCollection } from '@/lib/db/mongodb';
+import prisma from '@/lib/db';
 
 // Generate dynamic metadata for the course detail page
 export async function generateMetadata(
   { params }: { params: { courseId: string } }
 ): Promise<Metadata> {
   // Validate course ID
-  if (!params.courseId || !ObjectId.isValid(params.courseId)) {
+  if (!params.courseId) {
     return {
       title: 'Course Not Found | Choice E-Learning',
       description: 'The requested course could not be found.',
@@ -17,12 +16,11 @@ export async function generateMetadata(
   }
 
   try {
-    // Fetch course details
-    const coursesCollection = await getCollection('courses');
-    const course = await coursesCollection.findOne(
-      { _id: new ObjectId(params.courseId) },
-      { projection: { title: 1, description: 1 } }
-    );
+    // Fetch course details using Prisma
+    const course = await prisma.course.findUnique({
+      where: { id: params.courseId },
+      select: { title: true, description: true }
+    });
 
     if (!course) {
       return {

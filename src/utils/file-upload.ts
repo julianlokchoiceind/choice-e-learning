@@ -1,10 +1,11 @@
 import { NextRequest } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
+import { FileMetadata, AllowedFileTypes, S3Config } from '@/types/files';
 
 /**
  * Supported file types for upload
  */
-export const ALLOWED_FILE_TYPES = {
+export const ALLOWED_FILE_TYPES: AllowedFileTypes = {
   IMAGE: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
   VIDEO: ['video/mp4', 'video/webm', 'video/ogg'],
   DOCUMENT: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
@@ -26,17 +27,6 @@ export class FileUploadError extends Error {
     this.name = 'FileUploadError';
     this.statusCode = statusCode;
   }
-}
-
-/**
- * Interface for file metadata
- */
-export interface FileMetadata {
-  fieldname: string;
-  filename: string;
-  encoding: string;
-  mimetype: string;
-  size: number;
 }
 
 /**
@@ -96,7 +86,7 @@ export async function extractFilesFromRequest(req: NextRequest): Promise<Map<str
 /**
  * Get the S3 bucket configuration from environment variables
  */
-export function getS3Config() {
+export function getS3Config(): S3Config {
   const accessKey = process.env.S3_ACCESS_KEY;
   const secretKey = process.env.S3_SECRET_KEY;
   const bucketName = process.env.S3_BUCKET_NAME;
@@ -135,4 +125,4 @@ export async function uploadFileToS3(file: File, path: string = 'uploads'): Prom
   } catch (error) {
     throw new FileUploadError(`Failed to upload file: ${(error as Error).message}`);
   }
-} 
+}

@@ -1,6 +1,7 @@
 "use server";
 
 import prisma from '@/lib/db';
+import { safeFindMany, safeFindUnique } from '@/lib/db/prisma-helper';
 import { CourseListItem, CourseDetails, UserCourseStats } from '@/types';
 
 /**
@@ -188,12 +189,26 @@ export async function getCourseEnrollmentCount(courseId: string): Promise<number
  */
 export async function getUserStats(userId: string): Promise<UserCourseStats> {
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        enrolledIn: true
+    if (!userId) {
+      console.warn('getUserStats called with missing userId');
+      return {
+        coursesCompleted: 0,
+        lessonsCompleted: 0,
+        totalHoursLearned: 0,
+        currentStreak: 0,
+      };
+    }
+
+    // Use safeFindUnique instead of direct prisma call
+    const user = await safeFindUnique(
+      prisma.user,
+      {
+        where: { id: userId },
+        include: {
+          enrolledIn: true
+        }
       }
-    });
+    );
     
     if (!user) {
       return {
@@ -204,12 +219,13 @@ export async function getUserStats(userId: string): Promise<UserCourseStats> {
       };
     }
     
-    // Get user progress
-    const userProgress = await prisma.userProgress.findMany({
-      where: { userId }
-    });
+    // Use safeFindMany instead of direct prisma call
+    const userProgress = await safeFindMany(
+      prisma.userProgress,
+      { where: { userId } }
+    );
     
-    if (user.enrolledIn.length === 0) {
+    if (!user.enrolledIn || !Array.isArray(user.enrolledIn) || user.enrolledIn.length === 0) {
       return {
         coursesCompleted: 0,
         lessonsCompleted: 0,
@@ -228,34 +244,41 @@ export async function getUserStats(userId: string): Promise<UserCourseStats> {
     // Process each enrolled course
     for (const courseId of enrolledCourseIds) {
       // Get all lessons for this course
-      const courseLessons = await prisma.lesson.findMany({
-        where: { courseId }
-      });
-      
-      // Count completed lessons
-      let courseCompletedLessons = 0;
-      
-      for (const lesson of courseLessons) {
-        const progressEntry = userProgress.find(p => 
-          p.courseId === courseId && p.lessonId === lesson.id && p.completed
-        );
+      try {
+        // Use safeFindMany helper function
+        const courseLessons = await safeFindMany(prisma.lesson, {
+          where: { courseId }
+        });
         
-        if (progressEntry) {
-          completedLessons++;
-          courseCompletedLessons++;
-          // Add time spent to total hours (if available)
-          if (progressEntry.timeSpent) {
-            totalHoursLearned += progressEntry.timeSpent / 3600; // Convert seconds to hours
-          } else {
-            // Estimate if not available
-            totalHoursLearned += 0.5; // Default 30 minutes per lesson
+        // Count completed lessons
+        let courseCompletedLessons = 0;
+        
+        if (courseLessons && Array.isArray(courseLessons)) {
+          for (const lesson of courseLessons) {
+            const progressEntry = userProgress.find(p => 
+              p.courseId === courseId && p.lessonId === lesson.id && p.completed
+            );
+            
+            if (progressEntry) {
+              completedLessons++;
+              courseCompletedLessons++;
+              // Add time spent to total hours (if available)
+              if (progressEntry.timeSpent) {
+                totalHoursLearned += progressEntry.timeSpent / 3600; // Convert seconds to hours
+              } else {
+                // Estimate if not available
+                totalHoursLearned += 0.5; // Default 30 minutes per lesson
+              }
+            }
+          }
+          
+          // Check if course is completed
+          if (courseCompletedLessons === courseLessons.length && courseLessons.length > 0) {
+            coursesCompleted++;
           }
         }
-      }
-      
-      // Check if course is completed
-      if (courseCompletedLessons === courseLessons.length && courseLessons.length > 0) {
-        coursesCompleted++;
+      } catch (err) {
+        console.error(`Error processing course ${courseId}:`, err);
       }
     }
     
@@ -283,7 +306,7 @@ export async function getUserStats(userId: string): Promise<UserCourseStats> {
  * Calculate user streak based on user progress
  */
 function calculateStreak(userProgress: any[]): number {
-  if (!userProgress || userProgress.length === 0) {
+  if (!userProgress || !Array.isArray(userProgress) || userProgress.length === 0) {
     return 0;
   }
   

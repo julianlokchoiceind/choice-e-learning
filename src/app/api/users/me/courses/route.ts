@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ObjectId } from 'mongodb';
-import { getCollection } from '@/lib/db/mongodb';
+import prisma from '@/lib/db';
 import { authenticateUser } from '@/lib/auth/auth-middleware';
 
 export async function GET(req: NextRequest) {
@@ -20,12 +19,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Get user and enrolled courses IDs
-    const usersCollection = await getCollection('users');
-    const user = await usersCollection.findOne(
-      { _id: new ObjectId(userId) },
-      { projection: { enrolledIds: 1 } }
-    );
+    // Get user and enrolled courses
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { enrolledIds: true }
+    });
 
     if (!user) {
       return NextResponse.json(
@@ -49,65 +47,68 @@ export async function GET(req: NextRequest) {
     const limit = parseInt(url.searchParams.get('limit') || '10');
     const skip = (page - 1) * limit;
     
-    // Convert string IDs to ObjectId
-    const courseObjectIds = user.enrolledIds.map((id: string) => new ObjectId(id));
-    
-    // Get courses collection
-    const coursesCollection = await getCollection('courses');
-    
     // Get total count of enrolled courses
-    const totalCount = courseObjectIds.length;
+    const totalCount = user.enrolledIds?.length || 0;
     
-    // Get paginated courses with instructor details
-    const courses = await coursesCollection.aggregate([
-      // Match courses that user is enrolled in
-      { $match: { _id: { $in: courseObjectIds } } },
-      // Sort by creation date (newest first)
-      { $sort: { createdAt: -1 } },
-      // Apply pagination
-      { $skip: skip },
-      { $limit: limit },
-      // Lookup instructor details
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'instructorId',
-          foreignField: '_id',
-          as: 'instructorDetails'
+    // Get paginated courses with instructor details using Prisma
+    const courses = await prisma.course.findMany({
+      where: {
+        id: {
+          in: user.enrolledIds
         }
       },
-      // Unwind instructor details (convert array to object)
-      { $unwind: '$instructorDetails' },
-      // Project only needed fields
-      {
-        $project: {
-          id: { $toString: '$_id' },
-          title: 1,
-          description: 1,
-          price: 1,
-          level: 1,
-          topics: 1,
-          imageUrl: 1,
-          createdAt: 1,
-          updatedAt: 1,
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        price: true,
+        level: true,
+        topics: true,
+        imageUrl: true,
+        createdAt: true,
+        updatedAt: true,
+        creatorId: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      skip: skip,
+      take: limit
+    });
+    
+    // Get instructor details for each course
+    const coursesWithInstructors = await Promise.all(
+      courses.map(async (course) => {
+        const instructor = course.creatorId
+          ? await prisma.user.findUnique({
+              where: { id: course.creatorId },
+              select: {
+                id: true,
+                name: true
+              }
+            })
+          : { id: '', name: 'Administrator' };
+          
+        return {
+          ...course,
           instructor: {
-            id: { $toString: '$instructorDetails._id' },
-            name: '$instructorDetails.name'
+            id: instructor.id,
+            name: instructor.name
           }
-        }
-      }
-    ]).toArray();
+        };
+      })
+    );
 
     // Return the enrolled courses
     return NextResponse.json({
       success: true,
-      courses,
+      courses: coursesWithInstructors,
       count: totalCount,
       pagination: {
         page,
         limit,
         totalPages: Math.ceil(totalCount / limit),
-        hasMore: skip + courses.length < totalCount
+        hasMore: skip + coursesWithInstructors.length < totalCount
       }
     });
   } catch (error) {

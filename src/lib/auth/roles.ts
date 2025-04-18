@@ -1,4 +1,4 @@
-import { Role } from './auth-options';
+import { Role } from '@/types/auth/roles';
 import { User } from 'next-auth';
 
 /**
