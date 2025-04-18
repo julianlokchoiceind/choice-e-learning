@@ -110,6 +110,12 @@ function CoursesPage() {
   
   // Apply filters when filter state changes
   useEffect(() => {
+    // Guard against undefined or null courses
+    if (!courses || !Array.isArray(courses)) {
+      setFilteredCourses([]);
+      return;
+    }
+    
     let filtered = [...courses];
     
     // Apply search filter
@@ -405,7 +411,7 @@ function CoursesPage() {
         )}
         
         {/* No courses found */}
-        {!loading && filteredCourses.length === 0 && (
+        {!loading && filteredCourses && filteredCourses.length === 0 && (
           <div className="bg-yellow-50 text-yellow-700 p-8 rounded-lg text-center">
             <h3 className="text-xl font-bold mb-2">No courses found</h3>
             <p>Try adjusting your search or filter criteria.</p>
@@ -413,9 +419,9 @@ function CoursesPage() {
         )}
         
         {/* Course grid */}
-        {!loading && filteredCourses.length > 0 && (
+        {!loading && filteredCourses && filteredCourses.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCourses.map(course => (
+            {Array.isArray(filteredCourses) && filteredCourses.map(course => (
               <div key={course.id} className="border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                 <div className="relative h-48">
                   <Image

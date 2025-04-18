@@ -1,0 +1,11 @@
+{
+  "/dashboard/page": "app/dashboard/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/admin/courses/page": "app/admin/courses/page.js",
+  "/api/courses/route": "app/api/courses/route.js",
+  "/api/userStats/route": "app/api/userStats/route.js",
+  "/api/enrolledCourses/route": "app/api/enrolledCourses/route.js",
+  "/api/achievements/route": "app/api/achievements/route.js",
+  "/login/page": "app/login/page.js",
+  "/courses/page": "app/courses/page.js"
+}

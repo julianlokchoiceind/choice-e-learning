@@ -1,62 +1,101 @@
-import { NextRequest, NextResponse } from 'next/server';
+/**
+ * User registration API endpoint
+ * Handles new user registration process
+ */
+
+import { NextRequest } from 'next/server';
 import { registerUserSchema } from '@/utils/validation';
 import { AuthService } from '@/lib/auth/services/auth-service';
+import { 
+  apiCreated, 
+  apiError, 
+  apiServerError 
+} from '@/lib/api/api-response';
+import { 
+  validateRequest 
+} from '@/lib/api/request-parser';
+import { 
+  withErrorHandling 
+} from '@/lib/api/route-handlers';
+import { 
+  documentEndpoint 
+} from '@/lib/api/api-docs';
 
-export async function POST(req: NextRequest) {
+// Document the API endpoint
+documentEndpoint({
+  path: '/api/auth/register',
+  method: 'POST',
+  description: 'Register a new user account',
+  requiresAuth: false,
+  requestBody: {
+    contentType: 'application/json',
+    schema: 'name: string, email: string, password: string, role?: string',
+    example: {
+      name: 'John Doe',
+      email: 'john@example.com',
+      password: 'securePassword123'
+    }
+  },
+  responses: [
+    {
+      status: 201,
+      description: 'User registered successfully',
+      example: {
+        success: true,
+        data: {
+          id: '1234567890',
+          name: 'John Doe',
+          email: 'john@example.com',
+          role: 'student',
+          createdAt: '2023-01-01T00:00:00.000Z'
+        }
+      }
+    },
+    {
+      status: 400,
+      description: 'Invalid input data',
+      example: {
+        success: false,
+        error: 'Validation failed',
+        details: ['email: Invalid email address'],
+        code: 'VALIDATION_ERROR'
+      }
+    },
+    {
+      status: 409,
+      description: 'User already exists',
+      example: {
+        success: false,
+        error: 'User with this email already exists',
+        code: 'USER_EXISTS'
+      }
+    },
+    {
+      status: 500,
+      description: 'Server error',
+      example: {
+        success: false,
+        error: 'Failed to register user',
+        code: 'SERVER_ERROR'
+      }
+    }
+  ]
+});
+
+// POST handler for user registration
+const registerUser = withErrorHandling(async (req: NextRequest) => {
   console.log('=========== REGISTER API CALLED ===========');
-  console.log('Request method:', req.method);
   
   try {
-    // Parse request body
-    let reqText;
-    try {
-      reqText = await req.text();
-      console.log('Raw request body length:', reqText.length);
-    } catch (textError) {
-      console.error('Error reading request body:', textError);
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Could not read request body',
-        details: (textError as Error).message
-      }, { status: 400 });
-    }
+    // Validate request body
+    const validationResult = await validateRequest(req, registerUserSchema);
     
-    // Parse JSON
-    let body;
-    try {
-      body = JSON.parse(reqText);
-      console.log('Parsed body received');
-    } catch (e) {
-      console.error('JSON parse error:', e);
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Invalid JSON body',
-        details: (e as Error).message
-      }, { status: 400 });
+    if (!validationResult.success) {
+      return validationResult.error;
     }
-    
-    // Validate input data
-    console.log('Validating input data...');
-    const validation = registerUserSchema.safeParse(body);
-    if (!validation.success) {
-      console.error('Validation errors:', validation.error.errors);
-      // Simplified error format for user-friendly messages
-      const formattedErrors = validation.error.errors.map((err: any) => {
-        return `${err.path.join('.')}: ${err.message}`;
-      }).join(', ');
-      
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: formattedErrors || 'Invalid input data'
-        },
-        { status: 400 }
-      );
-    }
-    console.log('Input data valid');
     
     // Extract validated data
-    const { name, email, password, role = 'student' } = validation.data;
+    const { name, email, password, role = 'student' } = validationResult.data;
     
     console.log('Creating user with email:', email);
     
@@ -66,46 +105,38 @@ export async function POST(req: NextRequest) {
     if (!result.success) {
       console.error('User registration failed:', result.error);
       
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: result.error?.message || 'Failed to register user' 
-        },
-        { status: result.error?.status || 400 }
+      return apiError(
+        result.error?.message || 'Failed to register user',
+        undefined,
+        result.error?.code || 'REGISTRATION_FAILED',
+        result.error?.status || 400
       );
     }
     
     console.log('User created successfully:', result.data?.id);
     
     // Return success response
-    return NextResponse.json(
-      { 
-        success: true, 
-        user: {
-          id: result.data?.id,
-          name: result.data?.name,
-          email: result.data?.email,
-          role: result.data?.role,
-          createdAt: result.data?.createdAt
-        }
-      },
-      { status: 201 }
-    );
+    return apiCreated({
+      id: result.data?.id,
+      name: result.data?.name,
+      email: result.data?.email,
+      role: result.data?.role,
+      createdAt: result.data?.createdAt
+    }, 'User registered successfully');
   } catch (error) {
     console.error('Registration error:', error);
     console.error('Error stack:', (error as Error).stack);
     
     // Generic error response
-    return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to register user',
-        details: (error as Error).message
-      },
-      { status: 500 }
+    return apiServerError(
+      'Failed to register user',
+      (error as Error).message
     );
   }
   finally {
     console.log('=========== REGISTER API COMPLETED ===========');
   }
-}
+});
+
+// Export the route handler
+export const POST = registerUser;

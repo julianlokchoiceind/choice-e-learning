@@ -1,107 +1,54 @@
-import { Level } from '@prisma/client';
+/**
+ * Type definitions for course-related data
+ */
 
 /**
- * Course type returned by getAllCourses
+ * Represents a featured course displayed in the featured courses section
  */
-export interface CourseListItem {
+export interface FeaturedCourse {
   id: string;
   title: string;
   description: string;
   image: string;
-  level: Level;
+  level: string;
   price: number;
-  duration: string;
-  isFeatured: boolean;
-  students: number;
-  rating: number;
-  reviews: number;
-  instructorName: string;
+  isFeatured?: boolean;
 }
 
 /**
- * Full course details interface
+ * Represents a popular course displayed in the popular courses section
  */
-export interface CourseDetails {
+export interface PopularCourse {
   id: string;
+  title: string;
+  category: string;
+  students: number;
+  image: string;
+}
+
+/**
+ * Represents a learning roadmap step
+ */
+export interface Roadmap {
   title: string;
   description: string;
-  fullDescription: string;
-  image: string;
-  level: Level;
-  price: number;
-  duration: string;
-  lessonsCount: number;
-  totalHours: number;
-  lastUpdated: string;
-  rating: number;
-  reviewsCount: number;
-  isFeatured: boolean;
-  learningPoints: string[];
-  prerequisites?: string[];
-  modules?: CourseModule[];
-  instructor: CourseCreator;
-  reviews: CourseReview[];
 }
 
 /**
- * Course module interface
+ * Represents a student testimonial
  */
-export interface CourseModule {
-  title: string;
-  duration: string;
-  lessons: CourseLesson[];
-}
-
-/**
- * Course lesson interface
- */
-export interface CourseLesson {
-  title: string;
-  duration: string;
-}
-
-/**
- * Course creator interface (previously Instructor)
- */
-export interface CourseCreator {
+export interface Testimonial {
   name: string;
-  role: string;
-  bio: string;
-  avatar: string;
-  rating: number;
-  students: number;
-  courses: number;
-}
-
-/**
- * Course review interface
- */
-export interface CourseReview {
-  name: string;
-  rating: number;
-  avatar: string;
-  date: string;
-  comment: string;
-}
-
-/**
- * User stats interface
- */
-export interface UserCourseStats {
-  coursesCompleted: number;
-  lessonsCompleted: number;
-  totalHoursLearned: number;
-  currentStreak: number;
-}
-
-/**
- * Enrolled course interface for dashboard display
- */
-export interface EnrolledCourse {
-  id: string;
   title: string;
-  progress: number;
-  imageUrl: string;
-  totalLessons: number;
-  completedLessons: number;
-} 
+  avatar: string;
+  quote: string;
+}
+
+/**
+ * Represents a how it works step
+ */
+export interface HowItWorksStep {
+  step: string;
+  title: string;
+  description: string;
+}

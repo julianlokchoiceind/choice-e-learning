@@ -1,8 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/db';
-import { authenticateUser } from '@/lib/auth/auth-middleware';
-import { hashPassword, comparePasswords } from '@/utils/auth-utils';
+/**
+ * User profile API endpoint
+ * Handles fetching and updating user profile information
+ */
+
+import { NextRequest } from 'next/server';
 import { z } from 'zod';
+import prisma from '@/lib/db';
+import { createRouteHandler, withAuth } from '@/lib/api/route-handlers';
+import { apiSuccess, apiError, apiUpdated, apiNotFound } from '@/lib/api/api-response';
+import { validateRequest } from '@/lib/api/request-parser';
+import { comparePasswords, hashPassword } from '@/utils/auth-utils';
+import { documentEndpoint } from '@/lib/api/api-docs';
 
 // Schema for profile update validation
 const profileUpdateSchema = z.object({
@@ -19,27 +27,180 @@ const profileUpdateSchema = z.object({
   path: ["currentPassword"]
 });
 
-// GET handler to fetch user profile
-export async function GET(req: NextRequest) {
-  try {
-    // Authenticate user
-    const auth = await authenticateUser(req);
-    if (!auth.success) {
-      return auth.response;
+// Document the API endpoint
+documentEndpoint({
+  path: '/api/users/profile',
+  method: 'GET',
+  description: 'Get the current user\'s profile information',
+  requiresAuth: true,
+  responses: [
+    {
+      status: 200,
+      description: 'User profile retrieved successfully',
+      example: {
+        success: true,
+        data: {
+          id: '1234567890',
+          name: 'John Doe',
+          email: 'john@example.com',
+          role: 'student',
+          bio: 'A short bio',
+          avatar: 'https://example.com/avatar.jpg',
+          createdAt: '2023-01-01T00:00:00.000Z',
+          updatedAt: '2023-01-01T00:00:00.000Z'
+        }
+      }
+    },
+    {
+      status: 401,
+      description: 'User is not authenticated',
+      example: {
+        success: false,
+        error: 'You must be logged in to access this resource',
+        code: 'UNAUTHORIZED'
+      }
+    },
+    {
+      status: 404,
+      description: 'User not found',
+      example: {
+        success: false,
+        error: 'User not found',
+        code: 'NOT_FOUND'
+      }
     }
+  ]
+});
 
-    // Get user from database
-    const userId = auth.user?.id;
+documentEndpoint({
+  path: '/api/users/profile',
+  method: 'PUT',
+  description: 'Update the current user\'s profile information',
+  requiresAuth: true,
+  requestBody: {
+    contentType: 'application/json',
+    schema: 'name?: string, currentPassword?: string, newPassword?: string, bio?: string, avatar?: string',
+    example: {
+      name: 'New Name',
+      bio: 'New bio information',
+      avatar: 'https://example.com/new-avatar.jpg'
+    }
+  },
+  responses: [
+    {
+      status: 200,
+      description: 'Profile updated successfully',
+      example: {
+        success: true,
+        data: {
+          id: '1234567890',
+          name: 'New Name',
+          email: 'john@example.com',
+        },
+        message: 'Profile updated successfully'
+      }
+    },
+    {
+      status: 400,
+      description: 'Invalid input data',
+      example: {
+        success: false,
+        error: 'Validation failed',
+        details: ['name: String must contain at least 2 character(s)'],
+        code: 'VALIDATION_ERROR'
+      }
+    },
+    {
+      status: 401,
+      description: 'User is not authenticated',
+      example: {
+        success: false,
+        error: 'You must be logged in to access this resource',
+        code: 'UNAUTHORIZED'
+      }
+    }
+  ]
+});
+
+// GET handler to fetch user profile
+const getProfile = withAuth(async (req, { user }) => {
+  const userId = user.id;
+  
+  // Get user from database
+  const userProfile = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      bio: true,
+      avatar: true,
+      createdAt: true,
+      updatedAt: true
+    }
+  });
+
+  if (!userProfile) {
+    return apiNotFound('User');
+  }
+
+  // Return user profile
+  return apiSuccess(userProfile);
+});
+
+// PUT handler to update user profile
+const updateProfile = withAuth(async (req, { user }) => {
+  const userId = user.id;
+  
+  // Validate request body
+  const validationResult = await validateRequest(req, profileUpdateSchema);
+  
+  if (!validationResult.success) {
+    return validationResult.error;
+  }
+  
+  // Extract validated data
+  const { name, currentPassword, newPassword, bio, avatar } = validationResult.data;
+  
+  // Create update document
+  const updateDoc: any = { updatedAt: new Date() };
+  if (name) updateDoc.name = name;
+  if (bio !== undefined) updateDoc.bio = bio;
+  if (avatar) updateDoc.avatar = avatar;
+  
+  // Handle password update if requested
+  if (newPassword && currentPassword) {
+    // Get current user with password
+    const userWithPassword = await prisma.user.findUnique({ 
+      where: { id: userId },
+      select: { password: true }
+    });
     
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'User ID not found in session' },
-        { status: 401 }
+    if (!userWithPassword) {
+      return apiNotFound('User');
+    }
+    
+    // Verify current password
+    const isPasswordValid = await comparePasswords(currentPassword, userWithPassword.password);
+    if (!isPasswordValid) {
+      return apiError(
+        'Current password is incorrect',
+        undefined,
+        'INVALID_PASSWORD',
+        400
       );
     }
     
-    const user = await prisma.user.findUnique({
+    // Hash the new password
+    updateDoc.password = await hashPassword(newPassword);
+  }
+  
+  // Update user
+  try {
+    const updatedUser = await prisma.user.update({
       where: { id: userId },
+      data: updateDoc,
       select: {
         id: true,
         name: true,
@@ -47,136 +208,20 @@ export async function GET(req: NextRequest) {
         role: true,
         bio: true,
         avatar: true,
-        createdAt: true,
         updatedAt: true
       }
     });
-
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    // Return user profile
-    return NextResponse.json({
-      success: true,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        bio: user.bio || '',
-        avatar: user.avatar || '',
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt
-      }
-    });
+    
+    // Return success with updated user data
+    return apiUpdated(updatedUser);
   } catch (error) {
-    console.error('Error fetching user profile:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch user profile' },
-      { status: 500 }
-    );
+    if ((error as any).code === 'P2025') {
+      return apiNotFound('User');
+    }
+    throw error; // Let the error handler catch other errors
   }
-}
+});
 
-// PUT handler to update user profile
-export async function PUT(req: NextRequest) {
-  try {
-    // Authenticate user
-    const auth = await authenticateUser(req);
-    if (!auth.success) {
-      return auth.response;
-    }
-
-    // Parse request body
-    const body = await req.json();
-    
-    // Validate input
-    const validation = profileUpdateSchema.safeParse(body);
-    if (!validation.success) {
-      const errorMessages = validation.error.errors.map(err => 
-        `${err.path.join('.')}: ${err.message}`
-      ).join(', ');
-      
-      return NextResponse.json(
-        { success: false, error: errorMessages },
-        { status: 400 }
-      );
-    }
-    
-    // Extract validated data
-    const { name, currentPassword, newPassword, bio, avatar } = validation.data;
-    
-    // Create update document
-    const updateDoc: any = { updatedAt: new Date() };
-    if (name) updateDoc.name = name;
-    if (bio !== undefined) updateDoc.bio = bio;
-    if (avatar) updateDoc.avatar = avatar;
-    
-    // Get user from database
-    const userId = auth.user?.id;
-    
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: 'User ID not found in session' },
-        { status: 401 }
-      );
-    }
-    
-    // Handle password update if requested
-    if (newPassword && currentPassword) {
-      // Get current user with password
-      const user = await prisma.user.findUnique({ 
-        where: { id: userId },
-        select: { password: true }
-      });
-      
-      if (!user) {
-        return NextResponse.json(
-          { success: false, error: 'User not found' },
-          { status: 404 }
-        );
-      }
-      
-      // Verify current password
-      const isPasswordValid = await comparePasswords(currentPassword, user.password);
-      if (!isPasswordValid) {
-        return NextResponse.json(
-          { success: false, error: 'Current password is incorrect' },
-          { status: 400 }
-        );
-      }
-      
-      // Hash the new password
-      updateDoc.password = await hashPassword(newPassword);
-    }
-    
-    // Update user
-    try {
-      await prisma.user.update({
-        where: { id: userId },
-        data: updateDoc
-      });
-    } catch (error) {
-      return NextResponse.json(
-        { success: false, error: 'User not found' },
-        { status: 404 }
-      );
-    }
-    
-    // Return success
-    return NextResponse.json({
-      success: true,
-      message: 'Profile updated successfully'
-    });
-  } catch (error) {
-    console.error('Error updating user profile:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to update user profile' },
-      { status: 500 }
-    );
-  }
-} 
+// Export the route handler with method routing
+export const GET = getProfile;
+export const PUT = updateProfile;
