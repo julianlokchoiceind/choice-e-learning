@@ -1,8 +1,7 @@
 "use server";
 
-import { getCollection, createUserDirectly } from '@/lib/db/mongodb';
-import { hashPassword, comparePasswords } from '@/utils/auth-utils';
-import { ObjectId } from 'mongodb';
+import prisma from '@/lib/db';
+import { hashPassword, comparePasswords } from '@/lib/auth/utils/password-utils';
 
 export interface UserCreateInput {
   name: string;
@@ -24,8 +23,9 @@ export interface UserResponse {
  */
 export async function getUserByEmail(email: string) {
   try {
-    const usersCollection = await getCollection('users');
-    return usersCollection.findOne({ email: email.toLowerCase() });
+    return await prisma.user.findUnique({
+      where: { email: email.toLowerCase() }
+    });
   } catch (error) {
     console.error('Error in getUserByEmail:', error);
     throw error;
@@ -37,8 +37,9 @@ export async function getUserByEmail(email: string) {
  */
 export async function getUserById(id: string) {
   try {
-    const usersCollection = await getCollection('users');
-    return usersCollection.findOne({ _id: new ObjectId(id) });
+    return await prisma.user.findUnique({
+      where: { id }
+    });
   } catch (error) {
     console.error('Error in getUserById:', error);
     throw error;
@@ -74,42 +75,39 @@ export async function createUser(data: UserCreateInput): Promise<UserResponse> {
       throw new Error('Failed to process password');
     }
     
-    // Create user directly
-    console.log('Creating user directly...');
-    const result = await createUserDirectly({
-      name,
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      role,
+    // Create user with Prisma
+    console.log('Creating user with Prisma...');
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        role: role as any
+      }
     });
     
-    if (!result.success) {
-      console.error('Failed to create user:', result.error);
-      throw new Error(result.error || 'Failed to create user directly');
-    }
-    
-    console.log('User created successfully with ID:', result.id);
+    console.log('User created successfully with ID:', newUser.id);
     
     return {
-      id: result.id || '',
-      name: result.name || '',
-      email: result.email || '',
-      role: result.role || 'student',
-      createdAt: new Date()
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
+      createdAt: newUser.createdAt
     };
     
   } catch (error) {
     console.error('Error in createUser function:', error);
     
-    // Handle MongoDB connection error
+    // Handle Prisma connection error
     if ((error as Error).message.includes('connect ECONNREFUSED') || 
         (error as Error).message.includes('connection error')) {
-      console.error('MongoDB connection error');
-      throw new Error('Failed to connect to database. Please ensure MongoDB is running.');
+      console.error('Database connection error');
+      throw new Error('Failed to connect to database. Please check your database connection.');
     }
     
     // Handle duplicate key error
-    if ((error as Error).message.includes('duplicate key') || 
+    if ((error as Error).message.includes('Unique constraint failed') || 
         (error as Error).message.includes('already exists')) {
       console.error('Duplicate email error');
       throw new Error('User with this email already exists');
@@ -139,10 +137,7 @@ export async function authenticateUser(email: string, password: string) {
     
     // Return user without password
     const { password: _, ...userWithoutPassword } = user;
-    return {
-      ...userWithoutPassword,
-      id: user._id.toString()
-    };
+    return userWithoutPassword;
   } catch (error) {
     console.error('Error in authenticateUser:', error);
     throw error;
@@ -154,8 +149,9 @@ export async function authenticateUser(email: string, password: string) {
  */
 export async function isAdmin(userId: string) {
   try {
-    const usersCollection = await getCollection('users');
-    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
     return user?.role === 'admin';
   } catch (error) {
     console.error('Error in isAdmin check:', error);

@@ -3,30 +3,40 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { Role } from '@/lib/auth/auth-options';
+import { hasRole } from '@/lib/auth/roles';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'student' | 'instructor' | 'admin';
+  requiredRole?: Role;
 }
 
+/**
+ * Protected route component
+ * Protects routes that require authentication and specific roles
+ */
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    // If authentication state is loaded and user is not authenticated
-    if (!isLoading && !isAuthenticated) {
+    // Skip checks while loading
+    if (isLoading) return;
+    
+    // If user is not authenticated, redirect to login
+    if (!isAuthenticated) {
       router.push('/login');
+      return;
     }
     
     // If a specific role is required, check if the user has the role
-    if (!isLoading && isAuthenticated && requiredRole && user?.role !== requiredRole) {
-      // Redirect to unauthorized page or dashboard
+    if (requiredRole && !hasRole(user, requiredRole)) {
+      // Redirect to unauthorized page
       router.push('/unauthorized');
     }
   }, [isLoading, isAuthenticated, user, router, requiredRole]);
 
-  // Show nothing while loading
+  // Show loading indicator while authentication state is being determined
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -38,16 +48,16 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     );
   }
 
-  // If not authenticated, don't render the children
+  // If not authenticated, don't render children
   if (!isAuthenticated) {
     return null;
   }
   
-  // If a role is required and the user doesn't have it, don't render the children
-  if (requiredRole && user?.role !== requiredRole) {
+  // If a role is required and the user doesn't have it, don't render children
+  if (requiredRole && !hasRole(user, requiredRole)) {
     return null;
   }
 
   // Otherwise, render the children
   return <>{children}</>;
-} 
+}

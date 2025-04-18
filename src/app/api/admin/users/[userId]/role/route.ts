@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ObjectId } from 'mongodb';
-import { getCollection } from '@/lib/db/mongodb';
 import { requireAdmin } from '@/lib/auth/auth-middleware';
 import { Role } from '@/lib/auth/auth-options';
+import { AuthService } from '@/lib/auth/services/auth-service';
 import { z } from 'zod';
 
 // Schema for role update validation
@@ -24,19 +23,15 @@ export async function GET(
 
     // Validate user ID
     const userId = params.userId;
-    if (!userId || !ObjectId.isValid(userId)) {
+    if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Invalid user ID' },
         { status: 400 }
       );
     }
 
-    // Get user from database
-    const usersCollection = await getCollection('users');
-    const user = await usersCollection.findOne(
-      { _id: new ObjectId(userId) },
-      { projection: { _id: 1, name: 1, email: 1, role: 1 } }
-    );
+    // Get user from database using Auth Service
+    const user = await AuthService.getUserById(userId);
 
     if (!user) {
       return NextResponse.json(
@@ -49,7 +44,7 @@ export async function GET(
     return NextResponse.json({
       success: true,
       user: {
-        id: user._id.toString(),
+        id: user.id,
         name: user.name,
         email: user.email,
         role: user.role
@@ -78,7 +73,7 @@ export async function PUT(
 
     // Validate user ID
     const userId = params.userId;
-    if (!userId || !ObjectId.isValid(userId)) {
+    if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Invalid user ID' },
         { status: 400 }
@@ -104,17 +99,6 @@ export async function PUT(
     // Extract validated data
     const { role } = validation.data;
     
-    // Get user from database
-    const usersCollection = await getCollection('users');
-    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
-    
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'User not found' },
-        { status: 404 }
-      );
-    }
-    
     // Prevent admin from changing their own role (safety measure)
     if (auth.user?.id === userId) {
       return NextResponse.json(
@@ -123,21 +107,13 @@ export async function PUT(
       );
     }
 
-    // Update user role
-    const result = await usersCollection.updateOne(
-      { _id: new ObjectId(userId) },
-      { 
-        $set: { 
-          role,
-          updatedAt: new Date() 
-        } 
-      }
-    );
+    // Update user role using Auth Service
+    const result = await AuthService.updateUserRole(userId, role as Role);
     
-    if (result.matchedCount === 0) {
+    if (!result.success) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
-        { status: 404 }
+        { success: false, error: result.error?.message || 'Failed to update user role' },
+        { status: result.error?.status || 500 }
       );
     }
     
@@ -159,7 +135,7 @@ export async function PUT(
   }
 }
 
-// PATCH - Update a user's role
+// PATCH - Update a user's role (Alternative endpoint)
 export async function PATCH(
   req: NextRequest,
   { params }: { params: { userId: string } }
@@ -173,7 +149,7 @@ export async function PATCH(
 
     // Validate userId
     const userId = params.userId;
-    if (!userId || !ObjectId.isValid(userId)) {
+    if (!userId) {
       return NextResponse.json(
         { success: false, error: 'Invalid user ID' },
         { status: 400 }
@@ -184,7 +160,7 @@ export async function PATCH(
     const body = await req.json();
     
     const roleSchema = z.object({
-      role: z.enum(['admin', 'student'])
+      role: z.enum(['admin', 'student', 'instructor'])
     });
 
     const validationResult = roleSchema.safeParse(body);
@@ -197,41 +173,30 @@ export async function PATCH(
 
     const { role } = validationResult.data;
 
-    // Get users collection
-    const usersCollection = await getCollection('users');
-    
     // Check if user exists
-    const userExists = await usersCollection.findOne({ _id: new ObjectId(userId) });
-    if (!userExists) {
+    const user = await AuthService.getUserById(userId);
+    if (!user) {
       return NextResponse.json(
         { success: false, error: 'User not found' },
         { status: 404 }
       );
     }
 
-    // Update user's role
-    const updateResult = await usersCollection.updateOne(
-      { _id: new ObjectId(userId) },
-      { 
-        $set: { 
-          role,
-          updatedAt: new Date()
-        } 
-      }
-    );
+    // Return early if user already has this role
+    if (user.role === role) {
+      return NextResponse.json({
+        success: true,
+        message: `User already has the ${role} role`
+      });
+    }
 
-    if (updateResult.modifiedCount === 0) {
-      // If no document was modified (role was already set to the requested value)
-      if (userExists.role === role) {
-        return NextResponse.json({
-          success: true,
-          message: `User already has the ${role} role`
-        });
-      }
-      
+    // Update user's role using Auth Service
+    const updateResult = await AuthService.updateUserRole(userId, role as Role);
+
+    if (!updateResult.success) {
       return NextResponse.json(
-        { success: false, error: 'Failed to update user role' },
-        { status: 500 }
+        { success: false, error: updateResult.error?.message || 'Failed to update user role' },
+        { status: updateResult.error?.status || 500 }
       );
     }
 
@@ -248,4 +213,4 @@ export async function PATCH(
       { status: 500 }
     );
   }
-} 
+}

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ObjectId } from 'mongodb';
-import { getCollection } from '@/lib/db/mongodb';
+import prisma from '@/lib/db';
 import { requireAdmin } from '@/lib/auth/auth-middleware';
 
 // GET a specific course by ID (admin view)
@@ -15,18 +14,24 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const courseId = params.id;
     
     // Validate course ID
-    if (!courseId || !ObjectId.isValid(courseId)) {
+    if (!courseId || !courseId.match(/^[0-9a-fA-F]{24}$/)) {
       return NextResponse.json(
         { success: false, error: 'Invalid course ID' },
         { status: 400 }
       );
     }
     
-    // Get collections
-    const coursesCollection = await getCollection('courses');
-    
-    // Find course by ID
-    const course = await coursesCollection.findOne({ _id: new ObjectId(courseId) });
+    // Find course by ID using Prisma
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        _count: {
+          select: { 
+            students: true 
+          }
+        }
+      }
+    });
     
     if (!course) {
       return NextResponse.json(
@@ -37,7 +42,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     
     // Transform for response
     const transformedCourse = {
-      id: course._id.toString(),
+      id: course.id,
       title: course.title,
       description: course.description,
       price: course.price,
@@ -45,7 +50,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       topics: course.topics,
       imageUrl: course.imageUrl,
       instructorId: course.instructorId,
-      studentCount: Array.isArray(course.studentIds) ? course.studentIds.length : 0,
+      studentCount: course._count.students,
       createdAt: course.createdAt,
       updatedAt: course.updatedAt
     };
@@ -75,7 +80,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     const courseId = params.id;
     
     // Validate course ID
-    if (!courseId || !ObjectId.isValid(courseId)) {
+    if (!courseId || !courseId.match(/^[0-9a-fA-F]{24}$/)) {
       return NextResponse.json(
         { success: false, error: 'Invalid course ID' },
         { status: 400 }
@@ -85,22 +90,20 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     // Parse request body
     const body = await req.json();
     
-    // Get collections
-    const coursesCollection = await getCollection('courses');
-    
-    // Prepare update data
+    // Prepare update data with updated timestamp
     const updateData = {
       ...body,
       updatedAt: new Date()
     };
     
-    // Update course
-    const result = await coursesCollection.updateOne(
-      { _id: new ObjectId(courseId) },
-      { $set: updateData }
-    );
-    
-    if (result.matchedCount === 0) {
+    try {
+      // Update course with Prisma
+      await prisma.course.update({
+        where: { id: courseId },
+        data: updateData
+      });
+    } catch (error) {
+      // Course not found
       return NextResponse.json(
         { success: false, error: 'Course not found' },
         { status: 404 }
@@ -132,32 +135,30 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     const courseId = params.id;
     
     // Validate course ID
-    if (!courseId || !ObjectId.isValid(courseId)) {
+    if (!courseId || !courseId.match(/^[0-9a-fA-F]{24}$/)) {
       return NextResponse.json(
         { success: false, error: 'Invalid course ID' },
         { status: 400 }
       );
     }
     
-    // Get collections
-    const coursesCollection = await getCollection('courses');
-    const lessonsCollection = await getCollection('lessons');
-    
-    // Find course to verify it exists
-    const course = await coursesCollection.findOne({ _id: new ObjectId(courseId) });
-    
-    if (!course) {
-      return NextResponse.json(
-        { success: false, error: 'Course not found' },
-        { status: 404 }
-      );
-    }
-    
-    // Delete associated lessons
-    await lessonsCollection.deleteMany({ courseId: courseId });
-    
-    // Delete the course
-    await coursesCollection.deleteOne({ _id: new ObjectId(courseId) });
+    try {
+      // Check if course exists
+      const course = await prisma.course.findUnique({
+        where: { id: courseId }
+      });
+      
+      if (!course) {
+        return NextResponse.json(
+          { success: false, error: 'Course not found' },
+          { status: 404 }
+        );
+      }
+      
+      // Delete the course and cascade delete associated lessons (if cascade is set up)
+      await prisma.course.delete({
+        where: { id: courseId }
+      });
     
     return NextResponse.json({
       success: true,

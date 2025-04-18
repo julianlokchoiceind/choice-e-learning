@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { registerUserSchema } from '@/utils/validation';
-import { createUserDirectly } from '@/lib/db/mongodb';
-import { hashPassword } from '@/utils/auth-utils';
-import { Role } from '@/lib/auth/auth-options';
+import { AuthService } from '@/lib/auth/services/auth-service';
 
 export async function POST(req: NextRequest) {
   console.log('=========== REGISTER API CALLED ===========');
@@ -58,110 +56,41 @@ export async function POST(req: NextRequest) {
     console.log('Input data valid');
     
     // Extract validated data
-    let { name, email, password, role = 'student' } = validation.data;
-    
-    // Validate role - ensure only students and instructors can register directly
-    if (role !== Role.student && role !== Role.instructor) {
-      console.log('Role validation: forcing student role for security');
-      role = Role.student; // Force 'student' role for security
-    }
+    const { name, email, password, role = 'student' } = validation.data;
     
     console.log('Creating user with email:', email);
     
-    try {
-      // Hash the password before storing
-      const hashedPassword = await hashPassword(password);
+    // Use the centralized AuthService to register the user
+    const result = await AuthService.register({ name, email, password });
+    
+    if (!result.success) {
+      console.error('User registration failed:', result.error);
       
-      // Create user directly with MongoDB
-      console.log('Calling createUserDirectly...');
-      const result = await createUserDirectly({ 
-        name, 
-        email, 
-        password: hashedPassword, 
-        role
-      });
-      
-      if (!result.success) {
-        console.error('User creation failed:', result.error);
-        
-        // Check for specific error messages
-        if (result.error?.includes('already exists')) {
-          return NextResponse.json(
-            { success: false, error: 'Email already in use' },
-            { status: 409 }
-          );
-        }
-        
-        return NextResponse.json(
-          { success: false, error: result.error || 'Failed to create user' },
-          { status: 400 }
-        );
-      }
-      
-      console.log('User created successfully:', result.id);
-      
-      // Return success response
-      return NextResponse.json(
-        { 
-          success: true, 
-          user: {
-            id: result.id,
-            name: result.name,
-            email: result.email,
-            role: result.role,
-            createdAt: result.createdAt
-          }
-        },
-        { status: 201 }
-      );
-    } catch (error) {
-      console.error('User creation error:', error);
-      
-      // Check for specific error types
-      if ((error as Error).message.includes('already exists')) {
-        console.error('Email already exists error');
-        return NextResponse.json(
-          { success: false, error: 'Email already in use' },
-          { status: 409 }
-        );
-      }
-      
-      // Check for connection errors
-      if ((error as Error).message.includes('connect ECONNREFUSED') ||
-          (error as Error).message.includes('connection error') ||
-          (error as Error).message.includes('database')) {
-        console.error('Database connection error');
-        return NextResponse.json(
-          { 
-            success: false, 
-            error: 'Database connection failed. Please try again later.' 
-          },
-          { status: 503 }
-        );
-      }
-      
-      // Password processing errors
-      if ((error as Error).message.includes('password')) {
-        console.error('Password processing error');
-        return NextResponse.json(
-          { 
-            success: false, 
-            error: 'Failed to process password. Please try a different password.' 
-          },
-          { status: 400 }
-        );
-      }
-      
-      console.error('Unknown error during user creation:', error);
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Registration failed. Please try again.',
-          details: (error as Error).message
+          error: result.error?.message || 'Failed to register user' 
         },
-        { status: 500 }
+        { status: result.error?.status || 400 }
       );
     }
+    
+    console.log('User created successfully:', result.data?.id);
+    
+    // Return success response
+    return NextResponse.json(
+      { 
+        success: true, 
+        user: {
+          id: result.data?.id,
+          name: result.data?.name,
+          email: result.data?.email,
+          role: result.data?.role,
+          createdAt: result.data?.createdAt
+        }
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Registration error:', error);
     console.error('Error stack:', (error as Error).stack);
@@ -179,4 +108,4 @@ export async function POST(req: NextRequest) {
   finally {
     console.log('=========== REGISTER API COMPLETED ===========');
   }
-} 
+}

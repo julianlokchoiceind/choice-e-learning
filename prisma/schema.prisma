@@ -23,10 +23,12 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  reviews    Review[]
-  enrolledIn Course[]    @relation("EnrolledStudents", fields: [enrolledIds], references: [id])
-  enrolledIds String[]   @db.ObjectId
-  submissions Submission[]
+  reviews      Review[]
+  enrolledIn   Course[]      @relation("EnrolledStudents", fields: [enrolledIds], references: [id])
+  enrolledIds  String[]      @db.ObjectId
+  submissions  Submission[]
+  achievements Achievement[]
+  progress     UserProgress[]
 
   @@map("users")
 }
@@ -51,6 +53,7 @@ model Course {
   students   User[]    @relation("EnrolledStudents", fields: [studentIds], references: [id])
   studentIds String[]  @db.ObjectId
   reviews    Review[]
+  progress   UserProgress[]
 
   @@map("courses")
 }
@@ -71,6 +74,7 @@ model Lesson {
   course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  progress    UserProgress[]
 
   @@map("lessons")
 }
@@ -152,4 +156,38 @@ type RoadmapStep {
   description String
   order       Int
   resources   String[]
+}
+
+model Achievement {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id])
+  title       String
+  description String
+  icon        String
+  type        String
+  earnedAt    DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("achievements")
+}
+
+model UserProgress {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id])
+  courseId    String    @db.ObjectId
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessonId    String    @db.ObjectId
+  lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  progress    Float     @default(0)
+  lastAccessed DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, lessonId])
+  @@map("user_progress")
 }

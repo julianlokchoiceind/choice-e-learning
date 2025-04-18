@@ -1,21 +1,11 @@
-// Try to import prisma but handle the case where it fails
-import { PrismaClient } from '@prisma/client';
-let prisma: PrismaClient | null = null;
+// Export the Prisma client from our central location
+import prisma from './db/index';
 
-try {
-  // Create a new PrismaClient instance
-  prisma = new PrismaClient();
-  console.log('PrismaClient initialized successfully');
-} catch (error) {
-  console.warn('Failed to initialize PrismaClient:', error);
-  console.warn('The application will continue using MongoDB directly');
-}
+// Re-export all database services
+export * from './db/services';
 
-// Export all MongoDB functions from the server-only file
-export * from './db/mongodb';
-
-// Export prisma client (which might be null if initialization failed)
+// Export prisma client directly for convenience
 export { prisma };
 
-// Export prisma client as default (but may be null)
+// Export prisma client as default
 export default prisma;

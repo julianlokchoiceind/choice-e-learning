@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCollection } from '@/lib/db/mongodb';
+import prisma from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/auth-options';
 import { EnrolledCourse } from '@/types/course';
-import { ObjectId } from 'mongodb';
+
 import { checkAndAwardAchievements } from '@/services/achievements';
 
 export async function GET(request: NextRequest) {
@@ -23,41 +23,56 @@ export async function GET(request: NextRequest) {
       }, { status: 401 });
     }
 
-    // Get the necessary collections
-    const enrollmentsCollection = await getCollection('enrollments');
-    const coursesCollection = await getCollection('courses');
-    const userProgressCollection = await getCollection('userProgress');
+    // Use Prisma to get enrollment data
     
-    // Get all enrollments for the user
-    const enrollments = await enrollmentsCollection.find({ userId }).toArray();
+    // Get all courses the user is enrolled in
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        enrolledIn: true
+      }
+    });
     
-    if (!enrollments.length) {
+    if (!user || !user.enrolledIn.length) {
       return NextResponse.json({ 
         success: true, 
         courses: [] 
       });
     }
     
-    // Get the course IDs from enrollments
-    const courseIds = enrollments.map(enrollment => enrollment.courseId);
+    // Get the course IDs from enrolled courses
+    const courseIds = user.enrolledIn.map(course => course.id);
     
-    // Get basic course data for all enrolled courses
-    const courses = await coursesCollection.find({ 
-      _id: { $in: courseIds.map(id => typeof id === 'string' ? id : id.toString()) } 
-    }).toArray();
+    // Get basic course data for all enrolled courses using their IDs
+    const courses = await prisma.course.findMany({
+      where: {
+        id: { in: courseIds }
+      },
+      include: {
+        lessons: true
+      }
+    });
     
     // Get progress data for each course
-    const progressData = await userProgressCollection.aggregate([
-      { $match: { userId, courseId: { $in: courseIds } } },
-      { $group: {
-          _id: '$courseId',
-          completedLessons: {
-            $sum: { $cond: [{ $eq: ['$completed', true] }, 1, 0] }
-          },
-          totalTimeSpent: { $sum: '$timeSpent' }
-        }
+    const userProgress = await prisma.userProgress.findMany({
+      where: {
+        userId: userId,
+        courseId: { in: courseIds }
       }
-    ]).toArray();
+    });
+    
+    // Calculate aggregated progress data
+    const progressData = courseIds.map(courseId => {
+      const courseProgress = userProgress.filter(p => p.courseId === courseId);
+      const completedLessons = courseProgress.filter(p => p.completed).length;
+      const totalTimeSpent = courseProgress.reduce((sum, p) => sum + (p.timeSpent || 0), 0);
+      
+      return {
+        _id: courseId,
+        completedLessons,
+        totalTimeSpent
+      };
+    });
 
     // Create a map of progress data by courseId
     const progressMap = progressData.reduce((map, item) => {
@@ -69,32 +84,29 @@ export async function GET(request: NextRequest) {
     }, {} as Record<string, { completedLessons: number, totalTimeSpent: number }>);
     
     // Format the response data
-    const enrolledCourses: EnrolledCourse[] = await Promise.all(
-      courses.map(async (course) => {
-        const courseId = course._id.toString();
-        
-        // Get total lessons for the course
-        const totalLessons = await getCollection('lessons')
-          .then(collection => collection.countDocuments({ courseId }));
-        
-        // Get progress data or default values
-        const progress = progressMap[courseId] || { completedLessons: 0, totalTimeSpent: 0 };
-        
-        // Calculate progress percentage
-        const progressPercentage = totalLessons > 0 
-          ? Math.round((progress.completedLessons / totalLessons) * 100) 
-          : 0;
-        
-        return {
-          id: courseId,
-          title: course.title,
-          progress: progressPercentage,
-          imageUrl: course.image || '/images/course-placeholder.jpg',
-          totalLessons,
-          completedLessons: progress.completedLessons
-        };
-      })
-    );
+    const enrolledCourses: EnrolledCourse[] = courses.map((course) => {
+      const courseId = course.id;
+      
+      // Get total lessons for the course
+      const totalLessons = course.lessons.length;
+      
+      // Get progress data or default values
+      const progress = progressMap[courseId] || { completedLessons: 0, totalTimeSpent: 0 };
+      
+      // Calculate progress percentage
+      const progressPercentage = totalLessons > 0 
+        ? Math.round((progress.completedLessons / totalLessons) * 100) 
+        : 0;
+      
+      return {
+        id: courseId,
+        title: course.title,
+        progress: progressPercentage,
+        imageUrl: course.imageUrl || '/images/course-placeholder.jpg',
+        totalLessons,
+        completedLessons: progress.completedLessons
+      };
+    });
     
     return NextResponse.json({
       success: true,
@@ -137,14 +149,17 @@ export async function POST(request: NextRequest) {
     
     const { courseId } = data;
     
-    // Get the enrollments collection
-    const enrollmentsCollection = await getCollection('enrollments');
-    
-    // Check if enrollment already exists
-    const existingEnrollment = await enrollmentsCollection.findOne({
-      userId,
-      courseId
+    // Check if user is already enrolled in the course
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        enrolledIn: {
+          where: { id: courseId }
+        }
+      }
     });
+    
+    const existingEnrollment = user?.enrolledIn.length > 0;
     
     if (existingEnrollment) {
       return NextResponse.json({ 
@@ -154,9 +169,8 @@ export async function POST(request: NextRequest) {
     }
     
     // Get the course to make sure it exists
-    const coursesCollection = await getCollection('courses');
-    const course = await coursesCollection.findOne({ 
-      _id: new ObjectId(courseId) 
+    const course = await prisma.course.findUnique({
+      where: { id: courseId }
     });
     
     if (!course) {
@@ -166,35 +180,28 @@ export async function POST(request: NextRequest) {
       }, { status: 404 });
     }
     
-    // Create enrollment record
+    // Create the enrollment by connecting user and course
     const now = new Date();
-    const result = await enrollmentsCollection.insertOne({
-      userId,
-      courseId,
-      enrolledAt: now,
-      status: 'active',
-      progress: 0,
-      completedLessons: 0,
-      createdAt: now,
-      updatedAt: now
+    const result = await prisma.course.update({
+      where: { id: courseId },
+      data: {
+        students: {
+          connect: { id: userId }
+        }
+      }
     });
     
-    // Update user's enrolledIds array
-    const usersCollection = await getCollection('users');
-    await usersCollection.updateOne(
-      { _id: new ObjectId(userId) },
-      { 
-        $addToSet: { "enrolledIds": courseId } 
+    // Also create an enrollment record
+    await prisma.enrollment.create({
+      data: {
+        userId,
+        courseId,
+        enrolledAt: now,
+        status: 'active',
+        progress: 0,
+        completedLessons: 0
       }
-    );
-    
-    // Add the user to the course's studentIds
-    await coursesCollection.updateOne(
-      { _id: new ObjectId(courseId) },
-      { 
-        $addToSet: { "studentIds": userId } 
-      }
-    );
+    });
     
     // Check and award achievements (like "Course Starter")
     await checkAndAwardAchievements(userId);
@@ -202,7 +209,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       message: 'Successfully enrolled in course',
-      enrollmentId: result.insertedId.toString()
+      enrollmentId: `${userId}_${courseId}`
     });
     
   } catch (error) {

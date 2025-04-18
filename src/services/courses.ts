@@ -1,52 +1,52 @@
 "use server";
 
-import { getCollection } from '@/lib/db/mongodb';
+import prisma from '@/lib/db';
 import { CourseListItem, CourseDetails, UserCourseStats } from '@/types';
-import { ObjectId } from 'mongodb';
 
 /**
  * Get all courses from the database
  */
 export async function getAllCourses(): Promise<CourseListItem[]> {
   try {
-    const coursesCollection = await getCollection('courses');
-    const courses = await coursesCollection.find().toArray();
+    const courses = await prisma.course.findMany({
+      include: {
+        reviews: true,
+        lessons: true,
+        _count: {
+          select: {
+            students: true,
+            reviews: true,
+            lessons: true
+          }
+        }
+      }
+    });
     
-    const usersCollection = await getCollection('users');
-
     // Process the courses to match our CourseListItem interface
     const processedCourses = await Promise.all(
       courses.map(async (course) => {
-        // Get creator info (previously called instructor)
-        const creator = await usersCollection.findOne({ _id: new ObjectId(course.creatorId || course.instructorId) });
-        
-        // Count students
-        const studentsCount = Array.isArray(course.studentIds) ? course.studentIds.length : 0;
+        // Get creator info if available
+        const creator = course.creatorId 
+          ? await prisma.user.findUnique({ where: { id: course.creatorId } })
+          : null;
         
         // Calculate rating
-        const reviewsCollection = await getCollection('reviews');
-        const reviews = await reviewsCollection.find({ courseId: course._id.toString() }).toArray();
-        const rating = reviews.length > 0 
-          ? Number((reviews.reduce((acc: number, review: any) => acc + review.rating, 0) / reviews.length).toFixed(1))
+        const rating = course.reviews.length > 0 
+          ? Number((course.reviews.reduce((acc, review) => acc + review.rating, 0) / course.reviews.length).toFixed(1))
           : 4.5; // Default if no reviews
         
-        // Calculate duration based on lessons
-        const lessonsCollection = await getCollection('lessons');
-        const lessonsCount = await lessonsCollection.countDocuments({ courseId: course._id.toString() });
-        const duration = `${Math.ceil(lessonsCount / 2)} weeks`; // Approximate duration
-        
         return {
-          id: course._id.toString(),
+          id: course.id,
           title: course.title,
           description: course.description,
           image: course.imageUrl || 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop',
           level: course.level,
           price: course.price,
-          duration: duration,
+          duration: `${Math.ceil(course._count.lessons / 2)} weeks`, // Approximate duration
           isFeatured: Array.isArray(course.topics) && course.topics.includes('featured'),
-          students: studentsCount,
+          students: course._count.students,
           rating: rating,
-          reviews: reviews.length,
+          reviews: course._count.reviews,
           instructorName: creator?.name || 'Administrator',
         };
       })
@@ -64,56 +64,71 @@ export async function getAllCourses(): Promise<CourseListItem[]> {
  */
 export async function getCourseById(courseId: string) {
   try {
-    const coursesCollection = await getCollection('courses');
-    const course = await coursesCollection.findOne({ _id: new ObjectId(courseId) });
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        lessons: {
+          orderBy: { order: 'asc' }
+        },
+        reviews: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
+          }
+        },
+        students: true,
+        _count: {
+          select: {
+            students: true,
+            reviews: true,
+            lessons: true
+          }
+        }
+      }
+    });
     
     if (!course) return null;
     
-    // Get creator info (previously instructor)
-    const usersCollection = await getCollection('users');
-    const creator = await usersCollection.findOne({ _id: new ObjectId(course.creatorId || course.instructorId) });
-    
-    // Get lessons
-    const lessonsCollection = await getCollection('lessons');
-    const lessons = await lessonsCollection.find({ courseId: courseId }).toArray();
-    
-    // Get reviews
-    const reviewsCollection = await getCollection('reviews');
-    const reviews = await reviewsCollection.find({ courseId: courseId }).toArray();
+    // Get creator info if available
+    const creator = course.creatorId 
+      ? await prisma.user.findUnique({ where: { id: course.creatorId } })
+      : null;
     
     // Process reviews to include user names
-    const processedReviews = await Promise.all(
-      reviews.map(async (review) => {
-        const user = await usersCollection.findOne({ _id: new ObjectId(review.userId) });
-        return {
-          name: user?.name || 'Anonymous',
-          rating: review.rating,
-          avatar: 'https://randomuser.me/api/portraits/women/63.jpg', // Default avatar
-          date: `${Math.floor((Date.now() - new Date(review.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 30))} months ago`,
-          comment: review.comment || 'Great course!',
-        };
-      })
-    );
+    const processedReviews = course.reviews.map(review => {
+      return {
+        name: review.user?.name || 'Anonymous',
+        rating: review.rating,
+        avatar: 'https://randomuser.me/api/portraits/women/63.jpg', // Default avatar
+        date: `${Math.floor((Date.now() - new Date(review.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 30))} months ago`,
+        comment: review.comment || 'Great course!',
+      };
+    });
     
     // Calculate rating
-    const rating = reviews.length > 0 
-      ? Number((reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length).toFixed(1))
+    const rating = course.reviews.length > 0 
+      ? Number((course.reviews.reduce((acc, review) => acc + review.rating, 0) / course.reviews.length).toFixed(1))
       : 4.5; // Default if no reviews
     
     return {
-      id: course._id.toString(),
+      id: course.id,
       title: course.title,
       description: course.description,
       fullDescription: course.description,
       image: course.imageUrl || 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop',
       level: course.level,
       price: course.price,
-      duration: `${Math.ceil(lessons.length / 2)} weeks`, // Approximate duration
-      lessonsCount: lessons.length,
-      totalHours: Number((lessons.length * 0.5).toFixed(1)), // Approximate hours
+      duration: `${Math.ceil(course.lessons.length / 2)} weeks`, // Approximate duration
+      lessonsCount: course.lessons.length,
+      totalHours: Number((course.lessons.length * 0.5).toFixed(1)), // Approximate hours
       lastUpdated: new Date(course.updatedAt).toLocaleString('en-US', { month: 'long', year: 'numeric' }),
       rating: rating,
-      reviewsCount: reviews.length,
+      reviewsCount: course.reviews.length,
       isFeatured: Array.isArray(course.topics) && course.topics.includes('featured'),
       learningPoints: course.topics || [],
       instructor: {
@@ -122,7 +137,7 @@ export async function getCourseById(courseId: string) {
         bio: 'Course creator and educator',
         avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
         rating: 4.9,
-        students: course.studentIds?.length || 0,
+        students: course.students.length || 0,
         courses: 1, // Simplified
       },
       reviews: processedReviews,
@@ -138,8 +153,9 @@ export async function getCourseById(courseId: string) {
  */
 export async function getTotalStudentCount(): Promise<number> {
   try {
-    const usersCollection = await getCollection('users');
-    return usersCollection.countDocuments({ role: 'student' });
+    return await prisma.user.count({
+      where: { role: 'student' }
+    });
   } catch (error) {
     console.error('Error getting total student count:', error);
     return 0;
@@ -151,9 +167,16 @@ export async function getTotalStudentCount(): Promise<number> {
  */
 export async function getCourseEnrollmentCount(courseId: string): Promise<number> {
   try {
-    const coursesCollection = await getCollection('courses');
-    const course = await coursesCollection.findOne({ _id: new ObjectId(courseId) });
-    return Array.isArray(course?.studentIds) ? course.studentIds.length : 0;
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        _count: {
+          select: { students: true }
+        }
+      }
+    });
+    
+    return course?._count.students || 0;
   } catch (error) {
     console.error('Error getting course enrollment count:', error);
     return 0;
@@ -165,8 +188,12 @@ export async function getCourseEnrollmentCount(courseId: string): Promise<number
  */
 export async function getUserStats(userId: string): Promise<UserCourseStats> {
   try {
-    const usersCollection = await getCollection('users');
-    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        enrolledIn: true
+      }
+    });
     
     if (!user) {
       return {
@@ -177,10 +204,12 @@ export async function getUserStats(userId: string): Promise<UserCourseStats> {
       };
     }
     
-    // Get courses user is enrolled in
-    const enrolledIds = Array.isArray(user.enrolledIds) ? user.enrolledIds : [];
+    // Get user progress
+    const userProgress = await prisma.userProgress.findMany({
+      where: { userId }
+    });
     
-    if (enrolledIds.length === 0) {
+    if (user.enrolledIn.length === 0) {
       return {
         coursesCompleted: 0,
         lessonsCompleted: 0,
@@ -189,43 +218,40 @@ export async function getUserStats(userId: string): Promise<UserCourseStats> {
       };
     }
     
-    // Get data for each enrolled course
-    const lessonsCollection = await getCollection('lessons');
-    const userProgressCollection = await getCollection('userProgress');
-    
-    // Get user progress records
-    const userProgress = await userProgressCollection.find({ 
-      userId: userId 
-    }).toArray();
-    
     let completedLessons = 0;
-    let totalLessons = 0;
     let coursesCompleted = 0;
     let totalHoursLearned = 0;
     
+    // Get all lessons for enrolled courses
+    const enrolledCourseIds = user.enrolledIn.map(course => course.id);
+    
     // Process each enrolled course
-    for (const courseId of enrolledIds) {
+    for (const courseId of enrolledCourseIds) {
       // Get all lessons for this course
-      const courseLessons = await lessonsCollection.find({ 
-        courseId: courseId.toString() 
-      }).toArray();
-      
-      totalLessons += courseLessons.length;
+      const courseLessons = await prisma.lesson.findMany({
+        where: { courseId }
+      });
       
       // Count completed lessons
       let courseCompletedLessons = 0;
-      courseLessons.forEach(lesson => {
+      
+      for (const lesson of courseLessons) {
         const progressEntry = userProgress.find(p => 
-          p.courseId === courseId.toString() && p.lessonId === lesson._id.toString()
+          p.courseId === courseId && p.lessonId === lesson.id && p.completed
         );
         
-        if (progressEntry && progressEntry.completed) {
+        if (progressEntry) {
           completedLessons++;
           courseCompletedLessons++;
-          // Add time spent to total hours
-          totalHoursLearned += (progressEntry.timeSpent || 0) / 3600; // Convert seconds to hours
+          // Add time spent to total hours (if available)
+          if (progressEntry.timeSpent) {
+            totalHoursLearned += progressEntry.timeSpent / 3600; // Convert seconds to hours
+          } else {
+            // Estimate if not available
+            totalHoursLearned += 0.5; // Default 30 minutes per lesson
+          }
         }
-      });
+      }
       
       // Check if course is completed
       if (courseCompletedLessons === courseLessons.length && courseLessons.length > 0) {

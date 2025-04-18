@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ObjectId } from 'mongodb';
-import { getCollection } from '@/lib/db/mongodb';
+import prisma from '@/lib/db';
 import { authenticateUser } from '@/lib/auth/auth-middleware';
 import { hashPassword, comparePasswords } from '@/utils/auth-utils';
 import { z } from 'zod';
@@ -30,7 +29,6 @@ export async function GET(req: NextRequest) {
     }
 
     // Get user from database
-    const usersCollection = await getCollection('users');
     const userId = auth.user?.id;
     
     if (!userId) {
@@ -40,10 +38,19 @@ export async function GET(req: NextRequest) {
       );
     }
     
-    const user = await usersCollection.findOne(
-      { _id: new ObjectId(userId) },
-      { projection: { password: 0 } } // Exclude password
-    );
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        bio: true,
+        avatar: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
 
     if (!user) {
       return NextResponse.json(
@@ -56,7 +63,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       user: {
-        id: user._id.toString(),
+        id: user.id,
         name: user.name,
         email: user.email,
         role: user.role,
@@ -110,7 +117,6 @@ export async function PUT(req: NextRequest) {
     if (avatar) updateDoc.avatar = avatar;
     
     // Get user from database
-    const usersCollection = await getCollection('users');
     const userId = auth.user?.id;
     
     if (!userId) {
@@ -123,7 +129,10 @@ export async function PUT(req: NextRequest) {
     // Handle password update if requested
     if (newPassword && currentPassword) {
       // Get current user with password
-      const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+      const user = await prisma.user.findUnique({ 
+        where: { id: userId },
+        select: { password: true }
+      });
       
       if (!user) {
         return NextResponse.json(
@@ -146,12 +155,12 @@ export async function PUT(req: NextRequest) {
     }
     
     // Update user
-    const result = await usersCollection.updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: updateDoc }
-    );
-    
-    if (result.matchedCount === 0) {
+    try {
+      await prisma.user.update({
+        where: { id: userId },
+        data: updateDoc
+      });
+    } catch (error) {
       return NextResponse.json(
         { success: false, error: 'User not found' },
         { status: 404 }

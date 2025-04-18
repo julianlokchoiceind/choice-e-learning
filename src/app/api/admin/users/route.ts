@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ObjectId } from 'mongodb';
-import { getCollection } from '@/lib/db/mongodb';
+import prisma from '@/lib/db';
 import { requireAdmin } from '@/lib/auth/auth-middleware';
 import { Role } from '@/lib/auth/auth-options';
 
@@ -41,39 +40,53 @@ export async function GET(req: NextRequest) {
       ];
     }
     
-    // Get users collection
-    const usersCollection = await getCollection('users');
+    // Build Prisma where clause from filter
+    const where: any = {};
+    
+    // Add role filter if specified and valid
+    if (filter.role) {
+      where.role = filter.role;
+    }
+    
+    // Add search filter if provided
+    if (filter.$or) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } }
+      ];
+    }
     
     // Get total count of matching users
-    const totalCount = await usersCollection.countDocuments(filter);
+    const totalCount = await prisma.user.count({ where });
     
-    // Build sort options
-    const sortOptions: any = {};
+    // Build Prisma orderBy
+    let orderBy: any = {};
     // Only allow sorting by certain fields for security
     if (['name', 'email', 'role', 'createdAt', 'updatedAt'].includes(sortBy)) {
-      sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
+      orderBy[sortBy] = sortOrder === 'asc' ? 'asc' : 'desc';
     } else {
       // Default sort by createdAt descending
-      sortOptions.createdAt = -1;
+      orderBy = { createdAt: 'desc' };
     }
     
     // Get paginated users
-    const users = await usersCollection.find(filter)
-      .project({ password: 0 }) // Exclude password
-      .sort(sortOptions)
-      .skip(skip)
-      .limit(limit)
-      .toArray();
+    const users = await prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true
+      },
+      orderBy,
+      skip,
+      take: limit
+    });
     
-    // Format users for response
-    const formattedUsers = users.map(user => ({
-      id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt
-    }));
+    // No need for additional formatting since Prisma already provides correctly structured data
+    const formattedUsers = users;
     
     // Return paginated users
     return NextResponse.json({

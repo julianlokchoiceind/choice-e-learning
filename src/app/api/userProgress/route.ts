@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCollection } from '@/lib/db/mongodb';
-import { ObjectId } from 'mongodb';
+import prisma from '@/lib/db';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth/auth-options';
 import { checkAndAwardAchievements } from '@/services/achievements';
@@ -32,14 +31,13 @@ export async function POST(request: NextRequest) {
     
     const { courseId, lessonId, completed = false, progress = 0, timeSpent = 0 } = data;
     
-    // Get the user progress collection
-    const userProgressCollection = await getCollection('userProgress');
-    
     // Check if progress entry already exists
-    const existingProgress = await userProgressCollection.findOne({
-      userId,
-      courseId,
-      lessonId
+    const existingProgress = await prisma.userProgress.findFirst({
+      where: {
+        userId,
+        courseId,
+        lessonId
+      }
     });
     
     const now = new Date();
@@ -58,10 +56,10 @@ export async function POST(request: NextRequest) {
         updateData.completedAt = now;
       }
       
-      await userProgressCollection.updateOne(
-        { _id: existingProgress._id },
-        { $set: updateData }
-      );
+      await prisma.userProgress.update({
+        where: { id: existingProgress.id },
+        data: updateData
+      });
       
       // If lesson was newly completed, check for achievements
       if (completed && !existingProgress.completed) {
@@ -74,16 +72,16 @@ export async function POST(request: NextRequest) {
       });
     } else {
       // Create new progress entry
-      const result = await userProgressCollection.insertOne({
-        userId,
-        courseId,
-        lessonId,
-        completed,
-        completedAt: completed ? now : null,
-        progress,
-        timeSpent,
-        createdAt: now,
-        updatedAt: now
+      const result = await prisma.userProgress.create({
+        data: {
+          userId,
+          courseId,
+          lessonId,
+          completed,
+          completedAt: completed ? now : null,
+          progress,
+          timeSpent
+        }
       });
       
       // If lesson was completed, check for achievements
@@ -94,7 +92,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ 
         success: true, 
         message: 'Progress recorded successfully',
-        id: result.insertedId.toString()
+        id: result.id
       });
     }
   } catch (error) {
@@ -124,22 +122,23 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const courseId = searchParams.get('courseId');
     
-    // Get the user progress collection
-    const userProgressCollection = await getCollection('userProgress');
-    
-    // Query based on whether courseId is provided
-    const query: Record<string, any> = { userId };
+    // Build query based on whether courseId is provided
+    const where: Record<string, any> = { userId };
     if (courseId) {
-      query.courseId = courseId;
+      where.courseId = courseId;
     }
     
-    // Get progress entries
-    const progressEntries = await userProgressCollection.find(query).toArray();
+    // Get progress entries using Prisma
+    const progressEntries = await prisma.userProgress.findMany({
+      where
+    });
     
     // Calculate course progress if courseId is provided
     if (courseId) {
-      const lessonsCollection = await getCollection('lessons');
-      const totalLessons = await lessonsCollection.countDocuments({ courseId });
+      // Count total lessons for this course
+      const totalLessons = await prisma.lesson.count({
+        where: { courseId }
+      });
       const completedLessons = progressEntries.filter(entry => entry.completed).length;
       
       const courseProgress = totalLessons > 0 
@@ -154,7 +153,7 @@ export async function GET(request: NextRequest) {
           completedLessons,
           progress: courseProgress,
           entries: progressEntries.map(entry => ({
-            id: entry._id.toString(),
+            id: entry.id,
             lessonId: entry.lessonId,
             completed: entry.completed,
             completedAt: entry.completedAt,
@@ -169,7 +168,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       entries: progressEntries.map(entry => ({
-        id: entry._id.toString(),
+        id: entry.id,
         courseId: entry.courseId,
         lessonId: entry.lessonId,
         completed: entry.completed,

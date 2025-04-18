@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { AuthError } from '@/lib/auth/services/auth-service';
 
 export interface RegisterCredentials {
   name: string;
@@ -11,11 +12,6 @@ export interface RegisterCredentials {
 export interface LoginCredentials {
   email: string;
   password: string;
-}
-
-export interface AuthError {
-  message: string;
-  status?: number;
 }
 
 export function useAuth() {
@@ -31,6 +27,8 @@ export function useAuth() {
 
   /**
    * Register a new user
+   * @param credentials Registration credentials
+   * @returns Success status
    */
   const register = async (credentials: RegisterCredentials) => {
     console.log('Registering user:', credentials.email);
@@ -54,17 +52,15 @@ export function useAuth() {
         
         // Prepare a user-friendly error message
         let errorMessage = data.error || 'Registration failed';
+        let errorStatus = response.status;
         
-        // Handle specific status codes
-        if (response.status === 409) {
-          errorMessage = 'This email is already registered. Please use a different email or try to login.';
-        } else if (response.status === 503) {
-          errorMessage = 'Cannot connect to the database. Please try again later.';
-        } else if (response.status === 400) {
-          errorMessage = data.error || 'Invalid form data. Please check your input and try again.';
-        }
+        // Set appropriate error
+        setError({ 
+          message: errorMessage,
+          status: errorStatus
+        });
         
-        throw new Error(errorMessage);
+        return false;
       }
       
       // Auto-login after successful registration using the same approach as OAuth providers
@@ -118,6 +114,8 @@ export function useAuth() {
 
   /**
    * Log in an existing user
+   * @param credentials Login credentials
+   * @returns Success status
    */
   const login = async (credentials: LoginCredentials) => {
     console.log('Logging in user:', credentials.email);
@@ -135,7 +133,11 @@ export function useAuth() {
       
       if (result?.error) {
         console.error('Login failed:', result.error);
-        throw new Error(result.error);
+        setError({ 
+          message: result.error,
+          status: 401
+        });
+        return false;
       }
       
       console.log('Login successful, redirecting to dashboard');
@@ -159,6 +161,7 @@ export function useAuth() {
 
   /**
    * Log out the current user
+   * @returns Success status and message
    */
   const logout = async () => {
     console.log('Logging out user');
@@ -183,11 +186,11 @@ export function useAuth() {
   return {
     user: session?.user,
     isAuthenticated: !!session?.user,
-    isLoading: loading,
+    isLoading: loading || status === 'loading',
     authStatus: status,
     error,
     register,
     login,
     logout,
   };
-} 
+}

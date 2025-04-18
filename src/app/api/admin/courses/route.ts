@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ObjectId } from 'mongodb';
-import { getCollection } from '@/lib/db/mongodb';
+import prisma from '@/lib/db';
 import { requireAdmin } from '@/lib/auth/auth-middleware';
 import { z } from 'zod';
 import { getCurrentUser } from '@/lib/auth/session';
@@ -75,31 +74,24 @@ export async function POST(req: Request) {
     // Generate a slug from the title
     const slug = title.toLowerCase().replace(/\s+/g, '-') + '-' + uuidv4().substring(0, 8);
 
-    // Get the courses collection
-    const coursesCollection = await getCollection('courses');
+    // Create the course with Prisma
+    const newCourse = await prisma.course.create({
+      data: {
+        title,
+        description,
+        slug,
+        imageUrl: imageUrl || '/images/course-default.jpg',
+        price,
+        level,
+        topics,
+        videoUrl,
+        instructorId: user.id,
+        studentIds: [],
+      }
+    });
 
-    // Create the course document
-    const now = new Date();
-    const newCourse = {
-      title,
-      description,
-      slug,
-      imageUrl: imageUrl || '/images/course-default.jpg',
-      price,
-      level,
-      topics,
-      videoUrl,
-      instructorId: new ObjectId(user.id),
-      createdAt: now,
-      updatedAt: now,
-      studentIds: [],
-      lessons: []
-    };
-
-    // Insert the course into the database
-    const result = await coursesCollection.insertOne(newCourse);
-
-    if (!result.acknowledged) {
+    // Check if course was created successfully
+    if (!newCourse) {
       return NextResponse.json(
         { error: 'Failed to create course' },
         { status: 500 }
@@ -109,11 +101,7 @@ export async function POST(req: Request) {
     // Return the created course
     return NextResponse.json({
       success: true,
-      course: {
-        ...newCourse,
-        id: result.insertedId.toString(),
-        instructorId: user.id
-      }
+      course: newCourse
     }, { status: 201 });
   } catch (error) {
     console.error('Error creating course:', error);
@@ -143,25 +131,32 @@ export async function GET(req: Request) {
       );
     }
     
-    // Get the courses collection
-    const coursesCollection = await getCollection('courses');
-    
-    // Find all courses created by the admin
-    const courses = await coursesCollection.find({
-      instructorId: new ObjectId(user.id)
-    }).toArray();
+    // Find all courses created by the admin using Prisma
+    const courses = await prisma.course.findMany({
+      where: {
+        instructorId: user.id
+      },
+      include: {
+        _count: {
+          select: {
+            students: true,
+            lessons: true
+          }
+        }
+      }
+    });
     
     // Format the courses for response
     const formattedCourses = courses.map(course => ({
-      id: course._id.toString(),
+      id: course.id,
       title: course.title,
       description: course.description,
       price: course.price,
       level: course.level,
       topics: course.topics,
       imageUrl: course.imageUrl,
-      studentsCount: course.studentIds?.length || 0,
-      lessonsCount: course.lessons?.length || 0,
+      studentsCount: course._count.students,
+      lessonsCount: course._count.lessons,
       createdAt: course.createdAt,
       updatedAt: course.updatedAt
     }));

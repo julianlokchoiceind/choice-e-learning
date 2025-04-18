@@ -4,9 +4,9 @@ import GoogleProvider from 'next-auth/providers/google';
 import GitHubProvider from 'next-auth/providers/github';
 import FacebookProvider from 'next-auth/providers/facebook';
 import MicrosoftProvider from 'next-auth/providers/azure-ad';
-import { comparePasswords } from '@/utils/auth-utils';
-import { getCollection } from '../db/mongodb';
-import { ObjectId } from 'mongodb';
+import { comparePasswords } from './utils/password-utils';
+import { findUserByEmail, updateUserLoginInfo } from '@/lib/db/services/user-service';
+import prisma from '@/lib/db';
 
 // Check if environment variables are set
 function validateEnvVariables() {
@@ -39,6 +39,7 @@ validateEnvVariables();
 // Define Role enum
 export enum Role {
   student = 'student',
+  instructor = 'instructor',
   admin = 'admin'
 }
 
@@ -82,17 +83,8 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Email and password are required');
           }
 
-          // Get the users collection
-          const usersCollection = await getCollection('users');
-          if (!usersCollection) {
-            console.error('Failed to get users collection');
-            throw new Error('Database connection failed');
-          }
-
           // Find the user by email (case insensitive)
-          const user = await usersCollection.findOne({ 
-            email: credentials.email.toLowerCase() 
-          });
+          const user = await findUserByEmail(credentials.email);
 
           // If user doesn't exist
           if (!user) {
@@ -111,7 +103,7 @@ export const authOptions: NextAuthOptions = {
 
           // Return user object without password
           return {
-            id: user._id.toString(),
+            id: user.id,
             name: user.name,
             email: user.email,
             role: user.role as Role
@@ -259,72 +251,50 @@ export const authOptions: NextAuthOptions = {
           const normalizedEmail = typeof userEmail === 'string' ? userEmail.toLowerCase() : 
                                  (typeof user.email === 'string' ? user.email.toLowerCase() : '');
           
-          const usersCollection = await getCollection('users');
-          if (!usersCollection) {
-            console.error('Failed to get users collection');
-            throw new Error('Database connection failed');
-          }
-          
           // Check if user already exists
-          const existingUser = await usersCollection.findOne({ 
-            email: normalizedEmail
-          });
+          const existingUser = await findUserByEmail(normalizedEmail);
           
           if (existingUser) {
             // User exists, update their OAuth info and login history
             console.log(`Existing user ${normalizedEmail} signed in via ${account.provider}`);
             
             try {
-              // Update login history
-              await usersCollection.updateOne(
-                { _id: existingUser._id },
-                { 
-                  $set: { 
-                    lastLogin: new Date(),
-                    authProvider: account.provider,
-                    name: user.name || existingUser.name,
-                    image: user.image || existingUser.image,
-                  },
-                  $addToSet: { "loginHistory": new Date() }
+              // Update login history and OAuth info
+              await prisma.user.update({
+                where: { id: existingUser.id },
+                data: { 
+                  updatedAt: new Date(),
+                  name: user.name || existingUser.name,
+                  // Note: Add more fields as needed based on your User model
                 }
-              );
+              });
             } catch (updateError) {
               console.error('Error updating user login history:', updateError);
               // Continue with sign in even if update fails
             }
             
             // Set the user ID for the session
-            user.id = existingUser._id.toString();
-            user.role = existingUser.role;
+            user.id = existingUser.id;
+            user.role = existingUser.role as Role;
             
           } else {
             // Create a new user from OAuth data
             console.log(`Creating new user from ${account.provider} OAuth:`, userEmail);
             
-            const now = new Date();
-            const newUser = {
-              name: user.name || profile?.name || 'OAuth User',
-              email: userEmail.toLowerCase(),
-              image: user.image || null,
-              role: Role.student,
-              password: null,
-              createdAt: now,
-              updatedAt: now,
-              lastLogin: now,
-              loginHistory: [now],
-              authProvider: account.provider,
-              emailVerified: true, // OAuth emails are typically verified
-            };
-            
             try {
-              const result = await usersCollection.insertOne(newUser);
-              if (!result.acknowledged) {
-                throw new Error('Failed to create user record');
-              }
+              const newUser = await prisma.user.create({
+                data: {
+                  name: user.name || profile?.name || 'OAuth User',
+                  email: normalizedEmail,
+                  password: '', // Empty password for OAuth users
+                  role: 'student',
+                  // Add other fields as needed
+                }
+              });
               
-              console.log('Created new user from OAuth:', result.insertedId.toString());
-              user.id = result.insertedId.toString();
-              user.role = Role.student;
+              console.log('Created new user from OAuth:', newUser.id);
+              user.id = newUser.id;
+              user.role = newUser.role as Role;
               
             } catch (createError) {
               console.error('Error creating new user:', createError);
@@ -334,23 +304,16 @@ export const authOptions: NextAuthOptions = {
         } else if (account && account.provider === 'credentials') {
           // For credentials login, update login history
           try {
-            const credentialsUsersCollection = await getCollection('users');
-            if (credentialsUsersCollection) {
-              const existingUser = await credentialsUsersCollection.findOne({ email: user.email });
+            if (user.email) {
+              const existingUser = await findUserByEmail(user.email);
               if (existingUser) {
-                await credentialsUsersCollection.updateOne(
-                  { _id: existingUser._id },
-                  { 
-                    $set: { lastLogin: new Date() },
-                    $addToSet: { "loginHistory": new Date() }
-                  }
-                );
+                await updateUserLoginInfo(existingUser.id);
                 
-                // Check and award achievements for login
+                // Check and award achievements for login if needed
                 try {
                   // We need to dynamically import this to avoid circular dependencies
                   const { checkAndAwardAchievements } = await import('@/services/achievements');
-                  await checkAndAwardAchievements(existingUser._id.toString());
+                  await checkAndAwardAchievements(existingUser.id);
                 } catch (achievementError) {
                   console.error('Error checking achievements:', achievementError);
                   // Don't fail login if achievements check fails
@@ -443,4 +406,4 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
-export default authOptions; 
+export default authOptions;

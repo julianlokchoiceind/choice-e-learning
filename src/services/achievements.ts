@@ -1,7 +1,6 @@
 "use server";
 
-import { getCollection } from '@/lib/db/mongodb';
-import { ObjectId } from 'mongodb';
+import prisma from '@/lib/db';
 import { UserAchievement, AchievementType } from '@/types';
 
 /**
@@ -9,16 +8,17 @@ import { UserAchievement, AchievementType } from '@/types';
  */
 export async function getUserAchievements(userId: string): Promise<UserAchievement[]> {
   try {
-    const achievementsCollection = await getCollection('achievements');
-    const achievements = await achievementsCollection.find({ userId }).toArray();
+    const achievements = await prisma.achievement.findMany({
+      where: { userId }
+    });
     
     return achievements.map(achievement => ({
-      id: achievement._id.toString(),
+      id: achievement.id,
       userId: achievement.userId,
       title: achievement.title,
       description: achievement.description,
       icon: achievement.icon,
-      earnedAt: new Date(achievement.earnedAt),
+      earnedAt: achievement.earnedAt,
       type: achievement.type as AchievementType,
     }));
   } catch (error) {
@@ -39,52 +39,48 @@ export async function createAchievement(
 ): Promise<UserAchievement | null> {
   try {
     // Check if user already has this achievement
-    const achievementsCollection = await getCollection('achievements');
-    const existingAchievement = await achievementsCollection.findOne({
-      userId,
-      type
+    const existingAchievement = await prisma.achievement.findFirst({
+      where: {
+        userId,
+        type
+      }
     });
     
     if (existingAchievement) {
       // User already has this achievement, return it
       return {
-        id: existingAchievement._id.toString(),
+        id: existingAchievement.id,
         userId: existingAchievement.userId,
         title: existingAchievement.title,
         description: existingAchievement.description,
         icon: existingAchievement.icon,
-        earnedAt: new Date(existingAchievement.earnedAt),
+        earnedAt: existingAchievement.earnedAt,
         type: existingAchievement.type as AchievementType,
       };
     }
     
     // Create new achievement
     const now = new Date();
-    const achievement = {
+    const achievement = await prisma.achievement.create({
+      data: {
+        userId,
+        type,
+        title,
+        description,
+        icon,
+        earnedAt: now
+      }
+    });
+    
+    return {
+      id: achievement.id,
       userId,
-      type,
       title,
       description,
       icon,
       earnedAt: now,
-      createdAt: now,
+      type,
     };
-    
-    const result = await achievementsCollection.insertOne(achievement);
-    
-    if (result.acknowledged) {
-      return {
-        id: result.insertedId.toString(),
-        userId,
-        title,
-        description,
-        icon,
-        earnedAt: now,
-        type,
-      };
-    }
-    
-    return null;
   } catch (error) {
     console.error('Error creating achievement:', error);
     return null;
@@ -96,8 +92,12 @@ export async function createAchievement(
  */
 export async function checkAndAwardAchievements(userId: string): Promise<UserAchievement[]> {
   try {
-    const usersCollection = await getCollection('users');
-    const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        enrolledIn: true
+      }
+    });
     
     if (!user) {
       return [];
@@ -119,7 +119,7 @@ export async function checkAndAwardAchievements(userId: string): Promise<UserAch
     }
     
     // Check for course started achievement
-    if (Array.isArray(user.enrolledIds) && user.enrolledIds.length > 0) {
+    if (user.enrolledIn && user.enrolledIn.length > 0) {
       const courseStartedAchievement = await createAchievement(
         userId,
         AchievementType.COURSE_STARTED,
@@ -134,39 +134,48 @@ export async function checkAndAwardAchievements(userId: string): Promise<UserAch
     }
     
     // Check for course completion achievement
-    const userProgressCollection = await getCollection('userProgress');
-    const progressEntries = await userProgressCollection.find({ userId }).toArray();
+    const userProgress = await prisma.userProgress.findMany({
+      where: { userId }
+    });
     
-    if (progressEntries.length > 0) {
-      // Group progress by courseId
-      const courseProgress: Record<string, number> = {};
-      const courseTotals: Record<string, number> = {};
+    if (userProgress.length > 0) {
+      // Get all courses enrolled in
+      const enrolledCourseIds = user.enrolledIds || [];
       
-      // Get all courses to check total lessons
-      const coursesCollection = await getCollection('courses');
-      const lessonsCollection = await getCollection('lessons');
+      // Get all lessons for these courses
+      const lessons = await prisma.lesson.findMany({
+        where: {
+          courseId: {
+            in: enrolledCourseIds
+          }
+        }
+      });
       
-      for (const courseId of user.enrolledIds || []) {
-        const courseLessons = await lessonsCollection.find({ 
-          courseId: courseId.toString() 
-        }).toArray();
-        
-        courseTotals[courseId.toString()] = courseLessons.length;
-        courseProgress[courseId.toString()] = 0;
+      // Group lessons by courseId
+      const courseLessons: Record<string, number> = {};
+      for (const lesson of lessons) {
+        if (!courseLessons[lesson.courseId]) {
+          courseLessons[lesson.courseId] = 0;
+        }
+        courseLessons[lesson.courseId]++;
       }
       
       // Count completed lessons per course
-      for (const progress of progressEntries) {
-        if (progress.completed && courseProgress[progress.courseId] !== undefined) {
+      const courseProgress: Record<string, number> = {};
+      for (const progress of userProgress) {
+        if (progress.completed) {
+          if (!courseProgress[progress.courseId]) {
+            courseProgress[progress.courseId] = 0;
+          }
           courseProgress[progress.courseId]++;
         }
       }
       
       // Check if any course is completed
-      for (const [courseId, completed] of Object.entries(courseProgress)) {
-        const total = courseTotals[courseId] || 0;
+      for (const [courseId, completedCount] of Object.entries(courseProgress)) {
+        const totalLessons = courseLessons[courseId] || 0;
         
-        if (total > 0 && completed >= total) {
+        if (totalLessons > 0 && completedCount >= totalLessons) {
           const courseCompletedAchievement = await createAchievement(
             userId,
             AchievementType.COURSE_COMPLETED,
@@ -184,73 +193,40 @@ export async function checkAndAwardAchievements(userId: string): Promise<UserAch
       }
       
       // Quick Learner achievement - X lessons in Y days
-      const completedLessonCount = progressEntries.filter(p => p.completed).length;
-      const firstCompletionDate = progressEntries
-        .filter(p => p.completed && p.completedAt)
-        .sort((a, b) => new Date(a.completedAt!).getTime() - new Date(b.completedAt!).getTime())[0]?.completedAt;
+      const completedLessons = userProgress.filter(p => p.completed);
+      const completedLessonCount = completedLessons.length;
       
-      if (completedLessonCount >= 10 && firstCompletionDate) {
-        const daysSinceFirstCompletion = Math.floor(
-          (Date.now() - new Date(firstCompletionDate).getTime()) / (1000 * 60 * 60 * 24)
-        );
+      if (completedLessonCount >= 10) {
+        const completedDates = completedLessons
+          .filter(p => p.completedAt)
+          .map(p => p.completedAt!)
+          .sort((a, b) => a.getTime() - b.getTime());
         
-        if (daysSinceFirstCompletion <= 7) {
-          const quickLearnerAchievement = await createAchievement(
-            userId,
-            AchievementType.QUICK_LEARNER,
-            'Quick Learner',
-            'You completed 10 lessons within a week.',
-            'speed'
+        if (completedDates.length > 0) {
+          const firstCompletionDate = completedDates[0];
+          const daysSinceFirstCompletion = Math.floor(
+            (Date.now() - firstCompletionDate.getTime()) / (1000 * 60 * 60 * 24)
           );
           
-          if (quickLearnerAchievement) {
-            newAchievements.push(quickLearnerAchievement);
+          if (daysSinceFirstCompletion <= 7) {
+            const quickLearnerAchievement = await createAchievement(
+              userId,
+              AchievementType.QUICK_LEARNER,
+              'Quick Learner',
+              'You completed 10 lessons within a week.',
+              'speed'
+            );
+            
+            if (quickLearnerAchievement) {
+              newAchievements.push(quickLearnerAchievement);
+            }
           }
         }
       }
     }
     
-    // Streak achievement
-    if (user.loginHistory && Array.isArray(user.loginHistory) && user.loginHistory.length >= 7) {
-      // Check for 7-day streak
-      const sortedDates = [...user.loginHistory]
-        .map(date => new Date(date).toISOString().slice(0, 10))
-        .sort()
-        .filter((date, i, arr) => arr.indexOf(date) === i); // unique dates
-      
-      let maxStreak = 1;
-      let currentStreak = 1;
-      
-      for (let i = 1; i < sortedDates.length; i++) {
-        const prevDate = new Date(sortedDates[i - 1]);
-        const currDate = new Date(sortedDates[i]);
-        
-        const dayDiff = (currDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24);
-        
-        if (dayDiff === 1) {
-          currentStreak++;
-        } else {
-          maxStreak = Math.max(maxStreak, currentStreak);
-          currentStreak = 1;
-        }
-      }
-      
-      maxStreak = Math.max(maxStreak, currentStreak);
-      
-      if (maxStreak >= 7) {
-        const streakAchievement = await createAchievement(
-          userId,
-          AchievementType.STREAK,
-          'Consistent Learner',
-          'You maintained a 7-day learning streak.',
-          'streak'
-        );
-        
-        if (streakAchievement) {
-          newAchievements.push(streakAchievement);
-        }
-      }
-    }
+    // Note: For streak achievement, we'd need to modify the User model to include loginHistory
+    // This is currently not in the Prisma schema, so it's omitted from the refactored version
     
     return newAchievements;
   } catch (error) {
