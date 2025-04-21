@@ -1,0 +1,72 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+Mac Project address: "/Users/julianlok/Documents/choice-e-learning"
+Win Project address: "D:\choice-e-learning"
+
+# Hướng dẫn phát triển tính năng mới cho dự án Choice E-Learning
+
+## Nguyên tắc chung
+
+1. **Bám sát cấu trúc hiện tại**: Phát triển tính năng mới dựa trên cấu trúc dự án đã được refactor, không tạo thêm cấu trúc file/thư mục mới khi không cần thiết.
+
+2. **Tránh file thừa**: Không tạo file trùng lặp hoặc dư thừa. Nên mở rộng các file hiện có thay vì tạo file mới nếu có thể.
+
+3. **Đảm bảo tính ổn định**: Luôn đảm bảo các tính năng hiện tại vẫn hoạt động bình thường sau khi thêm tính năng mới.
+
+4. **Tuân thủ kiến trúc**: Tuân thủ kiến trúc đã được thiết lập trong dự án (separation of concerns, mô hình phân lớp).
+
+## Hướng dẫn cụ thể
+
+### Khi làm việc với components
+- Nếu tính năng mới yêu cầu UI mới, hãy xem xét các component hiện có trước khi tạo mới
+- Mở rộng các component hiện có thay vì tạo component mới nếu chức năng tương tự
+- Đặt các component mới trong thư mục phù hợp với cấu trúc hiện tại
+- Sử dụng các UI components từ thư mục `/components/ui` để đảm bảo giao diện nhất quán
+
+### Khi làm việc với API và services
+- Thêm API endpoint mới vào cấu trúc API hiện tại trong `/app/api`
+- Sử dụng các utilities có sẵn từ `/lib/api` như `api-response.ts` và `route-handlers.ts`
+- Mở rộng services hiện có trong `/lib/services` thay vì tạo file service mới
+- Đảm bảo xử lý lỗi nhất quán bằng cách sử dụng api-error-codes đã định nghĩa
+
+### Khi làm việc với cơ sở dữ liệu
+- Sử dụng Prisma đã được thiết lập làm chuẩn kết nối database
+- Thêm model mới vào schema Prisma nếu cần thiết 
+- Sử dụng các utilities từ `/lib/db` để đảm bảo nhất quán khi truy cập database
+- Không sử dụng kết nối trực tiếp đến MongoDB hoặc các database khác
+
+### Khi làm việc với authentication
+- Tận dụng hệ thống xác thực đã được chuẩn hóa trong `/lib/auth`
+- Sử dụng các middleware có sẵn như `withAuth`, `withRole`, `withAdmin` cho các API endpoint mới
+- Không tạo cơ chế xác thực riêng hoặc trùng lặp
+
+### Quản lý kiểu dữ liệu
+- Mở rộng các type hiện có trong `/src/types` nếu có thể
+- Tổ chức type mới vào đúng thư mục tương ứng với domain của nó
+- Sử dụng Zod cho việc validate dữ liệu đầu vào từ client
+
+### Nguyên tắc về kiểm thử
+- Kiểm tra kỹ các tính năng hiện có sau khi thêm tính năng mới
+- Đảm bảo không gây ảnh hưởng đến hiệu suất tổng thể của ứng dụng
+- Test trên nhiều trình duyệt và thiết bị trước khi đưa vào production
+
+### Phương pháp tiếp cận khi phát triển
+1. **Phân tích yêu cầu**: Hiểu rõ yêu cầu, xác định phạm vi tính năng
+2. **Tìm kiếm file liên quan**: Xác định các file cần mở rộng/chỉnh sửa
+3. **Thiết kế giải pháp**: Đưa ra cách triển khai phù hợp với cấu trúc hiện tại
+4. **Thay đổi nhỏ, liên tục**: Triển khai từng phần nhỏ, kiểm tra liên tục
+5. **Tích hợp**: Đảm bảo tính năng mới hoạt động với các phần khác của hệ thống
+
+## Một số lưu ý quan trọng
+- Không thay đổi các wrapper function/utility đã được chuẩn hóa (như `route-handlers.ts`)
+- Không duplicate code - tái sử dụng logic hiện có
+- Khi cần thay đổi cấu trúc, thảo luận trước với team để đảm bảo tính nhất quán
+- Nếu phát hiện code xấu/không tối ưu trong quá trình phát triển, đánh dấu để refactor sau, không thay đổi lớn khi đang triển khai tính năng
+
+Tuân thủ các nguyên tắc này sẽ giúp dự án phát triển bền vững, dễ bảo trì và nhất quán về mặt cấu trúc.

@@ -1,6 +1,11 @@
 ---
 description: 
 globs: 
+alwaysApply: true
+---
+---
+description: 
+globs: 
 alwaysApply: false
 ---
 # CURSOR DEVELOPER GUIDELINES
@@ -24,3 +29,4 @@ alwaysApply: false
 - **Efficient Editing**: Edit in place rather than deleting and recreating when possible
 
 Remember: The most professional code is precise, focused, and works within the established system.
+

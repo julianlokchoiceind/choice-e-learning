@@ -1,9 +1,9 @@
 'use client';
 
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/client/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { Role } from '@/lib/auth/auth-options';
+import { Role } from '@/types/auth/roles';
 import { hasRole } from '@/lib/auth/roles';
 
 interface ProtectedRouteProps {

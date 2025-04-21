@@ -14,6 +14,20 @@ export enum CourseLevel {
 }
 
 /**
+ * Chapter interface
+ */
+export interface Chapter {
+  id: string;
+  title: string;
+  description?: string;
+  order: number;
+  courseId: string;
+  lessons?: Lesson[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
  * Basic course interface
  */
 export interface Course {
@@ -31,11 +45,13 @@ export interface Course {
   // Relationships that might come from Prisma
   creator?: any;
   students?: any[];
+  chapters?: Chapter[];
   lessons?: any[];
   reviews?: any[];
   // Virtual counts from Prisma
   _count?: {
     students?: number;
+    chapters?: number;
     lessons?: number;
     reviews?: number;
   };
@@ -162,8 +178,20 @@ export interface Lesson {
   videoUrl?: string;
   order: number;
   courseId: string;
+  chapterId?: string;
+  chapter?: Chapter;
   createdAt: Date;
   updatedAt: Date;
+}
+
+/**
+ * Chapter creation parameters
+ */
+export interface CreateChapterParams {
+  title: string;
+  description?: string;
+  order: number;
+  courseId: string;
 }
 
 /**
@@ -175,6 +203,15 @@ export interface CreateLessonParams {
   videoUrl?: string;
   order: number;
   courseId: string;
+  chapterId?: string;
+}
+
+/**
+ * Course with chapters and lessons interface
+ */
+export interface CourseWithChaptersAndLessons extends Course {
+  chapters: (Chapter & { lessons: Lesson[] })[];
+  lessons: Lesson[];
 }
 
 /**

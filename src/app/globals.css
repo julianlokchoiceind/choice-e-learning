@@ -10,8 +10,8 @@
   --background-end-rgb: 255, 255, 255;
   
   /* Colors */
-  --color-primary: #0066cc;
-  --color-primary-hover: #0077ed;
+  --color-primary: #6366f1; /* indigo-500 */
+  --color-primary-hover: #4f46e5; /* indigo-600 */
   --color-background: #ffffff;
   --color-text: #1d1d1f;
   --color-text-secondary: #86868b;

@@ -19,7 +19,7 @@ import {
   BookOpenIcon,
   StarIcon
 } from '@heroicons/react/24/outline';
-import { getTotalStudentCount } from '@/services/courses';
+import { getTotalStudentCount } from '@/lib/services/courses/course-service';
 import ClientComponents from '@/components/home/ClientComponents';
 
 // Simplified roadmap data without React components
@@ -97,7 +97,7 @@ export default function Home() {
             {/* Right Content */}
             <div className="relative flex items-center justify-center h-full">
               {/* Main Image Container */}
-              <div className="relative w-full max-w-[600px] aspect-[3/4]">
+              <div className="relative w-full max-w-[550px] aspect-[4/5] md:aspect-[5/6] lg:aspect-[4/5]">
                 <Image
                   src="https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop"
                   alt="Professional coding instructor"

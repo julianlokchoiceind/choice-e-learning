@@ -46,6 +46,7 @@ model Course {
   imageUrl    String?
   level       Level
   topics      String[]
+  chapters    Chapter[]
   lessons     Lesson[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -62,19 +63,38 @@ enum Level {
   beginner
   intermediate
   advanced
+  all
+}
+
+model Chapter {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  order       Int
+  courseId    String   @db.ObjectId
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons     Lesson[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("chapters")
 }
 
 model Lesson {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  title       String
-  content     String
-  videoUrl    String?
-  order       Int
-  courseId    String   @db.ObjectId
-  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  progress    UserProgress[]
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  content       String
+  videoUrl      String?
+  order         Int
+  duration      String?
+  resourcesData String?  // Store resources as JSON string
+  courseId      String   @db.ObjectId
+  course        Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  chapterId     String?  @db.ObjectId
+  chapter       Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  progress      UserProgress[]
 
   @@map("lessons")
 }
