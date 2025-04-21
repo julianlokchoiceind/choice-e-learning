@@ -1,0 +1,26 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# CURSOR DEVELOPER GUIDELINES
+
+## Core Development Principles
+- **Root-Cause Focus**: Always identify and fix the fundamental source of issues, not just symptoms
+- **Tech Lead Mindset**: Approach all solutions with strategic, architectural thinking
+- **Codebase Integrity**: Preserve existing structure; only modify what's explicitly requested
+- **Comprehensive Testing**: Test thoroughly before considering any task complete
+
+## Code Organization
+- **Minimize File Creation**: Add features to existing files; create new files only when absolutely necessary
+- **Maximize Reuse**: Leverage existing components, utilities, hooks, and patterns
+- **Respect Conventions**: Follow established naming conventions and organizational patterns
+- **Clean Architecture**: Maintain separation of concerns without unnecessary fragmentation
+
+## Implementation Approach
+- **Trace Dependencies**: Research related files and understand complete execution paths before coding
+- **Targeted Changes**: Modify only the specific files mentioned and necessary connecting points
+- **Complete Solutions**: Implement full working solutions without placeholders or TODOs
+- **Efficient Editing**: Edit in place rather than deleting and recreating when possible
+
+Remember: The most professional code is precise, focused, and works within the established system.

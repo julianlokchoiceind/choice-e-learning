@@ -1,0 +1,238 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "../styles/transitions.css";
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 255, 255, 255;
+  
+  /* Colors */
+  --color-primary: #0066cc;
+  --color-primary-hover: #0077ed;
+  --color-background: #ffffff;
+  --color-text: #1d1d1f;
+  --color-text-secondary: #86868b;
+  --color-highlight: #f5f5f7;
+  
+  /* Animation durations */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-medium: 300ms;
+  --duration-slow: 500ms;
+}
+
+body {
+  color: var(--color-text);
+  background: var(--color-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom animations - must be outside @layer */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fadeSlideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes float-slow-reverse {
+  0%, 100% { transform: translateY(0) rotate(5deg); }
+  50% { transform: translateY(-12px) rotate(-2deg); }
+}
+
+@keyframes float-slow-alt {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-15px) rotate(3deg); }
+}
+
+@keyframes float-alt {
+  0%, 100% { transform: translateY(0) rotate(3deg); }
+  50% { transform: translateY(-10px) rotate(-3deg); }
+}
+
+/* Animation classes */
+.animate-fade {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out;
+}
+
+.animate-slide-right {
+  animation: slideInRight 1s ease forwards;
+}
+
+.animate-slide-left {
+  animation: slideInLeft 1s ease forwards;
+}
+
+.animate-ticker {
+  animation: ticker 30s linear infinite;
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
+
+.animate-float-slow-reverse {
+  animation: float-slow-reverse 8s ease-in-out infinite;
+}
+
+.animate-float-slow-alt {
+  animation: float-slow-alt 9s ease-in-out infinite;
+}
+
+.animate-float-alt {
+  animation: float-alt 6s ease-in-out infinite;
+}
+
+/* Base styles with Tailwind */
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold text-[#1d1d1f];
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  p {
+    @apply text-[#86868b];
+  }
+
+  a {
+    @apply text-[#0066cc] no-underline transition-colors hover:text-[#0077ed];
+  }
+}
+
+/* Component styles with Tailwind */
+@layer components {
+  .button-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-[#0066cc] rounded-full transition-all hover:bg-[#0077ed] hover:shadow-lg hover:-translate-y-0.5;
+  }
+
+  .button-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-base font-medium text-[#0066cc] bg-white border border-[#0066cc] rounded-full transition-all hover:bg-[#f5f5f7];
+  }
+
+  .card {
+    @apply bg-white rounded-[18px] overflow-hidden shadow-md transition-transform duration-300;
+  }
+
+  .number-circle {
+    @apply w-14 h-14 rounded-full bg-[#0066cc] text-white text-[22px] font-semibold flex items-center justify-center;
+  }
+
+  .page-hero {
+    @apply py-20 md:py-24 text-center;
+  }
+
+  .section-full {
+    @apply py-16 md:py-24;
+  }
+
+  .section-tight {
+    @apply py-10 md:py-16;
+  }
+}
+
+/* Utility classes with Tailwind */
+@layer utilities {
+  .bg-gradient-white {
+    @apply bg-white bg-gradient-to-b from-[#fbfbfd] to-white;
+  }
+
+  .bg-gradient-light {
+    @apply bg-[#f5f5f7] bg-gradient-to-b from-white to-[#f5f5f7];
+  }
+
+  .bg-gradient-blue {
+    @apply bg-gradient-to-br from-[#0077ed] via-[#1982f8] to-[#2e8ffd];
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .page-hero {
+    padding: 100px 0 40px;
+  }
+  
+  .section-full {
+    padding: 70px 0;
+  }
+  
+  .section-tight {
+    padding: 40px 0;
+  }
+}
+
+/* Ticker behaviors */
+#testimonialTicker:hover .animate-ticker {
+  animation-play-state: paused;
+} 
