@@ -62,11 +62,23 @@ export default function CoursesPage() {
     style.textContent = `
       .admin-button {
         transform: none !important;
-        transition: background 0.3s ease;
       }
       .admin-button:hover {
         transform: none !important;
         box-shadow: none !important;
+      }
+      
+      /* Styling for Add Course button */
+      .add-course-btn {
+        background-image: linear-gradient(to right, #3b82f6, #1d4ed8) !important;
+        color: white !important;
+        transition: none !important;
+      }
+      
+      .add-course-btn:hover {
+        background-image: linear-gradient(to right, #3b82f6, #1d4ed8) !important;
+        box-shadow: 0 0 0 2000px rgba(59, 130, 246, 0.2) inset !important;
+        color: white !important;
       }
     `;
     document.head.appendChild(style);
@@ -128,7 +140,7 @@ export default function CoursesPage() {
         <h1 className="text-2xl font-bold text-gray-800">Courses</h1>
         <Link 
           href="/admin/courses/new" 
-          className="px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-md flex items-center transition-colors duration-150 shadow-sm admin-button"
+          className="px-4 py-2 rounded-md flex items-center admin-button add-course-btn"
         >
           <PlusIcon className="h-5 w-5 mr-1" />
           Add New Course

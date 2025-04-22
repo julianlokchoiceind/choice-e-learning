@@ -740,26 +740,26 @@ export default function NewCoursePage() {
       <h2 className="text-xl font-semibold mb-4 text-gray-800">Basic Course Information</h2>
       
       <div className="space-y-4">
-        <div>
+            <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-            Course Title <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="title"
+                Course Title <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="title"
             name="title"
             value={values.title}
             onChange={handleChange}
             placeholder="Enter course title"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-        
-        <div>
+                required
+              />
+            </div>
+            
+            <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
             Course Description <span className="text-red-500">*</span>
-          </label>
+              </label>
           <textarea
             id="description"
             name="description"
@@ -770,50 +770,50 @@ export default function NewCoursePage() {
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
-        </div>
+                </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
               Price ($) <span className="text-red-500">*</span>
             </label>
-            <input
-              type="number"
-              id="price"
+                <input
+                  type="number"
+                  id="price"
               name="price"
               value={values.price}
               onChange={handleChange}
-              min="0"
-              step="0.01"
+                  min="0"
+                  step="0.01"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-            />
-          </div>
-          
-          <div>
+                />
+            </div>
+            
+            <div>
             <label htmlFor="level" className="block text-sm font-medium text-gray-700 mb-1">
-              Level <span className="text-red-500">*</span>
-            </label>
-            <select
-              id="level"
+                Level <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="level"
               name="level"
               value={values.level}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-              <option value="all">All Levels</option>
-            </select>
+                required
+              >
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+                <option value="all">All Levels</option>
+              </select>
           </div>
-        </div>
-        
-        <div>
+            </div>
+            
+            <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Course Image <span className="text-red-500">*</span>
-          </label>
+              </label>
           <div 
             onClick={handleImageUploadClick}
             className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition-colors"
@@ -821,7 +821,7 @@ export default function NewCoursePage() {
             <CloudArrowUpIcon className="h-10 w-10 text-gray-400" />
             <p className="mt-2 text-sm text-gray-500">Click to upload or drag and drop</p>
             <p className="text-xs text-gray-400">PNG, JPG, GIF up to 2MB</p>
-            <input
+              <input
               type="file"
               ref={fileInputRef}
               className="hidden"
@@ -829,12 +829,12 @@ export default function NewCoursePage() {
               onChange={handleFileChange}
             />
           </div>
-        </div>
-        
+            </div>
+            
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Topics/Tags
-          </label>
+              </label>
           <div className="flex flex-wrap gap-2 mb-2">
             {values.topics.map((topic, index) => (
               <div key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full flex items-center text-sm">
@@ -850,8 +850,8 @@ export default function NewCoursePage() {
             ))}
           </div>
           <div className="flex">
-            <input
-              type="text"
+              <input
+                type="text"
               value={newTopic}
               onChange={(e) => setNewTopic(e.target.value)}
               placeholder="Add topic (e.g., JavaScript, Web Development)"
@@ -942,10 +942,10 @@ export default function NewCoursePage() {
                           onChange={(e) => updateChapter(chapter.id, 'title', e.target.value)}
                           placeholder="Enter chapter title"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          required
-                        />
-                      </div>
-                      
+                required
+              />
+            </div>
+            
                       {/* Chapter description field removed as requested */}
                       
                       {/* Lessons in this chapter */}
@@ -999,7 +999,7 @@ export default function NewCoursePage() {
                                         <div className="mb-3">
                                           <label htmlFor={`lesson-${lesson.id}-title`} className="block text-sm font-medium text-gray-700 mb-1">
                                             Lesson Title <span className="text-red-500">*</span>
-                                          </label>
+              </label>
                                           <input
                                             type="text"
                                             id={`lesson-${lesson.id}-title`}
@@ -1007,14 +1007,14 @@ export default function NewCoursePage() {
                                             onChange={(e) => updateLessonInChapter(chapter.id, lesson.id, 'title', e.target.value)}
                                             placeholder="Enter lesson title"
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            required
+                required
                                           />
-                                        </div>
-                                        
+            </div>
+            
                                         <div className="mb-3">
                                           <label htmlFor={`lesson-${lesson.id}-video`} className="block text-sm font-medium text-gray-700 mb-1">
                                             Video URL <span className="text-red-500">*</span>
-                                          </label>
+              </label>
                                           <div className="flex">
                                             <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
                                               <VideoCameraIcon className="h-5 w-5" />
@@ -1026,18 +1026,18 @@ export default function NewCoursePage() {
                                               onChange={(e) => updateLessonInChapter(chapter.id, lesson.id, 'videoUrl', e.target.value)}
                                               placeholder="https://www.youtube.com/watch?v=..."
                                               className="flex-1 px-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                              required
+                required
                                             />
                                           </div>
                                           <p className="mt-1 text-xs text-gray-500">
                                             Enter YouTube, Vimeo, or other video platform URL
                                           </p>
-                                        </div>
-                                        
+            </div>
+            
                                         <div className="mb-3">
                                           <label htmlFor={`lesson-${lesson.id}-description`} className="block text-sm font-medium text-gray-700 mb-1">
                                             Lesson Description
-                                          </label>
+              </label>
                                           <textarea
                                             id={`lesson-${lesson.id}-description`}
                                             value={lesson.description}
@@ -1080,7 +1080,7 @@ export default function NewCoursePage() {
                                                     placeholder="https://..."
                                                     className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
                                                   />
-                                                  <select
+              <select
                                                     value={resource.type}
                                                     onChange={(e) => updateResource(lesson.id, resource.id, 'type', e.target.value, true, chapter.id)}
                                                     className="px-2 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -1089,7 +1089,7 @@ export default function NewCoursePage() {
                                                     <option value="pdf">PDF</option>
                                                     <option value="document">Document</option>
                                                     <option value="code">Code</option>
-                                                  </select>
+              </select>
                                                   <button
                                                     type="button"
                                                     onClick={() => removeResource(lesson.id, resource.id, true, chapter.id)}
@@ -1097,14 +1097,14 @@ export default function NewCoursePage() {
                                                   >
                                                     <XCircleIcon className="h-4 w-4" />
                                                   </button>
-                                                </div>
+            </div>
                                               ))}
-                                            </div>
+                  </div>
                                           ) : (
                                             <p className="text-xs text-gray-500 italic">No resources added yet</p>
                                           )}
-                                        </div>
-                                      </div>
+                </div>
+              </div>
                                     )}
                                   </Draggable>
                                 ))
@@ -1112,7 +1112,7 @@ export default function NewCoursePage() {
                                 <p className="text-sm text-gray-500 italic py-2">No lessons in this chapter yet</p>
                               )}
                               {provided.placeholder}
-                            </div>
+            </div>
                           )}
                         </Droppable>
                         
@@ -1124,7 +1124,7 @@ export default function NewCoursePage() {
                           <PlusIcon className="h-4 w-4 mr-1" />
                           Add Lesson to this Chapter
                         </button>
-                      </div>
+          </div>
                     </div>
                   )}
                 </Draggable>
@@ -1135,8 +1135,8 @@ export default function NewCoursePage() {
         </Droppable>
         
         <div className="flex space-x-4 mt-6">
-          <button
-            type="button"
+                <button
+                  type="button"
             onClick={addChapter}
             className="flex-1 py-2 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-600 hover:text-blue-600 hover:border-blue-500 transition-colors"
           >
@@ -1151,8 +1151,8 @@ export default function NewCoursePage() {
           >
             <PlusIcon className="h-5 w-5 mr-1" />
             Add Lesson without Chapter
-          </button>
-        </div>
+                </button>
+              </div>
         
         {/* Uncategorized lessons section */}
         {uncategorizedLessons.length > 0 && (
@@ -1205,17 +1205,17 @@ export default function NewCoursePage() {
                           <div className="mb-4">
                             <label htmlFor={`uncategorized-lesson-${lesson.id}-title`} className="block text-sm font-medium text-gray-700 mb-1">
                               Lesson Title <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                              type="text"
+                  </label>
+                  <input
+                    type="text"
                               id={`uncategorized-lesson-${lesson.id}-title`}
                               value={lesson.title}
                               onChange={(e) => updateUncategorizedLesson(lesson.id, 'title', e.target.value)}
                               placeholder="Enter lesson title"
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                               required
-                            />
-                          </div>
+                  />
+                </div>
                           
                           <div className="mb-4">
                             <label htmlFor={`uncategorized-lesson-${lesson.id}-video`} className="block text-sm font-medium text-gray-700 mb-1">
@@ -1225,7 +1225,7 @@ export default function NewCoursePage() {
                               <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
                                 <VideoCameraIcon className="h-5 w-5" />
                               </span>
-                              <input
+                      <input
                                 type="url"
                                 id={`uncategorized-lesson-${lesson.id}-video`}
                                 value={lesson.videoUrl}
@@ -1258,22 +1258,22 @@ export default function NewCoursePage() {
                           <div className="mt-4">
                             <div className="flex justify-between items-center mb-2">
                               <h4 className="font-medium text-gray-700">Additional Resources</h4>
-                              <button
-                                type="button"
+                      <button
+                        type="button"
                                 onClick={() => addResource(lesson.id, false)}
                                 className="text-blue-600 hover:text-blue-800 flex items-center text-sm"
-                              >
+                      >
                                 <PlusCircleIcon className="h-4 w-4 mr-1" />
                                 Add Resource
-                              </button>
-                            </div>
+                      </button>
+                    </div>
                             
                             {lesson.resources.length > 0 ? (
                               <div className="space-y-3">
                                 {lesson.resources.map((resource) => (
                                   <div key={resource.id} className="flex items-center space-x-2">
-                                    <input
-                                      type="text"
+                      <input
+                        type="text"
                                       value={resource.title}
                                       onChange={(e) => updateResource(lesson.id, resource.id, 'title', e.target.value, false)}
                                       placeholder="Resource title"
@@ -1296,26 +1296,26 @@ export default function NewCoursePage() {
                                       <option value="document">Document</option>
                                       <option value="code">Code</option>
                                     </select>
-                                    <button
-                                      type="button"
+                      <button
+                        type="button"
                                       onClick={() => removeResource(lesson.id, resource.id, false)}
                                       className="text-red-600 hover:text-red-800"
-                                    >
+                      >
                                       <XCircleIcon className="h-5 w-5" />
-                                    </button>
-                                  </div>
+                      </button>
+                    </div>
                                 ))}
-                              </div>
+                  </div>
                             ) : (
                               <p className="text-sm text-gray-500 italic">No resources added yet</p>
                             )}
-                          </div>
-                        </div>
+                </div>
+              </div>
                       )}
                     </Draggable>
                   ))}
                   {provided.placeholder}
-                </div>
+            </div>
               )}
             </Droppable>
           </div>
@@ -1447,22 +1447,22 @@ export default function NewCoursePage() {
   const renderStepButtons = () => (
     <div className="flex justify-between items-center mt-6">
       {step > 1 ? (
-        <button
-          type="button"
+            <button
+              type="button"
           onClick={prevStep}
           className="flex items-center text-gray-600 hover:text-gray-800 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-        >
+            >
           <ArrowLeftIcon className="h-4 w-4 mr-1" />
           Previous Step
-        </button>
+            </button>
       ) : (
-        <Link 
-          href="/admin/courses"
+            <Link
+              href="/admin/courses"
           className="flex items-center text-gray-600 hover:text-gray-800 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-        >
+            >
           <ArrowLeftIcon className="h-4 w-4 mr-1" />
-          Cancel
-        </Link>
+              Cancel
+            </Link>
       )}
       
       {step < 3 ? (
@@ -1478,7 +1478,8 @@ export default function NewCoursePage() {
         </button>
       ) : (
         <button
-          type="submit"
+          type="button"
+          onClick={handleSubmit}
           disabled={isSubmitting}
           className="flex items-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white py-2 px-6 rounded-md transition-colors disabled:opacity-70"
         >
@@ -1498,7 +1499,7 @@ export default function NewCoursePage() {
           )}
         </button>
       )}
-    </div>
+          </div>
   );
   
   return (
