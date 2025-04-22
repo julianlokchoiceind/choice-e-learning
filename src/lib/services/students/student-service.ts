@@ -165,7 +165,7 @@ export const studentService = {
   }) => {
     try {
       // Chuẩn bị dữ liệu tạo user
-      const userData = {
+      const userData: any = {
         name: data.name,
         email: data.email,
         role: "student" as const,
@@ -271,28 +271,74 @@ export const studentService = {
   
   deleteStudent: async (id: string) => {
     try {
+      console.log(`Starting delete operation for student ${id}`);
       // Check if this is a User with role "student"
       const user = await prisma.user.findFirst({
         where: { 
           id,
           role: "student"
         },
+        include: {
+          // Include related data to check for connections
+          reviews: true,
+          submissions: true,
+          achievements: true,
+          progress: true,
+          // Getting enrolled courses separately
+          _count: {
+            select: {
+              enrolledIn: true
+            }
+          }
+        }
       });
       
       if (!user) {
         throw new Error(`Student with ID ${id} not found`);
       }
       
-      // Don't delete the User, just update their role or mark as inactive
-      // This preserves enrollment data and other relationships
-      await prisma.user.update({
-        where: { id },
-        data: {
-          role: "admin" // Change role instead of deleting
-        },
-      });
+      // Check if student has related data
+      const hasRelatedData = user._count.enrolledIn > 0 ||
+                           user.reviews.length > 0 ||
+                           user.submissions.length > 0 ||
+                           user.achievements.length > 0 ||
+                           user.progress.length > 0;
       
-      return { id, success: true };
+      console.log(`Student ${id} has related data: ${hasRelatedData}`);
+      console.log(`Related data counts: Courses: ${user._count.enrolledIn}, Reviews: ${user.reviews.length}, Submissions: ${user.submissions.length}, Achievements: ${user.achievements.length}, Progress: ${user.progress.length}`);
+      
+      if (hasRelatedData) {
+        // Có dữ liệu liên quan - chỉ cập nhật role để tránh mất dữ liệu liên quan
+        console.log(`Updating role to deleted_user for student ${id} instead of deleting`);
+        const updatedUser = await prisma.user.update({
+          where: { id },
+          data: {
+            role: "deleted_user",
+          },
+        });
+        console.log(`Successfully updated student ${id} to role deleted_user`);
+        return { id, success: true, method: "role_update" };
+      } else {
+        // Không có dữ liệu liên quan - xóa hoàn toàn
+        try {
+          console.log(`Attempting to fully delete student ${id}`);
+          await prisma.user.delete({
+            where: { id },
+          });
+          console.log(`Successfully deleted student ${id} from database`);
+          return { id, success: true, method: "full_delete" };
+        } catch (deleteError) {
+          // Nếu không thể xóa, sử dụng phương pháp cập nhật role
+          console.error(`Failed to delete student ${id}, using role update instead:`, deleteError);
+          await prisma.user.update({
+            where: { id },
+            data: {
+              role: "deleted_user",
+            },
+          });
+          return { id, success: true, method: "role_update_fallback" };
+        }
+      }
     } catch (error) {
       console.error(`Error in deleteStudent for ID ${id}:`, error);
       throw error;

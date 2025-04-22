@@ -9,5 +9,6 @@
  */
 export enum Role {
   student = 'student',
-  admin = 'admin'
+  admin = 'admin',
+  DELETED_USER = 'deleted_user'
 }

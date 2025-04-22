@@ -9,6 +9,23 @@ import { apiError, apiValidationError } from './api-response';
 import { ApiErrorCode } from './api-error-codes';
 
 /**
+ * Parse and validate request body against Zod schema
+ * @param req Next.js request object
+ * @param schema Zod schema to validate against
+ * @returns Validated data
+ * @throws Error if validation fails
+ */
+export async function parseRequest<T>(req: NextRequest, schema: z.ZodType<T>): Promise<T> {
+  const result = await validateRequest(req, schema);
+  
+  if (!result.success) {
+    throw result.error;
+  }
+  
+  return result.data;
+}
+
+/**
  * Parse number-type query parameters safely
  * @param value String value from URL
  * @param defaultValue Default value if parameter is missing or invalid

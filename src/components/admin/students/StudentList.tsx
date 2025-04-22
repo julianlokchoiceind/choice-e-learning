@@ -28,6 +28,17 @@ export const StudentList = () => {
   // Create local state to manage students, which will be updated from API
   const [students, setStudents] = useState(apiStudents || []);
   const [searchQuery, setSearchQuery] = useState("");
+  const [actionStatus, setActionStatus] = useState<{message: string; type: 'success' | 'error'} | null>(null);
+  
+  // Auto-hide status messages after 3 seconds
+  useEffect(() => {
+    if (actionStatus) {
+      const timer = setTimeout(() => {
+        setActionStatus(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [actionStatus]);
   
   // When API students change, update local state
   useEffect(() => {
@@ -116,14 +127,82 @@ export const StudentList = () => {
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this student?")) {
       try {
-        await deleteStudent(id);
-        await fetchStudents({
+        console.log("Deleting student with ID:", id);
+        
+        // Temporarily remove the student from the UI for immediate feedback
+        setStudents(prevStudents => prevStudents.filter(student => student.id !== id));
+        
+        // Set a pending status notification
+        setActionStatus({
+          message: "Deleting student...",
+          type: 'success'
+        });
+        
+        // Implement retry logic for delete operation
+        let attempts = 0;
+        const maxAttempts = 3;
+        let success = false;
+        let lastError: any;
+        
+        while (attempts < maxAttempts && !success) {
+          try {
+            console.log(`Attempting to delete student (attempt ${attempts + 1})`);
+            const result = await deleteStudent(id);
+            console.log("Delete result:", result);
+            success = true;
+          } catch (err: any) {
+            lastError = err;
+            console.error(`Delete student attempt ${attempts + 1} failed:`, err);
+            attempts++;
+            
+            if (attempts < maxAttempts) {
+              // Wait with exponential backoff before retrying
+              await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, attempts)));
+            }
+          }
+        }
+        
+        if (!success) {
+          throw lastError;
+        }
+        
+        // Reload the students list
+        const refreshResult = await fetchStudents({
           page: currentPage,
           limit: 10,
           search: searchQuery || undefined,
         });
-      } catch (err) {
+        
+        console.log("Refreshed student list after delete:", refreshResult);
+        
+        // Force refresh the student list in UI
+        if (refreshResult?.data) {
+          setStudents([...refreshResult.data]);
+        }
+        
+        // Show success message with notification component
+        setActionStatus({
+          message: "Student deleted successfully",
+          type: 'success'
+        });
+      } catch (err: any) {
         console.error("Error deleting student:", err);
+        
+        // Revert the UI change since deletion failed
+        fetchStudents({
+          page: currentPage,
+          limit: 10,
+          search: searchQuery || undefined,
+        }).then(result => {
+          if (result?.data) {
+            setStudents([...result.data]);
+          }
+        });
+        
+        setActionStatus({
+          message: err.response?.data?.error || err.message || "Failed to delete student",
+          type: 'error'
+        });
       }
     }
   };
@@ -139,14 +218,37 @@ export const StudentList = () => {
   
   return (
     <div className="space-y-6">
+      {actionStatus && (
+        <div 
+          className={`mb-4 px-4 py-3 rounded-md flex justify-between items-center ${
+            actionStatus.type === 'success' 
+              ? 'bg-green-50 border border-green-300 text-green-700' 
+              : 'bg-red-50 border border-red-300 text-red-700'
+          }`}
+        >
+          <span>{actionStatus.message}</span>
+          <button 
+            onClick={() => setActionStatus(null)}
+            className="ml-auto text-gray-500 hover:text-gray-700"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
       <div className="flex justify-between items-center">
         <form onSubmit={handleSearch} className="relative w-72">
           <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
           <input
             type="text"
+            id="student-search"
+            name="student-search"
             placeholder="Search students..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={(e) => e.target.select()}
+            autoComplete="off"
             className="pl-10 pr-4 py-2 border border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
           />
           <button type="submit" className="sr-only">Search</button>
@@ -204,21 +306,21 @@ export const StudentList = () => {
                       <td className="py-4 px-6 text-gray-700">{student.city && student.city !== '-' ? student.city : "-"}</td>
                       <td className="py-4 px-6 text-gray-700">{student.grade && student.grade !== '-' ? student.grade : "-"}</td>
                       <td className="py-4 px-6">
-                        <div className="flex justify-end space-x-2">
-                          <Link
-                            href={`/admin/students/${student.id}`}
+                        <div className="flex justify-end space-x-2" data-testid="action-buttons">
+                          <button
+                            onClick={() => router.push(`/admin/students/${student.id}`)}
                             className="p-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-150"
                             aria-label="View student details"
                           >
                             <EyeIcon className="h-5 w-5" />
-                          </Link>
-                          <Link
-                            href={`/admin/students/${student.id}/edit`}
+                          </button>
+                          <button
+                            onClick={() => router.push(`/admin/students/${student.id}/edit`)}
                             className="p-2 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition-colors duration-150"
                             aria-label="Edit student"
                           >
                             <PencilSquareIcon className="h-5 w-5" />
-                          </Link>
+                          </button>
                           <button
                             onClick={() => handleDelete(student.id)}
                             className="p-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors duration-150"

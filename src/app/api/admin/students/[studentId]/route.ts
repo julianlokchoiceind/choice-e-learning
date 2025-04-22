@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { apiSuccess, apiError, apiValidationError, apiNotFound } from "@/lib/api/api-response";
 import { withAdmin } from "@/lib/api/route-handlers";
 import { z } from "zod";
@@ -23,19 +23,33 @@ export const GET = withAdmin(async (
   { params }: { params: { studentId: string } }
 ) => {
   try {
+    console.log(`API: Fetching student with ID ${params.studentId}`);
+    
+    // Validate ID format to prevent database errors
+    if (!/^[0-9a-fA-F]{24}$/.test(params.studentId)) {
+      console.error(`Invalid student ID format: ${params.studentId}`);
+      return apiError(
+        "Invalid student ID format",
+        "Student ID must be a valid MongoDB ObjectId",
+        ApiErrorCode.VALIDATION_ERROR
+      );
+    }
+    
     const student = await studentService.getStudentById(params.studentId);
     
     if (!student) {
+      console.log(`Student with ID ${params.studentId} not found`);
       return apiNotFound("Student");
     }
     
+    console.log(`Successfully retrieved student: ${student.name} (${student.email})`);
     return apiSuccess(student);
   } catch (error) {
     console.error("Error fetching student:", error);
     return apiError(
-      `Student with ID ${params.studentId} not found`,
+      `Failed to fetch student data`,
       error instanceof Error ? error.message : undefined,
-      ApiErrorCode.NOT_FOUND
+      ApiErrorCode.INTERNAL_SERVER_ERROR
     );
   }
 });
@@ -79,13 +93,49 @@ export const DELETE = withAdmin(async (
   { params }: { params: { studentId: string } }
 ) => {
   try {
+    console.log(`API: Attempting to delete student with ID ${params.studentId}`);
+    
+    // Validate ID format
+    if (!/^[0-9a-fA-F]{24}$/.test(params.studentId)) {
+      console.error(`Invalid student ID format: ${params.studentId}`);
+      return apiError(
+        "Invalid student ID format",
+        "Student ID must be a valid MongoDB ObjectId",
+        ApiErrorCode.VALIDATION_ERROR
+      );
+    }
+    
+    // First check if student exists
+    try {
+      const student = await studentService.getStudentById(params.studentId);
+      if (!student) {
+        console.log(`Student with ID ${params.studentId} not found during delete operation`);
+        return apiNotFound("Student");
+      }
+    } catch (checkError) {
+      // If we can't even check if the student exists, proceed with delete attempt anyway
+      console.warn(`Could not verify student existence before delete: ${checkError}`);
+    }
+    
+    // Proceed with deletion
     const result = await studentService.deleteStudent(params.studentId);
     
     if (!result) {
       return apiNotFound("Student");
     }
     
-    return apiSuccess({ success: true }, "Student deleted successfully");
+    console.log(`Successfully processed deletion request for student ${params.studentId}`);
+    console.log(`Deletion result:`, result);
+    
+    let successMessage = "Student deleted successfully";
+    if (result.method === "role_update" || result.method === "role_update_fallback") {
+      successMessage = "Student marked as deleted";
+    }
+    
+    return apiSuccess({ 
+      success: true, 
+      method: result.method || "unknown"
+    }, successMessage);
   } catch (error) {
     console.error("Error deleting student:", error);
     

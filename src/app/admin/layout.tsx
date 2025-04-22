@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { MagnifyingGlassIcon, BellIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
@@ -10,8 +10,24 @@ interface AdminLayoutProps {
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Fix hydration mismatch by ensuring we only render on client
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Show a minimal loading state until client-side hydration is complete
+  if (!isMounted) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-slate-50">
+        <div className="h-16 w-16 animate-spin rounded-full border-t-4 border-solid border-indigo-600"></div>
+      </div>
+    );
+  }
+  
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+      <div className="flex h-screen bg-gray-50 overflow-hidden">
       {/* Sidebar */}
       <AdminSidebar />
       
@@ -25,7 +41,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                   <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
                 </span>
-                <input className="form-input w-full sm:w-64 rounded-md pl-10 pr-4 py-2 border border-gray-300 focus:border-blue-600 focus:ring-0 focus:outline-none" type="text" placeholder="Search..." />
+                <input 
+                  className="form-input w-full sm:w-64 rounded-md pl-10 pr-4 py-2 border border-gray-300 focus:border-blue-600 focus:ring-0 focus:outline-none" 
+                  type="text" 
+                  placeholder="Search..." 
+                  id="admin-global-search"
+                  name="admin-global-search"
+                  autoComplete="off"
+                />
               </div>
             </div>
             <div className="flex items-center space-x-4">
