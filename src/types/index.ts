@@ -25,3 +25,6 @@ export * from './files';
 
 // Progress types
 export * from './progress';
+
+// FAQ types
+export * from './faq';

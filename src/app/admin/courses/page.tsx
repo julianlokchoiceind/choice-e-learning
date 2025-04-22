@@ -156,7 +156,7 @@ export default function CoursesPage() {
             <input 
               type="text" 
               placeholder="Search courses..." 
-              className="py-2 pl-10 pr-4 block w-full sm:w-80 shadow-sm border border-gray-300 rounded-md focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none"
+              className="py-2 pl-10 pr-4 block w-full sm:w-80 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)] outline-none"
             />
           </div>
           <div className="flex items-center space-x-2">
@@ -189,6 +189,9 @@ export default function CoursesPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[var(--color-primary)] uppercase tracking-wider">
+                    #
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[var(--color-primary)] uppercase tracking-wider">
                     Course Title
                   </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[var(--color-primary)] uppercase tracking-wider">
@@ -206,8 +209,11 @@ export default function CoursesPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {courses.map((course) => (
+                {courses.map((course, index) => (
                   <tr key={course.id} className="hover:bg-gray-50 transition-colors duration-150">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {index + 1}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 rounded-md bg-gray-200 overflow-hidden">

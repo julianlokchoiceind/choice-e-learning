@@ -25,7 +25,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                   <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
                 </span>
-                <input className="form-input w-full sm:w-64 rounded-md pl-10 pr-4 py-2 border border-gray-300 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" type="text" placeholder="Search..." />
+                <input className="form-input w-full sm:w-64 rounded-md pl-10 pr-4 py-2 border border-gray-300 focus:border-blue-600 focus:ring-0 focus:outline-none" type="text" placeholder="Search..." />
               </div>
             </div>
             <div className="flex items-center space-x-4">

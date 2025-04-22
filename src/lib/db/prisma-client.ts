@@ -48,7 +48,10 @@ function createPrismaClient(): PrismaClient {
     
     // Test connection and log success
     client.$connect()
-      .then(() => console.log('Database connection established successfully'))
+      .then(() => {
+        console.log('Database connection established successfully');
+        // No need to call bootstrap here as it will be handled by a separate import
+      })
       .catch((e) => console.error('Failed to connect to database:', e));
     
     return client;

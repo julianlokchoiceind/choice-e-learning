@@ -18,8 +18,15 @@ model User {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
   email     String   @unique
-  password  String
+  password  String?  // Đã chuyển thành optional để hỗ trợ đăng nhập OAuth
   role      Role     @default(student)
+  phone     String?
+  address   String?
+  city      String?
+  grade     String?
+  imageUrl  String?
+  provider  String?  // Provider cho OAuth (google, microsoft, etc)
+  providerId String? // ID từ OAuth provider
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -211,3 +218,5 @@ model UserProgress {
   @@unique([userId, lessonId])
   @@map("user_progress")
 }
+
+

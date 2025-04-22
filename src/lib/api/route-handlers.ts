@@ -117,6 +117,8 @@ export function withAdmin(handler: AuthenticatedHandlerFunction): HandlerFunctio
     const auth = await requireAdmin(req);
     
     if (!auth.success) {
+      console.log('Admin authentication failed for:', req.url);
+      console.log('Auth error:', auth);
       return auth.response;
     }
     
@@ -126,9 +128,22 @@ export function withAdmin(handler: AuthenticatedHandlerFunction): HandlerFunctio
       user: auth.user
     };
     
+    console.log(`Admin API access granted for ${auth.user.email} to ${req.url}`);
+    console.log('User data:', {
+      id: auth.user.id,
+      email: auth.user.email,
+      role: auth.user.role
+    });
+    
     // Call handler with authenticated admin user
-    const result = await handler(req, authContext);
-    return result || apiServerError('Admin handler returned undefined');
+    try {
+      const result = await handler(req, authContext);
+      console.log(`Admin API response for ${req.url} sent successfully`);
+      return result || apiServerError('Admin handler returned undefined');
+    } catch (error) {
+      console.error(`Admin API error for ${req.url}:`, error);
+      throw error;
+    }
   });
 }
 

@@ -69,4 +69,33 @@ Win Project address: "D:\choice-e-learning"
 - Khi cần thay đổi cấu trúc, thảo luận trước với team để đảm bảo tính nhất quán
 - Nếu phát hiện code xấu/không tối ưu trong quá trình phát triển, đánh dấu để refactor sau, không thay đổi lớn khi đang triển khai tính năng
 
-Tuân thủ các nguyên tắc này sẽ giúp dự án phát triển bền vững, dễ bảo trì và nhất quán về mặt cấu trúc.
+
+## Tuân thủ các nguyên tắc này sẽ giúp dự án phát triển bền vững, dễ bảo trì và nhất quán về mặt cấu trúc (rất quan trọng)
+
+khi tôi yêu cầu phát triển tính năng mới cho [TÊN TÍNH NĂNG] trong dự án này, hãy tuân thủ các nguyên tắc sau để đảm bảo tính nhất quán:
+
+1. Nghiên cứu cấu trúc hiện tại:
+   - Tìm các tính năng tương tự trong codebase để làm tham khảo
+   - Xác định các pattern và conventions được sử dụng
+
+2. Cấu trúc thư mục và routing:
+   - Tạo routes theo pattern: `/admin/<resource>/[id]/action`
+   - API endpoints theo pattern: `/api/admin/<resource>` và `/api/admin/<resource>/[id]`
+   - Đặt components trong: `/components/<domain>/<ComponentName>`
+
+3. Tổ chức mã nguồn:
+   - Tạo các services trong `/lib/services/<domain>`
+   - Định nghĩa types trong `/types/<domain>.ts`
+   - Sử dụng middleware auth đúng cách (`withAdmin`, `withAuth`)
+
+4. Kỹ thuật triển khai:
+   - Sử dụng hook patterns nhất quán với dự án hiện tại
+   - Xử lý dữ liệu và lỗi theo cùng một cách
+   - Sử dụng UI components từ thư viện hiện có
+
+5. Kiểm tra tính nhất quán:
+   - So sánh với tính năng tương tự
+   - Kiểm tra quy ước đặt tên
+   - Đảm bảo không duplicate code
+
+Mô tả chi tiết tính năng cần phát triển, các file/thư mục cần tạo/chỉnh sửa, và cách tính năng mới sẽ tích hợp với hệ thống hiện tại.

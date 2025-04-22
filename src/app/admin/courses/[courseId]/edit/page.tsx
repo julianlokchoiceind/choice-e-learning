@@ -34,7 +34,7 @@ interface Lesson {
 export default function EditCoursePage() {
   const router = useRouter();
   const params = useParams();
-  const courseId = params.id as string;
+  const courseId = params.courseId as string;
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);

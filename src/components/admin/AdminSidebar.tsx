@@ -18,8 +18,16 @@ import {
   QuestionMarkCircleIcon,
   ChevronDownIcon,
   ChevronRightIcon,
-  PlusCircleIcon
+  PlusCircleIcon,
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// Add proper slide animation to submenus
+const menuVariants = {
+  hidden: { height: 0, opacity: 0, overflow: 'hidden' },
+  visible: { height: 'auto', opacity: 1, transition: { duration: 0.3 } }
+};
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -57,6 +65,12 @@ export default function AdminSidebar() {
     };
   }, []);
   
+  // Student menu structure
+  const studentItems = [
+    { text: "All Students", href: "/admin/students" },
+    { text: "Add New Student", href: "/admin/students/new" },
+  ];
+  
   const menuItems: MenuItemProps[] = [
     {
       icon: <HomeIcon className="h-5 w-5" />,
@@ -65,13 +79,10 @@ export default function AdminSidebar() {
       isActive: pathname === '/admin'
     },
     {
-      icon: <AcademicCapIcon className="h-5 w-5" />,
-      text: "Student",
-      submenu: [
-        { text: "All Students", href: "/admin/student" },
-        { text: "Add New Student", href: "/admin/student/new" }
-      ],
-      isActive: pathname?.startsWith('/admin/student')
+      icon: <UserGroupIcon className="h-5 w-5" />,
+      text: "Students",
+      submenu: studentItems,
+      isActive: pathname?.startsWith('/admin/students')
     },
     {
       icon: <BookOpenIcon className="h-5 w-5" />,
@@ -81,6 +92,15 @@ export default function AdminSidebar() {
         { text: "Add New Course", href: "/admin/courses/new" }
       ],
       isActive: pathname?.startsWith('/admin/courses')
+    },
+    {
+      icon: <QuestionMarkCircleIcon className="h-5 w-5" />,
+      text: "FAQs",
+      submenu: [
+        { text: "All FAQs", href: "/admin/faqs" },
+        { text: "Add New FAQ", href: "/admin/faqs/new" }
+      ],
+      isActive: pathname?.startsWith('/admin/faqs')
     },
     {
       icon: <ChartBarIcon className="h-5 w-5" />,
@@ -230,23 +250,28 @@ function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false
       )}
 
       {submenu && (
-        <div 
-          className={`overflow-hidden transition-opacity duration-300 ease-in-out ${
-            isOpen ? 'max-h-40 opacity-100 mt-1' : 'max-h-0 opacity-0'
-          }`}
-        >
-          <div className="pl-10 space-y-1">
-            {submenu.map((item, index) => (
-              <Link
-                key={index}
-                href={item.href}
-                className="flex items-center px-3 py-2 text-sm text-blue-100 hover:text-white hover:bg-blue-500/50 rounded-md sidebar-menu-item"
-              >
-                {item.text}
-              </Link>
-            ))}
-          </div>
-        </div>
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              variants={menuVariants}
+            >
+              <div className="pl-10 space-y-1">
+                {submenu.map((item, index) => (
+                  <Link
+                    key={index}
+                    href={item.href}
+                    className="flex items-center px-3 py-2 text-sm text-blue-100 hover:text-white hover:bg-blue-500/50 rounded-md sidebar-menu-item"
+                  >
+                    {item.text}
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       )}
     </div>
   );
