@@ -697,18 +697,13 @@ export default function NewCoursePage() {
         level: values.level,
         topics: values.topics.length > 0 ? values.topics : ['general'],
         imageUrl: 'https://via.placeholder.com/800x400', // Default image URL
-        videoUrl: 'https://www.youtube.com/watch?v=placeholder', // Default video URL
-        chapters: chapters.map(chapter => ({
-          title: chapter.title || 'Untitled Chapter',
-          order: chapter.order
-        })),
         lessons: allLessons
       };
       
       // Send data to API
       console.log('Sending course data:', courseData);
       
-      const response = await fetch('/api/admin/courses', {
+      const response = await fetch('/api/courses', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

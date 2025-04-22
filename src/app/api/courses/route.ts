@@ -6,10 +6,13 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { getAllCourses } from '@/lib/services/courses/course-service';
+import prisma from '@/lib/db/prisma-client';
 import { 
   apiSuccess, 
-  apiServerError 
+  apiServerError,
+  apiError
 } from '@/lib/api/api-response';
+import { ApiErrorCode } from '@/lib/api/api-error-codes';
 import { 
   createRouteHandler, 
   withErrorHandling, 
@@ -206,5 +209,90 @@ const getCourses = withErrorHandling(async (req: NextRequest) => {
 // Export the route handler
 export const GET = getCourses;
 
-// TODO: Add POST handler for creating courses (admin only)
-// POST is intentionally not implemented yet pending further requirements
+// POST handler for creating courses (admin only)
+export const POST = withAdmin(async (req: NextRequest, context: any) => {
+  try {
+    const body = await req.json();
+    
+    // Validate course data with Zod
+    const courseSchema = z.object({
+      title: z.string().min(1, { message: 'Title is required' }),
+      description: z.string().min(1, { message: 'Description is required' }),
+      imageUrl: z.string().url({ message: 'Please provide a valid URL for image' }).optional(),
+      price: z.number().nonnegative({ message: 'Price must be a positive number' }),
+      level: z.enum(['beginner', 'intermediate', 'advanced', 'all']),
+      topics: z.array(z.string()),
+      lessons: z.array(z.object({
+        title: z.string().min(1, "Lesson title is required"),
+        description: z.string().optional().default(""),
+        order: z.number().int().min(1, "Order must be a positive integer"),
+        videoUrl: z.string().url("Must be a valid URL"),
+        resources: z.array(z.object({
+          title: z.string().min(1, "Resource title is required"),
+          url: z.string().url("Must be a valid URL"),
+          type: z.string()
+        })).optional().default([])
+      })).min(1, { message: 'At least one lesson is required' })
+    });
+    
+    const validation = courseSchema.safeParse(body);
+    
+    if (!validation.success) {
+      return apiError(
+        'Invalid course data',
+        validation.error.format(),
+        ApiErrorCode.VALIDATION_ERROR
+      );
+    }
+    
+    // Convert 'all' level to 'beginner' to match the database schema
+    const { level, lessons, ...courseData } = validation.data;
+    const normalizedLevel = level === 'all' ? 'beginner' : level;
+    
+    // Create the course with Prisma - only include fields from the schema
+    const newCourse = await prisma.course.create({
+      data: {
+        title: courseData.title,
+        description: courseData.description,
+        price: courseData.price,
+        imageUrl: courseData.imageUrl,
+        level: normalizedLevel,
+        topics: courseData.topics,
+        studentIds: [],
+      }
+    });
+    
+    // Check if course was created successfully
+    if (!newCourse) {
+      return apiServerError('Failed to create course');
+    }
+    
+    // Process and create lessons
+    if (lessons && Array.isArray(lessons)) {
+      for (const lesson of lessons) {
+        try {
+          // Create lesson
+          await prisma.lesson.create({
+            data: {
+              title: lesson.title,
+              content: lesson.description || '',
+              videoUrl: lesson.videoUrl,
+              order: lesson.order,
+              courseId: newCourse.id,
+              // Store resources as JSON in a field called 'resourcesData'
+              resourcesData: lesson.resources ? JSON.stringify(lesson.resources) : '[]'
+            }
+          });
+        } catch (lessonError) {
+          console.error('Error creating lesson:', lessonError);
+          // Continue to next lesson if this one fails
+        }
+      }
+    }
+    
+    return apiSuccess(newCourse, 'Course created successfully', undefined, 201);
+  } catch (error) {
+    console.error('Error creating course:', error);
+    return apiServerError('Failed to create course');
+  }
+});

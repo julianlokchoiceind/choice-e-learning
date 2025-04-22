@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { 
+import {
   PlusIcon, 
   PencilSquareIcon, 
   TrashIcon, 
@@ -30,6 +30,31 @@ interface Course {
 export default function CoursesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  
+  // Delete course function
+  const deleteCourse = async (courseId: string) => {
+    setIsDeleting(courseId);
+    
+    try {
+      const response = await fetch(`/api/courses/${courseId}`, {
+        method: 'DELETE'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete course');
+      }
+      
+      // Remove course from state
+      setCourses(prevCourses => prevCourses.filter(course => course.id.toString() !== courseId));
+      
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      alert('Failed to delete course. Please try again.');
+    } finally {
+      setIsDeleting(null);
+    }
+  };
   
   // Add CSS for buttons with no transform on hover - matching sidebar behavior
   useEffect(() => {
@@ -180,7 +205,7 @@ export default function CoursesPage() {
                               alt={course.title}
                               className="h-full w-full object-cover"
                               onError={(e) => {
-                                (e.target as HTMLImageElement).src = '/placeholder-course.jpg';
+                                (e.target as HTMLImageElement).src = '/images/placeholder-course.jpg';
                               }}
                             />
                           )}
@@ -204,23 +229,31 @@ export default function CoursesPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex space-x-2 justify-end">
-                        <button 
+                        <Link
+                          href={`/admin/courses/edit/${course.id}`}
                           className="text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 rounded-md p-1.5 transition-colors duration-150 admin-button"
                           aria-label="Edit course"
                         >
                           <PencilSquareIcon className="h-5 w-5" />
-                        </button>
+                        </Link>
                         <button 
                           className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 rounded-md p-1.5 transition-colors duration-150 admin-button"
                           aria-label="Delete course"
+                          disabled={isDeleting === course.id.toString()}
                           onClick={() => {
                             if (confirm(`Are you sure you want to delete "${course.title}"?`)) {
-                              // TODO: Implement delete course logic
-                              alert('Delete functionality not implemented yet');
+                              deleteCourse(course.id.toString());
                             }
                           }}
                         >
-                          <TrashIcon className="h-5 w-5" />
+                          {isDeleting === course.id.toString() ? (
+                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          ) : (
+                            <TrashIcon className="h-5 w-5" />
+                          )}
                         </button>
                       </div>
                     </td>
