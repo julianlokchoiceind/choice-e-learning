@@ -75,13 +75,18 @@ export default function EditCoursePage() {
         setIsLoading(true);
         setError(null);
         
+        console.log(`Fetching course with ID: ${courseId}`);
         const response = await fetch(`/api/courses/${courseId}`);
         
         if (!response.ok) {
-          throw new Error(`Failed to fetch course: ${response.statusText}`);
+          const statusText = response.statusText;
+          const errorBody = await response.text();
+          console.error(`Server error (${response.status} ${statusText}):`, errorBody);
+          throw new Error(`Failed to fetch course: ${statusText}`);
         }
         
         const data = await response.json();
+        console.log('Course data response:', data);
         
         if (data.success && data.data) {
           const course = data.data;
@@ -178,6 +183,7 @@ export default function EditCoursePage() {
         price: parseFloat(formData.price) || 0
       };
       
+      console.log(`Updating course ${courseId} with data:`, data);
       const response = await fetch(`/api/courses/${courseId}`, {
         method: 'PUT',
         headers: {
@@ -186,13 +192,33 @@ export default function EditCoursePage() {
         body: JSON.stringify(data)
       });
       
+      console.log(`Update course response status: ${response.status} ${response.statusText}`);
+      
+      // Check if response is not OK before trying to parse JSON
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update course');
+        // Try to get error details if possible
+        try {
+          const errorData = await response.json();
+          console.error('Error updating course:', errorData);
+          throw new Error(errorData.error || `Request failed with status ${response.status}`);
+        } catch (jsonError) {
+          // If we can't parse the error response as JSON
+          throw new Error(`Request failed with status ${response.status}: ${response.statusText}`);
+        }
       }
       
-      // Success - redirect back to courses page
-      router.push('/admin/courses');
+      // Read the response once only
+      const responseData = await response.json();
+      console.log('Update course response data:', responseData);
+      
+      if (responseData.success) {
+        // Success - redirect back to courses page
+        console.log('Course updated successfully, redirecting...');
+        router.push('/admin/courses');
+      } else {
+        console.error('Update failed with success=false:', responseData);
+        throw new Error(responseData.error || 'Failed to update course');
+      }
       
     } catch (err) {
       console.error('Error updating course:', err);

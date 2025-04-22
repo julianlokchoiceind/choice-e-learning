@@ -248,7 +248,7 @@ export default function CoursesPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex space-x-2 justify-end">
                         <Link
-                          href={`/admin/courses/edit/${course.id}`}
+                          href={`/admin/courses/${course.id}/edit`}
                           className="text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 rounded-md p-1.5 transition-colors duration-150 admin-button"
                           aria-label="Edit course"
                         >
