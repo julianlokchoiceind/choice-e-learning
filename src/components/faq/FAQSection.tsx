@@ -97,16 +97,6 @@ export default function FAQSection() {
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-8">
-      <div className="text-center mb-12">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Frequently Asked Questions
-        </h1>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Find answers to the most common questions about our online learning platform.
-          If you can't find what you're looking for, feel free to contact us.
-        </p>
-      </div>
-
       {/* Search and filter */}
       <div className="bg-white shadow-md rounded-lg p-6 mb-8">
         <div className="flex flex-col md:flex-row gap-4">
