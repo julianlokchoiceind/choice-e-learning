@@ -46,6 +46,20 @@ enum Role {
   deleted_user
 }
 
+model Topic {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  courseIds   String[] @db.ObjectId
+  courses     Course[] @relation("CourseTopics", fields: [courseIds], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("topics")
+}
+
 model Course {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
@@ -53,7 +67,9 @@ model Course {
   price       Float
   imageUrl    String?
   level       Level
-  topics      String[]
+  topics      String[] // Giữ lại cho backward compatibility
+  topicIds    String[] @db.ObjectId
+  topicsList  Topic[]  @relation("CourseTopics", fields: [topicIds], references: [id])
   chapters    Chapter[]
   lessons     Lesson[]
   createdAt   DateTime @default(now())

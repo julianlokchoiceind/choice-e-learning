@@ -137,7 +137,7 @@ export default function CoursesPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Courses</h1>
+        <h1 className="text-2xl font-bold mb-6">Courses Management</h1>
         <Link 
           href="/admin/courses/new" 
           className="px-4 py-2 rounded-md flex items-center admin-button add-course-btn"
@@ -188,22 +188,22 @@ export default function CoursesPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[var(--color-primary)] uppercase tracking-wider">
+                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">
                     #
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[var(--color-primary)] uppercase tracking-wider">
+                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">
                     Course Title
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[var(--color-primary)] uppercase tracking-wider">
+                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">
                     Level
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[var(--color-primary)] uppercase tracking-wider">
+                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">
                     Students
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-[var(--color-primary)] uppercase tracking-wider">
+                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">
                     Price
                   </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-[var(--color-primary)] uppercase tracking-wider">
+                  <th scope="col" className="py-4 px-6 text-right font-medium text-indigo-700 uppercase tracking-wider text-sm">
                     Actions
                   </th>
                 </tr>

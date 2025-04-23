@@ -11,6 +11,9 @@ import {
   PlusIcon
 } from '@heroicons/react/24/outline';
 
+import { TopicSelector } from '@/components/admin/courses';
+import FileUpload from '@/components/ui/file/FileUpload';
+
 interface CourseFormData {
   title: string;
   description: string;
@@ -39,7 +42,6 @@ export default function EditCoursePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [newTopic, setNewTopic] = useState('');
   const [activeTab, setActiveTab] = useState('basic'); // 'basic' or 'lessons'
 
   // Form state
@@ -154,23 +156,6 @@ export default function EditCoursePage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const addTopic = () => {
-    if (newTopic && !formData.topics.includes(newTopic)) {
-      setFormData(prev => ({
-        ...prev,
-        topics: [...prev.topics, newTopic]
-      }));
-      setNewTopic('');
-    }
-  };
-
-  const removeTopic = (topicToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      topics: prev.topics.filter(topic => topic !== topicToRemove)
-    }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
@@ -214,7 +199,9 @@ export default function EditCoursePage() {
       if (responseData.success) {
         // Success - redirect back to courses page
         console.log('Course updated successfully, redirecting...');
-        router.push('/admin/courses');
+        
+        // Use router.replace to ensure page cache is refreshed
+        router.replace('/admin/courses');
       } else {
         console.error('Update failed with success=false:', responseData);
         throw new Error(responseData.error || 'Failed to update course');
@@ -450,59 +437,25 @@ export default function EditCoursePage() {
               </div>
               
               <div>
-                <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                  Image URL
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Course Image
                 </label>
-                <input
-                  type="url"
-                  id="imageUrl"
-                  name="imageUrl"
-                  value={formData.imageUrl}
-                  onChange={handleChange}
-                  placeholder="https://example.com/image.jpg"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <FileUpload 
+                  currentImageUrl={formData.imageUrl}
+                  onImageUpload={(url) => setFormData({...formData, imageUrl: url})}
+                  type="course-cover"
+                  entityId={courseId}
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Enter a URL for the course image, or leave blank for default image
+                  Upload a new image or keep the existing one
                 </p>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Topics/Tags
-                </label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {formData.topics.map((topic, index) => (
-                    <div key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full flex items-center text-sm">
-                      <span>{topic}</span>
-                      <button
-                        type="button"
-                        onClick={() => removeTopic(topic)}
-                        className="ml-1 text-blue-600 hover:text-blue-800"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex">
-                  <input
-                    type="text"
-                    value={newTopic}
-                    onChange={(e) => setNewTopic(e.target.value)}
-                    placeholder="Add topic (e.g., JavaScript, Programming)"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={addTopic}
-                    className="bg-blue-600 text-white px-3 py-2 rounded-r-md hover:bg-blue-700 transition-colors"
-                  >
-                    Add
-                  </button>
-                </div>
+                <TopicSelector
+                  selectedTopics={formData.topics}
+                  onChange={(topics) => setFormData({...formData, topics})}
+                />
               </div>
             </div>
           </div>

@@ -268,6 +268,7 @@ export const StudentList = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr className="bg-gray-50">
+                <th className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">#</th>
                 <th className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">Name</th>
                 <th className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">Email</th>
                 <th className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">Phone</th>
@@ -285,10 +286,13 @@ export const StudentList = () => {
                   </td>
                 </tr>
               ) : students && students.length > 0 ? (
-                students.map((student) => {
+                students.map((student, index) => {
                   console.log("Rendering student:", student.id, student.email);
                   return (
                     <tr key={student.id} className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="py-4 px-6 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {index + 1}
+                      </td>
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-medium text-sm">

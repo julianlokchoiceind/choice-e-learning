@@ -3,15 +3,9 @@ description:
 globs: 
 alwaysApply: true
 ---
+Hướng dẫn phát triển tính năng mới cho dự án Choice E-Learning
 
-# Your rule content
-
-Mac Project address: "/Users/julianlok/Documents/choice-e-learning"
-Win Project address: "D:\choice-e-learning"
-
-# Hướng dẫn phát triển tính năng mới cho dự án Choice E-Learning
-
-## Nguyên tắc chung
+## A. Nguyên tắc chung
 
 1. **Bám sát cấu trúc hiện tại**: Phát triển tính năng mới dựa trên cấu trúc dự án đã được refactor, không tạo thêm cấu trúc file/thư mục mới khi không cần thiết.
 
@@ -21,7 +15,7 @@ Win Project address: "D:\choice-e-learning"
 
 4. **Tuân thủ kiến trúc**: Tuân thủ kiến trúc đã được thiết lập trong dự án (separation of concerns, mô hình phân lớp).
 
-## Hướng dẫn cụ thể
+## Hướng dẫn cụ thể:
 
 ### Khi làm việc với components
 - Nếu tính năng mới yêu cầu UI mới, hãy xem xét các component hiện có trước khi tạo mới
@@ -70,7 +64,8 @@ Win Project address: "D:\choice-e-learning"
 - Nếu phát hiện code xấu/không tối ưu trong quá trình phát triển, đánh dấu để refactor sau, không thay đổi lớn khi đang triển khai tính năng
 
 
-## Tuân thủ các nguyên tắc này sẽ giúp dự án phát triển bền vững, dễ bảo trì và nhất quán về mặt cấu trúc (rất quan trọng)
+
+## B. Tuân thủ các nguyên tắc này sẽ giúp dự án phát triển bền vững, dễ bảo trì và nhất quán về mặt cấu trúc (rất quan trọng)
 
 khi tôi yêu cầu phát triển tính năng mới cho [TÊN TÍNH NĂNG] trong dự án này, hãy tuân thủ các nguyên tắc sau để đảm bảo tính nhất quán:
 
@@ -82,20 +77,42 @@ khi tôi yêu cầu phát triển tính năng mới cho [TÊN TÍNH NĂNG] trong
    - Tạo routes theo pattern: `/admin/<resource>/[id]/action`
    - API endpoints theo pattern: `/api/admin/<resource>` và `/api/admin/<resource>/[id]`
    - Đặt components trong: `/components/<domain>/<ComponentName>`
+   - Tạo các hook trong: `/client/hooks/<domain>/use<Feature>.ts`
+   - Tạo các API public theo pattern: `/api/<resource>` khi cần hiển thị trên frontend
+   - Đảm bảo các public component đặt trong `/components/public/<domain>` nếu cần
 
 3. Tổ chức mã nguồn:
    - Tạo các services trong `/lib/services/<domain>`
    - Định nghĩa types trong `/types/<domain>.ts`
    - Sử dụng middleware auth đúng cách (`withAdmin`, `withAuth`)
+   - Sử dụng `apiSuccess` và các hàm liên quan từ `api-response.ts` cho API responses
+   - Xác thực dữ liệu đầu vào với Zod schema
+   - Export services và types từ file index.ts để dễ dàng import
 
 4. Kỹ thuật triển khai:
    - Sử dụng hook patterns nhất quán với dự án hiện tại
    - Xử lý dữ liệu và lỗi theo cùng một cách
    - Sử dụng UI components từ thư viện hiện có
+   - Thêm log chi tiết để dễ dàng debug
+   - Theo dõi và xử lý trạng thái loading/error trong React hooks
+   - Sử dụng Next.js features như CSR/SSR phù hợp với use case
 
 5. Kiểm tra tính nhất quán:
    - So sánh với tính năng tương tự
    - Kiểm tra quy ước đặt tên
    - Đảm bảo không duplicate code
+   - Kiểm tra việc hiển thị dữ liệu trên cả admin và frontend
+   - Kiểm tra cách dữ liệu được lưu trữ trong database
 
-Mô tả chi tiết tính năng cần phát triển, các file/thư mục cần tạo/chỉnh sửa, và cách tính năng mới sẽ tích hợp với hệ thống hiện tại.
+6. Xử lý dữ liệu:
+   - Sử dụng Prisma Client từ instance đã được cấu hình sẵn
+   - Xử lý lỗi nhất quán trong toàn bộ stack
+   - Đảm bảo dữ liệu được validate ở cả client và server
+   - Định dạng dữ liệu (như dates, số, etc.) theo chuẩn đã dùng trong dự án
+
+7. Tương tác giữa Admin và Frontend:
+   - Đảm bảo thay đổi trong admin panel được cập nhật ngay lập tức trên frontend
+   - Sử dụng cùng service cho cả admin và frontend để đảm bảo nhất quán
+   - Tối ưu hóa queries để tránh N+1 problem
+
+Mô tả chi tiết tính năng cần phát triển, các file/thư mục cần tạo/chỉnh sửa, và cách tính năng mới sẽ tích hợp với hệ thống hiện tại.thư mục cần tạo/chỉnh sửa, và cách tính năng mới sẽ tích hợp với hệ thống hiện tại.

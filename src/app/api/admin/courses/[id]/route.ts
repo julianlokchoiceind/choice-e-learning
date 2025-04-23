@@ -98,10 +98,21 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     
     try {
       // Update course with Prisma
-      await prisma.course.update({
+      const updatedCourse = await prisma.course.update({
         where: { id: courseId },
-        data: updateData
+        data: {
+          ...updateData,
+          // Luôn đảm bảo updatedAt được cập nhật, tránh trường hợp Next.js cache lại
+          updatedAt: new Date()
+        }
       });
+      
+      // Log thông tin để debug
+      console.log(`Updated course ${courseId}`, {
+        imageUrl: updatedCourse.imageUrl,
+        updatedAt: updatedCourse.updatedAt
+      });
+      
     } catch (error) {
       // Course not found
       return NextResponse.json(
@@ -110,10 +121,19 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       );
     }
     
-    return NextResponse.json({
+    // Trả về response với header ngăn cache
+    const response = NextResponse.json({
       success: true,
-      message: 'Course updated successfully'
+      message: 'Course updated successfully',
+      timestamp: Date.now() // Thêm timestamp để client có thể biết có sự thay đổi
     });
+    
+    // Thêm header để ngăn cache
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    
+    return response;
   } catch (error) {
     console.error('Error updating course:', error);
     return NextResponse.json(

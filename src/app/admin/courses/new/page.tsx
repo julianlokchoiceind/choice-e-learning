@@ -11,9 +11,10 @@ import {
   PlusCircleIcon,
   XCircleIcon,
   CheckCircleIcon,
-  CloudArrowUpIcon,
   VideoCameraIcon 
 } from '@heroicons/react/24/outline';
+import { TopicSelector } from '@/components/admin/courses';
+import FileUpload from '@/components/ui/file/FileUpload';
 
 // Interface for basic form values
 interface FormValues {
@@ -22,6 +23,7 @@ interface FormValues {
   price: string;
   level: string;
   topics: string[];
+  imageUrl: string;
 }
 
 // Interface for chapters
@@ -54,9 +56,6 @@ export default function NewCoursePage() {
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newTopic, setNewTopic] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
   // Form values
   const [values, setValues] = useState<FormValues>({
     title: '',
@@ -64,6 +63,7 @@ export default function NewCoursePage() {
     price: '0',
     level: 'beginner',
     topics: [],
+    imageUrl: ''
   });
   
   // Chapters
@@ -94,25 +94,6 @@ export default function NewCoursePage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setValues({ ...values, [name]: value });
-  };
-  
-  // Add a topic
-  const addTopic = () => {
-    if (newTopic.trim() && !values.topics.includes(newTopic.trim())) {
-      setValues({
-        ...values,
-        topics: [...values.topics, newTopic.trim()]
-      });
-      setNewTopic('');
-    }
-  };
-  
-  // Remove a topic
-  const removeTopic = (topicToRemove: string) => {
-    setValues({
-      ...values,
-      topics: values.topics.filter(topic => topic !== topicToRemove)
-    });
   };
   
   // Add a new chapter
@@ -601,18 +582,9 @@ export default function NewCoursePage() {
     setStep(step - 1);
   };
   
-  // Trigger file upload dialog
-  const handleImageUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-  
-  // Handle file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // TODO: Implement file upload logic
-      console.log('File selected:', file.name);
-    }
+  // Handle image upload
+  const handleImageUpload = (url: string) => {
+    setValues(prev => ({ ...prev, imageUrl: url }));
   };
   
   // Handle form submission
@@ -696,7 +668,7 @@ export default function NewCoursePage() {
         price: parseFloat(values.price) || 0, // Ensure we have a number
         level: values.level,
         topics: values.topics.length > 0 ? values.topics : ['general'],
-        imageUrl: 'https://via.placeholder.com/800x400', // Default image URL
+        imageUrl: values.imageUrl || 'https://via.placeholder.com/800x400', // Use uploaded image or default
         lessons: allLessons
       };
       
@@ -814,57 +786,17 @@ export default function NewCoursePage() {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Course Image <span className="text-red-500">*</span>
               </label>
-          <div 
-            onClick={handleImageUploadClick}
-            className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition-colors"
-          >
-            <CloudArrowUpIcon className="h-10 w-10 text-gray-400" />
-            <p className="mt-2 text-sm text-gray-500">Click to upload or drag and drop</p>
-            <p className="text-xs text-gray-400">PNG, JPG, GIF up to 2MB</p>
-              <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-          </div>
+          <FileUpload 
+            onImageUpload={handleImageUpload}
+            type="course-cover"
+          />
             </div>
             
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Topics/Tags
-              </label>
-          <div className="flex flex-wrap gap-2 mb-2">
-            {values.topics.map((topic, index) => (
-              <div key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full flex items-center text-sm">
-                <span>{topic}</span>
-                <button
-                  type="button"
-                  onClick={() => removeTopic(topic)}
-                  className="ml-1 text-blue-600 hover:text-blue-800"
-                >
-                  <XCircleIcon className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-          <div className="flex">
-              <input
-                type="text"
-              value={newTopic}
-              onChange={(e) => setNewTopic(e.target.value)}
-              placeholder="Add topic (e.g., JavaScript, Web Development)"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="button"
-              onClick={addTopic}
-              className="bg-blue-600 text-white px-3 py-2 rounded-r-md hover:bg-blue-700 transition-colors"
-            >
-              Add
-            </button>
-          </div>
+          <TopicSelector
+            selectedTopics={values.topics}
+            onChange={(topics) => setValues({...values, topics})}
+          />
         </div>
       </div>
     </div>

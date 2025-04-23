@@ -57,11 +57,18 @@ export async function getAllCourses(): Promise<CourseListItem[]> {
           ? Number((course.reviews.reduce((acc: number, review: any) => acc + (review?.rating || 0), 0) / course.reviews.length).toFixed(1))
           : 4.5; // Default if no reviews
         
+        // Thêm timestamp vào URL hình ảnh để tránh cache
+        const timestamp = Date.now();
+        const imageUrl = course.imageUrl 
+          ? `${course.imageUrl}?t=${timestamp}` 
+          : 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop';
+        
         return {
           id: course.id,
           title: course.title,
           description: course.description,
-          image: course.imageUrl || 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop',
+          image: imageUrl,
+          imageUrl: imageUrl, // Thêm cả trường này để đảm bảo tương thích
           level: course.level,
           price: course.price,
           duration: `${Math.ceil(course._count.lessons / 2)} weeks`, // Approximate duration
@@ -71,6 +78,7 @@ export async function getAllCourses(): Promise<CourseListItem[]> {
           reviews: course._count.reviews,
           instructorName: creator?.name || 'Administrator',
           learningPoints: Array.isArray(course.topics) ? course.topics : [],
+          updatedAt: course.updatedAt, // Thêm trường updatedAt để client có thể kiểm tra thời điểm cập nhật
         };
       })
     );
@@ -148,12 +156,19 @@ export async function getCourseById(courseId: string) {
       ? Number((course.reviews.reduce((acc: number, review: any) => acc + (review?.rating || 0), 0) / course.reviews.length).toFixed(1))
       : 4.5; // Default if no reviews
     
+    // Thêm timestamp vào URL hình ảnh để tránh cache
+    const timestamp = Date.now();
+    const imageUrl = course.imageUrl 
+      ? `${course.imageUrl}?t=${timestamp}` 
+      : 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop';
+      
     return {
       id: course.id,
       title: course.title,
       description: course.description,
       fullDescription: course.description,
-      image: course.imageUrl || 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop',
+      image: imageUrl,
+      imageUrl: imageUrl, // Thêm cả trường này để đảm bảo tương thích
       level: course.level,
       price: course.price,
       duration: `${Math.ceil(Array.isArray(course.lessons) ? course.lessons.length : 0 / 2)} weeks`, // Approximate duration
@@ -174,6 +189,8 @@ export async function getCourseById(courseId: string) {
         courses: 1, // Simplified
       },
       reviews: processedReviews,
+      updatedAt: course.updatedAt, // Đảm bảo có trường này để client có thể kiểm tra
+      _timestamp: timestamp, // Thêm một trường để client biết dữ liệu đã được tải mới
     };
   } catch (error) {
     console.error('Error fetching course by ID:', error);
@@ -636,6 +653,42 @@ export async function searchCourses(query: string, limit: number = 10): Promise<
     return processedCourses;
   } catch (error) {
     console.error('Error searching courses:', error);
+    return [];
+  }
+}
+
+/**
+ * Get all unique topics from courses
+ * @returns Array of unique topic strings
+ */
+export async function getAllTopics(): Promise<string[]> {
+  try {
+    // Fetch all courses and extract their topics
+    const courses = await prisma.course.findMany({
+      select: {
+        topics: true
+      }
+    });
+    
+    if (!courses || !Array.isArray(courses)) {
+      return [];
+    }
+    
+    // Extract topics from all courses and flatten the array
+    const allTopics = courses.reduce((acc: string[], course) => {
+      if (Array.isArray(course.topics)) {
+        return [...acc, ...course.topics];
+      }
+      return acc;
+    }, []);
+    
+    // Remove duplicates and filter out 'featured' which is a special tag
+    const uniqueTopics = [...new Set(allTopics)].filter(topic => topic !== 'featured');
+    
+    // Sort alphabetically
+    return uniqueTopics.sort();
+  } catch (error) {
+    console.error('Error fetching all topics:', error);
     return [];
   }
 }

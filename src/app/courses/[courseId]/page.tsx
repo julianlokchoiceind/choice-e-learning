@@ -60,14 +60,30 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
     const fetchCourseData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/courses/${courseId}`);
+        // Thêm timestamp vào request URL để tránh caching
+        const timestamp = Date.now();
+        const response = await fetch(`/api/courses/${courseId}?t=${timestamp}`, {
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        });
+        
         if (!response.ok) {
           throw new Error('Failed to fetch course details');
         }
         
         const data = await response.json();
         if (data.success) {
-          setCourse(data.course);
+          // Xử lý URL hình ảnh để đảm bảo không bị cache
+          const processedCourse = {
+            ...data.course,
+            imageUrl: data.course.imageUrl ? 
+              `${data.course.imageUrl}?t=${timestamp}` : 
+              data.course.imageUrl
+          };
+          setCourse(processedCourse);
         } else {
           setError(data.error || 'Failed to fetch course details');
         }
@@ -80,6 +96,13 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
     
     if (courseId) {
       fetchCourseData();
+      
+      // Set up a refresh interval to periodically check for updates
+      const refreshInterval = setInterval(() => {
+        fetchCourseData();
+      }, 30000); // Check every 30 seconds
+      
+      return () => clearInterval(refreshInterval);
     }
   }, [courseId]);
   

@@ -89,7 +89,8 @@ export default function AdminSidebar() {
       text: "Courses",
       submenu: [
         { text: "All Courses", href: "/admin/courses" },
-        { text: "Add New Course", href: "/admin/courses/new" }
+        { text: "Add New Course", href: "/admin/courses/new" },
+        { text: "Topics Management", href: "/admin/courses/topics" }
       ],
       isActive: pathname?.startsWith('/admin/courses')
     },

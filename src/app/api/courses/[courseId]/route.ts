@@ -42,8 +42,23 @@ export const GET = withErrorHandling(async (
       return apiNotFound('Course');
     }
     
-    // Return course details
-    return apiSuccess(course);
+    // Thêm timestamp vào hình ảnh để tránh cache
+    const processedCourse = {
+      ...course,
+      imageUrl: course?.imageUrl ? `${course.imageUrl}?t=${Date.now()}` : course?.imageUrl
+    };
+    
+    // Trả về với header ngăn cache
+    const response = apiSuccess(processedCourse);
+    
+    // Thêm header để không cache kết quả
+    if (response.headers) {
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+      response.headers.set('Pragma', 'no-cache');
+      response.headers.set('Expires', '0');
+    }
+    
+    return response;
   } catch (error) {
     console.error(`Error fetching course ${courseId}:`, error);
     return apiServerError('Failed to fetch course details');
@@ -64,7 +79,7 @@ export const PUT = withAdmin(async (
     const courseSchema = z.object({
       title: z.string().min(1, { message: 'Title is required' }),
       description: z.string().min(1, { message: 'Description is required' }),
-      imageUrl: z.string().url({ message: 'Please provide a valid URL for image' }).optional().nullable(),
+      imageUrl: z.string().optional().nullable(),
       price: z.number().nonnegative({ message: 'Price must be a positive number' }),
       level: z.enum(['beginner', 'intermediate', 'advanced', 'all']),
       topics: z.array(z.string()).optional().default([])

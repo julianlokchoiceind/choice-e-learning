@@ -67,3 +67,7 @@ logs
 # build and deploy
 /dist/
 /.firebase/
+
+# Uploaded files
+/public/uploads/*
+!/public/uploads/.gitkeep

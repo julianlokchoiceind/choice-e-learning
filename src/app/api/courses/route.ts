@@ -31,6 +31,10 @@ const courseQueryParamsSchema = z.object({
   page: z.string().optional().pipe(z.coerce.number().int().positive().default(1)),
   limit: z.string().optional().pipe(z.coerce.number().int().positive().default(10)),
   category: z.string().optional(),
+  topics: z.union([
+    z.string().array(),
+    z.string().transform(val => [val])
+  ]).optional(),
   search: z.string().optional(),
   sortBy: z.enum(['title', 'createdAt', 'popularity']).optional().default('createdAt'),
   order: z.enum(['asc', 'desc']).optional().default('desc')
@@ -133,19 +137,30 @@ const getCourses = withErrorHandling(async (req: NextRequest) => {
     return queryResult.error;
   }
   
-  const { page, limit, category, search, sortBy, order } = queryResult.data;
+  const { page, limit, category, topics, search, sortBy, order } = queryResult.data;
   
   try {
     // Get courses from service
     const courses = await getAllCourses();
     
-    // Apply filtering based on category if provided
+    // Apply filtering based on category and topics if provided
     let filteredCourses = courses;
+    
+    // Category filter (can be used for level or a single topic)
     if (category) {
       filteredCourses = courses.filter(course => 
         course.learningPoints?.includes(category) || 
         course.level === category
       );
+    }
+    
+    // Topics filter (for multiple topics)
+    if (topics && Array.isArray(topics) && topics.length > 0) {
+      filteredCourses = filteredCourses.filter(course => {
+        const courseLearningPoints = Array.isArray(course.learningPoints) ? course.learningPoints : [];
+        // Check if the course has at least one of the selected topics
+        return topics.some(topic => courseLearningPoints.includes(topic));
+      });
     }
     
     // Apply search filtering if provided
@@ -189,8 +204,15 @@ const getCourses = withErrorHandling(async (req: NextRequest) => {
     const paginatedCourses = filteredCourses.slice(startIndex, startIndex + limit);
     const totalPages = Math.ceil(totalItems / limit);
     
-    // Return courses with pagination info
-    return apiSuccess(paginatedCourses, undefined, {
+    // Xử lý hình ảnh để tránh cache
+    const timestamp = Date.now();
+    const processedCourses = paginatedCourses.map(course => ({
+      ...course,
+      imageUrl: course.imageUrl ? `${course.imageUrl}?t=${timestamp}` : course.imageUrl
+    }));
+    
+    // Tạo response với pagination info
+    const response = apiSuccess(processedCourses, undefined, {
       pagination: {
         page,
         pageSize: limit,
@@ -200,6 +222,15 @@ const getCourses = withErrorHandling(async (req: NextRequest) => {
         hasPrevPage: page > 1
       }
     });
+    
+    // Thêm header để ngăn cache
+    if (response.headers) {
+      response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+      response.headers.set('Pragma', 'no-cache');
+      response.headers.set('Expires', '0');
+    }
+    
+    return response;
   } catch (error) {
     console.error('Error fetching courses:', error);
     return apiServerError('Failed to fetch courses');
@@ -218,7 +249,7 @@ export const POST = withAdmin(async (req: NextRequest, context: any) => {
     const courseSchema = z.object({
       title: z.string().min(1, { message: 'Title is required' }),
       description: z.string().min(1, { message: 'Description is required' }),
-      imageUrl: z.string().url({ message: 'Please provide a valid URL for image' }).optional(),
+      imageUrl: z.string().optional(),
       price: z.number().nonnegative({ message: 'Price must be a positive number' }),
       level: z.enum(['beginner', 'intermediate', 'advanced', 'all']),
       topics: z.array(z.string()),
