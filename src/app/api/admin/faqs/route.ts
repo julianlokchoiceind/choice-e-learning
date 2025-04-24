@@ -40,7 +40,7 @@ export const GET = withAdmin(async (req: NextRequest) => {
     return apiError(
       "Failed to fetch FAQs",
       error instanceof Error ? error.message : undefined,
-      ApiErrorCode.INTERNAL_SERVER_ERROR
+      ApiErrorCode.SERVER_ERROR
     );
   }
 });
@@ -62,7 +62,7 @@ export const POST = withAdmin(async (req: NextRequest) => {
     return apiError(
       "Failed to create FAQ",
       error instanceof Error ? error.message : undefined,
-      ApiErrorCode.INTERNAL_SERVER_ERROR
+      ApiErrorCode.SERVER_ERROR
     );
   }
 });

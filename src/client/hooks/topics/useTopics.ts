@@ -1,15 +1,8 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
-import { Topic } from '@prisma/client';
+import { Topic, TopicFilter } from '@/types/topics';
 
-interface TopicFilter {
-  search?: string;
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-  isActive?: boolean;
-}
+// Using TopicFilter from @/types/topics
 
 interface TopicResponseSimple {
   success: boolean;
@@ -59,8 +52,8 @@ function useTopics(isAdmin = false) {
     
     try {
       // For less complex requests, use the simple endpoint
-      if (Object.keys(filters).length === 0 || (Object.keys(filters).length === 1 && filters.isActive !== undefined)) {
-        console.log('Using simple topics endpoint');
+      if (Object.keys(filters).length === 0) {
+        console.log('Using simple topics endpoint for empty filters');
         const response = await axios.get<{ success: boolean, data: Topic[] }>(`${baseUrl}`);
         
         if (response.data.success) {
@@ -85,10 +78,17 @@ function useTopics(isAdmin = false) {
       if (filters.limit) params.append('limit', filters.limit.toString());
       if (filters.sortBy) params.append('sortBy', filters.sortBy);
       if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
-      if (filters.isActive !== undefined) params.append('isActive', filters.isActive.toString());
       
-      // Log the request URL for debugging
-      console.log(`Fetching topics from: ${baseUrl}?${params.toString()}`);
+      // Improved handling for isActive filter
+      if (filters.isActive !== undefined) {
+      // Make sure to convert boolean to string correctly
+      params.append('isActive', filters.isActive.toString());
+      console.log(`Setting isActive filter to: ${filters.isActive}`);
+      }
+      
+      // Log the full filters and request URL for debugging
+      console.log('Fetching topics with filters:', filters);
+      console.log(`Request URL: ${baseUrl}?${params.toString()}`);
       
       const response = await axios.get<TopicResponse>(`${baseUrl}?${params.toString()}`);
       

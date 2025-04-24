@@ -27,7 +27,11 @@ const topicQueryParamsSchema = z.object({
   search: z.string().optional(),
   sortBy: z.enum(['name', 'createdAt']).optional().default('name'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
-  isActive: z.string().optional().pipe(z.coerce.boolean().optional())
+  isActive: z.union([
+    z.literal('true').transform(() => true),
+    z.literal('false').transform(() => false),
+    z.coerce.boolean().optional()
+  ]).optional()
 });
 
 // Define the schema for topic creation

@@ -4,17 +4,11 @@
  */
 
 import prismaInstance from '@/lib/db/prisma-client';
-import { Prisma, Topic } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { Topic, TopicFilter, CreateTopicParams, UpdateTopicParams } from '@/types/topics';
 import { slugify } from '@/lib/utils/string-utils';
 
-export interface TopicFilters {
-  search?: string;
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-  isActive?: boolean;
-}
+// Using TopicFilter from @/types/topics
 
 export interface TopicPaginatedResult {
   data: Topic[];
@@ -26,17 +20,7 @@ export interface TopicPaginatedResult {
   };
 }
 
-export interface CreateTopicData {
-  name: string;
-  description?: string;
-  isActive?: boolean;
-}
-
-export interface UpdateTopicData {
-  name?: string;
-  description?: string;
-  isActive?: boolean;
-}
+// Using CreateTopicParams and UpdateTopicParams from @/types/topics
 
 /**
  * Topic Service Implementation
@@ -45,7 +29,7 @@ class TopicService {
   /**
    * Get all topics with filtering and pagination
    */
-  async getAllTopics(filters: TopicFilters = {}): Promise<TopicPaginatedResult> {
+  async getAllTopics(filters: TopicFilter = {}): Promise<TopicPaginatedResult> {
     const {
       search,
       page = 1,
@@ -142,7 +126,7 @@ class TopicService {
   /**
    * Create a new topic
    */
-  async createTopic(data: CreateTopicData): Promise<Topic> {
+  async createTopic(data: CreateTopicParams): Promise<Topic> {
     const slug = slugify(data.name);
     
     // Check if slug already exists
@@ -171,7 +155,7 @@ class TopicService {
   /**
    * Update an existing topic
    */
-  async updateTopic(id: string, data: UpdateTopicData): Promise<Topic> {
+  async updateTopic(id: string, data: UpdateTopicParams): Promise<Topic> {
     const updateData: any = { ...data };
     
     // If name is being updated, also update the slug

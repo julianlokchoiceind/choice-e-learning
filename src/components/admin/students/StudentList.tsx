@@ -301,13 +301,13 @@ export const StudentList = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">#</th>
-                <th className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">Name</th>
-                <th className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">Email</th>
-                <th className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">Phone</th>
-                <th className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">City</th>
-                <th className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">Grade</th>
-                <th className="py-4 px-6 text-right font-medium text-indigo-700 uppercase tracking-wider text-sm">Actions</th>
+                <th className="py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base">#</th>
+                <th className="py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base">Name</th>
+                <th className="py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base">Email</th>
+                <th className="py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base">Phone</th>
+                <th className="py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base">City</th>
+                <th className="py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base">Grade</th>
+                <th className="py-4 px-6 text-right font-medium text-indigo-700 capitalize tracking-wider text-base">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">

@@ -89,10 +89,18 @@ export default function AdminSidebar() {
       text: "Courses",
       submenu: [
         { text: "All Courses", href: "/admin/courses" },
-        { text: "Add New Course", href: "/admin/courses/new" },
-        { text: "Topics Management", href: "/admin/courses/topics" }
+        { text: "Add New Course", href: "/admin/courses/new" }
       ],
       isActive: pathname?.startsWith('/admin/courses')
+    },
+    {
+      icon: <FolderIcon className="h-5 w-5" />,
+      text: "Topics",
+      submenu: [
+        { text: "All Topics", href: "/admin/topics" },
+        { text: "Add New Topic", href: "/admin/topics/new" }
+      ],
+      isActive: pathname?.startsWith('/admin/topics')
     },
     {
       icon: <QuestionMarkCircleIcon className="h-5 w-5" />,
@@ -127,12 +135,7 @@ export default function AdminSidebar() {
       ],
       isActive: pathname?.startsWith('/admin/certificates')
     },
-    {
-      icon: <FolderIcon className="h-5 w-5" />,
-      text: "Content Library",
-      href: "/admin/content-library",
-      isActive: pathname?.startsWith('/admin/content-library')
-    },
+
     {
       icon: <ClockIcon className="h-5 w-5" />,
       text: "Calendar",

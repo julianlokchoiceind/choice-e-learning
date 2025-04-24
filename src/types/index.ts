@@ -28,3 +28,6 @@ export * from './progress';
 
 // FAQ types
 export * from './faq';
+
+// Topic types
+export * from './topics';

@@ -113,6 +113,7 @@ export interface CourseListItem {
   title: string;
   description: string;
   image: string;
+  imageUrl?: string; // Added to fix the type error in courses API
   level: string;
   price: number;
   duration: string;
@@ -122,6 +123,7 @@ export interface CourseListItem {
   reviews: number;
   instructorName: string;
   learningPoints?: string[];
+  updatedAt?: Date; // Added to match what's returned by the service
 }
 
 /**
@@ -233,8 +235,9 @@ export interface UserCourseStats {
 
 /**
  * User progress interface for tracking course completion
+ * @deprecated Use UserProgress from the progress module instead
  */
-export interface UserProgress {
+export interface CourseUserProgress {
   id?: string;
   userId: string;
   courseId: string;

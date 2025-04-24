@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
   PlusIcon, 
@@ -8,7 +8,8 @@ import {
   TrashIcon, 
   MagnifyingGlassIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  BookOpenIcon,
 } from '@heroicons/react/24/outline';
 
 // Define the Course type to match API response
@@ -27,10 +28,26 @@ interface Course {
   updatedAt?: string;
 }
 
+// Define valid level options to ensure consistency with the backend
+const LEVEL_OPTIONS = [
+  { value: 'all', label: 'All Levels' },
+  { value: 'beginner', label: 'Beginner' },
+  { value: 'intermediate', label: 'Intermediate' },
+  { value: 'advanced', label: 'Advanced' }
+];
+
+// Ensure all level values are lowercase for consistent request parameters
+
 export default function CoursesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [courses, setCourses] = useState<Course[]>([]);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  
+  // Initialize state with default values (ensuring lowercase for level)
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedLevel, setSelectedLevel] = useState('all'); // 'all' is already lowercase
+  const [sortOption, setSortOption] = useState('newest');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   
   // Delete course function
   const deleteCourse = async (courseId: string) => {
@@ -56,7 +73,7 @@ export default function CoursesPage() {
     }
   };
   
-  // Add CSS for buttons with no transform on hover - matching sidebar behavior
+  // Add basic styles for consistent appearance
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -88,56 +105,175 @@ export default function CoursesPage() {
     };
   }, []);
   
-  // Fetch courses from the API when component mounts
+  // Debounce search query to avoid too many API calls
   useEffect(() => {
-    const fetchCourses = async () => {
-      setIsLoading(true);
-      
-      try {
-        const response = await fetch('/api/admin/courses');
-        
-        if (!response.ok) {
-          console.error(`Failed to fetch courses: ${response.status} ${response.statusText}`);
-          setCourses([]);
-          return;
-        }
-        
-        const data = await response.json();
-        
-        if (data.success && Array.isArray(data.courses)) {
-          setCourses(data.courses);
-        } else {
-          console.error('Invalid API response:', data);
-          setCourses([]);
-        }
-      } catch (err) {
-        console.error('Error fetching courses:', err);
-        setCourses([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchCourses();
-  }, []);
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
 
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Convert sort option to API parameters
+  const getSortParams = (option: string): { sortBy: string, sortOrder: 'asc' | 'desc' } => {
+    switch (option) {
+      case 'newest':
+        return { sortBy: 'createdAt', sortOrder: 'desc' };
+      case 'oldest':
+        return { sortBy: 'createdAt', sortOrder: 'asc' };
+      case 'priceAsc':
+        return { sortBy: 'price', sortOrder: 'asc' };
+      case 'priceDesc':
+        return { sortBy: 'price', sortOrder: 'desc' };
+      case 'mostStudents':
+        return { sortBy: 'students', sortOrder: 'desc' };
+      case 'leastStudents':
+        return { sortBy: 'students', sortOrder: 'asc' };
+      case 'title':
+        return { sortBy: 'title', sortOrder: 'asc' };
+      default:
+        return { sortBy: 'createdAt', sortOrder: 'desc' };
+    }
+  };
+
+  // Fetch courses with filters and sorting
+  const fetchCourses = useCallback(async () => {
+    setIsLoading(true);
+    console.log('===== FETCHING COURSES =====');
+    
+    try {
+      // Build query params
+      const params = new URLSearchParams();
+      
+      // Thêm tham số search
+      if (debouncedSearchQuery && debouncedSearchQuery.trim() !== '') {
+        params.append('search', debouncedSearchQuery.trim());
+        console.log(`Adding search parameter: "${debouncedSearchQuery.trim()}"`);
+      }
+      
+      // Xử lý level parameter
+      if (selectedLevel && selectedLevel !== 'all') {
+        const normalizedLevel = selectedLevel.toLowerCase().trim();
+        params.append('level', normalizedLevel);
+        console.log(`Adding level filter: "${normalizedLevel}"`);
+      } else {
+        console.log('No level filter (showing all levels)');
+      }
+      
+      // Thêm các tham số sắp xếp
+      const { sortBy, sortOrder } = getSortParams(sortOption);
+      params.append('sortBy', sortBy);
+      params.append('sortOrder', sortOrder);
+      console.log(`Adding sort parameters: ${sortBy} ${sortOrder}`);
+      
+      // Tạo timestamp để tránh cache
+      const timestamp = Date.now();
+      params.append('t', timestamp.toString());
+      
+      // Gọi API
+      const url = `/api/admin/courses?${params.toString()}`;
+      console.log(`Sending request to: ${url}`);
+      
+      const response = await fetch(url, {
+        // Thêm headers để tránh cache
+        cache: 'no-store',
+        next: { revalidate: 0 }
+      });
+      
+      if (!response.ok) {
+        console.error(`API Error: ${response.status} ${response.statusText}`);
+        setCourses([]);
+        return;
+      }
+      
+      const data = await response.json();
+      console.log(`API Response success: ${data.success}, courses count: ${data.courses?.length || 0}`);
+      
+      // Kiểm tra dữ liệu trả về
+      if (data.success && Array.isArray(data.courses)) {
+        const receivedCourses = data.courses;
+        console.log(`Received ${receivedCourses.length} courses from API`);
+        
+        // Log level values để debug
+        console.log('Course levels from API:', 
+          receivedCourses.map((c: Course) => ({ title: c.title, level: c.level }))
+        );
+        
+        // Cập nhật state
+        setCourses(receivedCourses);
+      } else {
+        console.error('Invalid API response format:', data);
+        setCourses([]);
+      }
+    } catch (err) {
+      console.error('Error fetching courses:', err);
+      setCourses([]);
+    } finally {
+      setIsLoading(false);
+      console.log('===== END FETCHING COURSES =====');
+    }
+  }, [debouncedSearchQuery, selectedLevel, sortOption]);
+  
+  // Fetch courses whenever filters or sort options change
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
+
+  // Get CSS class for level badge - using case-insensitive matching
   const getLevelBadgeClass = (level: string) => {
-    switch(level?.toLowerCase()) {
+    // Handle null/undefined case
+    if (!level) return 'bg-purple-100 text-purple-800';
+    
+    // Normalize to lowercase for consistent matching
+    const normalizedLevel = level.toLowerCase();
+    
+    // Match against known values
+    switch(normalizedLevel) {
       case 'beginner':
         return 'bg-green-100 text-green-800';
       case 'intermediate':
         return 'bg-yellow-100 text-yellow-800';
       case 'advanced':
         return 'bg-blue-100 text-blue-800';
-      default:
+      case 'all':
         return 'bg-purple-100 text-purple-800';
+      default:
+        // Log unknown levels for debugging
+        console.log(`Unknown level value encountered: ${level}`);
+        return 'bg-purple-100 text-purple-800';
+    }
+  };
+  
+  // Format level for display
+  const formatLevel = (level: string): string => {
+    if (!level) return 'Unknown';
+    
+    // Normalize to lowercase first
+    const normalizedLevel = level.toLowerCase();
+    
+    // Map to display value
+    switch (normalizedLevel) {
+      case 'beginner':
+        return 'Beginner';
+      case 'intermediate':
+        return 'Intermediate';
+      case 'advanced':
+        return 'Advanced';
+      case 'all':
+        return 'All Levels';
+      default:
+        // Default fallback with capitalization
+        return level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold mb-6">Courses Management</h1>
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center">
+          <BookOpenIcon className="h-7 w-7 text-indigo-600 mr-3" />
+          <h1 className="text-2xl font-bold text-gray-800">Course Management</h1>
+        </div>
         <Link 
           href="/admin/courses/new" 
           className="px-4 py-2 rounded-md flex items-center admin-button add-course-btn"
@@ -157,20 +293,72 @@ export default function CoursesPage() {
               type="text" 
               placeholder="Search courses..." 
               className="py-2 pl-10 pr-4 block w-full sm:w-80 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)] outline-none"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="flex items-center space-x-2">
-            <select className="py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm">
-              <option>All Levels</option>
-              <option>Beginner</option>
-              <option>Intermediate</option>
-              <option>Advanced</option>
+            {/* Level dropdown - using predefined options */}
+            <select 
+              id="level-filter"
+              className="py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm"
+              value={selectedLevel}
+              onChange={(e) => {
+                // Lấy giá trị và gọi thông báo debug
+                let newLevel = e.target.value.trim();
+                console.log(`Level dropdown changed to: "${newLevel}"`);
+                
+                // Bảo vệ trường hợp giá trị rỗng
+                if (!newLevel) {
+                  newLevel = 'all';
+                  console.log('Empty level value, defaulting to "all"');
+                }
+                
+                // Chuẩn hóa lowercase
+                newLevel = newLevel.toLowerCase();
+                console.log(`Normalized level: "${newLevel}"`);
+                
+                // Kiểm tra giá trị hợp lệ
+                if (!['all', 'beginner', 'intermediate', 'advanced'].includes(newLevel)) {
+                  console.error(`Invalid level value: "${newLevel}", resetting to "all"`);
+                  newLevel = 'all';
+                }
+                
+                // Cập nhật state
+                setSelectedLevel(newLevel);
+                
+                // Gọi API với giá trị mới
+                setTimeout(() => {
+                  console.log(`Fetching courses with new level: "${newLevel}"`);
+                  fetchCourses();
+                }, 0);
+              }}
+            >
+              {LEVEL_OPTIONS.map(option => (
+                <option key={option.value} value={option.value.toLowerCase()}>
+                  {option.label}
+                </option>
+              ))}
             </select>
-            <select className="py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm">
-              <option>Sort By: Newest</option>
-              <option>Sort By: Price (Low-High)</option>
-              <option>Sort By: Price (High-Low)</option>
-              <option>Sort By: Most Students</option>
+            
+            {/* Sort dropdown */}
+            <select 
+              id="sort-filter"
+              className="py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm"
+              value={sortOption}
+              onChange={(e) => {
+                setSortOption(e.target.value);
+                // Trigger immediate re-fetch with new sort option
+                setTimeout(() => fetchCourses(), 0);
+              }}
+            >
+              <option value="newest">Sort By: Newest</option>
+              <option value="oldest">Sort By: Oldest</option>
+              <option value="priceAsc">Sort By: Price (Low-High)</option>
+              <option value="priceDesc">Sort By: Price (High-Low)</option>
+              <option value="mostStudents">Sort By: Most Students</option>
+              <option value="leastStudents">Sort By: Least Students</option>
+              <option value="title">Sort By: Title (A-Z)</option>
             </select>
           </div>
         </div>
@@ -188,22 +376,22 @@ export default function CoursesPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">
+                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base">
                     #
                   </th>
-                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">
+                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base">
                     Course Title
                   </th>
-                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">
+                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base">
                     Level
                   </th>
-                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">
+                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base">
                     Students
                   </th>
-                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">
+                  <th scope="col" className="py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base">
                     Price
                   </th>
-                  <th scope="col" className="py-4 px-6 text-right font-medium text-indigo-700 uppercase tracking-wider text-sm">
+                  <th scope="col" className="py-4 px-6 text-right font-medium text-indigo-700 capitalize tracking-wider text-base">
                     Actions
                   </th>
                 </tr>
@@ -236,7 +424,7 @@ export default function CoursesPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs rounded-full ${getLevelBadgeClass(course.level)}`}>
-                        {course.level.charAt(0).toUpperCase() + course.level.slice(1)}
+                        {formatLevel(course.level)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">

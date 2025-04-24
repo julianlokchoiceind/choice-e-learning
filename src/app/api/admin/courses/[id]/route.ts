@@ -29,7 +29,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
           select: { 
             students: true 
           }
-        }
+        },
+        topicsList: true // Bao gồm thông tin topics từ relationship
       }
     });
     
@@ -48,6 +49,14 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       price: course.price,
       level: course.level,
       topics: course.topics,
+      topicsList: Array.isArray(course.topicsList) 
+        ? course.topicsList.map(topic => ({
+            id: topic.id,
+            name: topic.name,
+            slug: topic.slug,
+            isActive: topic.isActive
+          }))
+        : [],
       imageUrl: course.imageUrl,
       instructorId: course.instructorId,
       studentCount: course._count.students,
@@ -90,9 +99,39 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     // Parse request body
     const body = await req.json();
     
+    // Từ mảng topics, cập nhật topicIds
+    let topicIds: string[] = [];
+    if (body.topics && Array.isArray(body.topics)) {
+      const topicObjects = await Promise.all(
+        body.topics.map(async (topicName: string) => {
+          // Tìm topic theo tên
+          let topic = await prisma.topic.findFirst({
+            where: { name: { equals: topicName, mode: 'insensitive' } }
+          });
+          
+          // Nếu không tìm thấy, tạo mới
+          if (!topic) {
+            const slug = topicName.toLowerCase().replace(/\s+/g, '-');
+            topic = await prisma.topic.create({
+              data: {
+                name: topicName,
+                slug,
+                isActive: true
+              }
+            });
+          }
+          
+          return topic;
+        })
+      );
+      
+      topicIds = topicObjects.map(topic => topic.id);
+    }
+    
     // Prepare update data with updated timestamp
     const updateData = {
       ...body,
+      topicIds: topicIds.length > 0 ? topicIds : undefined, // Chỉ cập nhật nếu có dữ liệu mới
       updatedAt: new Date()
     };
     

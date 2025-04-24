@@ -60,7 +60,12 @@ function useCourses(isAdmin = false) {
       const params = new URLSearchParams();
       if (filters.search) params.append('search', filters.search);
       if (filters.category) params.append('category', filters.category);
-      if (filters.level) params.append('level', filters.level);
+      
+      // Only include level parameter if it's provided and not 'all'
+      if (filters.level && filters.level !== 'all') {
+        params.append('level', filters.level.toLowerCase());
+        console.log('Using level filter:', filters.level.toLowerCase());
+      }
       
       // Handle multiple topics if provided
       if (filters.topics && Array.isArray(filters.topics) && filters.topics.length > 0) {

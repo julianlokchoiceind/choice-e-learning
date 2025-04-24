@@ -67,7 +67,7 @@ export default function CoursesSection() {
   const handleSearch = () => {
     fetchCourses({
       search: searchQuery,
-      level: selectedLevel || undefined,
+      level: selectedLevel === "" ? undefined : selectedLevel.toLowerCase(),
       topics: selectedTopics.length > 0 ? selectedTopics : undefined,
       page: 1,
       limit: 9,
@@ -79,7 +79,7 @@ export default function CoursesSection() {
     setSelectedLevel(level);
     fetchCourses({
       search: searchQuery,
-      level: level || undefined,
+      level: level === "" ? undefined : level.toLowerCase(),
       topics: selectedTopics.length > 0 ? selectedTopics : undefined,
       page: 1,
       limit: 9,
@@ -94,7 +94,7 @@ export default function CoursesSection() {
     if (selectedTopics.length > 0 || currentPage > 1) {
       fetchCourses({
         search: searchQuery,
-        level: selectedLevel || undefined,
+        level: selectedLevel === "" ? undefined : selectedLevel.toLowerCase(),
         topics: selectedTopics.length > 0 ? selectedTopics : undefined,
         page: 1,
         limit: 9,
@@ -107,7 +107,7 @@ export default function CoursesSection() {
     setCurrentPage(page);
     fetchCourses({
       search: searchQuery,
-      level: selectedLevel || undefined,
+      level: selectedLevel === "" ? undefined : selectedLevel.toLowerCase(),
       topics: selectedTopics.length > 0 ? selectedTopics : undefined,
       page,
       limit: 9,
@@ -121,6 +121,7 @@ export default function CoursesSection() {
     fetchCourses({
       page: 1,
       limit: 9,
+      level: undefined, // Explicitly set to undefined to clear level filter
     });
     setCurrentPage(1);
   };
@@ -166,7 +167,7 @@ export default function CoursesSection() {
             >
               <option value="">All Levels</option>
               {levels.map((level) => (
-                <option key={level} value={level}>
+                <option key={level} value={level.toLowerCase()}>
                   {level.charAt(0).toUpperCase() + level.slice(1)}
                 </option>
               ))}
@@ -243,7 +244,9 @@ export default function CoursesSection() {
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-xl font-bold">{course.title}</h3>
                   <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                    {course.level.charAt(0).toUpperCase() + course.level.slice(1)}
+                    {course.level && typeof course.level === 'string' ? 
+                      course.level.charAt(0).toUpperCase() + course.level.slice(1) : 
+                      'All Levels'}
                   </span>
                 </div>
                 <p className="text-gray-600 mb-4 line-clamp-2">{course.description}</p>

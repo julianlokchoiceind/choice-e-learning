@@ -40,8 +40,12 @@ const courseSchema = z.object({
   videoUrl: z.string().url("Must be a valid URL").optional(),
   imageUrl: z.string().url("Must be a valid URL").optional(),
   chapters: z.array(chapterSchema).optional(),
-  lessons: z.array(lessonSchema)
+  lessons: z.array(lessonSchema),
+  slug: z.string().optional() // Add this line to include slug property
 });
+
+// Define valid level values exactly as they are stored in the database
+const VALID_LEVEL_VALUES = ['beginner', 'intermediate', 'advanced', 'all'];
 
 // POST - Create a new course
 export async function POST(req: Request) {
@@ -118,17 +122,43 @@ export async function POST(req: Request) {
     // Extract chapters and lessons from the validated data
     const { chapters = [], lessons = [] } = validationResult.data;
 
+    // Từ mảng tên topic, tìm (hoặc tạo) các Topic trong DB
+    const topicObjects = await Promise.all(
+      topics.map(async (topicName) => {
+        // Tìm topic theo tên
+        let topic = await prisma.topic.findFirst({
+          where: { name: { equals: topicName, mode: 'insensitive' } }
+        });
+        
+        // Nếu không tìm thấy, tạo mới
+        if (!topic) {
+          const slug = topicName.toLowerCase().replace(/\s+/g, '-');
+          topic = await prisma.topic.create({
+            data: {
+              name: topicName,
+              slug,
+              isActive: true
+            }
+          });
+        }
+        
+        return topic;
+      })
+    );
+
+    // Lấy mảng ID của các topic
+    const topicIds = topicObjects.map(topic => topic.id);
+
     // Create the course with Prisma
     const newCourse = await prisma.course.create({
       data: {
         title,
         description,
-        slug,
         imageUrl: imageUrl || '/images/course-default.jpg',
         price,
         level,
-        topics,
-        videoUrl,
+        topics: topics, // Giữ lại để tương thích ngược
+        topicIds: topicIds, // Liên kết với các Topic thực sự
         studentIds: [],
       }
     });
@@ -182,8 +212,10 @@ export async function POST(req: Request) {
                 }
               } else {
                 // Try to find by temporary ID format from frontend
+                // Make sure we have a string to work with
+                const chapterId_str = String(lesson.chapterId);
                 const chapterMatch = createdChapters.find(ch => 
-                  lesson.chapterId.includes(String(ch.order)));
+                  chapterId_str.includes(String(ch.order)));
                 if (chapterMatch) {
                   chapterId = chapterMatch.id;
                   console.log(`Found chapter by matching ID pattern, ID: ${chapterId}`);
@@ -257,61 +289,164 @@ export async function POST(req: Request) {
   }
 }
 
-// GET - Get all courses (admin view)
-export async function GET(req: Request) {
-  try {
-    const user = await getCurrentUser();
-    
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized. Please login.' },
-        { status: 401 }
-      );
-    }
-
-    if (!isAdmin(user)) {
-      return NextResponse.json(
-        { error: 'Forbidden. Only admins can view courses.' },
-        { status: 403 }
-      );
-    }
-    
-    // Find all courses using Prisma
-    const courses = await prisma.course.findMany({
-      include: {
-        _count: {
-          select: {
-            students: true,
-            lessons: true
-          }
-        }
+  export async function GET(req: NextRequest) {
+    try {
+      const user = await getCurrentUser();
+      
+      if (!user) {
+        return NextResponse.json(
+          { error: 'Unauthorized. Please login.' },
+          { status: 401 }
+        );
       }
-    });
-    
-    // Format the courses for response
-    const formattedCourses = courses.map(course => ({
-      id: course.id,
-      title: course.title,
-      description: course.description,
-      price: course.price,
-      level: course.level,
-      topics: course.topics,
-      imageUrl: course.imageUrl,
-      studentsCount: course._count.students,
-      lessonsCount: course._count.lessons,
-      createdAt: course.createdAt,
-      updatedAt: course.updatedAt
-    }));
-    
-    return NextResponse.json({
-      success: true,
-      courses: formattedCourses
-    });
-  } catch (error) {
-    console.error('Error fetching courses:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch courses', details: (error as Error).message },
-      { status: 500 }
-    );
-  }
-} 
+
+      if (!isAdmin(user)) {
+        return NextResponse.json(
+          { error: 'Forbidden. Only admins can view courses.' },
+          { status: 403 }
+        );
+      }
+      
+      // Parse query params
+      const url = new URL(req.url);
+      const search = url.searchParams.get('search') || '';
+      const levelParam = url.searchParams.get('level') || '';
+      const sortBy = url.searchParams.get('sortBy') || 'createdAt';
+      const sortOrder = url.searchParams.get('sortOrder')?.toLowerCase() === 'asc' ? 'asc' : 'desc';
+      
+      // Log request params for debugging
+      console.log(`======= ADMIN COURSES API CALL (${new Date().toISOString()}) =======`);
+      console.log('Request params:', { search, level: levelParam, sortBy, sortOrder });
+      
+      // Lấy tất cả khóa học từ database
+      // Filter sẽ được áp dụng sau khi nhận dữ liệu
+      console.log('Executing base Prisma query...');
+      
+      const allCourses = await prisma.course.findMany({
+        include: {
+          _count: {
+            select: {
+              students: true,
+              lessons: true
+            }
+          },
+          topicsList: true
+        }
+      });
+      
+      console.log(`Retrieved ${allCourses.length} courses from database`);
+      console.log('All course levels in database:', allCourses.map(c => c.level));
+      
+      // Lọc dữ liệu trong memory - cách này đảm bảo tính nhất quán
+      let filteredCourses = [...allCourses]; // Clone to avoid reference issues
+      
+      // Áp dụng filter tìm kiếm nếu có
+      if (search && search.trim() !== '') {
+        const searchLower = search.toLowerCase().trim();
+        console.log(`Applying search filter: "${searchLower}"`);
+        
+        filteredCourses = filteredCourses.filter(course => 
+          course.title.toLowerCase().includes(searchLower) || 
+          course.description.toLowerCase().includes(searchLower)
+        );
+        
+        console.log(`After search filter: ${filteredCourses.length} courses remain`);
+      }
+      
+      // Áp dụng filter level
+      if (levelParam && levelParam.trim() !== '' && levelParam !== 'all') {
+        const levelLower = levelParam.toLowerCase().trim();
+        console.log(`Applying level filter: "${levelLower}"`);
+        
+        // Sử dụng filter trong memory với case-insensitive comparison
+        filteredCourses = filteredCourses.filter(course => {
+          const courseLevel = course.level?.toLowerCase() || '';
+          const matches = courseLevel === levelLower;
+          
+          console.log(`Course "${course.title}" (${course.id}) - level="${course.level}" | matches=${matches}`);
+          
+          return matches;
+        });
+        
+        console.log(`After level filter: ${filteredCourses.length} courses remain`);
+      } else {
+        console.log('No level filter applied (showing all levels)');
+      }
+      
+      // Áp dụng sắp xếp
+      console.log(`Applying sort: ${sortBy} ${sortOrder}`);
+      
+      filteredCourses.sort((a, b) => {
+        let valueA, valueB;
+        
+        // Xác định các giá trị cần so sánh dựa trên trường sortBy
+        switch (sortBy) {
+          case 'title':
+            valueA = a.title.toLowerCase();
+            valueB = b.title.toLowerCase();
+            return sortOrder === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+          
+          case 'price':
+            valueA = a.price || 0;
+            valueB = b.price || 0;
+            return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
+          
+          case 'students':
+            valueA = a._count?.students || 0;
+            valueB = b._count?.students || 0;
+            return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
+            
+          case 'createdAt':
+          default:
+            valueA = new Date(a.createdAt).getTime();
+            valueB = new Date(b.createdAt).getTime();
+            return sortOrder === 'asc' ? valueA - valueB : valueB - valueA;
+        }
+      });
+      
+      // Format kết quả để trả về
+      const formattedCourses = filteredCourses.map(course => {
+        const legacyTopics = Array.isArray(course.topics) ? course.topics : [];
+        const relationTopics = Array.isArray(course.topicsList) 
+          ? course.topicsList.map(topic => ({
+              id: topic.id,
+              name: topic.name,
+              slug: topic.slug,
+              isActive: topic.isActive
+            }))
+          : [];
+        
+        // Log individual course data for verification
+        console.log(`Formatted course: "${course.title}" - level="${course.level}"`);
+        
+        return {
+          id: course.id,
+          title: course.title,
+          description: course.description,
+          price: course.price,
+          level: course.level,
+          topics: legacyTopics,
+          topicsList: relationTopics,
+          imageUrl: course.imageUrl,
+          studentsCount: course._count.students,
+          lessonsCount: course._count.lessons,
+          createdAt: course.createdAt,
+          updatedAt: course.updatedAt
+        };
+      });
+      
+      console.log(`Returning ${formattedCourses.length} courses to client`);
+      console.log(`======= END API CALL =======`);
+      
+      return NextResponse.json({
+        success: true,
+        courses: formattedCourses
+      });
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch courses', details: (error as Error).message },
+        { status: 500 }
+      );
+    }
+  } 

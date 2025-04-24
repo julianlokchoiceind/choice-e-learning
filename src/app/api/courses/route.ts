@@ -31,6 +31,7 @@ const courseQueryParamsSchema = z.object({
   page: z.string().optional().pipe(z.coerce.number().int().positive().default(1)),
   limit: z.string().optional().pipe(z.coerce.number().int().positive().default(10)),
   category: z.string().optional(),
+  level: z.string().optional(),
   topics: z.union([
     z.string().array(),
     z.string().transform(val => [val])
@@ -67,6 +68,12 @@ documentEndpoint({
       type: 'string', 
       required: false, 
       description: 'Filter by course category' 
+    },
+    { 
+      name: 'level', 
+      type: 'string', 
+      required: false, 
+      description: 'Filter by course level (beginner, intermediate, advanced, all)' 
     },
     { 
       name: 'search', 
@@ -137,7 +144,7 @@ const getCourses = withErrorHandling(async (req: NextRequest) => {
     return queryResult.error;
   }
   
-  const { page, limit, category, topics, search, sortBy, order } = queryResult.data;
+  const { page, limit, category, level, topics, search, sortBy, order } = queryResult.data;
   
   try {
     // Get courses from service
@@ -152,6 +159,16 @@ const getCourses = withErrorHandling(async (req: NextRequest) => {
         course.learningPoints?.includes(category) || 
         course.level === category
       );
+    }
+    
+    // Add explicit level filter
+    if (level && level !== 'all') {
+      // Ensure case-insensitive comparison
+      const levelLower = level.toLowerCase();
+      filteredCourses = filteredCourses.filter(course => 
+        course.level && course.level.toLowerCase() === levelLower
+      );
+      console.log(`Filtering by level: ${levelLower}, found ${filteredCourses.length} courses`);
     }
     
     // Topics filter (for multiple topics)
