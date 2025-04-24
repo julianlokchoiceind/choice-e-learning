@@ -40,6 +40,38 @@ export const StudentList = () => {
     }
   }, [actionStatus]);
   
+  // Add CSS for buttons with no transform on hover - matching sidebar behavior
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .admin-button {
+        transform: none !important;
+      }
+      .admin-button:hover {
+        transform: none !important;
+        box-shadow: none !important;
+      }
+      
+      /* Styling for Add Student button */
+      .add-btn {
+        background-image: linear-gradient(to right, #3b82f6, #1d4ed8) !important;
+        color: white !important;
+        transition: none !important;
+      }
+      
+      .add-btn:hover {
+        background-image: linear-gradient(to right, #3b82f6, #1d4ed8) !important;
+        box-shadow: 0 0 0 2000px rgba(59, 130, 246, 0.2) inset !important;
+        color: white !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+  
   // When API students change, update local state
   useEffect(() => {
     if (apiStudents && apiStudents.length > 0) {
@@ -237,6 +269,7 @@ export const StudentList = () => {
           </button>
         </div>
       )}
+
       <div className="flex justify-between items-center">
         <form onSubmit={handleSearch} className="relative w-72">
           <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
@@ -255,19 +288,19 @@ export const StudentList = () => {
         </form>
         <Link
           href="/admin/students/new"
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200 shadow-sm"
+          className="px-4 py-2 rounded-md flex items-center admin-button add-btn"
         >
-          <PlusIcon className="h-5 w-5" />
+          <PlusIcon className="h-5 w-5 mr-1" />
           Add New Student
         </Link>
       </div>
       
       {/* Students list */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead>
-              <tr className="bg-gray-50">
+            <thead className="bg-gray-50">
+              <tr>
                 <th className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">#</th>
                 <th className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">Name</th>
                 <th className="py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm">Email</th>
@@ -277,10 +310,10 @@ export const StudentList = () => {
                 <th className="py-4 px-6 text-right font-medium text-indigo-700 uppercase tracking-wider text-sm">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-10">
+                  <td colSpan={7} className="text-center py-10">
                     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto"></div>
                     <p className="mt-2 text-gray-500">Loading students...</p>
                   </td>
@@ -313,21 +346,21 @@ export const StudentList = () => {
                         <div className="flex justify-end space-x-2" data-testid="action-buttons">
                           <button
                             onClick={() => router.push(`/admin/students/${student.id}`)}
-                            className="p-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-150"
+                            className="text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 rounded-md p-1.5 transition-colors duration-150 admin-button"
                             aria-label="View student details"
                           >
                             <EyeIcon className="h-5 w-5" />
                           </button>
                           <button
                             onClick={() => router.push(`/admin/students/${student.id}/edit`)}
-                            className="p-2 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition-colors duration-150"
+                            className="text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 rounded-md p-1.5 transition-colors duration-150 admin-button"
                             aria-label="Edit student"
                           >
                             <PencilSquareIcon className="h-5 w-5" />
                           </button>
                           <button
                             onClick={() => handleDelete(student.id)}
-                            className="p-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors duration-150"
+                            className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 rounded-md p-1.5 transition-colors duration-150 admin-button"
                             aria-label="Delete student"
                           >
                             <TrashIcon className="h-5 w-5" />
@@ -339,7 +372,7 @@ export const StudentList = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan={6} className="text-center py-10 text-gray-500">
+                  <td colSpan={7} className="text-center py-10 text-gray-500">
                     <p>No students found.</p>
                     <p className="text-sm mt-1">Try with a different search term or add a new student.</p>
                   </td>
@@ -359,7 +392,7 @@ export const StudentList = () => {
               <button 
                 onClick={() => handlePageChange(Math.max(1, pagination.page - 1))}
                 disabled={pagination.page === 1}
-                className={`p-2 ${pagination.page === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'}`}
+                className={`p-2 ${pagination.page === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'} admin-button`}
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -375,7 +408,7 @@ export const StudentList = () => {
                     pagination.page === page 
                       ? 'bg-indigo-600 text-white' 
                       : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  } admin-button`}
                 >
                   {page}
                 </button>
@@ -384,7 +417,7 @@ export const StudentList = () => {
               <button 
                 onClick={() => handlePageChange(Math.min(pagination.totalPages, pagination.page + 1))}
                 disabled={pagination.page === pagination.totalPages}
-                className={`p-2 ${pagination.page === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'}`}
+                className={`p-2 ${pagination.page === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'} admin-button`}
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
