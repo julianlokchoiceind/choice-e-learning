@@ -11,6 +11,7 @@ import {
   ChevronRightIcon,
   BookOpenIcon,
 } from '@heroicons/react/24/outline';
+import { useCourses } from '@/client/hooks/courses';
 
 // Define the Course type to match API response
 interface Course {
@@ -36,40 +37,43 @@ const LEVEL_OPTIONS = [
   { value: 'advanced', label: 'Advanced' }
 ];
 
-// Ensure all level values are lowercase for consistent request parameters
-
 export default function CoursesPage() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  // Use the useCourses hook with isAdmin=true
+  const {
+    loading: isLoading,
+    courses,
+    deleteCourse,
+    fetchCourses,
+    pagination
+  } = useCourses(true);
+
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   
-  // Initialize state with default values (ensuring lowercase for level)
+  // Initialize state with default values
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedLevel, setSelectedLevel] = useState('all'); // 'all' is already lowercase
+  const [selectedLevel, setSelectedLevel] = useState('all');
   const [sortOption, setSortOption] = useState('newest');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   
-  // Delete course function
-  const deleteCourse = async (courseId: string) => {
-    setIsDeleting(courseId);
-    
+  // Handle delete confirmation
+  const handleDeleteConfirm = async (courseId: string) => {
     try {
-      const response = await fetch(`/api/courses/${courseId}`, {
-        method: 'DELETE'
+      // Use the deleteCourse function from the hook
+      await deleteCourse(courseId);
+      
+      // Remove course from state (will be handled by re-fetching)
+      fetchCourses({
+        search: debouncedSearchQuery || undefined,
+        level: selectedLevel === 'all' ? undefined : selectedLevel,
+        page: pagination.page,
+        limit: pagination.pageSize,
+        ...getSortParams(sortOption)
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete course');
-      }
-      
-      // Remove course from state
-      setCourses(prevCourses => prevCourses.filter(course => course.id.toString() !== courseId));
       
     } catch (error) {
       console.error('Error deleting course:', error);
-      alert('Failed to delete course. Please try again.');
     } finally {
-      setIsDeleting(null);
+      setConfirmDelete(null);
     }
   };
   
@@ -136,88 +140,16 @@ export default function CoursesPage() {
     }
   };
 
-  // Fetch courses with filters and sorting
-  const fetchCourses = useCallback(async () => {
-    setIsLoading(true);
-    console.log('===== FETCHING COURSES =====');
-    
-    try {
-      // Build query params
-      const params = new URLSearchParams();
-      
-      // Thêm tham số search
-      if (debouncedSearchQuery && debouncedSearchQuery.trim() !== '') {
-        params.append('search', debouncedSearchQuery.trim());
-        console.log(`Adding search parameter: "${debouncedSearchQuery.trim()}"`);
-      }
-      
-      // Xử lý level parameter
-      if (selectedLevel && selectedLevel !== 'all') {
-        const normalizedLevel = selectedLevel.toLowerCase().trim();
-        params.append('level', normalizedLevel);
-        console.log(`Adding level filter: "${normalizedLevel}"`);
-      } else {
-        console.log('No level filter (showing all levels)');
-      }
-      
-      // Thêm các tham số sắp xếp
-      const { sortBy, sortOrder } = getSortParams(sortOption);
-      params.append('sortBy', sortBy);
-      params.append('sortOrder', sortOrder);
-      console.log(`Adding sort parameters: ${sortBy} ${sortOrder}`);
-      
-      // Tạo timestamp để tránh cache
-      const timestamp = Date.now();
-      params.append('t', timestamp.toString());
-      
-      // Gọi API
-      const url = `/api/admin/courses?${params.toString()}`;
-      console.log(`Sending request to: ${url}`);
-      
-      const response = await fetch(url, {
-        // Thêm headers để tránh cache
-        cache: 'no-store',
-        next: { revalidate: 0 }
-      });
-      
-      if (!response.ok) {
-        console.error(`API Error: ${response.status} ${response.statusText}`);
-        setCourses([]);
-        return;
-      }
-      
-      const data = await response.json();
-      console.log(`API Response success: ${data.success}, courses count: ${data.courses?.length || 0}`);
-      
-      // Kiểm tra dữ liệu trả về
-      if (data.success && Array.isArray(data.courses)) {
-        const receivedCourses = data.courses;
-        console.log(`Received ${receivedCourses.length} courses from API`);
-        
-        // Log level values để debug
-        console.log('Course levels from API:', 
-          receivedCourses.map((c: Course) => ({ title: c.title, level: c.level }))
-        );
-        
-        // Cập nhật state
-        setCourses(receivedCourses);
-      } else {
-        console.error('Invalid API response format:', data);
-        setCourses([]);
-      }
-    } catch (err) {
-      console.error('Error fetching courses:', err);
-      setCourses([]);
-    } finally {
-      setIsLoading(false);
-      console.log('===== END FETCHING COURSES =====');
-    }
-  }, [debouncedSearchQuery, selectedLevel, sortOption]);
-  
-  // Fetch courses whenever filters or sort options change
+  // Fetch courses when filters change
   useEffect(() => {
-    fetchCourses();
-  }, [fetchCourses]);
+    fetchCourses({
+      search: debouncedSearchQuery || undefined,
+      level: selectedLevel === 'all' ? undefined : selectedLevel,
+      page: 1,
+      limit: 10,
+      ...getSortParams(sortOption)
+    });
+  }, [debouncedSearchQuery, selectedLevel, sortOption, fetchCourses]);
 
   // Get CSS class for level badge - using case-insensitive matching
   const getLevelBadgeClass = (level: string) => {
@@ -326,12 +258,6 @@ export default function CoursesPage() {
                 
                 // Cập nhật state
                 setSelectedLevel(newLevel);
-                
-                // Gọi API với giá trị mới
-                setTimeout(() => {
-                  console.log(`Fetching courses with new level: "${newLevel}"`);
-                  fetchCourses();
-                }, 0);
               }}
             >
               {LEVEL_OPTIONS.map(option => (
@@ -348,8 +274,6 @@ export default function CoursesPage() {
               value={sortOption}
               onChange={(e) => {
                 setSortOption(e.target.value);
-                // Trigger immediate re-fetch with new sort option
-                setTimeout(() => fetchCourses(), 0);
               }}
             >
               <option value="newest">Sort By: Newest</option>
@@ -442,25 +366,31 @@ export default function CoursesPage() {
                         >
                           <PencilSquareIcon className="h-5 w-5" />
                         </Link>
-                        <button 
-                          className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 rounded-md p-1.5 transition-colors duration-150 admin-button"
-                          aria-label="Delete course"
-                          disabled={isDeleting === course.id.toString()}
-                          onClick={() => {
-                            if (confirm(`Are you sure you want to delete "${course.title}"?`)) {
-                              deleteCourse(course.id.toString());
-                            }
-                          }}
-                        >
-                          {isDeleting === course.id.toString() ? (
-                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                          ) : (
+                        
+                        {confirmDelete === course.id.toString() ? (
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => handleDeleteConfirm(course.id.toString())}
+                              className="text-red-600 hover:text-red-800 font-medium bg-red-50 px-2 py-1 rounded admin-button"
+                            >
+                              Confirm
+                            </button>
+                            <button
+                              onClick={() => setConfirmDelete(null)}
+                              className="text-gray-600 hover:text-gray-800 bg-gray-50 px-2 py-1 rounded admin-button"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button 
+                            className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 rounded-md p-1.5 transition-colors duration-150 admin-button"
+                            aria-label="Delete course"
+                            onClick={() => setConfirmDelete(course.id.toString())}
+                          >
                             <TrashIcon className="h-5 w-5" />
-                          )}
-                        </button>
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -470,19 +400,57 @@ export default function CoursesPage() {
           )}
           
           {/* Pagination - only show if we have courses */}
-          {!isLoading && courses.length > 0 && (
+          {!isLoading && courses.length > 0 && pagination && pagination.totalPages > 0 && (
             <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
               <div className="text-sm text-gray-600">
-                Showing 1 to {courses.length} of {courses.length} courses
+                Showing {courses.length} of {pagination.totalItems || courses.length} courses
               </div>
               <div className="flex space-x-1">
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-150 rounded-md admin-button">
+                <button 
+                  onClick={() => fetchCourses({
+                    search: debouncedSearchQuery || undefined,
+                    level: selectedLevel === 'all' ? undefined : selectedLevel,
+                    page: Math.max(1, pagination.page - 1),
+                    limit: pagination.pageSize,
+                    ...getSortParams(sortOption)
+                  })}
+                  disabled={pagination.page === 1}
+                  className={`p-2 ${pagination.page === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'} admin-button`}
+                >
                   <ChevronLeftIcon className="h-5 w-5" />
                 </button>
-                <button className="w-8 h-8 bg-[var(--color-primary)] text-white rounded-md flex items-center justify-center font-medium admin-button">
-                  1
-                </button>
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors duration-150 rounded-md admin-button">
+                
+                {Array.from({length: pagination.totalPages}, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    onClick={() => fetchCourses({
+                      search: debouncedSearchQuery || undefined,
+                      level: selectedLevel === 'all' ? undefined : selectedLevel,
+                      page: page,
+                      limit: pagination.pageSize,
+                      ...getSortParams(sortOption)
+                    })}
+                    className={`w-8 h-8 flex items-center justify-center rounded-md ${
+                      pagination.page === page 
+                        ? 'bg-indigo-600 text-white' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    } admin-button`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                
+                <button 
+                  onClick={() => fetchCourses({
+                    search: debouncedSearchQuery || undefined,
+                    level: selectedLevel === 'all' ? undefined : selectedLevel,
+                    page: Math.min(pagination.totalPages, pagination.page + 1),
+                    limit: pagination.pageSize,
+                    ...getSortParams(sortOption)
+                  })}
+                  disabled={pagination.page === pagination.totalPages}
+                  className={`p-2 ${pagination.page === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'} admin-button`}
+                >
                   <ChevronRightIcon className="h-5 w-5" />
                 </button>
               </div>

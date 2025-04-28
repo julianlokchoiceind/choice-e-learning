@@ -9,7 +9,6 @@ export const metadata: Metadata = {
 export default function StudentsPage() {
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold mb-6">Students Management</h1>
       <StudentList />
     </div>
   );

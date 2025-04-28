@@ -84,13 +84,20 @@ function useCourses(isAdmin = false) {
       console.log('API Response:', response.data);
       
       if (response.data.success) {
-        // Thêm timestamp vào URL hình ảnh để tránh caching
-        const processedCourses = response.data.data.map(course => ({
-          ...course,
-          imageUrl: course.imageUrl ? `${course.imageUrl}?t=${Date.now()}` : course.imageUrl
-        }));
+        // Kiểm tra xem response.data.data có tồn tại và là một mảng hay không
+        if (response.data.data && Array.isArray(response.data.data)) {
+          // Thêm timestamp vào URL hình ảnh để tránh caching
+          const processedCourses = response.data.data.map(course => ({
+            ...course,
+            imageUrl: course.imageUrl ? `${course.imageUrl}?t=${Date.now()}` : course.imageUrl
+          }));
+          
+          setCourses(processedCourses);
+        } else {
+          console.warn('Received empty or invalid courses data:', response.data);
+          setCourses([]);
+        }
         
-        setCourses(processedCourses);
         if (response.data.meta && response.data.meta.pagination) {
           setPagination(response.data.meta.pagination);
         }
