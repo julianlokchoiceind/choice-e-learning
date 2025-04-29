@@ -176,7 +176,7 @@ const updateProfile = withAuth(async (req, { user }) => {
     }
     
     // Verify current password
-    const isPasswordValid = await comparePasswords(currentPassword, userWithPassword.password);
+    const isPasswordValid = await comparePasswords(currentPassword, userWithPassword.password || '');
     if (!isPasswordValid) {
       return apiError(
         'Current password is incorrect',

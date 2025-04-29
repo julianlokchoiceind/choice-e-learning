@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
-import { Course } from '@/types/course';
+import { Course, CourseListItem } from '@/types/course';
 
 interface CourseFilter {
   search?: string;
@@ -16,8 +16,8 @@ interface CourseFilter {
 
 interface CourseResponseBasic {
   success: boolean;
-  data: Course[] | Course;
-  courses?: Course[]; // Alternative response format
+  data: (Course | CourseListItem)[] | Course | CourseListItem;
+  courses?: (Course | CourseListItem)[];
   meta?: {
     pagination: {
       page: number;
@@ -33,8 +33,8 @@ interface CourseResponseBasic {
 function useCourses(isAdmin = false) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [course, setCourse] = useState<Course | null>(null);
+  const [courses, setCourses] = useState<(Course | CourseListItem)[]>([]);
+  const [course, setCourse] = useState<Course | CourseListItem | null>(null);
   const [topics, setTopics] = useState<string[]>([]);
   const [levels] = useState(['beginner', 'intermediate', 'advanced']);
   const [pagination, setPagination] = useState({
@@ -140,47 +140,33 @@ function useCourses(isAdmin = false) {
       const coursesData = response.data.courses || 
                           (Array.isArray(response.data.data) ? response.data.data : []);
       
-      // Check if we have valid array data
-      if (Array.isArray(coursesData) && coursesData.length > 0) {
-        // Add timestamp to image URLs to avoid caching
-        const processedCourses = coursesData.map(course => ({
-          ...course,
-          imageUrl: course.imageUrl ? `${course.imageUrl}?t=${Date.now()}` : '/images/placeholder-course.jpg'
-        }));
+      // Nếu là admin thì ép kiểu CourseListItem, ngược lại là Course
+      const processedCourses = (isAdmin
+        ? (coursesData as CourseListItem[])
+        : (coursesData as Course[])
+      ).map(course => ({
+        ...course,
+        imageUrl: course.imageUrl ? `${course.imageUrl}?t=${Date.now()}` : '/images/placeholder-course.jpg'
+      }));
       
-        setCourses(processedCourses);
-      } else {
-        console.warn('Received empty or invalid courses data:', response.data);
-        setCourses([]);
-      }
-        
-        // Xử lý pagination một cách an toàn
-        if (response.data.meta && response.data.meta.pagination) {
-          try {
-            // Kiểm tra các trường cần thiết
-            const paginationData = {
-              page: Number(response.data.meta.pagination.page) || 1,
-              pageSize: Number(response.data.meta.pagination.pageSize) || 10,
-              totalItems: Number(response.data.meta.pagination.totalItems) || 0,
-              totalPages: Number(response.data.meta.pagination.totalPages) || 1,
-              hasNextPage: Boolean(response.data.meta.pagination.hasNextPage),
-              hasPrevPage: Boolean(response.data.meta.pagination.hasPrevPage)
-            };
-            setPagination(paginationData);
-          } catch (paginationError) {
-            console.error('Error processing pagination data:', paginationError);
-            // Sử dụng giá trị mặc định nếu có lỗi
-            setPagination({
-              page: 1,
-              pageSize: 10,
-              totalItems: response.data.data?.length || 0,
-              totalPages: 1,
-              hasNextPage: false,
-              hasPrevPage: false
-            });
-          }
-        } else {
-          // Không có dữ liệu pagination, sử dụng giá trị mặc định
+      setCourses(processedCourses);
+      
+      // Xử lý pagination một cách an toàn
+      if (response.data.meta && response.data.meta.pagination) {
+        try {
+          // Kiểm tra các trường cần thiết
+          const paginationData = {
+            page: Number(response.data.meta.pagination.page) || 1,
+            pageSize: Number(response.data.meta.pagination.pageSize) || 10,
+            totalItems: Number(response.data.meta.pagination.totalItems) || 0,
+            totalPages: Number(response.data.meta.pagination.totalPages) || 1,
+            hasNextPage: Boolean(response.data.meta.pagination.hasNextPage),
+            hasPrevPage: Boolean(response.data.meta.pagination.hasPrevPage)
+          };
+          setPagination(paginationData);
+        } catch (paginationError) {
+          console.error('Error processing pagination data:', paginationError);
+          // Sử dụng giá trị mặc định nếu có lỗi
           setPagination({
             page: 1,
             pageSize: 10,
@@ -190,6 +176,17 @@ function useCourses(isAdmin = false) {
             hasPrevPage: false
           });
         }
+      } else {
+        // Không có dữ liệu pagination, sử dụng giá trị mặc định
+        setPagination({
+          page: 1,
+          pageSize: 10,
+          totalItems: response.data.data?.length || 0,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPrevPage: false
+        });
+      }
         
         return response.data;
       } else {
@@ -317,7 +314,7 @@ function useCourses(isAdmin = false) {
   /**
    * Create a new course (admin only)
    */
-  const createCourse = useCallback(async (data: any): Promise<Course | null> => {
+  const createCourse = useCallback(async (data: any): Promise<Course | CourseListItem | null> => {
     if (!isAdmin) {
       setError('Unauthorized');
       return null;
@@ -346,7 +343,7 @@ function useCourses(isAdmin = false) {
   /**
    * Update an existing course (admin only)
    */
-  const updateCourse = useCallback(async (id: string, data: any): Promise<Course | null> => {
+  const updateCourse = useCallback(async (id: string, data: any): Promise<Course | CourseListItem | null> => {
     if (!isAdmin) {
       setError('Unauthorized');
       return null;
@@ -389,6 +386,8 @@ function useCourses(isAdmin = false) {
       const response = await axios.delete(`${baseUrl}/${id}`);
       
       if (response.data.success) {
+        // Refresh courses list after successful deletion
+        await fetchCourses();
         return { success: true };
       } else {
         throw new Error('Failed to delete course');
@@ -400,7 +399,7 @@ function useCourses(isAdmin = false) {
     } finally {
       setLoading(false);
     }
-  }, [baseUrl, isAdmin]);
+  }, [baseUrl, isAdmin, fetchCourses]);
 
   return {
     loading,

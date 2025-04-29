@@ -14,7 +14,7 @@ export interface User {
   name: string;
   email: string;
   role: Role;
-  password: string;  // Not exposed to client
+  password: string | null;  // Not exposed to client, can be null for OAuth users
   createdAt: Date;
   updatedAt: Date;
   // Login tracking
@@ -35,7 +35,7 @@ export interface User {
  * User with password interface - for internal use only
  */
 export interface UserWithPassword extends User {
-  password: string;
+  password: string | null;
 }
 
 /**

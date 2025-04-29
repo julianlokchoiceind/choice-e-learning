@@ -40,21 +40,39 @@ export function useAuth() {
     try {
       // Call the register API endpoint
       console.log('Calling register API with:', { ...credentials, password: '******' });
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials),
-      });
       
-      const data = await response.json();
-      console.log('Register API response:', data);
-      
-      if (!response.ok) {
-        console.error('Registration failed:', data);
+      try {
+        const response = await import('@/lib/axios/apiClient').then(module => {
+          const apiClient = module.default;
+          return apiClient.post('/api/auth/register', credentials);
+        });
+        
+        const data = response.data;
+        console.log('Register API response:', data);
+        
+        if (data.success) {
+          // Continue with successful registration
+        } else {
+          console.error('Registration failed:', data);
+          
+          // Prepare a user-friendly error message
+          const errorMessage = data.error || 'Registration failed';
+          const errorStatus = response.status;
+          
+          // Set appropriate error
+          setError({ 
+            message: errorMessage,
+            status: errorStatus
+          });
+          
+          return false;
+        }
+      } catch (axiosError: any) {
+        console.error('Registration failed:', axiosError.response?.data || axiosError);
         
         // Prepare a user-friendly error message
-        let errorMessage = data.error || 'Registration failed';
-        let errorStatus = response.status;
+        const errorMessage = axiosError.response?.data?.error || 'Registration failed';
+        const errorStatus = axiosError.response?.status || 400;
         
         // Set appropriate error
         setError({ 

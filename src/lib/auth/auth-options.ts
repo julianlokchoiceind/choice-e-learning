@@ -389,7 +389,11 @@ export const authOptions: NextAuthOptions = {
         console.warn(`[NextAuth][Warning][${code}]`);
       }
     },
-    debug: () => {
+    debug: (message) => {
+      // Only log debug messages in development with DEBUG flag enabled
+      if (process.env.NODE_ENV === 'development' && process.env.DEBUG === 'true') {
+        console.log(`[NextAuth][Debug]: ${message}`);
+      }
     },
   },
   events: {

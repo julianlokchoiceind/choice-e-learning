@@ -324,7 +324,7 @@ export const GET = withAdmin(async (req: NextRequest, context: any) => {
     }
 
     // Build orderBy condition for Prisma
-    let orderBy: any = {};
+    const orderBy: any = {};
     switch (sortBy) {
       case 'title':
         orderBy.title = orderDirection;

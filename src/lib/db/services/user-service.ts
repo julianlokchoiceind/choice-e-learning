@@ -24,9 +24,18 @@ export async function findUserById(id: string): Promise<User | null> {
       return null;
     }
     
-    return await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id }
     });
+    
+    if (!user) return null;
+    
+    // Convert Prisma Role to App Role
+    return {
+      ...user,
+      password: user.password || '',
+      role: mapPrismaRoleToAppRole(user.role)
+    };
   } catch (error) {
     console.error('Error finding user by ID:', error);
     return null;
@@ -42,9 +51,18 @@ export async function findUserByEmail(email: string): Promise<User | null> {
   try {
     if (!email) return null;
     
-    return await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() }
     });
+    
+    if (!user) return null;
+    
+    // Convert Prisma Role to App Role
+    return {
+      ...user,
+      password: user.password || '',
+      role: mapPrismaRoleToAppRole(user.role)
+    };
   } catch (error) {
     console.error('Error finding user by email:', error);
     return null;
@@ -174,6 +192,7 @@ export async function verifyUserCredentials(
     if (!user) return null;
     
     // Verify password
+    // comparePasswords will handle null password internally
     const isPasswordValid = await comparePasswords(password, user.password);
     if (!isPasswordValid) return null;
     
@@ -199,8 +218,8 @@ export async function verifyUserCredentials(
  * @returns Paginated users without passwords
  */
 export async function getUsers(
-  page: number = 1, 
-  pageSize: number = 10,
+  page = 1, 
+  pageSize = 10,
   whereClause: Prisma.UserWhereInput = {}
 ): Promise<{
   users: Omit<User, 'password'>[];
@@ -378,5 +397,11 @@ export async function deleteUser(id: string): Promise<Omit<User, 'password'> | n
  * @returns Success flag
  */
 export async function updateUserLoginInfo(id: string): Promise<boolean> {
-  return await updateLoginStreak(id);
+  try {
+    if (!id) return false;
+    return await updateLoginStreak(id);
+  } catch (error) {
+    console.error('Error updating user login info:', error);
+    return false;
+  }
 }

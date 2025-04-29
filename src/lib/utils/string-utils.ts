@@ -18,8 +18,8 @@ export function slugify(text: string): string {
       .toLowerCase()
       .trim()
       .replace(/\s+/g, '-')            // Replace spaces with -
-      .replace(/[^\w\-]+/g, '')        // Remove non-word chars (except -)
-      .replace(/\-\-+/g, '-')          // Replace multiple - with single -
+      .replace(/[^\w-]+/g, '')        // Remove non-word chars (except -)
+      .replace(/--+/g, '-')          // Replace multiple - with single -
       .replace(/^-+/, '')              // Trim - from start of text
       .replace(/-+$/, '');             // Trim - from end of text
     
@@ -27,7 +27,7 @@ export function slugify(text: string): string {
     if (!slugged) {
       console.warn('Slugify produced empty result for:', text);
       // Fallback: replace all non-alphanumeric with dashes and ensure not empty
-      const fallback = text.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/\-\-+/g, '-');
+      const fallback = text.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/--+/g, '-');
       return fallback || `topic-${Date.now()}`; // Last resort fallback with timestamp
     }
     
@@ -68,7 +68,7 @@ export function capitalize(text: string): string {
  * @param currency The currency code (default: 'USD')
  * @returns Formatted currency string
  */
-export function formatCurrency(value: number, currency: string = 'USD'): string {
+export function formatCurrency(value: number, currency = 'USD'): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency

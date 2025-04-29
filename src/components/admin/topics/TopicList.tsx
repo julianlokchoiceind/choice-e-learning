@@ -126,7 +126,7 @@ export const TopicList = ({ topics, onDelete, isLoading = false }: TopicListProp
                       className="p-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors duration-150"
                       aria-label="Delete topic"
                       disabled={topic._count?.courses ? topic._count?.courses > 0 : false}
-                      title={topic._count?.courses && topic._count?.courses > 0 ? "Cannot delete topic that is used by courses" : "Delete topic"}
+                      title={topic._count?.courses && topic._count?.courses > 0 ? 'Cannot delete topic that is used by courses' : 'Delete topic'}
                     >
                       {topic._count?.courses && topic._count?.courses > 0 ? (
                         <ExclamationCircleIcon className="h-5 w-5 text-gray-400" />

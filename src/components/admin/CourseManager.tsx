@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -52,10 +52,10 @@ function CourseImage({ src, alt }: { src: string, alt: string }) {
   
   // Sử dụng regular img tag để tránh vấn đề với domain configuration
   return (
-    <img 
-      src={src} 
+    <Image src={src} 
       alt={alt || 'Course image'}
       className="h-12 w-20 object-cover rounded"
+      width={500} height={300}
       onError={() => setImgError(true)}
     />
   );
@@ -96,15 +96,12 @@ export default function CourseManager() {
     setLoading(true);
     try {
       console.log('Fetching courses from API...');
-      const response = await fetch('/api/admin/courses');
+      
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const response = await apiClient.get('/api/admin/courses');
       
       console.log('API response status:', response.status);
-      if (!response.ok) {
-        console.error('API response not OK:', response.status, response.statusText);
-        throw new Error(`Failed to fetch courses: ${response.status} ${response.statusText}`);
-      }
-      
-      const data = await response.json();
+      const data = response.data;
       console.log('API response data structure:', Object.keys(data));
       
       if (data.success) {
@@ -152,17 +149,12 @@ export default function CourseManager() {
     if (!confirm('Are you sure you want to delete this course?')) return;
     
     try {
-      const response = await fetch(`/api/admin/courses/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete course');
-      }
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      await apiClient.delete(`/api/admin/courses/${id}`);
       
       setCourses(courses.filter(course => course.id !== id));
-    } catch (err) {
-      setError((err as Error).message);
+    } catch (err: any) {
+      setError(err.response?.data?.error || (err as Error).message || 'Failed to delete course');
     }
   };
   
@@ -245,22 +237,19 @@ export default function CourseManager() {
         ? `/api/admin/courses/${selectedCourse.id}` 
         : '/api/admin/courses';
       
-      const method = currentView === 'edit' ? 'PUT' : 'POST';
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const data = {
+        ...formData,
+        topics: topicsArray,
+      };
       
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          topics: topicsArray,
-        }),
-      });
+      const response = currentView === 'edit' && selectedCourse
+        ? await apiClient.put(url, data)
+        : await apiClient.post(url, data);
       
-      const result = await response.json();
+      const result = response.data;
       
-      if (!response.ok) {
+      if (!result.success) {
         throw new Error(result.error || `Failed to ${currentView === 'edit' ? 'update' : 'add'} course`);
       }
       

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import Link from 'next/link';
@@ -57,7 +57,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
         <div className="p-6 max-w-lg mx-auto my-8 bg-white rounded-lg shadow-md">
           <h2 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h2>
           <p className="text-gray-700 mb-4">
-            We're sorry, but there was an error loading this content.
+            We&apos;re sorry, but there was an error loading this content.
           </p>
           {this.state.error && (
             <div className="bg-red-50 p-4 rounded-md mb-4">

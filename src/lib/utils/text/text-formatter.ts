@@ -14,8 +14,8 @@ export function slugify(text: string): string {
     .trim()
     .replace(/\s+/g, '-')        // Replace spaces with -
     .replace(/&/g, '-and-')      // Replace & with 'and'
-    .replace(/[^\w\-]+/g, '')    // Remove all non-word characters
-    .replace(/\-\-+/g, '-');     // Replace multiple - with single -
+    .replace(/[^\w-]+/g, '')    // Remove all non-word characters
+    .replace(/--+/g, '-');     // Replace multiple - with single -
 }
 
 /**
@@ -27,8 +27,8 @@ export function slugify(text: string): string {
  */
 export function truncate(
   text: string,
-  maxLength: number = 100,
-  suffix: string = '...'
+  maxLength = 100,
+  suffix = '...'
 ): string {
   if (!text || text.length <= maxLength) {
     return text;

@@ -75,13 +75,13 @@ export const TopicForm = ({
     } = {};
     
     if (!formData.name.trim()) {
-      errors.name = "Topic name is required";
+      errors.name = 'Topic name is required';
     } else if (formData.name.length > 100) {
-      errors.name = "Topic name must be less than 100 characters";
+      errors.name = 'Topic name must be less than 100 characters';
     }
     
     if (formData.description && formData.description.length > 500) {
-      errors.description = "Description must be less than 500 characters";
+      errors.description = 'Description must be less than 500 characters';
     }
     
     setFormErrors(errors);
@@ -102,8 +102,8 @@ export const TopicForm = ({
         isActive: formData.isActive
       });
     } catch (err: any) {
-      console.error("Error submitting topic:", err);
-      setServerError(err.response?.data?.error || "Failed to submit topic. Please try again.");
+      console.error('Error submitting topic:', err);
+      setServerError(err.response?.data?.error || 'Failed to submit topic. Please try again.');
     }
   };
   

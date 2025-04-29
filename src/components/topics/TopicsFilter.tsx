@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useTopics } from '@/client/hooks/topics';
-import { FunnelIcon } from "@heroicons/react/24/outline";
+import { FunnelIcon } from '@heroicons/react/24/outline';
 
 interface TopicsFilterProps {
   selectedTopics: string[];
@@ -16,7 +16,7 @@ export default function TopicsFilter({ selectedTopics, onChange }: TopicsFilterP
   useEffect(() => {
     // Fetch topics on mount
     fetchTopics({ isActive: true })
-      .catch(err => console.error("Error fetching topics:", err));
+      .catch(err => console.error('Error fetching topics:', err));
   }, [fetchTopics]);
 
   // Extract topic names from topic objects

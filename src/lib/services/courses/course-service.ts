@@ -43,7 +43,11 @@ interface EnrolledUser {
 }
 
 // Extended lesson interface for safe property access
-interface ExtendedLesson extends Lesson {
+interface ExtendedLesson extends Omit<Lesson, 'videoUrl' | 'chapterId'> {
+  videoUrl: string | null;
+  duration: string | null;
+  resourcesData: string | null;
+  chapterId: string | null;
   [key: string]: any;
 }
 
@@ -93,7 +97,7 @@ export async function getAllCourses(): Promise<CourseListItem[]> {
           title: course.title,
           description: course.description,
           imageUrl: imageUrl, // URL hình ảnh đã chuẩn hóa
-          image: imageUrl, // Thêm trường image để tương thích với CourseListItem interface
+          image: imageUrl, // Đảm bảo luôn là string
           level: course.level,
           price: course.price,
           duration: `${Math.ceil(course._count.lessons / 2)} weeks`, // Approximate duration
@@ -108,14 +112,7 @@ export async function getAllCourses(): Promise<CourseListItem[]> {
       })
     );
 
-    // Đảm bảo mỗi item đều có đủ cả hai trường imageUrl và image để phù hợp với interface CourseListItem
-    const finalCourses = processedCourses.map(course => ({
-      ...course,
-      image: course.imageUrl, // Đảm bảo có trường image từ imageUrl
-      imageUrl: course.imageUrl || course.image // Đảm bảo có imageUrl từ image nếu imageUrl không tồn tại
-    }));
-    
-    return finalCourses;
+    return processedCourses;
   } catch (error) {
     console.error('Error fetching all courses:', error);
     return [];
@@ -353,7 +350,7 @@ export async function getUserStats(userId: string): Promise<UserCourseStats> {
     }
 
     // Use safeFindUnique instead of direct prisma call
-    const user = await safeFindUnique<any>(
+    const user = await safeFindUnique<EnrolledUser, any>(
       prisma.user,
       {
         where: { id: userId },
@@ -400,10 +397,11 @@ export async function getUserStats(userId: string): Promise<UserCourseStats> {
     
     // Process each enrolled course
     for (const courseId of enrolledCourseIds) {
+      if (!courseId) continue;
       // Get all lessons for this course
       try {
         // Use safeFindMany helper function
-        const courseLessons = await safeFindMany<ExtendedLesson>(prisma.lesson, {
+        const courseLessons = await safeFindMany<ExtendedLesson, any>(prisma.lesson, {
           where: { courseId }
         });
         
@@ -472,7 +470,7 @@ export async function getUserStats(userId: string): Promise<UserCourseStats> {
  * @param userProgress Array of user progress entries
  * @returns Number of days in streak
  */
-function calculateStreak(userProgress: any[]): number {
+function calculateStreak(userProgress: UserProgress[]): number {
   if (!userProgress || !Array.isArray(userProgress) || userProgress.length === 0) {
     return 0;
   }
@@ -534,7 +532,7 @@ function calculateStreak(userProgress: any[]): number {
  * @param limit Maximum number of courses to return
  * @returns Array of featured courses
  */
-export async function getFeaturedCourses(limit: number = 5): Promise<CourseListItem[]> {
+export async function getFeaturedCourses(limit = 5): Promise<CourseListItem[]> {
   try {
     const courses = await prisma.course.findMany({
       where: {
@@ -589,14 +587,7 @@ export async function getFeaturedCourses(limit: number = 5): Promise<CourseListI
       })
     );
 
-    // Đảm bảo mỗi item đều có đủ cả hai trường imageUrl và image để phù hợp với interface CourseListItem
-    const finalCourses = processedCourses.map(course => ({
-      ...course,
-      image: course.imageUrl, // Đảm bảo có trường image từ imageUrl
-      imageUrl: course.imageUrl || course.image // Đảm bảo có imageUrl từ image nếu imageUrl không tồn tại
-    }));
-    
-    return finalCourses;
+    return processedCourses;
   } catch (error) {
     console.error('Error fetching featured courses:', error);
     return [];
@@ -609,7 +600,7 @@ export async function getFeaturedCourses(limit: number = 5): Promise<CourseListI
  * @param limit Maximum number of results to return
  * @returns Array of matching courses
  */
-export async function searchCourses(query: string, limit: number = 10): Promise<CourseListItem[]> {
+export async function searchCourses(query: string, limit = 10): Promise<CourseListItem[]> {
   try {
     if (!query) {
       return [];
@@ -686,14 +677,7 @@ export async function searchCourses(query: string, limit: number = 10): Promise<
       })
     );
 
-    // Đảm bảo mỗi item đều có đủ cả hai trường imageUrl và image để phù hợp với interface CourseListItem
-    const finalCourses = processedCourses.map(course => ({
-      ...course,
-      image: course.imageUrl, // Đảm bảo có trường image từ imageUrl
-      imageUrl: course.imageUrl || course.image // Đảm bảo có imageUrl từ image nếu imageUrl không tồn tại
-    }));
-    
-    return finalCourses;
+    return processedCourses;
   } catch (error) {
     console.error('Error searching courses:', error);
     return [];

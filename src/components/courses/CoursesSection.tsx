@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useCourses } from "@/client/hooks/courses";
-import Link from "next/link";
-import Image from "next/image";
-import { TopicsFilter } from "@/components/topics";
-import { Course } from "@/types/course";
+import { useState, useEffect } from 'react';
+import { useCourses } from '@/client/hooks/courses';
+import Link from 'next/link';
+import Image from 'next/image';
+import { TopicsFilter } from '@/components/topics';
+import { Course } from '@/types/course';
 import { 
   MagnifyingGlassIcon, 
   FunnelIcon,
@@ -14,7 +14,7 @@ import {
   StarIcon,
   UserIcon,
   ChevronRightIcon 
-} from "@heroicons/react/24/outline";
+} from '@heroicons/react/24/outline';
 
 export default function CoursesSection() {
   const {
@@ -29,8 +29,8 @@ export default function CoursesSection() {
   } = useCourses(false); // false = public view
 
   // Filter states
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedLevel, setSelectedLevel] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedLevel, setSelectedLevel] = useState<string>('');
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   
@@ -68,7 +68,7 @@ export default function CoursesSection() {
   const handleSearch = () => {
     fetchCourses({
       search: searchQuery,
-      level: selectedLevel === "" ? undefined : selectedLevel.toLowerCase(),
+      level: selectedLevel === '' ? undefined : selectedLevel.toLowerCase(),
       topics: selectedTopics.length > 0 ? selectedTopics : undefined,
       page: 1,
       limit: 9,
@@ -80,7 +80,7 @@ export default function CoursesSection() {
     setSelectedLevel(level);
     fetchCourses({
       search: searchQuery,
-      level: level === "" ? undefined : level.toLowerCase(),
+      level: level === '' ? undefined : level.toLowerCase(),
       topics: selectedTopics.length > 0 ? selectedTopics : undefined,
       page: 1,
       limit: 9,
@@ -116,8 +116,8 @@ export default function CoursesSection() {
   };
 
   const clearFilters = () => {
-    setSearchQuery("");
-    setSelectedLevel("");
+    setSearchQuery('');
+    setSelectedLevel('');
     setSelectedTopics([]);
     fetchCourses({
       page: 1,
@@ -128,7 +128,7 @@ export default function CoursesSection() {
   };
 
   // Placeholder image for courses without an image
-  const placeholderImage = "/placeholder-course.jpg";
+  const placeholderImage = '/placeholder-course.jpg';
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -253,8 +253,8 @@ export default function CoursesSection() {
                 <p className="text-gray-600 mb-4 line-clamp-2">{course.description}</p>
                 <div className="flex flex-wrap gap-1 mb-4">
                   {Array.isArray(course.topics) && course.topics
-                    .filter(topic => topic !== 'featured') // Loại bỏ topic 'featured' khỏi hiển thị
-                    .slice(0, 3).map(topic => (
+                    .filter((topic: string) => topic !== 'featured') // Loại bỏ topic 'featured' khỏi hiển thị
+                    .slice(0, 3).map((topic: string) => (
                     <span 
                       key={topic} 
                       className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded cursor-pointer hover:bg-blue-100"
@@ -267,9 +267,9 @@ export default function CoursesSection() {
                       {topic}
                     </span>
                   ))}
-                  {Array.isArray(course.topics) && course.topics.filter(topic => topic !== 'featured').length > 3 && (
+                  {Array.isArray(course.topics) && course.topics.filter((topic: string) => topic !== 'featured').length > 3 && (
                     <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
-                      +{course.topics.filter(topic => topic !== 'featured').length - 3} more
+                      +{course.topics.filter((topic: string) => topic !== 'featured').length - 3} more
                     </span>
                   )}
                 </div>
@@ -294,8 +294,8 @@ export default function CoursesSection() {
               disabled={currentPage === 1}
               className={`px-3 py-1 rounded-md ${
                 currentPage === 1
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
               Previous
@@ -308,8 +308,8 @@ export default function CoursesSection() {
                   onClick={() => handlePageChange(page)}
                   className={`px-3 py-1 rounded-md ${
                     currentPage === page
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
                 >
                   {page}
@@ -324,8 +324,8 @@ export default function CoursesSection() {
               disabled={currentPage === pagination.totalPages}
               className={`px-3 py-1 rounded-md ${
                 currentPage === pagination.totalPages
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
               Next

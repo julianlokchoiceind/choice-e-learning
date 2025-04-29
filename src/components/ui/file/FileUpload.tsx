@@ -1,6 +1,7 @@
-"use client";
+'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { CloudArrowUpIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 // Props interface for the component
@@ -81,17 +82,23 @@ export default function FileUpload({
         formData.append(type.includes('course') ? 'courseId' : 'userId', entityId);
       }
 
-      // Send the upload request
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
+      // Send the upload request using axios
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      
+      // Special config for file upload
+      const uploadConfig = {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      };
+      
+      const response = await apiClient.post('/api/upload', formData, uploadConfig);
+      
       // Parse the response
-      const result = await response.json();
-
+      const result = response.data;
+      
       // Handle upload failure
-      if (!response.ok || !result.success) {
+      if (!result.success) {
         throw new Error(result.error || 'Upload failed');
       }
 
@@ -137,11 +144,11 @@ export default function FileUpload({
       {/* Image preview or upload area */}
       {previewUrl && !imageError ? (
         <div className="relative">
-          <img 
-            src={previewUrl} 
-            alt="Preview" 
-            className="w-full h-48 object-cover rounded-md border border-gray-300" 
-            onError={(e) => {
+          <Image src={previewUrl} 
+            alt='Preview' 
+            className='w-full h-48 object-cover rounded-md border border-gray-300' 
+            width={500} height={300} 
+            onError={() => {
               console.error('Image failed to load:', previewUrl);
               setImageError(true);
             }}

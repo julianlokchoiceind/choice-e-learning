@@ -6,12 +6,16 @@
     "dev": "next dev",
     "build": "node scripts/clean-prisma.js && prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
     "postinstall": "node scripts/clean-prisma.js && prisma generate",
     "vercel-build": "node scripts/clean-prisma.js && prisma generate && next build",
     "seed-courses": "node scripts/seed-courses.js",
     "create-admin": "node scripts/create-admin.js",
-    "analyze": "node scripts/analyze-dependencies.js"
+    "analyze": "node scripts/analyze-dependencies.js",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx src --ignore-path .eslintignore",
+    "lint:fix": "eslint --ext .js,.jsx,.ts,.tsx src --fix --ignore-path .eslintignore",
+    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,json,css}'",
+    "fix-eslint-errors": "node scripts/fix-eslint-errors.js",
+    "check-all": "node scripts/check-all.js"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
@@ -40,14 +44,16 @@
     "@types/react": "^18.2.47",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-dom": "^18.2.18",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
     "autoprefixer": "^10.4.16",
-    "eslint": "^8.56.0",
-    "eslint-config-next": "14.0.4",
     "file-loader": "^6.2.0",
     "mongodb": "^6.15.0",
     "postcss": "^8.4.33",
     "prisma": "^6.6.0",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.31.1",
+    "eslint-plugin-react-hooks": "^4.6.0"
   }
 }

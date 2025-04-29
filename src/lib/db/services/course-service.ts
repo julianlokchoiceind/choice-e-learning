@@ -13,7 +13,7 @@ import { Course as PrismaCourse } from '@prisma/client';
  */
 export async function findCourseById(
   id: string, 
-  includeRelations: boolean = false
+  includeRelations = false
 ): Promise<PrismaCourse | null> {
   try {
     if (!id) {
@@ -52,8 +52,8 @@ export async function findCourseById(
  * @returns Paginated courses
  */
 export async function getCourses(
-  page: number = 1,
-  pageSize: number = 10,
+  page = 1,
+  pageSize = 10,
   filters: Prisma.CourseWhereInput = {}
 ): Promise<{
   courses: PrismaCourse[];
@@ -245,8 +245,8 @@ export async function unenrollStudent(
  */
 export async function getEnrolledCourses(
   userId: string,
-  page: number = 1,
-  pageSize: number = 10
+  page = 1,
+  pageSize = 10
 ): Promise<{
   courses: PrismaCourse[];
   total: number;

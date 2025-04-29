@@ -120,10 +120,12 @@ export interface CourseListItem {
   duration: string;
   isFeatured: boolean;
   students: number;
+  studentsCount?: number; // Added to fix build error
   rating: number;
   reviews: number;
   instructorName: string;
   learningPoints?: string[];
+  topics?: string[]; // Added to fix build error
   updatedAt?: Date; // Added to match what's returned by the service
 }
 

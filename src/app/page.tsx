@@ -73,7 +73,7 @@ export default function Home() {
             <div className="flex flex-col justify-center space-y-8 pt-20 lg:pt-0">
               <div className="space-y-6">
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1]">
-                  Let's Work <br />
+                  Let&apos;s Work <br />
                   Together to<br />
                   Create Future<br />
                   Tech Leaders

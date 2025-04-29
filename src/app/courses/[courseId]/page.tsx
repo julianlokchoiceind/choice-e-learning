@@ -62,7 +62,8 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
       try {
         // Thêm timestamp vào request URL để tránh caching
         const timestamp = Date.now();
-        const response = await fetch(`/api/courses/${courseId}?t=${timestamp}`, {
+        const apiClient = (await import('@/lib/axios/apiClient')).default;
+        const response = await apiClient.get(`/api/courses/${courseId}?t=${timestamp}`, {
           headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache',
@@ -70,11 +71,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
           }
         });
         
-        if (!response.ok) {
-          throw new Error('Failed to fetch course details');
-        }
-        
-        const data = await response.json();
+        const data = response.data;
         if (data.success) {
           // Xử lý URL hình ảnh để đảm bảo không bị cache
           const processedCourse = {
@@ -112,12 +109,9 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
       if (!session?.user?.id) return;
       
       try {
-        const response = await fetch(`/api/users/me/courses`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch enrollment status');
-        }
-        
-        const data = await response.json();
+        const apiClient = (await import('@/lib/axios/apiClient')).default;
+        const response = await apiClient.get(`/api/users/me/courses`);
+        const data = response.data;
         if (data.success) {
           const enrolled = data.courses.some((c: any) => c.id === courseId);
           setIsEnrolled(enrolled);
@@ -144,14 +138,9 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
     setEnrollmentError(null);
     
     try {
-      const response = await fetch(`/api/courses/${courseId}/enroll`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      const data = await response.json();
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const response = await apiClient.post(`/api/courses/${courseId}/enroll`);
+      const data = response.data;
       
       if (data.success) {
         setIsEnrolled(true);
@@ -181,14 +170,9 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
     setEnrollmentError(null);
     
     try {
-      const response = await fetch(`/api/courses/${courseId}/enroll`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      const data = await response.json();
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const response = await apiClient.delete(`/api/courses/${courseId}/enroll`);
+      const data = response.data;
       
       if (data.success) {
         setIsEnrolled(false);
@@ -262,7 +246,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
           <div className="grid md:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="md:col-span-2">
-              <h2 className="text-2xl font-bold mb-6">What you'll learn</h2>
+              <h2 className="text-2xl font-bold mb-6">What you&apos;ll learn</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                 {course.learningPoints && course.learningPoints.map((point: string, index: number) => (
                   <div key={index} className="flex items-start">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { 
@@ -51,13 +52,12 @@ export default function Dashboard() {
     const fetchUserStats = async () => {
       try {
         if (session?.user?.id) {
-          // Use fetch to call the server action from the client component
-          const response = await fetch(`/api/userStats?userId=${session.user.id}`);
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success) {
-              setStats(data.stats);
-            }
+          // Use axios to call the server action from the client component
+          const apiClient = (await import('@/lib/axios/apiClient')).default;
+          const response = await apiClient.get(`/api/userStats?userId=${session.user.id}`);
+          const data = response.data;
+          if (data.success) {
+            setStats(data.stats);
           }
         }
       } catch (error) {
@@ -70,12 +70,11 @@ export default function Dashboard() {
     const fetchEnrolledCourses = async () => {
       try {
         if (session?.user?.id) {
-          const response = await fetch(`/api/enrolledCourses?userId=${session.user.id}`);
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.courses) {
-              setEnrolledCourses(data.courses);
-            }
+          const apiClient = (await import('@/lib/axios/apiClient')).default;
+          const response = await apiClient.get(`/api/enrolledCourses?userId=${session.user.id}`);
+          const data = response.data;
+          if (data.success && data.courses) {
+            setEnrolledCourses(data.courses);
           }
         }
       } catch (error) {
@@ -86,12 +85,11 @@ export default function Dashboard() {
     const fetchAchievements = async () => {
       try {
         if (session?.user?.id) {
-          const response = await fetch('/api/achievements');
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.achievements) {
-              setAchievements(data.achievements);
-            }
+          const apiClient = (await import('@/lib/axios/apiClient')).default;
+          const response = await apiClient.get('/api/achievements');
+          const data = response.data;
+          if (data.success && data.achievements) {
+            setAchievements(data.achievements);
           }
         }
       } catch (error) {
@@ -245,11 +243,10 @@ export default function Dashboard() {
                     <div key={course.id} className="p-4 transition hover:bg-gray-50">
                       <div className="flex flex-col sm:flex-row items-start">
                         <div className="flex-shrink-0 w-full sm:w-32 h-24 mb-4 sm:mb-0 sm:mr-4">
-                          <img 
-                            src={course.imageUrl} 
+                          <Image src={course.imageUrl} 
                             alt={course.title}
                             className="w-full h-full object-cover rounded-md"
-                          />
+                            width={500} height={300} />
                         </div>
                         <div className="flex-1">
                           <h3 className="font-medium mb-1">{course.title}</h3>
@@ -280,7 +277,7 @@ export default function Dashboard() {
                 <div className="p-8 text-center">
                   <BookOpenIcon className="mx-auto h-12 w-12 text-gray-400" />
                   <h3 className="mt-2 text-lg font-medium text-gray-900">No courses yet</h3>
-                  <p className="mt-1 text-sm text-gray-500">You haven't enrolled in any courses yet.</p>
+                  <p className="mt-1 text-sm text-gray-500">You haven&apos;t enrolled in any courses yet.</p>
                   <div className="mt-6">
                     <Link
                       href="/courses"

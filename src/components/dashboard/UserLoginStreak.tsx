@@ -47,7 +47,7 @@ export const UserLoginStreak: React.FC = () => {
           {loginStreak === 1 ? (
             'First day - keep going!'
           ) : loginStreak >= 7 ? (
-            `You've logged in for ${loginStreak} days in a row!`
+            `You&apos;ve logged in for ${loginStreak} days in a row!`
           ) : (
             `${loginStreak} day streak - ${7 - loginStreak} more for achievement!`
           )}

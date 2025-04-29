@@ -36,7 +36,7 @@ export interface PaginatedResponse<T> {
  * @param limit The number of items per page
  * @returns The skip and take parameters for Prisma
  */
-export function getPaginationParams(page: number = 1, limit: number = 10) {
+export function getPaginationParams(page = 1, limit = 10) {
   const validPage = Math.max(1, page); // Ensure page is at least 1
   const validLimit = Math.min(Math.max(1, limit), 100); // Limit between 1 and 100
   const skip = (validPage - 1) * validLimit;
@@ -54,8 +54,8 @@ export function getPaginationParams(page: number = 1, limit: number = 10) {
 export function createPaginatedResponse<T>(
   data: T[],
   totalItems: number,
-  page: number = 1,
-  limit: number = 10
+  page = 1,
+  limit = 10
 ): PaginatedResponse<T> {
   const validPage = Math.max(1, page);
   const validLimit = Math.min(Math.max(1, limit), 100);
@@ -80,7 +80,7 @@ export function createPaginatedResponse<T>(
  * @param limit The number of items per page
  * @returns The total number of pages
  */
-export function getTotalPages(totalItems: number, limit: number = 10): number {
+export function getTotalPages(totalItems: number, limit = 10): number {
   const validLimit = Math.min(Math.max(1, limit), 100);
   return Math.ceil(totalItems / validLimit);
 }

@@ -24,7 +24,7 @@ export default function RoadmapPage() {
             className="object-cover" 
             priority
           />
-          {/* Overlay with site's main blue gradient - semi-transparent for SVG background */}
+          {/* Overlay with site&apos;s main blue gradient - semi-transparent for SVG background */}
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, #1e2a78 0%, #0b1120 100%)' }}></div>
         </div>
         
@@ -159,7 +159,7 @@ export default function RoadmapPage() {
                       <p className="text-[17px] text-[#86868b] mb-5">{step.description}</p>
                       
                       <div className="mb-5">
-                        <div className="font-medium text-[17px] text-[#1d1d1f] mb-2">Key skills you'll learn:</div>
+                        <div className="font-medium text-[17px] text-[#1d1d1f] mb-2">Key skills you&apos;ll learn:</div>
                         <div className="flex flex-wrap gap-2">
                           {step.skills.map((skill, skillIndex) => (
                             <span key={skillIndex} className="inline-block bg-[#f5f5f7] text-[#1d1d1f] text-sm font-medium px-3 py-1 rounded-full">

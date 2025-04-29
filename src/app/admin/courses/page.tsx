@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
   PlusIcon, 
@@ -33,6 +34,7 @@ export default function CoursesPage() {
   } = useCourses(true);
 
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Initialize state with default values
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,10 +45,16 @@ export default function CoursesPage() {
   // Handle delete confirmation
   const handleDeleteConfirm = async (courseId: string) => {
     try {
+      // Hide confirmation buttons first
+      setConfirmDelete(null);
+      
+      // Show loading state
+      setIsDeleting(true);
+      
       // Use the deleteCourse function from the hook
       await deleteCourse(courseId);
       
-      // Remove course from state (will be handled by re-fetching)
+      // Refresh the courses list
       fetchCourses({
         search: debouncedSearchQuery || undefined,
         level: selectedLevel === 'all' ? undefined : selectedLevel,
@@ -57,8 +65,10 @@ export default function CoursesPage() {
       
     } catch (error) {
       console.error('Error deleting course:', error);
+      // Silent error handling, no UI feedback
     } finally {
       setConfirmDelete(null);
+      setIsDeleting(false);
     }
   };
   
@@ -287,9 +297,10 @@ export default function CoursesPage() {
         </div>
         
         <div className="overflow-x-auto">
-          {isLoading ? (
+          {isLoading || isDeleting ? (
             <div className="py-10 text-center">
-              <p className="text-gray-500">Loading courses...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+              <p className="text-gray-500">{isDeleting ? 'Deleting course...' : 'Loading courses...'}</p>
             </div>
           ) : courses.length === 0 ? (
             <div className="py-10 text-center">
@@ -328,10 +339,10 @@ export default function CoursesPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 rounded-md bg-gray-200 overflow-hidden">
-                          <img 
-                            src={course.imageUrl || '/images/placeholder-course.jpg'} 
+                          <Image src={course.imageUrl || '/images/placeholder-course.jpg'} 
                             alt={course.title || 'Course image'}
                             className="h-full w-full object-cover"
+                            width={500} height={300}
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = '/images/placeholder-course.jpg';
                             }}
@@ -381,9 +392,9 @@ export default function CoursesPage() {
                           </div>
                         ) : (
                           <button 
+                            onClick={() => setConfirmDelete(course.id.toString())}
                             className="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 rounded-md p-1.5 transition-colors duration-150 admin-button"
                             aria-label="Delete course"
-                            onClick={() => setConfirmDelete(course.id.toString())}
                           >
                             <TrashIcon className="h-5 w-5" />
                           </button>

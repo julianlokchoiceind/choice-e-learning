@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { StudentList } from "@/components/admin/students/StudentList";
+import StudentList from "@/components/admin/students/StudentList";
 
 export const metadata: Metadata = {
   title: "Students Management - Admin Dashboard",

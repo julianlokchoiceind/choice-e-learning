@@ -120,7 +120,7 @@ export default function NewTopicPage() {
       if (errorResponse?.error) {
         errorMessage = errorResponse.error;
       } else if (err?.message) {
-        // Only use error.message if it's helpful (not generic)
+        // Only use error.message if it&apos;s helpful (not generic)
         if (err.message !== "Request failed with status code 500" &&
             !err.message.includes("Network Error")) {
           errorMessage = err.message;

@@ -42,7 +42,7 @@ export default function EditCoursePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('basic'); // 'basic' or 'lessons'
+  const [activeTab, setActiveTab] = useState('basic'); // 'basic' or 'lessons&apos;
 
   // Form state
   const [formData, setFormData] = useState<CourseFormData>({
@@ -78,16 +78,9 @@ export default function EditCoursePage() {
         setError(null);
         
         console.log(`Fetching course with ID: ${courseId}`);
-        const response = await fetch(`/api/courses/${courseId}`);
-        
-        if (!response.ok) {
-          const statusText = response.statusText;
-          const errorBody = await response.text();
-          console.error(`Server error (${response.status} ${statusText}):`, errorBody);
-          throw new Error(`Failed to fetch course: ${statusText}`);
-        }
-        
-        const data = await response.json();
+        const apiClient = (await import('@/lib/axios/apiClient')).default;
+        const response = await apiClient.get(`/api/courses/${courseId}`);
+        const data = response.data;
         console.log('Course data response:', data);
         
         if (data.success && data.data) {
@@ -127,13 +120,9 @@ export default function EditCoursePage() {
       setIsLoadingLessons(true);
       setLessonError(null);
       
-      const response = await fetch(`/api/courses/${courseId}/lessons`);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch lessons: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const response = await apiClient.get(`/api/courses/${courseId}/lessons`);
+      const data = response.data;
       
       if (data.success && data.data) {
         setLessons(data.data);
@@ -173,31 +162,13 @@ export default function EditCoursePage() {
       };
       
       console.log(`Updating course ${courseId} with data:`, data);
-      const response = await fetch(`/api/courses/${courseId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
       
-      console.log(`Update course response status: ${response.status} ${response.statusText}`);
+      const response = await apiClient.put(`/api/courses/${courseId}`, data);
+      console.log(`Update course response status: ${response.status}`);
       
-      // Check if response is not OK before trying to parse JSON
-      if (!response.ok) {
-        // Try to get error details if possible
-        try {
-          const errorData = await response.json();
-          console.error('Error updating course:', errorData);
-          throw new Error(errorData.error || `Request failed with status ${response.status}`);
-        } catch (jsonError) {
-          // If we can't parse the error response as JSON
-          throw new Error(`Request failed with status ${response.status}: ${response.statusText}`);
-        }
-      }
-      
-      // Read the response once only
-      const responseData = await response.json();
+      // Read the response data
+      const responseData = response.data;
       console.log('Update course response data:', responseData);
       
       if (responseData.success) {
@@ -233,22 +204,24 @@ export default function EditCoursePage() {
         order: editingLessonId ? undefined : (lessons.length + 1)
       };
       
-      const method = editingLessonId ? 'PUT' : 'POST';
-      const url = editingLessonId 
-        ? `/api/courses/${courseId}/lessons/${editingLessonId}`
-        : `/api/courses/${courseId}/lessons`;
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
       
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(lessonDataToSend)
-      });
+      let response;
+      if (editingLessonId) {
+        response = await apiClient.put(
+          `/api/courses/${courseId}/lessons/${editingLessonId}`,
+          lessonDataToSend
+        );
+      } else {
+        response = await apiClient.post(
+          `/api/courses/${courseId}/lessons`,
+          lessonDataToSend
+        );
+      }
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Failed to ${editingLessonId ? 'update' : 'create'} lesson`);
+      const data = response.data;
+      if (!data.success) {
+        throw new Error(data.error || `Failed to ${editingLessonId ? 'update' : 'create'} lesson`);
       }
       
       // Reset form and reload lessons
@@ -294,13 +267,11 @@ export default function EditCoursePage() {
       setIsSaving(true);
       setLessonError(null);
       
-      const response = await fetch(`/api/courses/${courseId}/lessons/${lessonId}`, {
-        method: 'DELETE'
-      });
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const response = await apiClient.delete(`/api/courses/${courseId}/lessons/${lessonId}`);
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete lesson');
+      if (!response.data.success) {
+        throw new Error(response.data.error || 'Failed to delete lesson');
       }
       
       // Reload lessons

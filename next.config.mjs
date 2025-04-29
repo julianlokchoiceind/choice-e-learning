@@ -10,6 +10,8 @@
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable React Strict Mode
+  reactStrictMode: true,
   // Image configuration for remote sources
   images: {
     remotePatterns: [
@@ -23,6 +25,12 @@ const nextConfig = {
         hostname: 'randomuser.me',
         pathname: '**',
       },
+    ],
+    domains: [
+      'via.placeholder.com',
+      'randomuser.me',
+      'localhost',
+      'picsum.photos'
     ],
   },
   

@@ -1,8 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { 
   PencilSquareIcon, 
   TrashIcon, 
@@ -11,10 +12,10 @@ import {
   EyeIcon,
   UserGroupIcon,
   XMarkIcon
-} from "@heroicons/react/24/outline";
-import { useStudents } from "@/client/hooks/students";
+} from '@heroicons/react/24/outline';
+import { useStudents } from '@/client/hooks/students';
 
-export const StudentList = () => {
+export default function StudentList() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -29,9 +30,9 @@ export const StudentList = () => {
   
   // Create local state to manage students, which will be updated from API
   const [students, setStudents] = useState(apiStudents || []);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("createdAt");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   
   // Add CSS for buttons with no transform on hover - matching sidebar behavior
@@ -75,15 +76,15 @@ export const StudentList = () => {
   }, [apiStudents]);
 
   // Get current page from URL or default to 1
-  const currentPage = parseInt(searchParams.get("page") || "1");
+  const currentPage = parseInt(searchParams.get('page') || '1');
   
   // Debugging effect để theo dõi state
   useEffect(() => {
-    console.log("STATE CHANGE: loading =", loading);
-    console.log("STATE CHANGE: students =", students?.length || 0, "items");
-    console.log("STATE CHANGE: pagination =", pagination);
+    console.log('STATE CHANGE: loading =', loading);
+    console.log('STATE CHANGE: students =', students?.length || 0, 'items');
+    console.log('STATE CHANGE: pagination =', pagination);
     if (students && students.length > 0) {
-      console.log("First student:", students[0]);
+      console.log('First student:', students[0]);
     }
   }, [loading, students, pagination]);
   
@@ -91,8 +92,8 @@ export const StudentList = () => {
     // Call fetchStudents with the current parameters when component mounts or page changes
     const fetchData = async () => {
       try {
-        console.log("ADMIN UI: Fetching students for page:", currentPage);
-        console.log("ADMIN UI: Before fetch - Current students:", students);
+        console.log('ADMIN UI: Fetching students for page:', currentPage);
+        console.log('ADMIN UI: Before fetch - Current students:', students);
         
         const result = await fetchStudents({
           page: currentPage,
@@ -102,24 +103,24 @@ export const StudentList = () => {
           sortOrder,
         });
         
-        console.log("ADMIN UI: Direct result from fetchStudents:", {
+        console.log('ADMIN UI: Direct result from fetchStudents:', {
           dataLength: result?.data?.length || 0,
           meta: result?.meta
         });
         
         // Need to access students after state update
         setTimeout(() => {
-          console.log("ADMIN UI: After fetch - Current students:", students);
-          console.log("ADMIN UI: After fetch - Student count:", students?.length || 0);
+          console.log('ADMIN UI: After fetch - Current students:', students);
+          console.log('ADMIN UI: After fetch - Student count:', students?.length || 0);
           
           // Force re-render if students is empty but we have data in the result
           if ((!students || students.length === 0) && result?.data?.length > 0) {
-            console.log("ADMIN UI: Forcing manual state update with", result.data.length, "students");
+            console.log('ADMIN UI: Forcing manual state update with', result.data.length, 'students');
             setStudents([...result.data]);
           }
         }, 100);
       } catch (err) {
-        console.error("Error in StudentList useEffect:", err);
+        console.error('Error in StudentList useEffect:', err);
         // Silent error handling - no UI error display
       }
     };
@@ -132,7 +133,7 @@ export const StudentList = () => {
   // Handle search with better error management
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Search submitted with query:", searchQuery);
+    console.log('Search submitted with query:', searchQuery);
     
     try {
       fetchStudents({
@@ -142,55 +143,55 @@ export const StudentList = () => {
         sortBy,
         sortOrder,
       });
-      router.push("/admin/students?page=1");
+      router.push('/admin/students?page=1');
     } catch (err) {
-      console.error("Error in search:", err);
+      console.error('Error in search:', err);
       // Silent error handling
     }
   };
 
   // Handle sort change from dropdown
   const handleSortChange = (sortOption: string) => {
-    let newSortBy = "createdAt";
-    let newSortOrder: "asc" | "desc" = "desc";
+    let newSortBy = 'createdAt';
+    let newSortOrder: 'asc' | 'desc' = 'desc';
     
     // Map the dropdown value to sortBy and sortOrder values
     switch (sortOption) {
-      case "newest":
-        newSortBy = "createdAt";
-        newSortOrder = "desc";
+      case 'newest':
+        newSortBy = 'createdAt';
+        newSortOrder = 'desc';
         break;
-      case "oldest":
-        newSortBy = "createdAt";
-        newSortOrder = "asc";
+      case 'oldest':
+        newSortBy = 'createdAt';
+        newSortOrder = 'asc';
         break;
-      case "nameAsc":
-        newSortBy = "name";
-        newSortOrder = "asc";
+      case 'nameAsc':
+        newSortBy = 'name';
+        newSortOrder = 'asc';
         break;
-      case "nameDesc":
-        newSortBy = "name";
-        newSortOrder = "desc";
+      case 'nameDesc':
+        newSortBy = 'name';
+        newSortOrder = 'desc';
         break;
-      case "emailAsc":
-        newSortBy = "email";
-        newSortOrder = "asc";
+      case 'emailAsc':
+        newSortBy = 'email';
+        newSortOrder = 'asc';
         break;
-      case "emailDesc":
-        newSortBy = "email";
-        newSortOrder = "desc";
+      case 'emailDesc':
+        newSortBy = 'email';
+        newSortOrder = 'desc';
         break;
-      case "gradeAsc":
-        newSortBy = "grade";
-        newSortOrder = "asc";
+      case 'gradeAsc':
+        newSortBy = 'grade';
+        newSortOrder = 'asc';
         break;
-      case "gradeDesc":
-        newSortBy = "grade";
-        newSortOrder = "desc";
+      case 'gradeDesc':
+        newSortBy = 'grade';
+        newSortOrder = 'desc';
         break;
       default:
-        newSortBy = "createdAt";
-        newSortOrder = "desc";
+        newSortBy = 'createdAt';
+        newSortOrder = 'desc';
     }
     
     setSortBy(newSortBy);
@@ -204,7 +205,7 @@ export const StudentList = () => {
       sortOrder: newSortOrder,
     });
     
-    router.push("/admin/students?page=1");
+    router.push('/admin/students?page=1');
   };
   
   const handlePageChange = (page: number) => {
@@ -248,7 +249,7 @@ export const StudentList = () => {
   };
   
   const getInitials = (name: string) => {
-    if (!name) return "";
+    if (!name) return '';
     return name
       .split(" ")
       .map((n) => n[0])
@@ -258,15 +259,15 @@ export const StudentList = () => {
 
   // Convert sortBy and sortOrder to a single dropdown value
   const getCurrentSort = () => {
-    if (sortBy === "createdAt" && sortOrder === "desc") return "newest";
-    if (sortBy === "createdAt" && sortOrder === "asc") return "oldest";
-    if (sortBy === "name" && sortOrder === "asc") return "nameAsc";
-    if (sortBy === "name" && sortOrder === "desc") return "nameDesc";
-    if (sortBy === "email" && sortOrder === "asc") return "emailAsc";
-    if (sortBy === "email" && sortOrder === "desc") return "emailDesc";
-    if (sortBy === "grade" && sortOrder === "asc") return "gradeAsc";
-    if (sortBy === "grade" && sortOrder === "desc") return "gradeDesc";
-    return "newest"; // Default
+    if (sortBy === 'createdAt' && sortOrder === 'desc') return 'newest';
+    if (sortBy === 'createdAt' && sortOrder === 'asc') return 'oldest';
+    if (sortBy === 'name' && sortOrder === 'asc') return 'nameAsc';
+    if (sortBy === 'name' && sortOrder === 'desc') return 'nameDesc';
+    if (sortBy === 'email' && sortOrder === 'asc') return 'emailAsc';
+    if (sortBy === 'email' && sortOrder === 'desc') return 'emailDesc';
+    if (sortBy === 'grade' && sortOrder === 'asc') return 'gradeAsc';
+    if (sortBy === 'grade' && sortOrder === 'desc') return 'gradeDesc';
+    return 'newest'; // Default
   };
   
   return (
@@ -354,13 +355,13 @@ export const StudentList = () => {
                   return (
                     <tr key={student.id} className="hover:bg-gray-50 transition-colors duration-150">
                       <td className="py-4 px-6 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {index + 1}
+                        {((pagination?.page || 1) - 1) * 10 + index + 1}
                       </td>
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-medium text-sm">
                             {student.imageUrl ? (
-                              <img src={student.imageUrl} alt={student.name} className="h-10 w-10 rounded-full object-cover" />
+                              <Image src={student.imageUrl} alt={student.name} className="h-10 w-10 rounded-full object-cover" width={500} height={300} />
                             ) : (
                               getInitials(student.name || 'Unknown')
                             )}

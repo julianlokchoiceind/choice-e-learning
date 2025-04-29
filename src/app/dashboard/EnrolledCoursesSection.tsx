@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -30,14 +31,9 @@ export default function EnrolledCoursesSection({ courses: initialCourses }: Enro
     setError(null);
     
     try {
-      const response = await fetch(`/api/courses/${courseId}/enroll`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      const data = await response.json();
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const response = await apiClient.delete(`/api/courses/${courseId}/enroll`);
+      const data = response.data;
       
       if (data.success) {
         // Remove the course from the local state
@@ -67,11 +63,10 @@ export default function EnrolledCoursesSection({ courses: initialCourses }: Enro
               <div key={course.id} className="p-4 transition hover:bg-gray-50">
                 <div className="flex flex-col sm:flex-row items-start">
                   <div className="flex-shrink-0 w-full sm:w-32 h-24 mb-4 sm:mb-0 sm:mr-4">
-                    <img 
-                      src={course.imageUrl} 
+                    <Image src={course.imageUrl} 
                       alt={course.title}
                       className="w-full h-full object-cover rounded-md"
-                    />
+                      width={500} height={300} />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-medium mb-1">{course.title}</h3>
@@ -113,7 +108,7 @@ export default function EnrolledCoursesSection({ courses: initialCourses }: Enro
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
             <h3 className="mt-2 text-lg font-medium text-gray-900">No courses yet</h3>
-            <p className="mt-1 text-sm text-gray-500">You haven't enrolled in any courses yet.</p>
+            <p className="mt-1 text-sm text-gray-500">You haven&apos;t enrolled in any courses yet.</p>
             <div className="mt-6">
               <Link
                 href="/courses"

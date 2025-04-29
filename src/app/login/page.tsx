@@ -62,7 +62,7 @@ export default function LoginPage() {
       password: true,
     });
     
-    let newErrors = {
+    const newErrors = {
       email: '',
       password: '',
     };

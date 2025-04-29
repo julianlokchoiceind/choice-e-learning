@@ -675,17 +675,11 @@ export default function NewCoursePage() {
       // Send data to API
       console.log('Sending course data:', courseData);
       
-      const response = await fetch('/api/courses', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(courseData),
-      });
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const response = await apiClient.post('/api/courses', courseData);
+      const data = response.data;
       
-      const data = await response.json();
-      
-      if (response.ok) {
+      if (data.success) {
         // Redirect to courses page after successful creation
         router.push('/admin/courses');
       } else {

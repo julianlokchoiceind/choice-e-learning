@@ -1,9 +1,10 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import axios from "axios";
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import axios from 'axios';
 import { 
   ArrowLeftIcon,
   PencilSquareIcon,
@@ -18,7 +19,7 @@ import {
   MapPinIcon,
   CheckCircleIcon,
   UserIcon
-} from "@heroicons/react/24/outline";
+} from '@heroicons/react/24/outline';
 
 interface Student {
   id: string;
@@ -123,11 +124,11 @@ export const StudentDetail = ({ studentId }: StudentDetailProps) => {
           setPayments(mockPayments);
           
         } else {
-          throw new Error("Invalid API response format");
+          throw new Error('Invalid API response format');
         }
       } catch (error) {
-        console.error("Error fetching student:", error);
-        setError("Failed to fetch student details. Please try again.");
+        console.error('Error fetching student:', error);
+        setError('Failed to fetch student details. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -137,28 +138,28 @@ export const StudentDetail = ({ studentId }: StudentDetailProps) => {
   }, [studentId]);
   
   const handleDelete = async () => {
-    if (confirm("Are you sure you want to delete this student?")) {
+    if (confirm('Are you sure you want to delete this student?')) {
       try {
         const response = await axios.delete(`/api/admin/students/${studentId}`);
         if (response.data && response.data.success) {
           // Nếu xóa thành công, quay về trang danh sách
-          router.push("/admin/students");
+          router.push('/admin/students');
         } else {
-          throw new Error(response.data?.error || "Unknown error");
+          throw new Error(response.data?.error || 'Unknown error');
         }
       } catch (error: any) {
-        console.error("Error deleting student:", error);
-        setError(error.response?.data?.error || error.message || "Failed to delete student. Please try again.");
+        console.error('Error deleting student:', error);
+        setError(error.response?.data?.error || error.message || 'Failed to delete student. Please try again.');
       }
     }
   };
   
   const getInitials = (name: string | undefined) => {
-    if (!name) return "";
+    if (!name) return '';
     return name
-      .split(" ")
+      .split(' ')
       .map((n) => n[0])
-      .join("")
+      .join('')
       .toUpperCase();
   };
   
@@ -225,7 +226,7 @@ export const StudentDetail = ({ studentId }: StudentDetailProps) => {
             <div className="flex flex-col items-center mb-8">
               <div className="w-36 h-36 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center mb-4">
                 {student.imageUrl ? (
-                  <img src={student.imageUrl} alt={student.name || 'Student'} className="h-full w-full rounded-full object-cover" />
+                  <Image src={student.imageUrl} alt={student.name || 'Student'} className="h-full w-full rounded-full object-cover" width={500} height={300} />
                 ) : (
                   <span className="text-indigo-600 text-5xl font-bold">
                     {getInitials(student.name)}

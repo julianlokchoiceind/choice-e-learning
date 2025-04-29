@@ -10,7 +10,11 @@ import { Lesson } from '@/types/course';
 import { getUserLoginStreak } from '@/lib/db/services/user-service';
 
 // Extended lesson interface for internal use
-interface ExtendedLesson extends Lesson {
+interface ExtendedLesson extends Omit<Lesson, 'videoUrl' | 'chapterId'> {
+  videoUrl: string | null;
+  duration: string | null;
+  resourcesData: string | null;
+  chapterId: string | null;
   [key: string]: any;
 }
 

@@ -119,7 +119,7 @@ export function generateUniqueFileName(originalName: string): string {
  * @param decimals Number of decimal places
  * @returns Formatted file size with appropriate unit
  */
-export function formatFileSize(bytes: number, decimals: number = 2): string {
+export function formatFileSize(bytes: number, decimals = 2): string {
   if (bytes === 0) return '0 Bytes';
   
   const k = 1024;

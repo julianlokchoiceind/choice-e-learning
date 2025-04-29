@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -67,91 +67,91 @@ export default function AdminSidebar() {
   
   // Student menu structure
   const studentItems = [
-    { text: "All Students", href: "/admin/students" },
-    { text: "Add New Student", href: "/admin/students/new" },
+    { text: 'All Students', href: '/admin/students' },
+    { text: 'Add New Student', href: '/admin/students/new' },
   ];
   
   const menuItems: MenuItemProps[] = [
     {
       icon: <HomeIcon className="h-5 w-5" />,
-      text: "Dashboard",
-      href: "/admin",
+      text: 'Dashboard',
+      href: '/admin',
       isActive: pathname === '/admin'
     },
     {
       icon: <UserGroupIcon className="h-5 w-5" />,
-      text: "Students",
+      text: 'Students',
       submenu: studentItems,
       isActive: pathname?.startsWith('/admin/students')
     },
     {
       icon: <BookOpenIcon className="h-5 w-5" />,
-      text: "Courses",
+      text: 'Courses',
       submenu: [
-        { text: "All Courses", href: "/admin/courses" },
-        { text: "Add New Course", href: "/admin/courses/new" }
+        { text: 'All Courses', href: '/admin/courses' },
+        { text: 'Add New Course', href: '/admin/courses/new' }
       ],
       isActive: pathname?.startsWith('/admin/courses')
     },
     {
       icon: <FolderIcon className="h-5 w-5" />,
-      text: "Topics",
+      text: 'Topics',
       submenu: [
-        { text: "All Topics", href: "/admin/topics" },
-        { text: "Add New Topic", href: "/admin/topics/new" }
+        { text: 'All Topics', href: '/admin/topics' },
+        { text: 'Add New Topic', href: '/admin/topics/new' }
       ],
       isActive: pathname?.startsWith('/admin/topics')
     },
     {
       icon: <QuestionMarkCircleIcon className="h-5 w-5" />,
-      text: "FAQs",
+      text: 'FAQs',
       submenu: [
-        { text: "All FAQs", href: "/admin/faqs" },
-        { text: "Add New FAQ", href: "/admin/faqs/new" }
+        { text: 'All FAQs', href: '/admin/faqs' },
+        { text: 'Add New FAQ', href: '/admin/faqs/new' }
       ],
       isActive: pathname?.startsWith('/admin/faqs')
     },
     {
       icon: <ChartBarIcon className="h-5 w-5" />,
-      text: "Analytics",
-      href: "/admin/analytics",
+      text: 'Analytics',
+      href: '/admin/analytics',
       isActive: pathname?.startsWith('/admin/analytics')
     },
     {
       icon: <DocumentTextIcon className="h-5 w-5" />,
-      text: "Quizzes",
+      text: 'Quizzes',
       submenu: [
-        { text: "All Quizzes", href: "/admin/quizzes" },
-        { text: "Create Quiz", href: "/admin/quizzes/new" }
+        { text: 'All Quizzes', href: '/admin/quizzes' },
+        { text: 'Create Quiz', href: '/admin/quizzes/new' }
       ],
       isActive: pathname?.startsWith('/admin/quizzes')
     },
     {
       icon: <DocumentCheckIcon className="h-5 w-5" />,
-      text: "Certificates",
+      text: 'Certificates',
       submenu: [
-        { text: "All Certificates", href: "/admin/certificates" },
-        { text: "Create Template", href: "/admin/certificates/template" }
+        { text: 'All Certificates', href: '/admin/certificates' },
+        { text: 'Create Template', href: '/admin/certificates/template' }
       ],
       isActive: pathname?.startsWith('/admin/certificates')
     },
 
     {
       icon: <ClockIcon className="h-5 w-5" />,
-      text: "Calendar",
-      href: "/admin/calendar",
+      text: 'Calendar',
+      href: '/admin/calendar',
       isActive: pathname?.startsWith('/admin/calendar')
     },
     {
       icon: <BellIcon className="h-5 w-5" />,
-      text: "Notifications",
-      href: "/admin/notifications",
+      text: 'Notifications',
+      href: '/admin/notifications',
       isActive: pathname?.startsWith('/admin/notifications')
     },
     {
       icon: <Cog6ToothIcon className="h-5 w-5" />,
-      text: "Settings",
-      href: "/admin/settings",
+      text: 'Settings',
+      href: '/admin/settings',
       isActive: pathname?.startsWith('/admin/settings')
     }
   ];
@@ -161,7 +161,7 @@ export default function AdminSidebar() {
       <div className="p-5 flex items-center border-b border-blue-400/30">
         <div className="mr-3 w-10 h-10 flex-shrink-0">
           <Image 
-            src="/images/logos/choiceind logox2.png" 
+            src='/images/logos/choiceind logox2.png' 
             alt="Choice Logo" 
             width={40} 
             height={40} 
@@ -191,7 +191,7 @@ export default function AdminSidebar() {
 
       <div className="px-4 py-6">
         <Link
-          href="/admin/help"
+          href='/admin/help'
           className="flex items-center justify-center p-4 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 rounded-lg shadow-md mb-4 transition-all duration-200 transform hover:scale-[1.02] border border-blue-400/20"
         >
           <QuestionMarkCircleIcon className="h-5 w-5 mr-2 text-white" />
@@ -239,7 +239,7 @@ function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false
         </button>
       ) : (
         <Link
-          href={href || "#"}
+          href={href || '#'}
           className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium sidebar-menu-item ${isFirst ? 'first-menu-item' : ''} ${
             isActive 
               ? 'bg-blue-700/70 text-white' 

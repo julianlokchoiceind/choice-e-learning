@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from 'next/image';
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTopics } from "@/client/hooks/topics";
@@ -231,11 +232,10 @@ export default function TopicDetailPage({ params }: { params: { topicId: string 
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
                       {course.imageUrl ? (
-                        <img 
-                          src={course.imageUrl} 
+                        <Image src={course.imageUrl} 
                           alt={course.title} 
                           className="h-12 w-12 rounded-md object-cover"
-                        />
+                          width={500} height={300} />
                       ) : (
                         <div className="h-12 w-12 bg-gray-200 rounded-md flex items-center justify-center">
                           <DocumentTextIcon className="h-6 w-6 text-gray-500" />

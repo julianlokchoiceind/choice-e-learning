@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -41,13 +42,9 @@ export default function CourseDetailPage() {
         setIsLoading(true);
         setError(null);
         
-        const response = await fetch(`/api/courses/${courseId}`);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch course: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
+        const apiClient = (await import('@/lib/axios/apiClient')).default;
+        const response = await apiClient.get(`/api/courses/${courseId}`);
+        const data = response.data;
         
         if (data.success && data.data) {
           setCourse(data.data);
@@ -73,14 +70,8 @@ export default function CourseDetailPage() {
     }
     
     try {
-      const response = await fetch(`/api/admin/courses/${courseId}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete course');
-      }
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      await apiClient.delete(`/api/admin/courses/${courseId}`);
       
       // Redirect to courses page after successful deletion
       router.push('/admin/courses');
@@ -133,11 +124,10 @@ export default function CourseDetailPage() {
           <div className="bg-white rounded-lg shadow overflow-hidden">
             {course.imageUrl && (
               <div className="h-48 overflow-hidden">
-                <img 
-                  src={course.imageUrl} 
+                <Image src={course.imageUrl} 
                   alt={course.title}
                   className="w-full h-full object-cover"
-                />
+                  width={500} height={300} />
               </div>
             )}
             

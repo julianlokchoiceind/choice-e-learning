@@ -6,7 +6,11 @@ const RETRY_DELAY_MS = 200;
 
 // Prevent multiple instances of Prisma Client in development
 declare global {
+  // Using 'var' is required here for Next.js global declarations
+  // This is an exception to our ESLint rules
+  /* eslint-disable no-var */
   var prisma: PrismaClient | undefined;
+  /* eslint-enable no-var */
 }
 
 // Helper function to add delay
@@ -20,6 +24,7 @@ function createPrismaClient(): PrismaClient {
     });
     
     // Add middleware for error handling and retry logic
+    // Client.$extends is used here for query middleware
     client.$extends({
       query: {
         $allModels: {
@@ -53,7 +58,7 @@ function createPrismaClient(): PrismaClient {
     });
     
     // Keep old approach for backward compatibility, will be removed in future updates
-    // @ts-ignore - using deprecated method for backward compatibility
+    // The $use method is deprecated in newer Prisma versions but we still need it for compatibility
     client.$use(async (params, next) => {
       let retries = 0;
       

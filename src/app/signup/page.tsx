@@ -76,7 +76,7 @@ export default function SignUpPage() {
       confirmPassword: true,
     });
     
-    let newErrors = {
+    const newErrors = {
       name: '',
       email: '',
       password: '',

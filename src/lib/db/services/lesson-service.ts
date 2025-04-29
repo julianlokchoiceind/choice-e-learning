@@ -11,7 +11,7 @@ import { Lesson, Prisma } from '@prisma/client';
  */
 export async function findLessonById(
   id: string,
-  includeCourse: boolean = false
+  includeCourse = false
 ): Promise<Lesson | null> {
   try {
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {

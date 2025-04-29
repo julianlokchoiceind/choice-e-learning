@@ -56,44 +56,12 @@ export default function CourseLearnPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
   
-  // Check if user is enrolled in this course
-  useEffect(() => {
-    const checkEnrollment = async () => {
-      if (!session?.user) {
-        router.push(`/login?callbackUrl=/courses/${courseId}/learn`);
-        return;
-      }
-      
-      try {
-        // Fetch enrollment status
-        const response = await fetch(`/api/users/me/courses`);
-        const data = await response.json();
-        
-        if (!data.success || !data.courses.some((c: any) => c.id === courseId)) {
-          // If not enrolled, redirect to course detail page
-          router.push(`/courses/${courseId}`);
-          return;
-        }
-        
-        // Fetch course data and progress
-        await fetchCourseData();
-        await fetchProgress();
-      } catch (err) {
-        setError('Failed to check enrollment status');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    checkEnrollment();
-  }, [courseId, session, router]);
-  
   // Fetch course data
   const fetchCourseData = async () => {
     try {
-      const response = await fetch(`/api/courses/${courseId}/content`);
-      const data = await response.json();
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const response = await apiClient.get(`/api/courses/${courseId}/content`);
+      const data = response.data;
       
       if (data.success) {
         setCourseData(data.course);
@@ -109,8 +77,9 @@ export default function CourseLearnPage() {
   // Fetch user progress
   const fetchProgress = async () => {
     try {
-      const response = await fetch(`/api/courses/${courseId}/progress`);
-      const data = await response.json();
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const response = await apiClient.get(`/api/courses/${courseId}/progress`);
+      const data = response.data;
       
       if (data.success) {
         setProgress(data.progress);
@@ -142,6 +111,40 @@ export default function CourseLearnPage() {
     }
   };
   
+  // Check if user is enrolled in this course
+  useEffect(() => {
+    const checkEnrollment = async () => {
+      if (!session?.user) {
+        router.push(`/login?callbackUrl=/courses/${courseId}/learn`);
+        return;
+      }
+      
+      try {
+        // Fetch enrollment status
+        const apiClient = (await import('@/lib/axios/apiClient')).default;
+        const response = await apiClient.get(`/api/users/me/courses`);
+        const data = response.data;
+        
+        if (!data.success || !data.courses.some((c: any) => c.id === courseId)) {
+          // If not enrolled, redirect to course detail page
+          router.push(`/courses/${courseId}`);
+          return;
+        }
+        
+        // Fetch course data and progress
+        await fetchCourseData();
+        await fetchProgress();
+      } catch (err) {
+        setError('Failed to check enrollment status');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    checkEnrollment();
+  }, [courseId, session, router]);
+  
   // Mark lesson as completed
   const markLessonAsCompleted = async () => {
     if (!courseData) return;
@@ -149,13 +152,13 @@ export default function CourseLearnPage() {
     const currentLessonId = courseData.modules[currentModule].lessons[currentLesson].id;
     
     try {
-      const response = await fetch(`/api/courses/${courseId}/progress`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lessonId: currentLessonId, completed: true })
+      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const response = await apiClient.post(`/api/courses/${courseId}/progress`, {
+        lessonId: currentLessonId, 
+        completed: true
       });
       
-      const data = await response.json();
+      const data = response.data;
       
       if (data.success) {
         // Update local progress state

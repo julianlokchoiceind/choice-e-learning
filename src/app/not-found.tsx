@@ -10,7 +10,7 @@ export default function NotFound() {
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">Page not found</h1>
             <p className="text-xl opacity-70 mb-8">
-              The page you're looking for doesn't exist or has been moved.
+              The page you're looking for doesn&apos;t exist or has been moved.
             </p>
           </div>
         </div>

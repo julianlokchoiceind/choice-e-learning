@@ -22,7 +22,7 @@ export default function FAQPage() {
           </h1>
           <p className="text-[21px] leading-[1.381] text-white/80 max-w-[680px] mx-auto">
             Find answers to the most common questions about our online learning platform.
-            If you can't find what you're looking for, feel free to contact us.
+            If you can't find what you&apos;re looking for, feel free to contact us.
           </p>
         </div>
       </section>
