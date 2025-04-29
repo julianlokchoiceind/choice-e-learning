@@ -33,6 +33,34 @@ interface CourseFormData {
   imageUrl?: string;
 }
 
+// Custom Image component with error handling
+function CourseImage({ src, alt }: { src: string, alt: string }) {
+  const [imgError, setImgError] = useState(false);
+  
+  if (imgError) {
+    return (
+      <div className="h-12 w-20 bg-gray-100 rounded flex items-center justify-center">
+        <BookOpenIcon className="h-6 w-6 text-gray-400" />
+      </div>
+    );
+  }
+  
+  // Xử lý URL không hợp lệ
+  if (!src) {
+    src = '/images/course-default.jpg';
+  }
+  
+  // Sử dụng regular img tag để tránh vấn đề với domain configuration
+  return (
+    <img 
+      src={src} 
+      alt={alt || 'Course image'}
+      className="h-12 w-20 object-cover rounded"
+      onError={() => setImgError(true)}
+    />
+  );
+}
+
 // Main component for Course Management
 export default function CourseManager() {
   // States for view management
@@ -67,20 +95,52 @@ export default function CourseManager() {
   const fetchCourses = async () => {
     setLoading(true);
     try {
+      console.log('Fetching courses from API...');
       const response = await fetch('/api/admin/courses');
       
+      console.log('API response status:', response.status);
       if (!response.ok) {
-        throw new Error('Failed to fetch courses');
+        console.error('API response not OK:', response.status, response.statusText);
+        throw new Error(`Failed to fetch courses: ${response.status} ${response.statusText}`);
       }
       
       const data = await response.json();
+      console.log('API response data structure:', Object.keys(data));
       
       if (data.success) {
-        setCourses(data.courses);
+        // Handle either data.courses or data.data for backwards compatibility
+        if (data.courses && Array.isArray(data.courses)) {
+          console.log('Using courses array from response, found', data.courses.length, 'courses');
+          // Ensure all courses have proper imageUrl
+          const processedCourses = data.courses.map((course: any) => {
+            return {
+              ...course,
+              // Ensure imageUrl exists (fallback to default if not)
+              imageUrl: course.imageUrl || '/images/course-default.jpg'
+            };
+          });
+          setCourses(processedCourses);
+        } else if (data.data && Array.isArray(data.data)) {
+          console.log('Using data array from response, found', data.data.length, 'courses');
+          // Ensure all courses have proper imageUrl
+          const processedCourses = data.data.map((course: any) => {
+            return {
+              ...course,
+              // Ensure imageUrl exists (fallback to default if not)
+              imageUrl: course.imageUrl || '/images/course-default.jpg'
+            };
+          });
+          setCourses(processedCourses);
+        } else {
+          console.warn('API returned success but no valid courses array:', data);
+          setCourses([]);
+        }
       } else {
+        console.error('API returned error:', data.error || 'Unknown error');
         throw new Error(data.error || 'Failed to fetch courses');
       }
     } catch (err) {
+      console.error('Error in fetchCourses:', err);
       setError((err as Error).message);
     } finally {
       setLoading(false);
@@ -355,6 +415,7 @@ export default function CourseManager() {
             <table className="min-w-full">
               <thead>
                 <tr className="bg-gray-100 border-b">
+                  <th className="py-3 px-4 text-left font-medium text-indigo-600 uppercase tracking-wider w-16">Image</th>
                   <th className="py-3 px-4 text-left font-medium text-indigo-600 uppercase tracking-wider">Title</th>
                   <th className="py-3 px-4 text-left font-medium text-indigo-600 uppercase tracking-wider">Level</th>
                   <th className="py-3 px-4 text-left font-medium text-indigo-600 uppercase tracking-wider">Price</th>
@@ -365,6 +426,17 @@ export default function CourseManager() {
               <tbody className="divide-y divide-gray-200">
                 {courses.map((course) => (
                   <tr key={course.id} className="hover:bg-gray-50">
+                    <td className="py-3 px-4">
+                      <div className="relative h-12 w-20 overflow-hidden rounded">
+                        {course.imageUrl ? (
+                          <CourseImage src={course.imageUrl} alt={course.title} />
+                        ) : (
+                          <div className="h-12 w-20 bg-gray-200 rounded flex items-center justify-center">
+                            <BookOpenIcon className="h-6 w-6 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                    </td>
                     <td className="py-3 px-4">
                       <div className="font-medium">{course.title}</div>
                       <div className="text-sm text-gray-500 truncate max-w-xs">{course.description}</div>

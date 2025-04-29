@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth-options';
-import { Role } from './auth-options';
+import { Role } from '@/types/auth/roles';
 
 /**
  * Get the current user's session on the server side

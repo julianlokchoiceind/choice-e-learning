@@ -4,7 +4,7 @@
  */
 
 import { Role } from './auth/roles';
-import { Course } from './courses';
+import { Course } from './course';
 
 /**
  * Extended User interface from Prisma schema
@@ -17,10 +17,12 @@ export interface User {
   password: string;  // Not exposed to client
   createdAt: Date;
   updatedAt: Date;
+  // Login tracking
+  lastLoginAt?: Date | null;
+  loginStreak?: number;
   // Relationships
   enrolledIn?: Course[];
   enrolledIds?: string[];
-  enrolledInIds?: string[];
   achievements?: any[];
   reviews?: any[];
   progress?: any[];

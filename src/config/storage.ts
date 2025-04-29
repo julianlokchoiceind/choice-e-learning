@@ -3,7 +3,7 @@
  * This file contains environment-specific storage configuration settings
  */
 
-import { ALLOWED_FILE_TYPES, MAX_FILE_SIZE } from '@/utils/file-upload';
+import { ALLOWED_FILE_TYPES, MAX_FILE_SIZE } from '@/lib/utils/file/file-upload';
 
 const storageConfig = {
   /**

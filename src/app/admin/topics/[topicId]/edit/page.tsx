@@ -13,7 +13,7 @@ export default function EditTopicPage({ params }: { params: { topicId: string } 
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    isActive: true
+    isActive: true as boolean
   });
   const [formErrors, setFormErrors] = useState<{
     name?: string;
@@ -31,7 +31,7 @@ export default function EditTopicPage({ params }: { params: { topicId: string } 
           setFormData({
             name: topic.name || "",
             description: topic.description || "",
-            isActive: topic.isActive
+            isActive: topic.isActive ?? true
           });
           
           // Check if topic has associated courses count
@@ -40,6 +40,8 @@ export default function EditTopicPage({ params }: { params: { topicId: string } 
           } else if (topic.courseIds && Array.isArray(topic.courseIds)) {
             // Fallback to courseIds length if _count is not available
             setCourseCount(topic.courseIds.length);
+          } else {
+            setCourseCount(0);
           }
         }
       } catch (err) {

@@ -1,24 +1,34 @@
-import { Topic as PrismaTopic } from '@prisma/client';
+/**
+ * @file Topic type definitions
+ * @description Type definitions for topics used across the application
+ */
 
 /**
- * Extended Topic interface with count relations
+ * Topic interface
  */
-export interface Topic extends PrismaTopic {
+export interface Topic {
+  id: string;
+  name: string;
+  description?: string;
+  isActive?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
   _count?: {
     courses?: number;
   };
+  courseIds?: string[];
 }
 
 /**
- * Topic filter parameters for querying
+ * Topic filter interface for querying topics
  */
 export interface TopicFilter {
   search?: string;
+  isActive?: boolean;
   page?: number;
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-  isActive?: boolean;
 }
 
 /**

@@ -17,22 +17,21 @@ import { ApiErrorCode } from '@/lib/api/api-error-codes';
 import { 
   createRouteHandler, 
   withErrorHandling, 
-  withAdmin 
+  withAdmin,
+  RouteContext,
+  AuthenticatedContext 
 } from '@/lib/api/route-handlers';
 
 // Define the course detail API path parameters
-type CourseDetailParams = {
-  params: {
-    courseId: string;
-  };
-};
+// Không cần định nghĩa riêng, sử dụng RouteContext từ route-handlers
+
 
 // GET handler to fetch a specific course by ID
 export const GET = withErrorHandling(async (
   _req: NextRequest,
-  { params }: CourseDetailParams
+  context: RouteContext
 ) => {
-  const { courseId } = params;
+  const courseId = context.params.courseId;
   
   try {
     // Get course details from service
@@ -68,9 +67,9 @@ export const GET = withErrorHandling(async (
 // PUT handler for updating a course (admin only)
 export const PUT = withAdmin(async (
   req: NextRequest, 
-  { params }: CourseDetailParams
+  context: AuthenticatedContext
 ) => {
-  const { courseId } = params;
+  const courseId = context.params.courseId;
   
   try {
     const body = await req.json();
@@ -131,9 +130,9 @@ export const PUT = withAdmin(async (
 // DELETE handler for deleting a course (admin only)
 export const DELETE = withAdmin(async (
   _req: NextRequest, 
-  { params }: CourseDetailParams
+  context: AuthenticatedContext
 ) => {
-  const { courseId } = params;
+  const courseId = context.params.courseId;
   
   try {
     // Check if course exists

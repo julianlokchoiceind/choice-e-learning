@@ -1,13 +1,14 @@
 import { NextRequest } from "next/server";
 import { apiSuccess, apiError } from "@/lib/api/api-response";
-import { faqService } from "@/lib/services/faq/faq-service";
 import { ApiErrorCode } from "@/lib/api/api-error-codes";
+import { faqService } from "@/lib/services/faq/faq-service";
 
-// GET - Retrieve public FAQs with filtering, pagination
+// GET - Get all public FAQs with filtering and pagination
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     
+    // Parse query parameters
     const search = searchParams.get("search") || undefined;
     const category = searchParams.get("category") || undefined;
     const page = parseInt(searchParams.get("page") || "1");
@@ -15,6 +16,7 @@ export async function GET(req: NextRequest) {
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = (searchParams.get("sortOrder") || "desc") as "asc" | "desc";
     
+    // Get public FAQ data
     const result = await faqService.getAllFAQs({
       search,
       category,
@@ -26,11 +28,11 @@ export async function GET(req: NextRequest) {
     
     return apiSuccess(result);
   } catch (error) {
-    console.error("Error fetching FAQs:", error);
+    console.error("Error fetching public FAQs:", error);
     return apiError(
       "Failed to fetch FAQs",
       error instanceof Error ? error.message : undefined,
-      ApiErrorCode.INTERNAL_SERVER_ERROR
+      ApiErrorCode.SERVER_ERROR
     );
   }
 }

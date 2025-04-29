@@ -45,6 +45,7 @@ export interface Course {
   // Relationships that might come from Prisma
   creator?: any;
   students?: any[];
+  studentsCount?: number; // Count of students enrolled in the course
   chapters?: Chapter[];
   lessons?: any[];
   reviews?: any[];
@@ -247,6 +248,25 @@ export interface CourseUserProgress {
   timeSpent?: number;
   updatedAt: Date;
   createdAt?: Date;
+}
+
+/**
+ * Enrolled course interface for student's enrolled courses
+ */
+export interface EnrolledCourse {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  level: string;
+  progress: number;
+  lastAccessed?: Date;
+  completed: boolean;
+  instructor: string;
+  lessonsCompleted: number;
+  totalLessons: number;
+  timeSpent: number;
+  enrolledAt: Date;
 }
 
 /**

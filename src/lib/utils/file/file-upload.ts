@@ -1,131 +1,147 @@
 /**
- * Utilities for file upload handling
+ * File upload constants and utilities
+ * Provides common file upload validation and configuration settings
  */
-import { NextRequest } from 'next/server';
-import { v4 as uuidv4 } from 'uuid';
-import { FileMetadata, AllowedFileTypes, S3Config } from '@/types/files';
 
-/**
- * Supported file types for upload
- */
-export const ALLOWED_FILE_TYPES: AllowedFileTypes = {
-  IMAGE: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-  VIDEO: ['video/mp4', 'video/webm', 'video/ogg'],
-  DOCUMENT: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+import { ApiErrorCode } from '@/lib/api/api-error-codes';
+
+export type FileMetadata = {
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  url: string;
 };
 
 /**
- * Maximum file size (10MB)
+ * Maximum file size (in bytes)
+ * Default: 10MB
  */
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 /**
- * Error class for file upload errors
+ * Allowed MIME types for file uploads
  */
-export class FileUploadError extends Error {
-  statusCode: number;
+export const ALLOWED_FILE_TYPES = {
+  image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'],
+  video: ['video/mp4', 'video/webm', 'video/ogg'],
+  document: [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'text/plain',
+    'text/csv'
+  ],
+  audio: ['audio/mpeg', 'audio/ogg', 'audio/wav', 'audio/webm'],
+};
 
-  constructor(message: string, statusCode: number = 400) {
-    super(message);
-    this.name = 'FileUploadError';
-    this.statusCode = statusCode;
-  }
+/**
+ * Get file extension from file name
+ * @param fileName File name
+ * @returns File extension (without dot)
+ */
+export function getFileExtension(fileName: string): string {
+  return fileName.split('.').pop()?.toLowerCase() || '';
 }
 
 /**
- * Validate a file based on type and size
- * @param file The file to validate
- * @param allowedTypes Array of allowed MIME types
- * @param maxSize Maximum file size in bytes
- * @throws FileUploadError if validation fails
+ * Validate file size
+ * @param fileSize File size in bytes
+ * @param maxSize Maximum allowed size in bytes
+ * @returns Object with validation result and error code if invalid
  */
-export function validateFile(
-  file: File,
-  allowedTypes: string[] = [...ALLOWED_FILE_TYPES.IMAGE],
+export function validateFileSize(
+  fileSize: number,
   maxSize: number = MAX_FILE_SIZE
-): void {
-  // Check file type
-  if (!allowedTypes.includes(file.type)) {
-    throw new FileUploadError(`File type not allowed. Allowed types: ${allowedTypes.join(', ')}`);
+): { valid: boolean; errorCode?: ApiErrorCode } {
+  if (fileSize > maxSize) {
+    return {
+      valid: false,
+      errorCode: ApiErrorCode.FILE_TOO_LARGE
+    };
   }
-
-  // Check file size
-  if (file.size > maxSize) {
-    const maxSizeMB = maxSize / (1024 * 1024);
-    throw new FileUploadError(`File too large. Maximum size is ${maxSizeMB}MB`);
-  }
+  
+  return { valid: true };
 }
 
 /**
- * Generate a unique filename for upload
- * @param originalFilename The original filename
- * @returns A unique filename with the same extension
+ * Validate file type
+ * @param mimeType File MIME type
+ * @param allowedTypes Allowed MIME types or a specific type category
+ * @returns Object with validation result and error code if invalid
  */
-export function generateUniqueFilename(originalFilename: string): string {
-  const fileExtension = originalFilename.split('.').pop() || '';
-  const uniqueId = uuidv4();
-  return `${uniqueId}.${fileExtension}`;
+export function validateFileType(
+  mimeType: string,
+  allowedTypes: string[] | keyof typeof ALLOWED_FILE_TYPES = Object.values(ALLOWED_FILE_TYPES).flat()
+): { valid: boolean; errorCode?: ApiErrorCode } {
+  // If allowedTypes is a type category string, get the array of allowed types for that category
+  const typesToCheck = typeof allowedTypes === 'string'
+    ? ALLOWED_FILE_TYPES[allowedTypes] || []
+    : allowedTypes;
+  
+  if (!typesToCheck.includes(mimeType)) {
+    return {
+      valid: false,
+      errorCode: ApiErrorCode.INVALID_FILE_TYPE
+    };
+  }
+  
+  return { valid: true };
 }
 
 /**
- * Extract files from a multipart form data request
- * @param req The Next.js request object
- * @returns A promise that resolves to a map of field names to files
+ * Generate a unique file name to prevent collisions
+ * @param originalName Original file name
+ * @returns Unique file name with timestamp and random string
  */
-export async function extractFilesFromRequest(req: NextRequest): Promise<Map<string, File>> {
-  const formData = await req.formData();
-  const files = new Map<string, File>();
+export function generateUniqueFileName(originalName: string): string {
+  const timestamp = Date.now();
+  const randomStr = Math.random().toString(36).substring(2, 10);
+  const extension = getFileExtension(originalName);
+  
+  // Remove special characters from original name
+  const sanitizedName = originalName
+    .split('.')
+    .slice(0, -1)
+    .join('.')
+    .replace(/[^a-zA-Z0-9_-]/g, '-')
+    .substring(0, 50);
+  
+  return `${sanitizedName}-${timestamp}-${randomStr}.${extension}`;
+}
 
-  // Extract files from form data
-  for (const [key, value] of formData.entries()) {
-    if (value instanceof File) {
-      files.set(key, value);
+/**
+ * Format file size for display
+ * @param bytes File size in bytes
+ * @param decimals Number of decimal places
+ * @returns Formatted file size with appropriate unit
+ */
+export function formatFileSize(bytes: number, decimals: number = 2): string {
+  if (bytes === 0) return '0 Bytes';
+  
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+/**
+ * Get file type category from MIME type
+ * @param mimeType File MIME type
+ * @returns File type category or 'unknown'
+ */
+export function getFileTypeCategory(mimeType: string): string {
+  for (const [category, types] of Object.entries(ALLOWED_FILE_TYPES)) {
+    if (types.includes(mimeType)) {
+      return category;
     }
   }
-
-  return files;
-}
-
-/**
- * Get the S3 bucket configuration from environment variables
- */
-export function getS3Config(): S3Config {
-  const accessKey = process.env.S3_ACCESS_KEY;
-  const secretKey = process.env.S3_SECRET_KEY;
-  const bucketName = process.env.S3_BUCKET_NAME;
-  const region = process.env.S3_REGION;
-
-  if (!accessKey || !secretKey || !bucketName || !region) {
-    throw new Error('S3 configuration is incomplete. Check environment variables.');
-  }
-
-  return {
-    accessKey,
-    secretKey,
-    bucketName,
-    region,
-  };
-}
-
-/**
- * Mock implementation for uploading a file to S3
- * In a real application, this would use the AWS SDK
- * @param file The file to upload
- * @param path The path within the bucket
- * @returns A promise that resolves to the URL of the uploaded file
- */
-export async function uploadFileToS3(file: File, path: string = 'uploads'): Promise<string> {
-  try {
-    // For now, we'll just simulate an upload and return a mock URL
-    const uniqueFilename = generateUniqueFilename(file.name);
-    const { bucketName, region } = getS3Config();
-    
-    // Simulate upload delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Return a mock S3 URL
-    return `https://${bucketName}.s3.${region}.amazonaws.com/${path}/${uniqueFilename}`;
-  } catch (error) {
-    throw new FileUploadError(`Failed to upload file: ${(error as Error).message}`);
-  }
+  
+  return 'unknown';
 }

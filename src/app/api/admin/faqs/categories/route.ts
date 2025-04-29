@@ -5,7 +5,7 @@ import { faqService } from "@/lib/services/faq/faq-service";
 import { ApiErrorCode } from "@/lib/api/api-error-codes";
 
 // GET - Get all distinct FAQ categories
-export const GET = withAdmin(async (req: NextRequest) => {
+export const GET = withAdmin(async (_req) => {
   try {
     const categories = await faqService.getAllCategories();
     return apiSuccess(categories);
@@ -14,7 +14,7 @@ export const GET = withAdmin(async (req: NextRequest) => {
     return apiError(
       "Failed to fetch FAQ categories",
       error instanceof Error ? error.message : undefined,
-      ApiErrorCode.INTERNAL_SERVER_ERROR
+      ApiErrorCode.SERVER_ERROR
     );
   }
 });

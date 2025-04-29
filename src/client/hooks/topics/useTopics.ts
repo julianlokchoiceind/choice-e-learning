@@ -28,6 +28,11 @@ interface TopicResponsePaginated {
 
 type TopicResponse = TopicResponseSimple | TopicResponsePaginated;
 
+// Type guard to check if response has pagination metadata
+function isPaginatedResponse(response: any): response is TopicResponsePaginated {
+  return response && 'meta' in response && !!response.meta?.pagination;
+}
+
 function useTopics(isAdmin = false) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,22 +95,83 @@ function useTopics(isAdmin = false) {
       console.log('Fetching topics with filters:', filters);
       console.log(`Request URL: ${baseUrl}?${params.toString()}`);
       
-      const response = await axios.get<TopicResponse>(`${baseUrl}?${params.toString()}`);
-      
-      // Debug log response structure
-      console.log('Topics response structure:', {
-        success: response.data.success,
-        hasData: !!response.data.data,
-        hasMeta: !!response.data.meta,
-        hasPagination: response.data.meta && !!response.data.meta.pagination
-      });
+      // Wrap API call in a try/catch block
+      let response;
+      try {
+        console.log(`[useTopics] Calling API: ${baseUrl}?${params.toString()}`);
+        response = await axios.get<TopicResponse>(`${baseUrl}?${params.toString()}`);
+        
+        // Debug log response details
+        console.log('[useTopics] API Response success:', response.data.success);
+        console.log('[useTopics] Response status:', response.status);
+        console.log('[useTopics] Content type:', response.headers['content-type']);
+        
+        // Debug log response structure
+        console.log('[useTopics] Topics response structure:', {
+          success: response.data.success,
+          hasData: !!response.data.data,
+          dataLength: response.data.data?.length,
+          hasMeta: isPaginatedResponse(response.data),
+          hasPagination: isPaginatedResponse(response.data)
+        });
+        
+        if (!response || !response.data) {
+          console.error('[useTopics] Empty response from server');
+          setTopics([]);
+          setPagination({
+            page: 1,
+            pageSize: 10,
+            totalItems: 0,
+            totalPages: 0,
+          });
+          return {
+            data: [],
+            meta: {
+              pagination: {
+                page: 1,
+                pageSize: 10,
+                totalItems: 0,
+                totalPages: 0
+              }
+            }
+          };
+        }
+      } catch (apiError: any) {
+        // Log detailed error information
+        console.error('[useTopics] API call failed with error:', apiError);
+        if (apiError.response) {
+          console.error('[useTopics] Response status:', apiError.response.status);
+          console.error('[useTopics] Response data:', apiError.response.data);
+        }
+        
+        // Set empty results and return default response
+        setTopics([]);
+        setPagination({
+          page: 1,
+          pageSize: 10,
+          totalItems: 0,
+          totalPages: 0,
+        });
+        
+        return {
+          data: [],
+          meta: {
+            pagination: {
+              page: 1,
+              pageSize: 10,
+              totalItems: 0,
+              totalPages: 0
+            }
+          }
+        };
+      }
       
       if (response.data.success) {
         // Save the topics
         setTopics(response.data.data);
         
         // Handle pagination if it exists
-        if (response.data.meta && response.data.meta.pagination) {
+        if (isPaginatedResponse(response.data)) {
           setPagination(response.data.meta.pagination);
         } else {
           // Reset pagination for responses without meta (simple API mode)
@@ -122,11 +188,32 @@ function useTopics(isAdmin = false) {
       
       return response.data;
     } catch (err: any) {
-      console.error('Error fetching topics:', err);
-      // Provide more detailed error information
+      console.error('[useTopics] Error fetching topics:', err);
+      // Provide more detailed error information but don't throw
       const errorMessage = err.response?.data?.error || err.message || 'Failed to fetch topics';
       setError(errorMessage);
-      throw err;
+      
+      // Set empty values
+      setTopics([]);
+      setPagination({
+        page: 1,
+        pageSize: 10,
+        totalItems: 0,
+        totalPages: 0,
+      });
+      
+      // Return a valid response with empty data
+      return {
+        data: [],
+        meta: {
+          pagination: {
+            page: 1,
+            pageSize: 10,
+            totalItems: 0,
+            totalPages: 0
+          }
+        }
+      };
     } finally {
       setLoading(false);
     }
@@ -145,18 +232,42 @@ function useTopics(isAdmin = false) {
     setError(null);
     
     try {
-      const response = await axios.get<{ success: boolean, data: Topic }>(`${baseUrl}/${id}`);
+      // Debug log
+      console.log(`[useTopics] Fetching topic by ID: ${id}`);
+      
+      let response;
+      try {
+        response = await axios.get<{ success: boolean, data: Topic }>(`${baseUrl}/${id}`);
+        console.log('[useTopics] Topic fetch response:', response.data.success);
+      } catch (apiError: any) {
+        console.error('[useTopics] API error fetching topic:', apiError);
+        if (apiError.response) {
+          console.error('[useTopics] Response status:', apiError.response.status);
+          console.error('[useTopics] Response data:', apiError.response.data);
+        }
+        
+        // Return null instead of throwing
+        setTopic(null);
+        setError('Failed to fetch topic');
+        setLoading(false);
+        return null;
+      }
       
       if (response.data.success) {
         setTopic(response.data.data);
         return response.data.data;
       } else {
-        throw new Error('Failed to fetch topic');
+        console.warn('[useTopics] API returned success:false');
+        setTopic(null);
+        setError('Failed to fetch topic');
+        return null;
       }
     } catch (err) {
-      console.error('Error fetching topic:', err);
+      console.error('[useTopics] Error in fetchTopicById:', err);
       setError('Failed to fetch topic');
-      throw err;
+      setTopic(null);
+      // Don't throw
+      return null;
     } finally {
       setLoading(false);
     }
@@ -167,6 +278,7 @@ function useTopics(isAdmin = false) {
    */
   const createTopic = useCallback(async (data: { name: string; description?: string; isActive?: boolean }) => {
     if (!isAdmin) {
+      console.warn('[useTopics] Attempt to create topic without admin rights');
       setError('Unauthorized');
       return null;
     }
@@ -175,16 +287,61 @@ function useTopics(isAdmin = false) {
     setError(null);
     
     try {
-      const response = await axios.post<{ success: boolean, data: Topic }>(`${baseUrl}`, data);
+      console.log('[useTopics] Creating topic with data:', data);
       
-      if (response.data.success) {
+      // Chuẩn hóa dữ liệu trước khi gọi API
+      const sanitizedData = {
+        name: data.name?.trim() || '',
+        description: data.description?.trim() || undefined,
+        isActive: data.isActive !== undefined ? data.isActive : true
+      };
+      
+      console.log('[useTopics] Sanitized data:', sanitizedData);
+      
+      // Kiểm tra dữ liệu trước khi gọi API
+      if (!sanitizedData.name) {
+        console.error('[useTopics] Name is required');
+        setError('Topic name is required');
+        return null;
+      }
+      
+      // Sử dụng axios để gọi API endpoint
+      const response = await axios.post(`${baseUrl}`, sanitizedData, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        // Thêm timeout để tránh request bị treo
+        timeout: 10000
+      });
+      
+      console.log('[useTopics] Create topic API response:', response.data);
+      
+      if (response.data && response.data.success) {
+        console.log('[useTopics] Topic created successfully:', response.data.data);
         return response.data.data;
       } else {
-        throw new Error('Failed to create topic');
+        console.error('[useTopics] API returned success=false:', response.data);
+        throw new Error(response.data?.error || 'Failed to create topic');
       }
     } catch (err: any) {
-      console.error('Error creating topic:', err);
-      setError(err.response?.data?.error || 'Failed to create topic');
+      console.error('[useTopics] Error creating topic:', err);
+      
+      // Log chi tiết hơn về response error
+      if (err.response) {
+        console.error('[useTopics] Error status:', err.response.status);
+        console.error('[useTopics] Error data:', err.response.data);
+      } else if (err.request) {
+        // Yêu cầu được gửi nhưng không nhận được phản hồi
+        console.error('[useTopics] No response received:', err.request);
+        setError('Server did not respond. Please try again.');
+        throw new Error('Server did not respond');
+      } else {
+        // Lỗi khi thiết lập yêu cầu
+        console.error('[useTopics] Request setup error:', err.message);
+      }
+      
+      // Set thông báo lỗi
+      setError(err.response?.data?.error || err.message || 'Failed to create topic');
       throw err;
     } finally {
       setLoading(false);

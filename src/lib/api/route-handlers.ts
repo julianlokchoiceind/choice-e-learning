@@ -10,17 +10,35 @@ import { apiError, apiServerError, apiUnauthorized } from './api-response';
 import { ApiErrorCode } from './api-error-codes';
 
 // Định nghĩa kiểu dữ liệu cho route handler
-type RouteContext = { params: Record<string, string> };
-type AuthenticatedContext = RouteContext & { user: any };
+export type RouteParams = Record<string, string>;
+export type RouteContext = { params: RouteParams };
+export type AuthenticatedContext = RouteContext & { 
+  user: any;
+  params: {
+    [key: string]: string;
+  } & {
+    studentId?: string;
+    courseId?: string;
+    lessonId?: string;
+    topicId?: string;
+    faqId?: string;
+    userId?: string;
+  }
+};
+
+// Route parameter extraction helper
+export function extractRouteParam(context: RouteContext, paramName: string): string | null {
+  return context.params && context.params[paramName] ? context.params[paramName] : null;
+}
 
 // Kiểu hàm xử lý route cơ bản
-type HandlerFunction = (
+export type HandlerFunction = (
   req: NextRequest,
   context: RouteContext
 ) => Promise<NextResponse | undefined>;
 
 // Kiểu hàm xử lý route đã xác thực
-type AuthenticatedHandlerFunction = (
+export type AuthenticatedHandlerFunction = (
   req: NextRequest,
   context: AuthenticatedContext
 ) => Promise<NextResponse | undefined>;
@@ -125,15 +143,20 @@ export function withAdmin(handler: AuthenticatedHandlerFunction): HandlerFunctio
     // Create new context with admin user data
     const authContext: AuthenticatedContext = {
       ...context,
-      user: auth.user
+      user: auth.user || { id: '', role: Role.student, email: '' }
     };
     
-    console.log(`Admin API access granted for ${auth.user.email} to ${req.url}`);
-    console.log('User data:', {
-      id: auth.user.id,
-      email: auth.user.email,
-      role: auth.user.role
-    });
+    if (auth.user) {
+      const userEmail = auth.user?.email || 'unknown';
+      console.log(`Admin API access granted for ${userEmail} to ${req.url}`);
+      console.log('User data:', {
+        id: auth.user?.id || '',
+        email: userEmail,
+        role: auth.user?.role || ''
+      });
+    } else {
+      console.log('Admin API access granted but user data is undefined');
+    }
     
     // Call handler with authenticated admin user
     try {

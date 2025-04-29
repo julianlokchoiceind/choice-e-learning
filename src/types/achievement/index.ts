@@ -12,7 +12,7 @@ export enum AchievementType {
   COURSE_STARTED = 'course_started',
   COURSE_COMPLETED = 'course_completed',
   LESSON_COMPLETED = 'lesson_completed',
-  STREAK = 'streak',
+  DAILY_STREAK = 'daily_streak',
   QUICK_LEARNER = 'quick_learner',
 }
 

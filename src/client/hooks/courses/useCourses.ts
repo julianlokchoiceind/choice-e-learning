@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
-import { Course } from '@prisma/client';
+import { Course } from '@/types/course';
 
 interface CourseFilter {
   search?: string;
@@ -14,10 +14,11 @@ interface CourseFilter {
   _cache?: number; // Thêm cache-busting parameter
 }
 
-interface CourseResponse {
+interface CourseResponseBasic {
   success: boolean;
-  data: Course[];
-  meta: {
+  data: Course[] | Course;
+  courses?: Course[]; // Alternative response format
+  meta?: {
     pagination: {
       page: number;
       pageSize: number;
@@ -35,7 +36,7 @@ function useCourses(isAdmin = false) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [course, setCourse] = useState<Course | null>(null);
   const [topics, setTopics] = useState<string[]>([]);
-  const [levels, setLevels] = useState(['beginner', 'intermediate', 'advanced']);
+  const [levels] = useState(['beginner', 'intermediate', 'advanced']);
   const [pagination, setPagination] = useState({
     page: 1,
     pageSize: 10,
@@ -51,9 +52,25 @@ function useCourses(isAdmin = false) {
   /**
    * Fetch courses with filtering and pagination
    */
-  const fetchCourses = useCallback(async (filters: CourseFilter = {}) => {
+  const fetchCourses = useCallback(async (filters: CourseFilter = {}): Promise<CourseResponseBasic> => {
     setLoading(true);
     setError(null);
+    
+    // Default empty response
+    const emptyResponse: CourseResponseBasic = {
+      success: true,
+      data: [],
+      meta: {
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          totalItems: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPrevPage: false
+        }
+      }
+    };
     
     try {
       // Build query string
@@ -79,27 +96,99 @@ function useCourses(isAdmin = false) {
       if (filters.sortBy) params.append('sortBy', filters.sortBy);
       if (filters.sortOrder) params.append('order', filters.sortOrder);
       
-      const response = await axios.get<{ success: boolean, data: Course[], meta: { pagination: any } }>(`${baseUrl}?${params.toString()}`);
-      
-      console.log('API Response:', response.data);
-      
-      if (response.data.success) {
-        // Kiểm tra xem response.data.data có tồn tại và là một mảng hay không
-        if (response.data.data && Array.isArray(response.data.data)) {
-          // Thêm timestamp vào URL hình ảnh để tránh caching
-          const processedCourses = response.data.data.map(course => ({
-            ...course,
-            imageUrl: course.imageUrl ? `${course.imageUrl}?t=${Date.now()}` : course.imageUrl
-          }));
-          
-          setCourses(processedCourses);
-        } else {
-          console.warn('Received empty or invalid courses data:', response.data);
-          setCourses([]);
+      // Thêm try-catch chi tiết hơn khi gọi API
+      let response;
+      try {
+        console.log(`[useCourses] Calling API: ${baseUrl}?${params.toString()}`);
+        response = await axios.get(`${baseUrl}?${params.toString()}`);
+        console.log('[useCourses] API Response:', response.data);
+        
+        // Log headers and status for debugging
+        console.log('[useCourses] Response status:', response.status);
+        console.log('[useCourses] Content type:', response.headers['content-type']);
+        
+        // Kiểm tra xem response có đúng định dạng không
+        if (!response || !response.data) {
+          console.error('[useCourses] Empty response from server');
+          // Return empty default values instead of throwing
+          return emptyResponse;
+        }
+      } catch (apiError: any) {
+        // Log đầy đủ thông tin lỗi
+        console.error('[useCourses] API call failed with error:', apiError);
+        if (apiError.response) {
+          console.error('[useCourses] Response status:', apiError.response.status);
+          console.error('[useCourses] Response data:', apiError.response.data);
         }
         
+        // Return empty default values instead of throwing
+        setCourses([]);
+        setPagination({
+          page: 1,
+          pageSize: 10,
+          totalItems: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPrevPage: false
+        });
+        
+        return emptyResponse;
+      }
+      
+      if (response.data.success) {
+      // Check for data in either response.data.data or response.data.courses
+      const coursesData = response.data.courses || 
+                          (Array.isArray(response.data.data) ? response.data.data : []);
+      
+      // Check if we have valid array data
+      if (Array.isArray(coursesData) && coursesData.length > 0) {
+        // Add timestamp to image URLs to avoid caching
+        const processedCourses = coursesData.map(course => ({
+          ...course,
+          imageUrl: course.imageUrl ? `${course.imageUrl}?t=${Date.now()}` : '/images/placeholder-course.jpg'
+        }));
+      
+        setCourses(processedCourses);
+      } else {
+        console.warn('Received empty or invalid courses data:', response.data);
+        setCourses([]);
+      }
+        
+        // Xử lý pagination một cách an toàn
         if (response.data.meta && response.data.meta.pagination) {
-          setPagination(response.data.meta.pagination);
+          try {
+            // Kiểm tra các trường cần thiết
+            const paginationData = {
+              page: Number(response.data.meta.pagination.page) || 1,
+              pageSize: Number(response.data.meta.pagination.pageSize) || 10,
+              totalItems: Number(response.data.meta.pagination.totalItems) || 0,
+              totalPages: Number(response.data.meta.pagination.totalPages) || 1,
+              hasNextPage: Boolean(response.data.meta.pagination.hasNextPage),
+              hasPrevPage: Boolean(response.data.meta.pagination.hasPrevPage)
+            };
+            setPagination(paginationData);
+          } catch (paginationError) {
+            console.error('Error processing pagination data:', paginationError);
+            // Sử dụng giá trị mặc định nếu có lỗi
+            setPagination({
+              page: 1,
+              pageSize: 10,
+              totalItems: response.data.data?.length || 0,
+              totalPages: 1,
+              hasNextPage: false,
+              hasPrevPage: false
+            });
+          }
+        } else {
+          // Không có dữ liệu pagination, sử dụng giá trị mặc định
+          setPagination({
+            page: 1,
+            pageSize: 10,
+            totalItems: response.data.data?.length || 0,
+            totalPages: 1,
+            hasNextPage: false,
+            hasPrevPage: false
+          });
         }
         
         return response.data;
@@ -107,9 +196,21 @@ function useCourses(isAdmin = false) {
         throw new Error('Failed to fetch courses');
       }
     } catch (err) {
-      console.error('Error fetching courses:', err);
+      console.error('[useCourses] Error fetching courses:', err);
       setError('Failed to fetch courses');
-      throw err;
+      
+      // Don't throw error, instead return empty default response
+      setCourses([]);
+      setPagination({
+        page: 1,
+        pageSize: 10,
+        totalItems: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPrevPage: false
+      });
+      
+      return emptyResponse;
     } finally {
       setLoading(false);
     }
@@ -123,13 +224,22 @@ function useCourses(isAdmin = false) {
     setError(null);
     
     try {
-      const response = await axios.get<{ success: boolean, data: Course }>(`${baseUrl}/${id}`);
+      const response = await axios.get<CourseResponseBasic>(`${baseUrl}/${id}`);
       
       if (response.data.success) {
-        // Thêm timestamp vào URL hình ảnh để tránh caching
+        // Handle proper typing for the response data
+        const courseData = response.data.data;
+        if (!courseData) {
+          throw new Error('Course data is empty');
+        }
+        
+        // If data is an array, take the first item (though it should be a single object)
+        const courseItem = Array.isArray(courseData) ? courseData[0] : courseData;
+        
+        // Thêm timestamp vào URL hình ảnh để tránh caching và xử lý ảnh rỗng
         const processedCourse = {
-          ...response.data.data,
-          imageUrl: response.data.data.imageUrl ? `${response.data.data.imageUrl}?t=${Date.now()}` : response.data.data.imageUrl
+          ...courseItem,
+          imageUrl: courseItem.imageUrl ? `${courseItem.imageUrl}?t=${Date.now()}` : '/images/placeholder-course.jpg'
         };
         
         setCourse(processedCourse);
@@ -140,7 +250,9 @@ function useCourses(isAdmin = false) {
     } catch (err) {
       console.error('Error fetching course:', err);
       setError('Failed to fetch course');
-      throw err;
+      // Don't throw error, instead return null
+      setCourse(null);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -156,20 +268,35 @@ function useCourses(isAdmin = false) {
     try {
       const response = await axios.get('/api/courses/topics');
       
-      if (response.data.success && response.data.data && Array.isArray(response.data.data.topics)) {
-        console.log('API Topics Response:', response.data.data.topics);
-        setTopics(response.data.data.topics);
-        return response.data.data.topics;
-      } else {
-        // Fallback to default topics if API fails
-        const fallbackTopics = [
-          'JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js', 
-          'HTML', 'CSS', 'Python', 'Data Science', 'Machine Learning',
-          'Web Development', 'Backend', 'Frontend', 'Database', 'DevOps'
-        ];
-        setTopics(fallbackTopics);
-        return fallbackTopics;
+      if (response.data.success) {
+        // Handle multiple response format possibilities
+        let topicsData: string[] = [];
+        
+        if (response.data.data) {
+          if (Array.isArray(response.data.data)) {
+            // Direct array format
+            topicsData = response.data.data;
+          } else if (response.data.data.topics && Array.isArray(response.data.data.topics)) {
+            // Nested topics format
+            topicsData = response.data.data.topics;
+            console.log('API Topics Response:', response.data.data.topics);
+          }
+        }
+        
+        if (topicsData.length > 0) {
+          setTopics(topicsData);
+          return topicsData;
+        }
       }
+      
+      // Fallback to default topics if API fails or returns empty data
+      const fallbackTopics = [
+        'JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js', 
+        'HTML', 'CSS', 'Python', 'Data Science', 'Machine Learning',
+        'Web Development', 'Backend', 'Frontend', 'Database', 'DevOps'
+      ];
+      setTopics(fallbackTopics);
+      return fallbackTopics;
     } catch (err) {
       console.error('Error fetching course topics:', err);
       setError('Failed to fetch course topics');
@@ -190,7 +317,7 @@ function useCourses(isAdmin = false) {
   /**
    * Create a new course (admin only)
    */
-  const createCourse = useCallback(async (data: any) => {
+  const createCourse = useCallback(async (data: any): Promise<Course | null> => {
     if (!isAdmin) {
       setError('Unauthorized');
       return null;
@@ -200,7 +327,7 @@ function useCourses(isAdmin = false) {
     setError(null);
     
     try {
-      const response = await axios.post<{ success: boolean, data: Course }>(`${baseUrl}`, data);
+      const response = await axios.post(`${baseUrl}`, data);
       
       if (response.data.success) {
         return response.data.data;
@@ -219,18 +346,18 @@ function useCourses(isAdmin = false) {
   /**
    * Update an existing course (admin only)
    */
-  const updateCourse = useCallback(async (id: string, data: any) => {
-  if (!isAdmin) {
-  setError('Unauthorized');
-  return null;
-  }
-  
-  setLoading(true);
-  setError(null);
-  
-  try {
-  // Sử dụng PUT thay vì PATCH để khớp với API endpoint
-      const response = await axios.put<{ success: boolean, data: Course }>(`${baseUrl}/${id}`, data);
+  const updateCourse = useCallback(async (id: string, data: any): Promise<Course | null> => {
+    if (!isAdmin) {
+      setError('Unauthorized');
+      return null;
+    }
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Sử dụng PUT thay vì PATCH để khớp với API endpoint
+      const response = await axios.put(`${baseUrl}/${id}`, data);
       
       if (response.data.success) {
         return response.data.data;
@@ -249,7 +376,7 @@ function useCourses(isAdmin = false) {
   /**
    * Delete a course (admin only)
    */
-  const deleteCourse = useCallback(async (id: string) => {
+  const deleteCourse = useCallback(async (id: string): Promise<{ success: boolean } | null> => {
     if (!isAdmin) {
       setError('Unauthorized');
       return null;
@@ -259,10 +386,10 @@ function useCourses(isAdmin = false) {
     setError(null);
     
     try {
-      const response = await axios.delete<{ success: boolean, data: { success: boolean } }>(`${baseUrl}/${id}`);
+      const response = await axios.delete(`${baseUrl}/${id}`);
       
       if (response.data.success) {
-        return response.data.data;
+        return { success: true };
       } else {
         throw new Error('Failed to delete course');
       }

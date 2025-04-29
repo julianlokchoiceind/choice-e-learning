@@ -93,13 +93,17 @@ export default function EditCoursePage() {
         if (data.success && data.data) {
           const course = data.data;
           
+          // Thêm timestamp vào URL ảnh để tránh cache
+          const imageUrl = course.imageUrl || course.image || '';
+          const imageUrlWithTimestamp = imageUrl ? `${imageUrl}?t=${Date.now()}` : '';
+          
           setFormData({
             title: course.title || '',
             description: course.description || '',
             price: course.price?.toString() || '0',
             level: course.level || 'beginner',
             topics: Array.isArray(course.topics) ? course.topics : course.learningPoints || [],
-            imageUrl: course.imageUrl || course.image || ''
+            imageUrl: imageUrlWithTimestamp
           });
         } else {
           throw new Error('Invalid response from server');

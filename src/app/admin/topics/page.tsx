@@ -60,72 +60,130 @@ export default function TopicsPage() {
   }, []);
 
   useEffect(() => {
-    // Fetch topics on initial load
-    fetchTopics({
-      page: currentPage,
-      limit: 10,
-      sortBy: "name",
-      sortOrder: "asc",
-      isActive: showActive
-    });
+    // Fetch topics on initial load with error handling
+    try {
+      console.log('[TopicsPage] Fetching topics with params:', {
+        page: currentPage,
+        isActive: showActive
+      });
+      
+      fetchTopics({
+        page: currentPage,
+        limit: 10,
+        sortBy: "name",
+        sortOrder: "asc",
+        isActive: showActive
+      }).catch(err => {
+        console.error('[TopicsPage] Error fetching topics in effect:', err);
+        // Error is already handled in the hook, so we don't need to do anything here
+      });
+    } catch (error) {
+      console.error('[TopicsPage] Exception in topics fetch effect:', error);
+      // Continue rendering with empty data
+    }
   }, [fetchTopics, currentPage, showActive]);
 
   const handleSearch = () => {
-    fetchTopics({
-      search: searchQuery,
-      isActive: showActive,
-      page: 1,
-      limit: 10,
-    });
-    setCurrentPage(1);
+    try {
+      console.log('[TopicsPage] Searching topics with query:', searchQuery);
+      
+      fetchTopics({
+        search: searchQuery,
+        isActive: showActive,
+        page: 1,
+        limit: 10,
+      }).catch(err => {
+        console.error('[TopicsPage] Error during search:', err);
+        // Error is already handled in the hook
+      });
+      
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('[TopicsPage] Exception in search handler:', error);
+      // Continue with UI
+    }
   };
 
   const handleStatusChange = (status: string) => {
-    let isActiveFilter: boolean | undefined;
-    
-    if (status === "all") {
-      isActiveFilter = undefined;
-    } else if (status === "active") {
-      isActiveFilter = true;
-    } else if (status === "inactive") {
-      isActiveFilter = false;
+    try {
+      let isActiveFilter: boolean | undefined;
+      
+      if (status === "all") {
+        isActiveFilter = undefined;
+      } else if (status === "active") {
+        isActiveFilter = true;
+      } else if (status === "inactive") {
+        isActiveFilter = false;
+      }
+      
+      console.log(`[TopicsPage] Changing status filter to: ${status} (${isActiveFilter})`);
+      
+      setShowActive(isActiveFilter);
+      setCurrentPage(1);
+      
+      // Immediately fetch topics with the new filter
+      fetchTopics({
+        search: searchQuery,
+        isActive: isActiveFilter,
+        page: 1,
+        limit: 10,
+      }).catch(err => {
+        console.error('[TopicsPage] Error during status change:', err);
+        // Error is already handled in the hook
+      });
+    } catch (error) {
+      console.error('[TopicsPage] Exception in status change handler:', error);
+      // Continue with UI
     }
-    
-    setShowActive(isActiveFilter);
-    setCurrentPage(1);
-    
-    // Immediately fetch topics with the new filter
-    fetchTopics({
-      search: searchQuery,
-      isActive: isActiveFilter,
-      page: 1,
-      limit: 10,
-    });
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    fetchTopics({
-      search: searchQuery,
-      isActive: showActive,
-      page,
-      limit: 10,
-    });
+    try {
+      console.log(`[TopicsPage] Changing to page ${page}`);
+      
+      setCurrentPage(page);
+      fetchTopics({
+        search: searchQuery,
+        isActive: showActive,
+        page,
+        limit: 10,
+      }).catch(err => {
+        console.error(`[TopicsPage] Error when fetching page ${page}:`, err);
+        // Error is already handled in the hook
+      });
+    } catch (error) {
+      console.error(`[TopicsPage] Exception in page change handler:`, error);
+      // Continue with UI
+    }
   };
 
   const handleDeleteConfirm = async (id: string) => {
     try {
-      await deleteTopic(id);
-      // Refresh the list after deletion
-      fetchTopics({
-        search: searchQuery,
-        isActive: showActive,
-        page: currentPage,
-        limit: 10,
-      });
+      console.log(`[TopicsPage] Attempting to delete topic: ${id}`);
+      
+      try {
+        await deleteTopic(id);
+        console.log(`[TopicsPage] Topic deleted successfully: ${id}`);
+        
+        // Refresh the list after deletion
+        fetchTopics({
+          search: searchQuery,
+          isActive: showActive,
+          page: currentPage,
+          limit: 10,
+        }).catch(err => {
+          console.error('[TopicsPage] Error refreshing after delete:', err);
+          // Error is already handled in the hook
+        });
+      } catch (deleteError) {
+        console.error(`[TopicsPage] Error when trying to delete topic ${id}:`, deleteError);
+        // Continue with UI
+      }
+      
       setConfirmDelete(null);
     } catch (err: any) {
-      console.error("Error deleting topic:", err);
+      console.error("[TopicsPage] Exception in delete handler:", err);
+      setConfirmDelete(null); // Reset the confirmation state
     }
   };
 

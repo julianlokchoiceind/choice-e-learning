@@ -47,7 +47,8 @@ export async function POST(request: NextRequest) {
       const updateData: Record<string, any> = {
         progress: Math.max(existingProgress.progress || 0, progress),
         timeSpent: (existingProgress.timeSpent || 0) + timeSpent,
-        updatedAt: now
+        updatedAt: now,
+        lastAccessed: now
       };
       
       // Only update completed and completedAt if it's newly completed

@@ -10,5 +10,5 @@
 export enum Role {
   student = 'student',
   admin = 'admin',
-  DELETED_USER = 'deleted_user'
+  deleted_user = 'deleted_user'
 }

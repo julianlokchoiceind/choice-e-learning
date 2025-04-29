@@ -5,6 +5,7 @@ import { useCourses } from "@/client/hooks/courses";
 import Link from "next/link";
 import Image from "next/image";
 import { TopicsFilter } from "@/components/topics";
+import { Course } from "@/types/course";
 import { 
   MagnifyingGlassIcon, 
   FunnelIcon,

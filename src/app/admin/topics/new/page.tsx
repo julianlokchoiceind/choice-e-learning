@@ -67,24 +67,67 @@ export default function NewTopicPage() {
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setServerError(null); // Clear previous errors
     
     if (!validateForm()) {
       return;
     }
     
+    // Ensure name is not just whitespace
+    if (!formData.name.trim()) {
+      setFormErrors(prev => ({
+        ...prev,
+        name: "Topic name cannot be empty"
+      }));
+      return;
+    }
+    
     try {
-      const newTopic = await createTopic({
+      console.log("Submitting topic form with data:", formData);
+      
+      // Prepare the data to send to API
+      const topicData = {
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
         isActive: formData.isActive
-      });
+      };
+      
+      console.log("Calling createTopic with:", topicData);
+      
+      // createTopic function from useTopics will handle setting loading state
+      const newTopic = await createTopic(topicData);
       
       if (newTopic) {
-        router.push("/admin/topics");
+        console.log("Topic created successfully:", newTopic);
+        // Thêm delay ngắn trước khi chuyển trang
+        setTimeout(() => {
+          router.push("/admin/topics");
+        }, 500);
+      } else {
+        console.error("Failed to create topic: returned null");
+        setServerError("Failed to create topic. Please try again.");
       }
     } catch (err: any) {
       console.error("Error creating topic:", err);
-      setServerError(err.response?.data?.error || "Failed to create topic. Please try again.");
+      
+      // Show detailed error information
+      const errorResponse = err.response?.data;
+      console.error("Error response:", errorResponse);
+      
+      // Extract error message from response or use a default
+      let errorMessage = "Failed to create topic. Please try again.";
+      
+      if (errorResponse?.error) {
+        errorMessage = errorResponse.error;
+      } else if (err?.message) {
+        // Only use error.message if it's helpful (not generic)
+        if (err.message !== "Request failed with status code 500" &&
+            !err.message.includes("Network Error")) {
+          errorMessage = err.message;
+        }
+      }
+      
+      setServerError(errorMessage);
     }
   };
   

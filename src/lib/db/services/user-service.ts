@@ -1,3 +1,7 @@
+/**
+ * @file User service
+ * @description Provides functions for user management
+ */
 export const dynamic = "force-dynamic";
 
 import prisma from '@/lib/db/prisma-client';
@@ -5,7 +9,9 @@ import { Prisma } from '@prisma/client';
 import { User, SafeUser } from '@/types/user';
 import { hashPassword, comparePasswords } from '@/lib/auth/utils/password-utils';
 import { CreateUserRequest } from '@/types/user';
+import { Role as PrismaRole } from '@prisma/client';
 import { Role } from '@/types/auth/roles';
+import { mapAppRoleToPrismaRole, mapPrismaRoleToAppRole } from '@/lib/utils/role-mapper';
 
 /**
  * Find a user by ID
@@ -61,13 +67,18 @@ export async function createUser(userData: CreateUserRequest): Promise<Omit<User
         name: userData.name,
         email: userData.email.toLowerCase(),
         password: hashedPassword,
-        role: userData.role || Role.student,
+        role: mapAppRoleToPrismaRole(userData.role || Role.student),
       }
     });
     
     // Return user without password
     const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    
+    // Convert Prisma Role to App Role
+    return {
+      ...userWithoutPassword,
+      role: mapPrismaRoleToAppRole(user.role)
+    };
   } catch (error) {
     console.error('Error creating user:', error);
     return null;
@@ -90,6 +101,11 @@ export async function updateUser(
       data.password = await hashPassword(data.password);
     }
     
+    // Map role if provided
+    if (data.role) {
+      data.role = mapAppRoleToPrismaRole(data.role as unknown as Role);
+    }
+    
     const user = await prisma.user.update({
       where: { id },
       data
@@ -97,7 +113,12 @@ export async function updateUser(
     
     // Return user without password
     const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    
+    // Convert Prisma Role to App Role
+    return {
+      ...userWithoutPassword,
+      role: mapPrismaRoleToAppRole(user.role)
+    };
   } catch (error) {
     console.error('Error updating user:', error);
     return null;
@@ -112,17 +133,22 @@ export async function updateUser(
  */
 export async function updateUserRole(
   id: string, 
-  role: Role.student | Role.admin
+  role: Role
 ): Promise<Omit<User, 'password'> | null> {
   try {
     const user = await prisma.user.update({
       where: { id },
-      data: { role }
+      data: { role: mapAppRoleToPrismaRole(role) }
     });
     
     // Return user without password
     const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    
+    // Convert Prisma Role to App Role
+    return {
+      ...userWithoutPassword,
+      role: mapPrismaRoleToAppRole(user.role)
+    };
   } catch (error) {
     console.error('Error updating user role:', error);
     return null;
@@ -153,7 +179,12 @@ export async function verifyUserCredentials(
     
     // Return user without password
     const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    
+    // Convert Prisma Role to App Role
+    return {
+      ...userWithoutPassword,
+      role: mapPrismaRoleToAppRole(user.role)
+    };
   } catch (error) {
     console.error('Error verifying credentials:', error);
     return null;
@@ -197,10 +228,13 @@ export async function getUsers(
       orderBy: { createdAt: 'desc' }
     });
     
-    // Remove passwords
+    // Remove passwords and map roles
     const usersWithoutPasswords = users.map(user => {
       const { password, ...rest } = user;
-      return rest;
+      return {
+        ...rest,
+        role: mapPrismaRoleToAppRole(user.role)
+      };
     });
     
     return {
@@ -219,27 +253,97 @@ export async function getUsers(
 }
 
 /**
- * Update user's last login and login history
- * @param id User ID
+ * Update user's login streak information
+ * @param id User ID to update
  * @returns Success flag
  */
-export async function updateUserLoginInfo(id: string): Promise<boolean> {
+export async function updateLoginStreak(id: string): Promise<boolean> {
   try {
     const now = new Date();
     
+    // Get user data from Prisma
+    const userData = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        loginStreak: true,
+        lastLoginAt: true
+      }
+    });
+    
+    if (!userData) {
+      console.error('User not found when updating login streak');
+      return false;
+    }
+    
+    // Calculate if this is a streak continuation
+    let newLoginStreak = userData.loginStreak || 0;
+    
+    if (userData.lastLoginAt) {
+      // Get last login date (without time)
+      const lastLoginDate = new Date(userData.lastLoginAt);
+      lastLoginDate.setHours(0, 0, 0, 0);
+      
+      // Get current date (without time)
+      const today = new Date(now);
+      today.setHours(0, 0, 0, 0);
+      
+      // Get yesterday's date (without time)
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      // Check if last login was yesterday (streak continues)
+      if (lastLoginDate.getTime() === yesterday.getTime()) {
+        newLoginStreak++;
+      } 
+      // If last login was today, maintain streak but don't increment
+      else if (lastLoginDate.getTime() === today.getTime()) {
+        // Do nothing, keep same streak
+      } 
+      // If last login was before yesterday, reset streak
+      else {
+        newLoginStreak = 1; // Reset streak but count today
+      }
+    } else {
+      // First login ever
+      newLoginStreak = 1;
+    }
+    
+    // Update user using prisma
     await prisma.user.update({
       where: { id },
       data: {
+        lastLoginAt: now,
+        loginStreak: newLoginStreak,
         updatedAt: now
-        // Note: The loginHistory field is not part of the Prisma schema
-        // We would need to add it to the schema if needed
       }
     });
     
     return true;
   } catch (error) {
-    console.error('Error updating login info:', error);
+    console.error('Error updating login streak:', error);
     return false;
+  }
+}
+
+/**
+ * Get user's current login streak
+ * @param userId User ID
+ * @returns Current login streak or 0 if not found
+ */
+export async function getUserLoginStreak(userId: string): Promise<number> {
+  try {
+    // Get user data from Prisma
+    const userData = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        loginStreak: true
+      }
+    });
+    
+    return userData?.loginStreak || 0;
+  } catch (error) {
+    console.error('Error getting user login streak:', error);
+    return 0;
   }
 }
 
@@ -256,9 +360,23 @@ export async function deleteUser(id: string): Promise<Omit<User, 'password'> | n
     
     // Return user without password
     const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    
+    // Convert Prisma Role to App Role
+    return {
+      ...userWithoutPassword,
+      role: mapPrismaRoleToAppRole(user.role)
+    };
   } catch (error) {
     console.error('Error deleting user:', error);
     return null;
   }
+}
+
+/**
+ * Update user's login information
+ * @param id User ID to update
+ * @returns Success flag
+ */
+export async function updateUserLoginInfo(id: string): Promise<boolean> {
+  return await updateLoginStreak(id);
 }

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get query parameters
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const userId = searchParams.get('userId') || '';
     
     // Get the currently authenticated user for verification
     const session = await getServerSession(authOptions);
@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
       }
     });
     
-    if (!user || !user.enrolledIn.length) {
+    // Check if user exists and has enrolled courses
+    if (!user || !user.enrolledIn || user.enrolledIn.length === 0) {
       return NextResponse.json({ 
         success: true, 
         courses: [] 
@@ -97,14 +98,32 @@ export async function GET(request: NextRequest) {
       const progressPercentage = totalLessons > 0 
         ? Math.round((progress.completedLessons / totalLessons) * 100) 
         : 0;
+
+      // Find the most recently accessed lesson to determine last access time
+      const lastAccessedProgress = userProgress
+        .filter(p => p.courseId === courseId)
+        .sort((a, b) => {
+          const dateA = a.lastAccessed ? new Date(a.lastAccessed).getTime() : 0;
+          const dateB = b.lastAccessed ? new Date(b.lastAccessed).getTime() : 0;
+          return dateB - dateA; // Most recent first
+        })[0];
+
+      const lastAccessed = lastAccessedProgress?.lastAccessed || undefined;
       
       return {
         id: courseId,
         title: course.title,
-        progress: progressPercentage,
+        description: course.description,
         imageUrl: course.imageUrl || '/images/course-placeholder.jpg',
-        totalLessons,
-        completedLessons: progress.completedLessons
+        level: course.level,
+        progress: progressPercentage,
+        lastAccessed: lastAccessed,
+        completed: totalLessons > 0 && progress.completedLessons === totalLessons,
+        instructor: 'Instructor', // We need to populate this from elsewhere
+        lessonsCompleted: progress.completedLessons,
+        totalLessons: totalLessons,
+        timeSpent: progress.totalTimeSpent,
+        enrolledAt: new Date() // We should get this from an enrollment record if possible
       };
     });
     
@@ -159,7 +178,7 @@ export async function POST(request: NextRequest) {
       }
     });
     
-    const existingEnrollment = user?.enrolledIn.length > 0;
+    const existingEnrollment = user?.enrolledIn && user.enrolledIn.length > 0;
     
     if (existingEnrollment) {
       return NextResponse.json({ 
@@ -191,17 +210,25 @@ export async function POST(request: NextRequest) {
       }
     });
     
-    // Also create an enrollment record
-    await prisma.enrollment.create({
-      data: {
-        userId,
-        courseId,
-        enrolledAt: now,
-        status: 'active',
-        progress: 0,
-        completedLessons: 0
-      }
+    // Create initial progress records for all lessons in the course
+    const lessons = await prisma.lesson.findMany({
+      where: { courseId }
     });
+    
+    if (lessons.length > 0) {
+      // Create progress records for each lesson
+      await prisma.userProgress.createMany({
+        data: lessons.map(lesson => ({
+          userId,
+          courseId,
+          lessonId: lesson.id,
+          completed: false,
+          progress: 0,
+          timeSpent: 0,
+          lastAccessed: now
+        }))
+      });
+    }
     
     // Check and award achievements (like "Course Starter")
     await checkAndAwardAchievements(userId);

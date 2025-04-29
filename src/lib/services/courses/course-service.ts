@@ -5,7 +5,35 @@ export const dynamic = "force-dynamic";
  */
 import prisma from '@/lib/db/prisma-client';
 import { safeFindMany, safeFindUnique } from '@/lib/db/prisma-helper';
-import { CourseListItem, CourseDetails, UserCourseStats, Course, UserProgress, Lesson } from '@/types/course';
+import { CourseListItem, CourseDetails, UserCourseStats, Course, Lesson } from '@/types/course';
+import { UserProgress } from '@/types/progress';
+
+
+/**
+ * Chuẩn hóa URL hình ảnh để đảm bảo nhất quán
+ * @param originalUrl URL gốc có thể null, tương đối hoặc tuyệt đối
+ * @returns URL chuẩn hóa đảm bảo đúng định dạng
+ */
+function processImageUrl(originalUrl?: string | null): string {
+  // Không có URL, trả về URL mặc định
+  if (!originalUrl) {
+    return '/images/course-default.jpg';
+  }
+  
+  // URL đã là tuyệt đối, giữ nguyên
+  if (originalUrl.startsWith('http')) {
+    // Thêm cache busting parameter
+    return `${originalUrl}${originalUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+  }
+  
+  // URL tương đối đã có dấu / ở đầu, giữ nguyên
+  if (originalUrl.startsWith('/')) {
+    return originalUrl;
+  }
+  
+  // URL tương đối không có dấu / ở đầu, thêm vào
+  return `/${originalUrl}`;
+}
 
 // Local interfaces for internal use
 interface EnrolledUser {
@@ -57,18 +85,15 @@ export async function getAllCourses(): Promise<CourseListItem[]> {
           ? Number((course.reviews.reduce((acc: number, review: any) => acc + (review?.rating || 0), 0) / course.reviews.length).toFixed(1))
           : 4.5; // Default if no reviews
         
-        // Thêm timestamp vào URL hình ảnh để tránh cache
-        const timestamp = Date.now();
-        const imageUrl = course.imageUrl 
-          ? `${course.imageUrl}?t=${timestamp}` 
-          : 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop';
+        // Chuẩn hóa URL hình ảnh (chỉ dùng một trường imageUrl)
+        const imageUrl = processImageUrl(course.imageUrl);
         
         return {
           id: course.id,
           title: course.title,
           description: course.description,
-          image: imageUrl,
-          imageUrl: imageUrl, // Thêm cả trường này để đảm bảo tương thích
+          imageUrl: imageUrl, // URL hình ảnh đã chuẩn hóa
+          image: imageUrl, // Thêm trường image để tương thích với CourseListItem interface
           level: course.level,
           price: course.price,
           duration: `${Math.ceil(course._count.lessons / 2)} weeks`, // Approximate duration
@@ -83,7 +108,14 @@ export async function getAllCourses(): Promise<CourseListItem[]> {
       })
     );
 
-    return processedCourses;
+    // Đảm bảo mỗi item đều có đủ cả hai trường imageUrl và image để phù hợp với interface CourseListItem
+    const finalCourses = processedCourses.map(course => ({
+      ...course,
+      image: course.imageUrl, // Đảm bảo có trường image từ imageUrl
+      imageUrl: course.imageUrl || course.image // Đảm bảo có imageUrl từ image nếu imageUrl không tồn tại
+    }));
+    
+    return finalCourses;
   } catch (error) {
     console.error('Error fetching all courses:', error);
     return [];
@@ -156,19 +188,15 @@ export async function getCourseById(courseId: string) {
       ? Number((course.reviews.reduce((acc: number, review: any) => acc + (review?.rating || 0), 0) / course.reviews.length).toFixed(1))
       : 4.5; // Default if no reviews
     
-    // Thêm timestamp vào URL hình ảnh để tránh cache
-    const timestamp = Date.now();
-    const imageUrl = course.imageUrl 
-      ? `${course.imageUrl}?t=${timestamp}` 
-      : 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop';
+    // Chuẩn hóa URL hình ảnh
+    const imageUrl = processImageUrl(course.imageUrl);
       
     return {
       id: course.id,
       title: course.title,
       description: course.description,
       fullDescription: course.description,
-      image: imageUrl,
-      imageUrl: imageUrl, // Thêm cả trường này để đảm bảo tương thích
+      imageUrl: imageUrl,
       level: course.level,
       price: course.price,
       duration: `${Math.ceil(Array.isArray(course.lessons) ? course.lessons.length : 0 / 2)} weeks`, // Approximate duration
@@ -189,8 +217,7 @@ export async function getCourseById(courseId: string) {
         courses: 1, // Simplified
       },
       reviews: processedReviews,
-      updatedAt: course.updatedAt, // Đảm bảo có trường này để client có thể kiểm tra
-      _timestamp: timestamp, // Thêm một trường để client biết dữ liệu đã được tải mới
+      updatedAt: course.updatedAt // Đảm bảo có trường này để client có thể kiểm tra
     };
   } catch (error) {
     console.error('Error fetching course by ID:', error);
@@ -445,15 +472,15 @@ export async function getUserStats(userId: string): Promise<UserCourseStats> {
  * @param userProgress Array of user progress entries
  * @returns Number of days in streak
  */
-function calculateStreak(userProgress: UserProgress[]): number {
+function calculateStreak(userProgress: any[]): number {
   if (!userProgress || !Array.isArray(userProgress) || userProgress.length === 0) {
     return 0;
   }
   
   // Get all dates when user completed lessons
   const completionDates = userProgress
-    .filter((p: UserProgress) => p?.completed)
-    .map((p: UserProgress) => new Date(p?.completedAt || p?.updatedAt || Date.now()))
+    .filter((p: any) => p?.completed)
+    .map((p: any) => new Date(p?.completedAt || p?.updatedAt || Date.now()))
     .sort((a, b) => b.getTime() - a.getTime()); // Sort in descending order
   
   if (completionDates.length === 0) {
@@ -547,7 +574,8 @@ export async function getFeaturedCourses(limit: number = 5): Promise<CourseListI
           id: course.id,
           title: course.title,
           description: course.description,
-          image: course.imageUrl || 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop',
+          imageUrl: processImageUrl(course.imageUrl),
+          image: processImageUrl(course.imageUrl),
           level: course.level,
           price: course.price,
           duration: `${Math.ceil((course._count?.lessons || 0) / 2)} weeks`,
@@ -561,7 +589,14 @@ export async function getFeaturedCourses(limit: number = 5): Promise<CourseListI
       })
     );
 
-    return processedCourses;
+    // Đảm bảo mỗi item đều có đủ cả hai trường imageUrl và image để phù hợp với interface CourseListItem
+    const finalCourses = processedCourses.map(course => ({
+      ...course,
+      image: course.imageUrl, // Đảm bảo có trường image từ imageUrl
+      imageUrl: course.imageUrl || course.image // Đảm bảo có imageUrl từ image nếu imageUrl không tồn tại
+    }));
+    
+    return finalCourses;
   } catch (error) {
     console.error('Error fetching featured courses:', error);
     return [];
@@ -636,7 +671,8 @@ export async function searchCourses(query: string, limit: number = 10): Promise<
           id: course.id,
           title: course.title,
           description: course.description,
-          image: course.imageUrl || 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop',
+          imageUrl: processImageUrl(course.imageUrl),
+          image: processImageUrl(course.imageUrl),
           level: course.level,
           price: course.price,
           duration: `${Math.ceil((course._count?.lessons || 0) / 2)} weeks`,
@@ -650,7 +686,14 @@ export async function searchCourses(query: string, limit: number = 10): Promise<
       })
     );
 
-    return processedCourses;
+    // Đảm bảo mỗi item đều có đủ cả hai trường imageUrl và image để phù hợp với interface CourseListItem
+    const finalCourses = processedCourses.map(course => ({
+      ...course,
+      image: course.imageUrl, // Đảm bảo có trường image từ imageUrl
+      imageUrl: course.imageUrl || course.image // Đảm bảo có imageUrl từ image nếu imageUrl không tồn tại
+    }));
+    
+    return finalCourses;
   } catch (error) {
     console.error('Error searching courses:', error);
     return [];

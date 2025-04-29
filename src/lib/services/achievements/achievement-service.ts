@@ -7,10 +7,33 @@ import prisma from '@/lib/db/prisma-client';
 import { safeFindMany, safeFindFirst, safeFindUnique, safeCreate } from '@/lib/db/prisma-helper';
 import { UserAchievement, AchievementType } from '@/types/achievement';
 import { Lesson } from '@/types/course';
+import { getUserLoginStreak } from '@/lib/db/services/user-service';
 
 // Extended lesson interface for internal use
 interface ExtendedLesson extends Lesson {
   [key: string]: any;
+}
+
+// Define interface for achievement database record
+interface AchievementRecord {
+  id: string;
+  userId: string;
+  title: string;
+  description: string;
+  icon: string;
+  earnedAt: Date;
+  type: string;
+}
+
+// Define interface for user progress record
+interface UserProgressRecord {
+  id: string;
+  userId: string;
+  courseId: string;
+  lessonId: string;
+  completed: boolean;
+  completedAt?: Date | null;
+  progress: number;
 }
 
 /**
@@ -25,8 +48,8 @@ export async function getUserAchievements(userId: string): Promise<UserAchieveme
       return [];
     }
 
-    // Use safeFindMany instead of direct prisma call
-    const achievements = await safeFindMany(prisma.achievement, {
+    // Use safeFindMany with proper typing
+    const achievements = await safeFindMany<AchievementRecord, any>(prisma.achievement, {
       where: { userId }
     });
     
@@ -73,7 +96,7 @@ export async function createAchievement(
     }
     
     // Check if user already has this achievement using safeFindFirst
-    const existingAchievement = await safeFindFirst(prisma.achievement, {
+    const existingAchievement = await safeFindFirst<AchievementRecord, any>(prisma.achievement, {
       where: {
         userId,
         type
@@ -95,7 +118,7 @@ export async function createAchievement(
     
     // Create new achievement using safeCreate
     const now = new Date();
-    const achievement = await safeCreate(prisma.achievement, {
+    const achievement = await safeCreate<AchievementRecord, any>(prisma.achievement, {
       data: {
         userId,
         type,
@@ -138,8 +161,15 @@ export async function checkAndAwardAchievements(userId: string): Promise<UserAch
       return [];
     }
     
-    // Use safeFindUnique instead of direct prisma call
-    const user = await safeFindUnique<any>(prisma.user, {
+    // Define user record interface for this context
+    interface UserRecord {
+      id: string;
+      enrolledIn?: Array<{ id: string }>;
+      enrolledIds?: string[];
+    }
+    
+    // Use safeFindUnique with proper typing
+    const user = await safeFindUnique<UserRecord, any>(prisma.user, {
       where: { id: userId },
       include: {
         enrolledIn: true
@@ -181,8 +211,11 @@ export async function checkAndAwardAchievements(userId: string): Promise<UserAch
       }
     }
     
+    // Check for daily streak achievement
+    await checkDailyStreakAchievement(userId, newAchievements);
+    
     // Check for course completion achievement
-    const userProgress = await safeFindMany(prisma.userProgress, {
+    const userProgress = await safeFindMany<UserProgressRecord, any>(prisma.userProgress, {
       where: { userId }
     });
     
@@ -193,7 +226,7 @@ export async function checkAndAwardAchievements(userId: string): Promise<UserAch
           user.enrolledIn.map(course => course?.id).filter(Boolean) : []);
       
       // Get all lessons for these courses using safeFindMany
-      const lessons = await safeFindMany<ExtendedLesson>(prisma.lesson, {
+      const lessons = await safeFindMany<ExtendedLesson, any>(prisma.lesson, {
         where: {
           courseId: {
             in: enrolledCourseIds.length > 0 ? enrolledCourseIds : ['none']
@@ -287,6 +320,38 @@ export async function checkAndAwardAchievements(userId: string): Promise<UserAch
 }
 
 /**
+ * Check and award daily streak achievement
+ * @param userId User ID to check streak for
+ * @param achievementsArray Array to add new achievements to
+ */
+async function checkDailyStreakAchievement(
+  userId: string, 
+  achievementsArray: UserAchievement[]
+): Promise<void> {
+  try {
+    // Get user's login streak from the specialized service
+    const loginStreak = await getUserLoginStreak(userId);
+    
+    // Award achievement if streak is 7 or more days
+    if (loginStreak >= 7) {
+      const streakAchievement = await createAchievement(
+        userId,
+        AchievementType.DAILY_STREAK,
+        'Daily Streak',
+        'You logged in for 7 consecutive days.',
+        'calendar'
+      );
+      
+      if (streakAchievement) {
+        achievementsArray.push(streakAchievement);
+      }
+    }
+  } catch (error) {
+    console.error('Error checking daily streak achievement:', error);
+  }
+}
+
+/**
  * Get all achievement types with their details
  * @returns Map of achievement types to their details
  */
@@ -316,6 +381,11 @@ export function getAchievementTypes(): Record<AchievementType, { title: string, 
       title: 'Daily Streak',
       description: 'You logged in for 7 consecutive days.',
       icon: 'calendar',
+    },
+    [AchievementType.LESSON_COMPLETED]: {
+      title: 'Lesson Completed',
+      description: 'You completed your first lesson.',
+      icon: 'book',
     },
   };
 }

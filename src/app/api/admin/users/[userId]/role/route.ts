@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/auth-middleware';
-import { Role } from '@/lib/auth/auth-options';
+import { Role } from '@/types/auth/roles';
+import { Role as PrismaRole } from '@prisma/client';
 import { getUserById, updateUserRoleAuth as updateUserRole } from '@/lib/auth/services/auth-service';
 import { z } from 'zod';
 
@@ -99,6 +100,9 @@ export async function PUT(
     // Extract validated data
     const { role } = validation.data;
     
+    // Convert string role to Role enum
+    const roleEnum = role === 'admin' ? Role.admin : role === 'student' ? Role.student : Role.student;
+    
     // Prevent admin from changing their own role (safety measure)
     if (auth.user?.id === userId) {
       return NextResponse.json(
@@ -108,7 +112,7 @@ export async function PUT(
     }
 
     // Update user role using Auth Service
-    const result = await updateUserRole(userId, role as Role);
+    const result = await updateUserRole(userId, roleEnum);
     
     if (!result.success) {
       return NextResponse.json(
@@ -190,8 +194,11 @@ export async function PATCH(
       });
     }
 
+    // Convert string role to Role enum
+    const roleEnum = role === 'admin' ? Role.admin : role === 'student' ? Role.student : Role.student;
+    
     // Update user's role using Auth Service
-    const updateResult = await updateUserRole(userId, role as Role);
+    const updateResult = await updateUserRole(userId, roleEnum);
 
     if (!updateResult.success) {
       return NextResponse.json(

@@ -12,7 +12,20 @@ import {
   CheckCircleIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
-import { EnrolledCourse, UserCourseStats, UserAchievement } from '@/types';
+import { UserCourseStats } from '@/types/course';
+import { UserAchievement } from '@/types/achievement';
+import { UserLoginStreak } from '@/components/dashboard/UserLoginStreak';
+import { useUserState } from '@/client/hooks/user/useUserState';
+
+// Define EnrolledCourse type if it's not available
+interface EnrolledCourse {
+  id: string;
+  title: string;
+  imageUrl: string;
+  progress: number;
+  completedLessons: number;
+  totalLessons: number;
+}
 
 // Mock data for upcoming deadlines (will be replaced with real data later)
 const mockUpcomingDeadlines = [
@@ -22,6 +35,7 @@ const mockUpcomingDeadlines = [
 
 export default function Dashboard() {
   const { data: session, status } = useSession();
+  const { loginStreak } = useUserState();
   const [stats, setStats] = useState<UserCourseStats>({
     coursesCompleted: 0,
     lessonsCompleted: 0,
@@ -131,6 +145,8 @@ export default function Dashboard() {
         return <AcademicCapIcon className="w-6 h-6 text-purple-500" />;
       case 'quick_learner':
         return <FireIcon className="w-6 h-6 text-orange-500" />;
+      case 'daily_streak':
+        return <FireIcon className="w-6 h-6 text-red-500" />;
       case 'streak':
         return <FireIcon className="w-6 h-6 text-red-500" />;
       default:
@@ -211,7 +227,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="text-sm text-gray-500 font-medium">Current Streak</p>
-                <p className="text-2xl font-bold">{stats.currentStreak} days</p>
+                <p className="text-2xl font-bold">{loginStreak || stats.currentStreak} days</p>
               </div>
             </div>
           </div>
@@ -280,6 +296,9 @@ export default function Dashboard() {
           
           {/* Right column - Achievements and deadlines */}
           <div className="space-y-8">
+            {/* Login Streak */}
+            <UserLoginStreak />
+            
             {/* Achievements section */}
             <div>
               <h2 className="text-xl font-bold mb-4">Your Achievements</h2>

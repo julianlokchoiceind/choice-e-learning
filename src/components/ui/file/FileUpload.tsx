@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { CloudArrowUpIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 // Props interface for the component
@@ -25,10 +25,22 @@ export default function FileUpload({
   // Component state
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(currentImageUrl || null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
   
   // Reference to the file input element
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Xử lý URL của ảnh hiện tại để tránh cache
+  useEffect(() => {
+    if (currentImageUrl) {
+      const urlWithTimestamp = `${currentImageUrl}${currentImageUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
+      setPreviewUrl(urlWithTimestamp);
+      setImageError(false);
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [currentImageUrl]);
 
   /**
    * Handle file change event when user selects a file
@@ -123,12 +135,16 @@ export default function FileUpload({
       />
 
       {/* Image preview or upload area */}
-      {previewUrl ? (
+      {previewUrl && !imageError ? (
         <div className="relative">
           <img 
             src={previewUrl} 
             alt="Preview" 
             className="w-full h-48 object-cover rounded-md border border-gray-300" 
+            onError={(e) => {
+              console.error('Image failed to load:', previewUrl);
+              setImageError(true);
+            }}
           />
           <button
             type="button"

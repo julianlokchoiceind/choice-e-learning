@@ -14,9 +14,13 @@ const updateFAQSchema = z.object({
 });
 
 // GET - Retrieve a single FAQ by ID
-export const GET = withAdmin(async (req: NextRequest, { params }: { params: { faqId: string } }) => {
+export const GET = withAdmin(async (_req, context) => {
   try {
-    const { faqId } = params;
+    const faqId = context.params.faqId;
+    
+    if (!faqId) {
+      return apiNotFound("FAQ");
+    }
     
     const faq = await faqService.getFAQById(faqId);
     
@@ -30,26 +34,31 @@ export const GET = withAdmin(async (req: NextRequest, { params }: { params: { fa
     return apiError(
       "Failed to fetch FAQ",
       error instanceof Error ? error.message : undefined,
-      ApiErrorCode.INTERNAL_SERVER_ERROR
+      ApiErrorCode.SERVER_ERROR
     );
   }
 });
 
 // PATCH - Update a FAQ
-export const PATCH = withAdmin(async (req: NextRequest, { params }: { params: { faqId: string } }) => {
+export const PATCH = withAdmin(async (req, context) => {
   try {
-    const { faqId } = params;
+    const faqId = context.params.faqId;
+    
+    if (!faqId) {
+      return apiNotFound("FAQ");
+    }
+    
     const body = await parseRequest(req, updateFAQSchema);
     
     // Check if FAQ exists
-    const existingFAQ = await faqService.getFAQById(faqId);
+    const existingFAQ = await faqService.getFAQById(faqId as string);
     
     if (!existingFAQ) {
       return apiNotFound("FAQ");
     }
     
     // Update FAQ
-    const updatedFAQ = await faqService.updateFAQ(faqId, body);
+    const updatedFAQ = await faqService.updateFAQ(faqId as string, body);
     
     return apiSuccess(updatedFAQ, "FAQ updated successfully");
   } catch (error) {
@@ -61,15 +70,19 @@ export const PATCH = withAdmin(async (req: NextRequest, { params }: { params: { 
     return apiError(
       "Failed to update FAQ",
       error instanceof Error ? error.message : undefined,
-      ApiErrorCode.INTERNAL_SERVER_ERROR
+      ApiErrorCode.SERVER_ERROR
     );
   }
 });
 
 // DELETE - Delete a FAQ
-export const DELETE = withAdmin(async (req: NextRequest, { params }: { params: { faqId: string } }) => {
+export const DELETE = withAdmin(async (_req, context) => {
   try {
-    const { faqId } = params;
+    const faqId = context.params.faqId;
+    
+    if (!faqId) {
+      return apiNotFound("FAQ");
+    }
     
     // Check if FAQ exists
     const existingFAQ = await faqService.getFAQById(faqId);
@@ -79,7 +92,7 @@ export const DELETE = withAdmin(async (req: NextRequest, { params }: { params: {
     }
     
     // Delete FAQ
-    await faqService.deleteFAQ(faqId);
+    await faqService.deleteFAQ(faqId as string);
     
     return apiSuccess({ success: true }, "FAQ deleted successfully");
   } catch (error) {
@@ -87,7 +100,7 @@ export const DELETE = withAdmin(async (req: NextRequest, { params }: { params: {
     return apiError(
       "Failed to delete FAQ",
       error instanceof Error ? error.message : undefined,
-      ApiErrorCode.INTERNAL_SERVER_ERROR
+      ApiErrorCode.SERVER_ERROR
     );
   }
 });

@@ -125,34 +125,27 @@ documentEndpoint({
 
 // GET handler to fetch user profile
 const getProfile = withAuth(async (req, { user }) => {
-  const userId = user.id;
+  const userId = user?.id || ''; // Ensure userId is always string
   
   // Get user from database
   const userProfile = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-      bio: true,
-      avatar: true,
-      createdAt: true,
-      updatedAt: true
-    }
+    where: { id: userId }
   });
 
   if (!userProfile) {
     return apiNotFound('User');
   }
 
+  // Select only fields we want to return
+  const { password, ...userWithoutPassword } = userProfile;
+
   // Return user profile
-  return apiSuccess(userProfile);
+  return apiSuccess(userWithoutPassword);
 });
 
 // PUT handler to update user profile
 const updateProfile = withAuth(async (req, { user }) => {
-  const userId = user.id;
+  const userId = user?.id || ''; // Ensure userId is always string
   
   // Validate request body
   const validationResult = await validateRequest(req, profileUpdateSchema);
@@ -167,7 +160,7 @@ const updateProfile = withAuth(async (req, { user }) => {
   // Create update document
   const updateDoc: any = { updatedAt: new Date() };
   if (name) updateDoc.name = name;
-  if (bio !== undefined) updateDoc.bio = bio;
+  if (bio !== undefined) updateDoc.bio = bio;  // bio đã là string hoặc null/undefined
   if (avatar) updateDoc.avatar = avatar;
   
   // Handle password update if requested
@@ -201,20 +194,14 @@ const updateProfile = withAuth(async (req, { user }) => {
   try {
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: updateDoc,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        bio: true,
-        avatar: true,
-        updatedAt: true
-      }
+      data: updateDoc
     });
     
+    // Remove sensitive fields
+    const { password: _, ...userData } = updatedUser;
+    
     // Return success with updated user data
-    return apiUpdated(updatedUser);
+    return apiUpdated(userData);
   } catch (error) {
     if ((error as any).code === 'P2025') {
       return apiNotFound('User');

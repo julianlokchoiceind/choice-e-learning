@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     // Get user and enrolled courses
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { enrolledIds: true }
+      include: { enrolledIn: true }
     });
 
     if (!user) {
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     }
 
     // If user has no enrolled courses, return empty array
-    if (!user.enrolledIds || user.enrolledIds.length === 0) {
+    if (!user || !user.enrolledIn || user.enrolledIn.length === 0) {
       return NextResponse.json({ 
         success: true, 
         courses: [],
@@ -48,13 +48,16 @@ export async function GET(req: NextRequest) {
     const skip = (page - 1) * limit;
     
     // Get total count of enrolled courses
-    const totalCount = user.enrolledIds?.length || 0;
+    const totalCount = user.enrolledIn.length;
+    
+    // Get course IDs from enrolled courses
+    const enrolledIds = user.enrolledIn.map(course => course.id);
     
     // Get paginated courses with instructor details using Prisma
     const courses = await prisma.course.findMany({
       where: {
         id: {
-          in: user.enrolledIds
+          in: enrolledIds
         }
       },
       select: {
@@ -87,14 +90,13 @@ export async function GET(req: NextRequest) {
                 name: true
               }
             })
-          : { id: '', name: 'Administrator' };
+          : null;
           
         return {
           ...course,
-          instructor: {
-            id: instructor.id,
-            name: instructor.name
-          }
+          instructor: instructor
+            ? { id: instructor.id, name: instructor.name }
+            : { id: '', name: 'Administrator' }
         };
       })
     );

@@ -1,20 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth/auth-options';
+import { NextRequest } from 'next/server';
+import { apiSuccess } from '@/lib/api/api-response';
+import { withAuth } from '@/lib/api/route-handlers';
 
-export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  
-  if (!session) {
-    return NextResponse.json(
-      { error: 'Authentication required' },
-      { status: 401 }
-    );
-  }
-  
-  return NextResponse.json({
-    success: true,
-    message: 'You are authenticated!',
-    user: session.user
+export const GET = withAuth(async (_req, context) => {
+  return apiSuccess({
+    message: 'This is a protected route',
+    user: {
+      id: context.user.id,
+      name: context.user.name,
+      email: context.user.email,
+      role: context.user.role
+    }
   });
-} 
+}); 

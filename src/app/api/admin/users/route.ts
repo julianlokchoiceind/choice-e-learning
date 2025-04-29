@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import { requireAdmin } from '@/lib/auth/auth-middleware';
-import { Role } from '@/lib/auth/auth-options';
+import { Role } from '@/types/auth/roles';
+import { Role as PrismaRole } from '@prisma/client';
 
 export async function GET(req: NextRequest) {
   try {

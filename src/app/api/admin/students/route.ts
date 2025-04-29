@@ -59,7 +59,7 @@ export const GET = withAdmin(async (req: NextRequest) => {
         firstStudent: result?.data?.[0] ? { 
           id: result.data[0].id,
           email: result.data[0].email,
-          role: result.data[0].role 
+          // Do not attempt to access 'role' which doesn't exist in FormattedStudent
         } : null
       });
       console.log('=================== STUDENT API REQUEST FINISHED ===================');
@@ -125,7 +125,7 @@ export const POST = withAdmin(async (req: NextRequest) => {
     return apiError(
       "Failed to create student",
       error instanceof Error ? error.message : undefined,
-      ApiErrorCode.INTERNAL_SERVER_ERROR
+      ApiErrorCode.SERVER_ERROR
     );
   }
 });

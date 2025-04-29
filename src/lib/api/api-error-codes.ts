@@ -81,6 +81,7 @@ export enum ApiErrorCode {
   
   // Server errors (10000-10999)
   SERVER_ERROR = 'SERVER_ERROR',
+  INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR', // Alias for SERVER_ERROR for backward compatibility
   SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
   EXTERNAL_SERVICE_ERROR = 'EXTERNAL_SERVICE_ERROR',
   NOT_IMPLEMENTED = 'NOT_IMPLEMENTED'
@@ -163,6 +164,7 @@ export const errorCodeToStatusMap: Record<ApiErrorCode, number> = {
   
   // Server errors
   [ApiErrorCode.SERVER_ERROR]: 500,
+  [ApiErrorCode.INTERNAL_SERVER_ERROR]: 500, // Same as SERVER_ERROR
   [ApiErrorCode.SERVICE_UNAVAILABLE]: 503,
   [ApiErrorCode.EXTERNAL_SERVICE_ERROR]: 502,
   [ApiErrorCode.NOT_IMPLEMENTED]: 501
@@ -301,6 +303,7 @@ export function getDefaultErrorMessage(code: ApiErrorCode): string {
     
     // Server errors
     case ApiErrorCode.SERVER_ERROR:
+    case ApiErrorCode.INTERNAL_SERVER_ERROR:
       return 'Server error occurred';
     case ApiErrorCode.SERVICE_UNAVAILABLE:
       return 'Service is currently unavailable';

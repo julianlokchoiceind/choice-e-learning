@@ -36,14 +36,14 @@ export const POST = withAdmin(
       // Get the file from the form data
       const file = formData.get('file') as File | null;
       if (!file) {
-        return apiError('No file provided', null, ApiErrorCode.VALIDATION_ERROR);
+        return apiError('No file provided', undefined, ApiErrorCode.VALIDATION_ERROR);
       }
       
       // Check file type
       if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
         return apiError(
           'File type not allowed. Only JPEG, PNG, and GIF are allowed.',
-          null, 
+          undefined, 
           ApiErrorCode.VALIDATION_ERROR
         );
       }
@@ -52,7 +52,7 @@ export const POST = withAdmin(
       if (file.size > MAX_FILE_SIZE) {
         return apiError(
           'File size exceeds limit of 2MB',
-          null,
+          undefined,
           ApiErrorCode.VALIDATION_ERROR
         );
       }

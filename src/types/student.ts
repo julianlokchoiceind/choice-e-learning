@@ -1,4 +1,5 @@
 import { User } from "@prisma/client";
+import { Role } from "./auth/roles";
 
 // This represents a User with role "student" with only the fields needed for student management
 export interface FormattedStudent {
@@ -12,6 +13,7 @@ export interface FormattedStudent {
   imageUrl: string | null;
   provider?: string | null;
   providerId?: string | null;
+  role?: Role;
   createdAt: Date;
   updatedAt: Date;
 }

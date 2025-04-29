@@ -1,114 +1,152 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from './auth-options';
+import { authOptions } from '@/lib/auth/auth-options';
 import { Role } from '@/types/auth/roles';
-import { hasRole, isAdmin, hasPermission } from './roles';
-import { AuthErrorCode, getAuthError } from './utils/auth-errors';
+import { apiUnauthorized, apiForbidden } from '@/lib/api/api-response';
 
 /**
- * Get the authenticated user's session
- * @returns The session object or null if not authenticated
+ * Get the authenticated session and create a standard response
+ * @param req The Next.js request
+ * @returns An object containing the session, user, and response
  */
-export async function getAuthSession() {
-  return await getServerSession(authOptions);
+export async function getAuthSession(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions).catch(error => {
+      console.error('Error getting server session:', error);
+      return null;
+    });
+    
+    return {
+      session,
+      user: session?.user || null
+    };
+  } catch (error) {
+    console.error('Auth middleware error:', error);
+    return {
+      session: null,
+      user: null
+    };
+  }
 }
 
 /**
- * Middleware to check if user is authenticated
- * @param req Next request object
- * @returns Authentication result with user data or error response
+ * Authenticate a user and ensure they are logged in
+ * @param req The Next.js request
+ * @returns An object with success and user data
  */
 export async function authenticateUser(req: NextRequest) {
-  const session = await getAuthSession();
-  
-  if (!session?.user) {
-    const error = getAuthError(AuthErrorCode.UNAUTHORIZED);
+  try {
+    // Get the authenticated session
+    const { session, user } = await getAuthSession(req);
+    
+    // Check if user is authenticated
+    if (!session || !user) {
+      return {
+        success: false,
+        response: apiUnauthorized()
+      };
+    }
+    
+    // Return the authenticated user
+    return {
+      success: true,
+      user
+    };
+  } catch (error) {
+    console.error('Authentication error:', error);
     return {
       success: false,
-      response: NextResponse.json(
-        { success: false, error: error.message },
-        { status: error.status }
-      )
+      response: apiUnauthorized()
     };
   }
-  
-  return {
-    success: true,
-    session,
-    user: session.user
-  };
 }
 
 /**
- * Check if user has required role(s)
- * @param req Next request object
- * @param roles Required role(s)
- * @returns Authentication result with user data or error response
+ * Check if the authenticated user has the required role
+ * @param req The Next.js request
+ * @param requiredRoles Single role or array of roles required
+ * @returns An object with success and user data
  */
-export async function checkUserRole(req: NextRequest, roles: Role | Role[]) {
-  const auth = await authenticateUser(req);
-  
-  if (!auth.success) {
-    return auth;
-  }
-  
-  // TypeScript knows auth.user exists if auth.success is true
-  const userRole = auth.user?.role;
-  const allowedRoles = Array.isArray(roles) ? roles : [roles];
-  
-  // Admin role has access to everything
-  if (isAdmin(auth.user)) {
-    return auth;
-  }
-  
-  // Check if user has one of the allowed roles
-  if (!userRole || !allowedRoles.some(role => hasRole(auth.user, role))) {
-    const error = getAuthError(AuthErrorCode.FORBIDDEN);
+export async function checkUserRole(req: NextRequest, requiredRoles: Role | Role[]) {
+  try {
+    // Authenticate the user first
+    const auth = await authenticateUser(req);
+    
+    if (!auth.success || !auth.user) {
+      return auth;
+    }
+    
+    // Convert requiredRoles to an array if it's not already
+    const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
+    
+    // Check if user has any of the required roles
+    if (!roles.includes(auth.user.role)) {
+      return {
+        success: false,
+        response: apiForbidden()
+      };
+    }
+    
+    // User is authenticated and has the required role
+    return {
+      success: true,
+      user: auth.user
+    };
+  } catch (error) {
+    console.error('Role check error:', error);
     return {
       success: false,
-      response: NextResponse.json(
-        { success: false, error: error.message },
-        { status: error.status }
-      )
+      response: apiUnauthorized()
     };
   }
-  
-  return auth;
 }
 
 /**
- * Check if user is admin
- * @param req Next request object
- * @returns Authentication result with user data or error response
+ * Require admin role for authentication
+ * @param req The Next.js request
+ * @returns An object with success and user data
  */
 export async function requireAdmin(req: NextRequest) {
-  return await checkUserRole(req, Role.admin);
+  return checkUserRole(req, Role.admin);
 }
 
 /**
- * Check if user has permission to access a resource
- * @param req Next request object
- * @param userId Resource owner ID
- * @returns Authentication result with user data or error response
+ * Check if user is authenticated and is either the resource owner or an admin
+ * @param req The Next.js request
+ * @param ownerId Resource owner ID
+ * @returns An object with success and user data
  */
-export async function requireSelfOrAdmin(req: NextRequest, userId: string) {
-  const auth = await authenticateUser(req);
-  
-  if (!auth.success) {
-    return auth;
-  }
-  
-  // Check if user has permission to access the resource
-  if (!hasPermission(auth.user, userId)) {
-    const error = getAuthError(AuthErrorCode.FORBIDDEN);
+export async function requireSelfOrAdmin(_req: NextRequest, ownerId: string) {
+  try {
+    // Get the authenticated user
+    const { session, user } = await getAuthSession(_req);
+    
+    // Check if user is authenticated
+    if (!session || !user) {
+      return {
+        success: false,
+        response: apiUnauthorized()
+      };
+    }
+    
+    // Check if user is the resource owner or an admin
+    if (user.id !== ownerId && user.role !== Role.admin) {
+      return {
+        success: false,
+        response: apiForbidden()
+      };
+    }
+    
+    // User is authenticated and authorized
+    return {
+      success: true,
+      user
+    };
+  } catch (error) {
+    console.error('Owner/admin check error:', error);
     return {
       success: false,
-      response: NextResponse.json(
-        { success: false, error: error.message },
-        { status: error.status }
-      )
+      response: apiUnauthorized()
     };
   }
-  
-  return auth;
 }

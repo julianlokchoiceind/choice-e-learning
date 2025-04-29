@@ -7,6 +7,7 @@ import MicrosoftProvider from 'next-auth/providers/azure-ad';
 import { login, getUserByEmail, updateUserRoleAuth } from './services/auth-service';
 import prisma from '@/lib/db';
 import { Role } from '@/types/auth/roles';
+import { updateLoginStreak } from '@/lib/db/services';
 
 // Check if environment variables are set
 function validateEnvVariables() {
@@ -296,7 +297,13 @@ export const authOptions: NextAuthOptions = {
             if (user.email) {
               const existingUser = await getUserByEmail(user.email);
               if (existingUser) {
-                // Login was already done via the authorize callback
+                // Update user login info to track streak
+                try {
+                  await updateLoginStreak(existingUser.id);
+                } catch (loginError) {
+                  console.error('Error updating login info:', loginError);
+                  // Don't fail login if this fails
+                }
                 
                 // Check and award achievements for login if needed
                 try {

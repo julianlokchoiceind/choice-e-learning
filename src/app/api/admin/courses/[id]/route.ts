@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/db';
-import { requireAdmin } from '@/lib/auth/auth-middleware';
+import { withAdmin } from '@/lib/api/route-handlers';
 
 // GET a specific course by ID (admin view)
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export const GET = withAdmin(async (req: NextRequest, context: any) => {
   try {
-    // Authenticate and authorize admin
-    const auth = await requireAdmin(req);
-    if (!auth.success) {
-      return auth.response;
-    }
-
-    const courseId = params.id;
+    const courseId = req.nextUrl.pathname.split('/').pop();
     
     // Validate course ID
     if (!courseId) {
@@ -58,7 +52,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
           }))
         : [],
       imageUrl: course.imageUrl,
-      instructorId: course.instructorId,
+      creatorId: course.creatorId,
       studentCount: course._count.students,
       createdAt: course.createdAt,
       updatedAt: course.updatedAt
@@ -66,7 +60,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     
     return NextResponse.json({
       success: true,
-      course: transformedCourse
+      data: transformedCourse
     });
   } catch (error) {
     console.error('Error fetching course:', error);
@@ -75,18 +69,12 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       { status: 500 }
     );
   }
-}
+});
 
 // PUT - Update a course
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export const PUT = withAdmin(async (req: NextRequest, context: any) => {
   try {
-    // Authenticate and authorize admin
-    const auth = await requireAdmin(req);
-    if (!auth.success) {
-      return auth.response;
-    }
-
-    const courseId = params.id;
+    const courseId = req.nextUrl.pathname.split('/').pop();
     
     // Validate course ID
     if (!courseId) {
@@ -111,7 +99,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
           
           // Nếu không tìm thấy, tạo mới
           if (!topic) {
-            const slug = topicName.toLowerCase().replace(/\s+/g, '-');
+            const slug = topicName.toLowerCase().replace(/\\s+/g, '-');
             topic = await prisma.topic.create({
               data: {
                 name: topicName,
@@ -160,9 +148,50 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       );
     }
     
+    // Fetch the updated course to return in the response
+    const updatedCourse = await prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        _count: { select: { students: true } },
+        topicsList: true
+      }
+    });
+
+    if (!updatedCourse) {
+      return NextResponse.json(
+        { success: false, error: 'Updated course not found' },
+        { status: 404 }
+      );
+    }
+
+    // Transform for response
+    const transformedCourse = {
+      id: updatedCourse.id,
+      title: updatedCourse.title,
+      description: updatedCourse.description,
+      price: updatedCourse.price,
+      level: updatedCourse.level,
+      topics: updatedCourse.topics,
+      topicsList: Array.isArray(updatedCourse.topicsList) 
+        ? updatedCourse.topicsList.map(topic => ({
+            id: topic.id,
+            name: topic.name,
+            slug: topic.slug,
+            isActive: topic.isActive
+          }))
+        : [],
+      imageUrl: updatedCourse.imageUrl,
+      // creatorId sẽ được sử dụng thay vì instructorId
+      creatorId: updatedCourse.creatorId,
+      studentCount: updatedCourse._count.students,
+      createdAt: updatedCourse.createdAt,
+      updatedAt: updatedCourse.updatedAt
+    };
+    
     // Trả về response với header ngăn cache
     const response = NextResponse.json({
       success: true,
+      data: transformedCourse,
       message: 'Course updated successfully',
       timestamp: Date.now() // Thêm timestamp để client có thể biết có sự thay đổi
     });
@@ -180,18 +209,12 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       { status: 500 }
     );
   }
-}
+});
 
 // DELETE - Delete a course
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export const DELETE = withAdmin(async (req: NextRequest, context: any) => {
   try {
-    // Authenticate and authorize admin
-    const auth = await requireAdmin(req);
-    if (!auth.success) {
-      return auth.response;
-    }
-
-    const courseId = params.id;
+    const courseId = req.nextUrl.pathname.split('/').pop();
     
     // Validate course ID
     if (!courseId) {
@@ -221,6 +244,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     
       return NextResponse.json({
         success: true,
+        data: { success: true },
         message: 'Course and associated lessons deleted successfully'
       });
     } catch (error) {
@@ -237,4 +261,4 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       { status: 500 }
     );
   }
-} 
+});

@@ -49,12 +49,16 @@ export async function POST(
     }
 
     // Check if user is already enrolled
-    const existingEnrollment = await prisma.enrollment.findFirst({
-      where: {
-        userId,
-        courseId
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        enrolledIn: {
+          where: { id: courseId }
+        }
       }
     });
+    
+    const existingEnrollment = user?.enrolledIn && user.enrolledIn.length > 0;
 
     if (existingEnrollment) {
       return NextResponse.json(
@@ -76,17 +80,25 @@ export async function POST(
       }
     });
     
-    // Create an enrollment record
-    const enrollment = await prisma.enrollment.create({
-      data: {
-        userId,
-        courseId,
-        enrolledAt: now,
-        status: 'active',
-        progress: 0,
-        completedLessons: 0
-      }
+    // Create initial progress records for all lessons in the course
+    const lessons = await prisma.lesson.findMany({
+      where: { courseId }
     });
+    
+    if (lessons.length > 0) {
+      // Create progress records for each lesson
+      await prisma.userProgress.createMany({
+        data: lessons.map(lesson => ({
+          userId,
+          courseId,
+          lessonId: lesson.id,
+          completed: false,
+          progress: 0,
+          timeSpent: 0,
+          lastAccessed: now
+        }))
+      });
+    }
 
     // Check and award achievements (like "Course Starter")
     await checkAndAwardAchievements(userId);
@@ -99,7 +111,7 @@ export async function POST(
         id: course.id,
         title: course.title
       },
-      enrollmentId: enrollment.id
+      enrollmentId: `${userId}_${courseId}`
     });
   } catch (error) {
     console.error('Error enrolling in course:', error);
@@ -150,12 +162,16 @@ export async function DELETE(
     }
 
     // Check if user is actually enrolled
-    const existingEnrollment = await prisma.enrollment.findFirst({
-      where: {
-        userId,
-        courseId
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        enrolledIn: {
+          where: { id: courseId }
+        }
       }
     });
+    
+    const existingEnrollment = user?.enrolledIn && user.enrolledIn.length > 0;
 
     if (!existingEnrollment) {
       return NextResponse.json(
@@ -174,10 +190,11 @@ export async function DELETE(
       }
     });
     
-    // Delete the enrollment record
-    await prisma.enrollment.delete({
+    // Delete any progress records for this course
+    await prisma.userProgress.deleteMany({
       where: {
-        id: existingEnrollment.id
+        userId,
+        courseId
       }
     });
 

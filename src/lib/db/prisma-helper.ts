@@ -37,7 +37,7 @@ export async function safeExec<T>(
  * @returns Array of results or empty array on error
  */
 export async function safeFindMany<T, A>(
-  model: any,
+  model: { findMany: (args?: A) => Promise<T[]>; name?: string },
   args?: A
 ): Promise<T[]> {
   if (!model || !model.findMany) {
@@ -59,7 +59,7 @@ export async function safeFindMany<T, A>(
  * @returns Result or null on error
  */
 export async function safeFindUnique<T, A>(
-  model: any,
+  model: { findUnique: (args: A) => Promise<T | null>; name?: string },
   args: A
 ): Promise<T | null> {
   if (!model || !model.findUnique) {
@@ -81,7 +81,7 @@ export async function safeFindUnique<T, A>(
  * @returns Result or null on error
  */
 export async function safeFindFirst<T, A>(
-  model: any,
+  model: { findFirst: (args: A) => Promise<T | null>; name?: string },
   args: A
 ): Promise<T | null> {
   if (!model || !model.findFirst) {
@@ -103,7 +103,7 @@ export async function safeFindFirst<T, A>(
  * @returns Created object or null on error
  */
 export async function safeCreate<T, A>(
-  model: any,
+  model: { create: (args: A) => Promise<T>; name?: string },
   args: A
 ): Promise<T | null> {
   if (!model || !model.create) {
@@ -131,15 +131,15 @@ export function isPrismaAvailable(): boolean {
  * @param modelName Name of the model to get
  * @returns Prisma model or null if not available
  */
-export function getModel(modelName: keyof PrismaClient): any {
+export function getModel<T>(modelName: keyof PrismaClient): T | null {
   if (!prisma) {
     console.error('Prisma client is not available');
     return null;
   }
   
-  const model = prisma[modelName];
+  const model = prisma[modelName] as unknown as T;
   if (!model) {
-    console.error(`Model ${modelName} not found in Prisma client`);
+    console.error(`Model ${String(modelName)} not found in Prisma client`);
     return null;
   }
   

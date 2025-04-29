@@ -20,6 +20,40 @@ function createPrismaClient(): PrismaClient {
     });
     
     // Add middleware for error handling and retry logic
+    client.$extends({
+      query: {
+        $allModels: {
+          async $allOperations({ args, query, operation }) {
+            let retries = 0;
+            
+            while (true) {
+              try {
+                return await query(args);
+              } catch (error: any) {
+                // Log the error
+                console.error(`Prisma Client Error in operation: ${operation}:`, error);
+                
+                // Check if we should retry
+                if (retries < MAX_RETRIES && isPrismaRetryableError(error)) {
+                  retries++;
+                  console.log(`Retrying operation (attempt ${retries}/${MAX_RETRIES})...`);
+                  
+                  // Add exponential backoff
+                  await delay(RETRY_DELAY_MS * Math.pow(2, retries - 1));
+                  continue;
+                }
+                
+                // If we reach here, we've exceeded retries or error is not retryable
+                throw error;
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    // Keep old approach for backward compatibility, will be removed in future updates
+    // @ts-ignore - using deprecated method for backward compatibility
     client.$use(async (params, next) => {
       let retries = 0;
       

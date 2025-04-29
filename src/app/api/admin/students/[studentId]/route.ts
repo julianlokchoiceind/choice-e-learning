@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { apiSuccess, apiError, apiValidationError, apiNotFound } from "@/lib/api/api-response";
-import { withAdmin } from "@/lib/api/route-handlers";
+import { withAdmin, AuthenticatedContext } from "@/lib/api/route-handlers";
 import { z } from "zod";
 import { parseRequest } from "@/lib/api/request-parser";
 import { studentService } from "@/lib/services/students/student-service";
@@ -18,16 +18,21 @@ const updateStudentSchema = z.object({
 });
 
 // GET - Retrieve a specific student by ID
-export const GET = withAdmin(async (
-  req: NextRequest,
-  { params }: { params: { studentId: string } }
-) => {
+export const GET = withAdmin(async (req: NextRequest, context: AuthenticatedContext) => {
+  const studentId = context.params.studentId;
+  if (!studentId) {
+    return apiError(
+      "Missing student ID",
+      "Student ID is required in the URL path",
+      ApiErrorCode.VALIDATION_ERROR
+    );
+  }
   try {
-    console.log(`API: Fetching student with ID ${params.studentId}`);
+    console.log(`API: Fetching student with ID ${studentId}`);
     
     // Validate ID format to prevent database errors
-    if (!/^[0-9a-fA-F]{24}$/.test(params.studentId)) {
-      console.error(`Invalid student ID format: ${params.studentId}`);
+    if (!/^[0-9a-fA-F]{24}$/.test(studentId)) {
+      console.error(`Invalid student ID format: ${studentId}`);
       return apiError(
         "Invalid student ID format",
         "Student ID must be a valid MongoDB ObjectId",
@@ -35,10 +40,10 @@ export const GET = withAdmin(async (
       );
     }
     
-    const student = await studentService.getStudentById(params.studentId);
+    const student = await studentService.getStudentById(studentId);
     
     if (!student) {
-      console.log(`Student with ID ${params.studentId} not found`);
+      console.log(`Student with ID ${studentId} not found`);
       return apiNotFound("Student");
     }
     
@@ -49,21 +54,26 @@ export const GET = withAdmin(async (
     return apiError(
       `Failed to fetch student data`,
       error instanceof Error ? error.message : undefined,
-      ApiErrorCode.INTERNAL_SERVER_ERROR
+      ApiErrorCode.SERVER_ERROR
     );
   }
 });
 
 // PATCH - Update a student by ID
-export const PATCH = withAdmin(async (
-  req: NextRequest,
-  { params }: { params: { studentId: string } }
-) => {
+export const PATCH = withAdmin(async (req: NextRequest, context: AuthenticatedContext) => {
+  const studentId = context.params.studentId;
+  if (!studentId) {
+    return apiError(
+      "Missing student ID",
+      "Student ID is required in the URL path",
+      ApiErrorCode.VALIDATION_ERROR
+    );
+  }
   try {
     const body = await parseRequest(req, updateStudentSchema);
     
     const updatedStudent = await studentService.updateStudent(
-      params.studentId,
+      studentId,
       body
     );
     
@@ -82,22 +92,27 @@ export const PATCH = withAdmin(async (
     return apiError(
       "Failed to update student",
       error instanceof Error ? error.message : undefined,
-      ApiErrorCode.INTERNAL_SERVER_ERROR
+      ApiErrorCode.SERVER_ERROR
     );
   }
 });
 
 // DELETE - Delete a student by ID
-export const DELETE = withAdmin(async (
-  req: NextRequest,
-  { params }: { params: { studentId: string } }
-) => {
+export const DELETE = withAdmin(async (req: NextRequest, context: AuthenticatedContext) => {
+  const studentId = context.params.studentId;
+  if (!studentId) {
+    return apiError(
+      "Missing student ID",
+      "Student ID is required in the URL path",
+      ApiErrorCode.VALIDATION_ERROR
+    );
+  }
   try {
-    console.log(`API: Attempting to delete student with ID ${params.studentId}`);
+    console.log(`API: Attempting to delete student with ID ${studentId}`);
     
     // Validate ID format
-    if (!/^[0-9a-fA-F]{24}$/.test(params.studentId)) {
-      console.error(`Invalid student ID format: ${params.studentId}`);
+    if (!/^[0-9a-fA-F]{24}$/.test(studentId)) {
+      console.error(`Invalid student ID format: ${studentId}`);
       return apiError(
         "Invalid student ID format",
         "Student ID must be a valid MongoDB ObjectId",
@@ -107,9 +122,9 @@ export const DELETE = withAdmin(async (
     
     // First check if student exists
     try {
-      const student = await studentService.getStudentById(params.studentId);
+      const student = await studentService.getStudentById(studentId);
       if (!student) {
-        console.log(`Student with ID ${params.studentId} not found during delete operation`);
+        console.log(`Student with ID ${studentId} not found during delete operation`);
         return apiNotFound("Student");
       }
     } catch (checkError) {
@@ -118,13 +133,13 @@ export const DELETE = withAdmin(async (
     }
     
     // Proceed with deletion
-    const result = await studentService.deleteStudent(params.studentId);
+    const result = await studentService.deleteStudent(studentId);
     
     if (!result) {
       return apiNotFound("Student");
     }
     
-    console.log(`Successfully processed deletion request for student ${params.studentId}`);
+    console.log(`Successfully processed deletion request for student ${studentId}`);
     console.log(`Deletion result:`, result);
     
     let successMessage = "Student deleted successfully";
@@ -146,7 +161,7 @@ export const DELETE = withAdmin(async (
     return apiError(
       "Failed to delete student",
       error instanceof Error ? error.message : undefined,
-      ApiErrorCode.INTERNAL_SERVER_ERROR
+      ApiErrorCode.SERVER_ERROR
     );
   }
 });

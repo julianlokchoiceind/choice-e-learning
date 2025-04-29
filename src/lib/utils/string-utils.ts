@@ -8,17 +8,35 @@
  * @returns The slugified string
  */
 export function slugify(text: string): string {
-  return text
-    .toString()
-    .normalize('NFD')                 // Split accented characters into base char and accent
-    .replace(/[\u0300-\u036f]/g, '') // Remove accents
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')            // Replace spaces with -
-    .replace(/[^\w\-]+/g, '')        // Remove non-word chars (except -)
-    .replace(/\-\-+/g, '-')          // Replace multiple - with single -
-    .replace(/^-+/, '')              // Trim - from start of text
-    .replace(/-+$/, '');             // Trim - from end of text
+  if (!text) return '';
+  
+  try {
+    const slugged = text
+      .toString()
+      .normalize('NFD')                 // Split accented characters into base char and accent
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')            // Replace spaces with -
+      .replace(/[^\w\-]+/g, '')        // Remove non-word chars (except -)
+      .replace(/\-\-+/g, '-')          // Replace multiple - with single -
+      .replace(/^-+/, '')              // Trim - from start of text
+      .replace(/-+$/, '');             // Trim - from end of text
+    
+    // Ensure we're not returning an empty string
+    if (!slugged) {
+      console.warn('Slugify produced empty result for:', text);
+      // Fallback: replace all non-alphanumeric with dashes and ensure not empty
+      const fallback = text.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/\-\-+/g, '-');
+      return fallback || `topic-${Date.now()}`; // Last resort fallback with timestamp
+    }
+    
+    return slugged;
+  } catch (error) {
+    console.error('Error in slugify function:', error);
+    // Emergency fallback with timestamp to ensure uniqueness
+    return `topic-${Date.now()}`;
+  }
 }
 
 /**

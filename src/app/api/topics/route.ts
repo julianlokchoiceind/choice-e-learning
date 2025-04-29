@@ -55,7 +55,9 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
         page: result.meta.page,
         pageSize: result.meta.limit,
         totalItems: result.meta.total,
-        totalPages: result.meta.totalPages
+        totalPages: result.meta.totalPages,
+        hasNextPage: result.meta.page < result.meta.totalPages,
+        hasPrevPage: result.meta.page > 1
       }
     });
   } catch (error) {

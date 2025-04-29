@@ -25,14 +25,19 @@ model User {
   city      String?
   grade     String?
   imageUrl  String?
+  bio       String?  // User biography or description
+  avatar    String?  // Avatar URL, can be different from imageUrl
   provider  String?  // Provider cho OAuth (google, microsoft, etc)
   providerId String? // ID từ OAuth provider
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  lastLoginAt DateTime?
+  loginStreak Int     @default(0)
 
   reviews      Review[]
   enrolledIn   Course[]      @relation("EnrolledStudents", fields: [enrolledIds], references: [id])
   enrolledIds  String[]      @db.ObjectId
+  createdCourses Course[]    @relation("CourseCreator")
   submissions  Submission[]
   achievements Achievement[]
   progress     UserProgress[]
@@ -72,6 +77,8 @@ model Course {
   topicsList  Topic[]  @relation("CourseTopics", fields: [topicIds], references: [id])
   chapters    Chapter[]
   lessons     Lesson[]
+  creatorId   String?  @db.ObjectId
+  creator     User?    @relation("CourseCreator", fields: [creatorId], references: [id])
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -228,6 +235,7 @@ model UserProgress {
   completed   Boolean   @default(false)
   completedAt DateTime?
   progress    Float     @default(0)
+  timeSpent   Int       @default(0)
   lastAccessed DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

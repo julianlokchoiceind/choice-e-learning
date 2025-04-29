@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import { Role } from '@/lib/auth/auth-options';
+import { Role } from '@/types/auth/roles';
 
 /**
  * Auth middleware for protected routes

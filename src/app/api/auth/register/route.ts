@@ -11,6 +11,7 @@ import {
   apiError, 
   apiServerError 
 } from '@/lib/api/api-response';
+import { ApiErrorCode } from '@/lib/api/api-error-codes';
 import { 
   validateRequest 
 } from '@/lib/api/request-parser';
@@ -108,7 +109,7 @@ const registerUser = withErrorHandling(async (req: NextRequest) => {
       return apiError(
         result.error?.message || 'Failed to register user',
         undefined,
-        result.error?.code || 'REGISTRATION_FAILED',
+        result.error?.code as ApiErrorCode || ApiErrorCode.SERVER_ERROR,
         result.error?.status || 400
       );
     }

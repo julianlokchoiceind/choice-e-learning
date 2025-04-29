@@ -25,7 +25,7 @@ interface StudentFilter {
   sortOrder?: 'asc' | 'desc';
 }
 
-interface StudentPaginatedResult {
+interface StudentResult {
   data: Student[];
   meta: {
     total: number;

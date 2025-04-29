@@ -12,22 +12,7 @@ import {
   BookOpenIcon,
 } from '@heroicons/react/24/outline';
 import { useCourses } from '@/client/hooks/courses';
-
-// Define the Course type to match API response
-interface Course {
-  id: string | number;
-  title: string;
-  description?: string;
-  price: number;
-  level: string;
-  topics?: string[];
-  imageUrl?: string;
-  students?: number;
-  studentsCount?: number; // API response field
-  lessonsCount?: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
+import { Course } from '@/types/course';
 
 // Define valid level options to ensure consistency with the backend
 const LEVEL_OPTIONS = [
@@ -142,13 +127,27 @@ export default function CoursesPage() {
 
   // Fetch courses when filters change
   useEffect(() => {
-    fetchCourses({
-      search: debouncedSearchQuery || undefined,
-      level: selectedLevel === 'all' ? undefined : selectedLevel,
-      page: 1,
-      limit: 10,
-      ...getSortParams(sortOption)
-    });
+    try {
+      console.log('[CoursesPage] Fetching courses with filters:', {
+        search: debouncedSearchQuery,
+        level: selectedLevel,
+        sortOption
+      });
+      
+      fetchCourses({
+        search: debouncedSearchQuery || undefined,
+        level: selectedLevel === 'all' ? undefined : selectedLevel,
+        page: 1,
+        limit: 10,
+        ...getSortParams(sortOption)
+      }).catch(err => {
+        console.error('[CoursesPage] Error in effect when fetching courses:', err);
+        // Error is already handled in the hook, so we don't need to do anything here
+      });
+    } catch (error) {
+      console.error('[CoursesPage] Exception in courses fetch effect:', error);
+      // Continue rendering with empty data
+    }
   }, [debouncedSearchQuery, selectedLevel, sortOption, fetchCourses]);
 
   // Get CSS class for level badge - using case-insensitive matching
@@ -329,16 +328,14 @@ export default function CoursesPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 rounded-md bg-gray-200 overflow-hidden">
-                          {course.imageUrl && (
-                            <img 
-                              src={course.imageUrl} 
-                              alt={course.title}
-                              className="h-full w-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = '/images/placeholder-course.jpg';
-                              }}
-                            />
-                          )}
+                          <img 
+                            src={course.imageUrl || '/images/placeholder-course.jpg'} 
+                            alt={course.title || 'Course image'}
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/placeholder-course.jpg';
+                            }}
+                          />
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">{course.title}</div>
@@ -407,13 +404,22 @@ export default function CoursesPage() {
               </div>
               <div className="flex space-x-1">
                 <button 
-                  onClick={() => fetchCourses({
-                    search: debouncedSearchQuery || undefined,
-                    level: selectedLevel === 'all' ? undefined : selectedLevel,
-                    page: Math.max(1, pagination.page - 1),
-                    limit: pagination.pageSize,
-                    ...getSortParams(sortOption)
-                  })}
+                  onClick={() => {
+                    try {
+                      fetchCourses({
+                        search: debouncedSearchQuery || undefined,
+                        level: selectedLevel === 'all' ? undefined : selectedLevel,
+                        page: Math.max(1, pagination.page - 1),
+                        limit: pagination.pageSize,
+                        ...getSortParams(sortOption)
+                      }).catch(err => {
+                        console.error('[CoursesPage] Error when fetching previous page:', err);
+                        // Error is already handled in the hook
+                      });
+                    } catch (error) {
+                      console.error('[CoursesPage] Exception in prev page handler:', error);
+                    }
+                  }}
                   disabled={pagination.page === 1}
                   className={`p-2 ${pagination.page === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'} admin-button`}
                 >
@@ -423,13 +429,22 @@ export default function CoursesPage() {
                 {Array.from({length: pagination.totalPages}, (_, i) => i + 1).map(page => (
                   <button
                     key={page}
-                    onClick={() => fetchCourses({
-                      search: debouncedSearchQuery || undefined,
-                      level: selectedLevel === 'all' ? undefined : selectedLevel,
-                      page: page,
-                      limit: pagination.pageSize,
-                      ...getSortParams(sortOption)
-                    })}
+                    onClick={() => {
+                      try {
+                        fetchCourses({
+                          search: debouncedSearchQuery || undefined,
+                          level: selectedLevel === 'all' ? undefined : selectedLevel,
+                          page: page,
+                          limit: pagination.pageSize,
+                          ...getSortParams(sortOption)
+                        }).catch(err => {
+                          console.error(`[CoursesPage] Error when fetching page ${page}:`, err);
+                          // Error is already handled in the hook
+                        });
+                      } catch (error) {
+                        console.error(`[CoursesPage] Exception in page ${page} handler:`, error);
+                      }
+                    }}
                     className={`w-8 h-8 flex items-center justify-center rounded-md ${
                       pagination.page === page 
                         ? 'bg-indigo-600 text-white' 
@@ -441,13 +456,22 @@ export default function CoursesPage() {
                 ))}
                 
                 <button 
-                  onClick={() => fetchCourses({
-                    search: debouncedSearchQuery || undefined,
-                    level: selectedLevel === 'all' ? undefined : selectedLevel,
-                    page: Math.min(pagination.totalPages, pagination.page + 1),
-                    limit: pagination.pageSize,
-                    ...getSortParams(sortOption)
-                  })}
+                  onClick={() => {
+                    try {
+                      fetchCourses({
+                        search: debouncedSearchQuery || undefined,
+                        level: selectedLevel === 'all' ? undefined : selectedLevel,
+                        page: Math.min(pagination.totalPages, pagination.page + 1),
+                        limit: pagination.pageSize,
+                        ...getSortParams(sortOption)
+                      }).catch(err => {
+                        console.error('[CoursesPage] Error when fetching next page:', err);
+                        // Error is already handled in the hook
+                      });
+                    } catch (error) {
+                      console.error('[CoursesPage] Exception in next page handler:', error);
+                    }
+                  }}
                   disabled={pagination.page === pagination.totalPages}
                   className={`p-2 ${pagination.page === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'} admin-button`}
                 >

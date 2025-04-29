@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useTopics } from '@/client/hooks/topics';
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
 
 interface TopicFormProps {

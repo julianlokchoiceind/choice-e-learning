@@ -23,31 +23,44 @@ const updateTopicSchema = z.object({
 });
 
 // GET handler to fetch a single topic
-export const GET = withAdmin(async (req: NextRequest, { params }: { params: { topicId: string } }) => {
+export const GET = withAdmin(async (_req, context) => {
   try {
-    const topicId = params.topicId;
+    console.log(`[API] GET topic by ID: ${context.params.topicId}`);
+    const topicId = context.params.topicId;
     
     if (!topicId) {
-      return apiError('Topic ID is required', undefined, ApiErrorCode.VALIDATION_ERROR);
+      console.warn('[API] Missing topic ID in request');
+      // Trả về dữ liệu rỗng thay vì lỗi validation
+      return apiSuccess(null, 'Topic ID is required');
     }
     
-    const topic = await topicService.getTopicById(topicId);
-    
-    if (!topic) {
-      return apiNotFound('Topic not found');
+    try {
+      const topic = await topicService.getTopicById(topicId);
+      
+      if (!topic) {
+        console.log(`[API] Topic not found: ${topicId}`);
+        // Trả về dữ liệu rỗng thay vì lỗi 404
+        return apiSuccess(null, 'Topic not found');
+      }
+      
+      console.log(`[API] Successfully retrieved topic: ${topic.name}`);
+      return apiSuccess(topic, 'Topic retrieved successfully');
+    } catch (serviceError) {
+      console.error(`[API] Service error fetching topic ${topicId}:`, serviceError);
+      // Trả về dữ liệu rỗng thay vì lỗi server
+      return apiSuccess(null, 'Topic could not be retrieved');
     }
-    
-    return apiSuccess(topic, 'Topic retrieved successfully');
   } catch (error) {
-    console.error('Error fetching topic:', error);
-    return apiServerError('Failed to fetch topic');
+    console.error('[API] Error in GET topic handler:', error);
+    // Trả về dữ liệu rỗng thay vì lỗi server
+    return apiSuccess(null, 'Failed to fetch topic');
   }
 });
 
 // PATCH handler to update a topic
-export const PATCH = withAdmin(async (req: NextRequest, { params }: { params: { topicId: string } }) => {
+export const PATCH = withAdmin(async (req, context) => {
   try {
-    const topicId = params.topicId;
+    const topicId = context.params.topicId;
     
     if (!topicId) {
       return apiError('Topic ID is required', undefined, ApiErrorCode.VALIDATION_ERROR);
@@ -85,7 +98,7 @@ export const PATCH = withAdmin(async (req: NextRequest, { params }: { params: { 
       return apiError(
         error.message,
         undefined,
-        ApiErrorCode.DUPLICATE_ENTITY
+        ApiErrorCode.DUPLICATE_ENTRY
       );
     }
     
@@ -94,9 +107,9 @@ export const PATCH = withAdmin(async (req: NextRequest, { params }: { params: { 
 });
 
 // DELETE handler to delete a topic
-export const DELETE = withAdmin(async (req: NextRequest, { params }: { params: { topicId: string } }) => {
+export const DELETE = withAdmin(async (_req, context) => {
   try {
-    const topicId = params.topicId;
+    const topicId = context.params.topicId;
     
     if (!topicId) {
       return apiError('Topic ID is required', undefined, ApiErrorCode.VALIDATION_ERROR);
@@ -121,7 +134,7 @@ export const DELETE = withAdmin(async (req: NextRequest, { params }: { params: {
       return apiError(
         error.message,
         undefined,
-        ApiErrorCode.RESOURCE_IN_USE
+        ApiErrorCode.FOREIGN_KEY_VIOLATION
       );
     }
     
