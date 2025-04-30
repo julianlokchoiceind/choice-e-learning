@@ -7,7 +7,8 @@ import {
   PlusIcon, 
   MagnifyingGlassIcon, 
   TrashIcon, 
-  PencilSquareIcon 
+  PencilSquareIcon, 
+  QuestionMarkCircleIcon 
 } from "@heroicons/react/24/outline";
 
 export default function FAQsAdminPage() {
@@ -122,7 +123,10 @@ export default function FAQsAdminPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold mb-6">FAQs Management</h1>
+        <div className="flex items-center mb-6">
+          <QuestionMarkCircleIcon className="h-7 w-7 text-indigo-600 mr-3" />
+          <h1 className="text-2xl font-bold text-gray-800">FAQs Management</h1>
+        </div>
         <Link 
           href="/admin/faqs/new" 
           className="px-4 py-2 rounded-md flex items-center admin-button add-faq-btn"
@@ -262,7 +266,7 @@ export default function FAQsAdminPage() {
         </div>
         
         {/* Pagination */}
-        {pagination.totalPages > 1 && (
+        {pagination && (
           <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
             <div className="text-sm text-gray-600">
               Showing {faqs.length} of {pagination.total || faqs.length} FAQs
@@ -277,7 +281,6 @@ export default function FAQsAdminPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              
               {/* Page numbers */}
               {Array.from({length: pagination.totalPages}, (_, i) => i + 1).map(page => (
                 <button
@@ -292,7 +295,6 @@ export default function FAQsAdminPage() {
                   {page}
                 </button>
               ))}
-              
               <button 
                 onClick={() => handlePageChange(Math.min(pagination.totalPages, currentPage + 1))}
                 disabled={currentPage === pagination.totalPages}

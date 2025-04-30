@@ -128,7 +128,7 @@ export const POST = withAdmin(async (req: Request, context: any) => {
       topics.map(async (topicName) => {
         // Tìm topic theo tên
         let topic = await prisma.topic.findFirst({
-          where: { name: { equals: topicName, mode: 'insensitive' } }
+          where: { name: { equals: topicName } }
         });
         
         // Nếu không tìm thấy, tạo mới
@@ -314,13 +314,13 @@ export const GET = withAdmin(async (req: NextRequest, context: any) => {
     
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } }
+        { title: { contains: search } },
+        { description: { contains: search } }
       ];
     }
     
     if (levelParam && levelParam !== 'all') {
-      where.level = { equals: levelParam.toLowerCase(), mode: 'insensitive' };
+      where.level = { equals: levelParam.toLowerCase() };
     }
 
     // Build orderBy condition for Prisma
@@ -407,6 +407,14 @@ export const GET = withAdmin(async (req: NextRequest, context: any) => {
         createdAt: course.createdAt,
         updatedAt: course.updatedAt
       }));
+      // Nếu sortBy là 'title', sort lại ở tầng Node.js để không phân biệt hoa/thường
+      if (sortBy === 'title') {
+        formattedCourses.sort((a, b) => {
+          return orderDirection === 'asc'
+            ? (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' })
+            : (b.title || '').localeCompare(a.title || '', undefined, { sensitivity: 'base' });
+        });
+      }
       console.log('Formatted courses successfully, count:', formattedCourses.length);
     } catch (formatError) {
       console.error('Error formatting courses:', formatError);

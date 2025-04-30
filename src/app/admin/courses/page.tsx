@@ -124,10 +124,6 @@ export default function CoursesPage() {
         return { sortBy: 'price', sortOrder: 'asc' };
       case 'priceDesc':
         return { sortBy: 'price', sortOrder: 'desc' };
-      case 'mostStudents':
-        return { sortBy: 'students', sortOrder: 'desc' };
-      case 'leastStudents':
-        return { sortBy: 'students', sortOrder: 'asc' };
       case 'title':
         return { sortBy: 'title', sortOrder: 'asc' };
       default:
@@ -289,8 +285,6 @@ export default function CoursesPage() {
               <option value="oldest">Sort By: Oldest</option>
               <option value="priceAsc">Sort By: Price (Low-High)</option>
               <option value="priceDesc">Sort By: Price (High-Low)</option>
-              <option value="mostStudents">Sort By: Most Students</option>
-              <option value="leastStudents">Sort By: Least Students</option>
               <option value="title">Sort By: Title (A-Z)</option>
             </select>
           </div>

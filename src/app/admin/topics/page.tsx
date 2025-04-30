@@ -9,7 +9,8 @@ import {
   TrashIcon, 
   MagnifyingGlassIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
+  FolderIcon
 } from "@heroicons/react/24/outline";
 
 export default function TopicsPage() {
@@ -190,7 +191,10 @@ export default function TopicsPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold mb-6">Topics Management</h1>
+        <div className="flex items-center mb-6">
+          <FolderIcon className="h-7 w-7 text-indigo-600 mr-3" />
+          <h1 className="text-2xl font-bold text-gray-800">Topics Management</h1>
+        </div>
         <Link
           href="/admin/topics/new"
           className="px-4 py-2 rounded-md flex items-center admin-button add-topic-btn"
@@ -350,7 +354,7 @@ export default function TopicsPage() {
         </div>
         
         {/* Pagination */}
-        {pagination && pagination.totalPages > 1 && (
+        {pagination && (
           <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
             <div className="text-sm text-gray-600">
               Showing {topics.length} of {pagination.totalItems} topics
@@ -365,7 +369,6 @@ export default function TopicsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              
               {/* Page numbers */}
               {Array.from({length: pagination.totalPages}, (_, i) => i + 1).map(page => (
                 <button
@@ -380,7 +383,6 @@ export default function TopicsPage() {
                   {page}
                 </button>
               ))}
-              
               <button 
                 onClick={() => handlePageChange(Math.min(pagination.totalPages, currentPage + 1))}
                 disabled={currentPage === pagination.totalPages}

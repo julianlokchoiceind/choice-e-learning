@@ -5,7 +5,7 @@
 
 ✖ 1 problem (1 error, 0 warnings)
 
-(node:46520) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/julianlok/Documents/choice-e-learning/eslint.config.js?mtime=1745939165015 is not specified and it doesn't parse as CommonJS.
+(node:47608) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/julianlok/Documents/choice-e-learning/eslint.config.js?mtime=1745939165015 is not specified and it doesn't parse as CommonJS.
 Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
 To eliminate this warning, add "type": "module" to /Users/julianlok/Documents/choice-e-learning/package.json.
 (Use `node --trace-warnings ...` to show where the warning was created)

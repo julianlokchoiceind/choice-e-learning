@@ -22,4 +22,4 @@ results.push(runCommand('npx tsc --noEmit', 'TypeScript Errors'));
 results.push(runCommand('npx next build', 'Next.js Build Errors'));
 
 fs.writeFileSync(OUTPUT_FILE, results.join('\n'), 'utf-8');
-console.log(`\nAll Errors Reported to NextError.md ${OUTPUT_FILE}`); 
+console.log(`\nAll Errors Reported to nexterror.md ${OUTPUT_FILE}`); 

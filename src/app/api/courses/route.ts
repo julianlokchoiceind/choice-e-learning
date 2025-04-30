@@ -198,7 +198,9 @@ const getCourses = withErrorHandling(async (req: NextRequest) => {
           case 'title':
             valueA = a.title || '';
             valueB = b.title || '';
-            return order === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+            return order === 'asc'
+              ? valueA.localeCompare(valueB, undefined, { sensitivity: 'base' })
+              : valueB.localeCompare(valueA, undefined, { sensitivity: 'base' });
           
           case 'popularity':
             valueA = a.students || 0;
