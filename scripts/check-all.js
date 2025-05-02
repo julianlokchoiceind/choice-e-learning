@@ -1,7 +1,7 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 
-const OUTPUT_FILE = 'NextError.md';
+const OUTPUT_FILE = 'nexterror.md';
 
 function runCommand(cmd, title) {
   let output = '';
