@@ -4,17 +4,17 @@
  */
 
 import { NextRequest } from 'next/server';
-import { uploadFile } from '@/lib/services/file/file-upload-service';
+import { uploadFile } from '@/server/services/file/file-upload-service';
 import { 
   apiSuccess, 
   apiServerError,
   apiError
-} from '@/lib/api/api-response';
-import { ApiErrorCode } from '@/lib/api/api-error-codes';
+} from '@/server/api/api-response';
+import { ApiErrorCode } from '@/server/api/api-error-codes';
 import { 
   withErrorHandling, 
   withAdmin 
-} from '@/lib/api/route-handlers';
+} from '@/server/api/route-handlers';
 
 // Maximum file size allowed (2MB)
 const MAX_FILE_SIZE = 2 * 1024 * 1024;

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/db';
-import { withAdmin } from '@/lib/api/route-handlers';
+import prisma from '@/client/utils/db';
+import { withAdmin } from '@/server/api/route-handlers';
 
 // GET a specific course by ID (admin view)
 export const GET = withAdmin(async (req: NextRequest, context: any) => {

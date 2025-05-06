@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/db';
+import prisma from '@/client/utils/db';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth/auth-options';
-import { checkAndAwardAchievements } from '@/lib/services/achievements/achievement-service';
+import { authOptions } from '@/server/auth/auth-options';
+import { checkAndAwardAchievements } from '@/server/services/achievements/achievement-service';
 
 export async function POST(request: NextRequest) {
   try {

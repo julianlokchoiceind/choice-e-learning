@@ -1,7 +1,7 @@
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { User } from '@/types/user';
+import { User } from '@/shared/types/user';
 
 export function useUserState() {
   const { data: session } = useSession();

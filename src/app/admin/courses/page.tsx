@@ -13,7 +13,7 @@ import {
   BookOpenIcon,
 } from '@heroicons/react/24/outline';
 import { useCourses } from '@/client/hooks/courses';
-import { Course } from '@/types/course';
+import { Course } from '@/shared/types/course';
 
 // Define valid level options to ensure consistency with the backend
 const LEVEL_OPTIONS = [

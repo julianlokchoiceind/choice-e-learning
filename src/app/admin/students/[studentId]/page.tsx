@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { StudentDetail } from "@/components/admin/students/StudentDetail";
+import { StudentDetail } from '@/client/components/admin/students/StudentDetail";
 
 export const metadata: Metadata = {
   title: "Student Details - Admin Dashboard",

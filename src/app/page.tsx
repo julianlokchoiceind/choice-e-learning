@@ -19,8 +19,8 @@ import {
   BookOpenIcon,
   StarIcon
 } from '@heroicons/react/24/outline';
-import { getTotalStudentCount } from '@/lib/services/courses/course-service';
-import ClientComponents from '@/components/home/ClientComponents';
+import { getTotalStudentCount } from '@/server/services/courses/course-service';
+import ClientComponents from '@/client/components/home/ClientComponents';
 
 // Simplified roadmap data without React components
 const roadmapsData = [

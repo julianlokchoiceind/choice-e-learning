@@ -5,22 +5,22 @@
 
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { getCourseById } from '@/lib/services/courses/course-service';
-import prisma from '@/lib/db/prisma-client';
+import { getCourseById } from '@/server/services/courses/course-service';
+import prisma from '@/server/db/prisma-client';
 import { 
   apiSuccess, 
   apiServerError,
   apiError,
   apiNotFound
-} from '@/lib/api/api-response';
-import { ApiErrorCode } from '@/lib/api/api-error-codes';
+} from '@/server/api/api-response';
+import { ApiErrorCode } from '@/server/api/api-error-codes';
 import { 
   createRouteHandler, 
   withErrorHandling, 
   withAdmin,
   RouteContext,
   AuthenticatedContext 
-} from '@/lib/api/route-handlers';
+} from '@/server/api/route-handlers';
 
 // Define the course detail API path parameters
 // Không cần định nghĩa riêng, sử dụng RouteContext từ route-handlers

@@ -5,17 +5,17 @@ import {
   apiServerError,
   apiError,
   apiNotFound
-} from '@/lib/api/api-response';
-import { ApiErrorCode } from '@/lib/api/api-error-codes';
+} from '@/server/api/api-response';
+import { ApiErrorCode } from '@/server/api/api-error-codes';
 import { 
   createRouteHandler, 
   withErrorHandling, 
   withAdmin 
-} from '@/lib/api/route-handlers';
+} from '@/server/api/route-handlers';
 import { 
   getLessonsForCourse,
   createLesson
-} from '@/lib/db/services/lesson-service';
+} from '@/server/db/services/lesson-service';
 
 // Define path parameters
 type CourseLessonsParams = {

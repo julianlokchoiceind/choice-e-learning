@@ -4,23 +4,23 @@
  */
 
 import { NextRequest } from 'next/server';
-import { registerUserSchema } from '@/lib/utils/data/validation';
-import { register } from '@/lib/auth/services/auth-service';
+import { registerUserSchema } from '@/server/utils/data/validation';
+import { register } from '@/server/auth/services/auth-service';
 import { 
   apiCreated, 
   apiError, 
   apiServerError 
-} from '@/lib/api/api-response';
-import { ApiErrorCode } from '@/lib/api/api-error-codes';
+} from '@/server/api/api-response';
+import { ApiErrorCode } from '@/server/api/api-error-codes';
 import { 
   validateRequest 
-} from '@/lib/api/request-parser';
+} from '@/server/api/request-parser';
 import { 
   withErrorHandling 
-} from '@/lib/api/route-handlers';
+} from '@/server/api/route-handlers';
 import { 
   documentEndpoint 
-} from '@/lib/api/api-docs';
+} from '@/server/api/api-docs';
 
 // Document the API endpoint
 documentEndpoint({

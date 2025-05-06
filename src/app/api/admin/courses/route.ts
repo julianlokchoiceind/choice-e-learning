@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/db/prisma-client';
-import { withAdmin } from '@/lib/api/route-handlers';
+import prisma from '@/server/db/prisma-client';
+import { withAdmin } from '@/server/api/route-handlers';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
 

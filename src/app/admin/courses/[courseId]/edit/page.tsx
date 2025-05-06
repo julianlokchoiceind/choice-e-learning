@@ -11,8 +11,8 @@ import {
   PlusIcon
 } from '@heroicons/react/24/outline';
 
-import { TopicSelector } from '@/components/admin/courses';
-import FileUpload from '@/components/ui/file/FileUpload';
+import { TopicSelector } from '@/client/components/admin/courses';
+import FileUpload from '@/client/components/ui/file/FileUpload';
 
 interface CourseFormData {
   title: string;

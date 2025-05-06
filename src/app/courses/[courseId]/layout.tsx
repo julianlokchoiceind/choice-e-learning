@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import React from 'react';
 import { notFound } from 'next/navigation';
-import prisma from '@/lib/db';
+import prisma from '@/client/utils/db';
 
 // Generate dynamic metadata for the course detail page
 export async function generateMetadata(

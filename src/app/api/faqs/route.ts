@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
-import { apiSuccess, apiError } from "@/lib/api/api-response";
-import { ApiErrorCode } from "@/lib/api/api-error-codes";
-import { faqService } from "@/lib/services/faq/faq-service";
+import { apiSuccess, apiError } from '@/server/api/api-response";
+import { ApiErrorCode } from '@/server/api/api-error-codes";
+import { faqService } from '@/server/services/faq/faq-service";
 
 // GET - Get all public FAQs with filtering and pagination
 export async function GET(req: NextRequest) {

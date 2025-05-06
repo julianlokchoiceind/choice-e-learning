@@ -5,13 +5,13 @@
 
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import prisma from '@/lib/db';
-import { createRouteHandler, withAuth } from '@/lib/api/route-handlers';
-import { apiSuccess, apiError, apiUpdated, apiNotFound } from '@/lib/api/api-response';
-import { validateRequest } from '@/lib/api/request-parser';
-import { comparePasswords, hashPassword } from '@/lib/auth/utils/password-utils';
-import { documentEndpoint } from '@/lib/api/api-docs';
-import { ApiErrorCode } from '@/lib/api/api-error-codes';
+import prisma from '@/client/utils/db';
+import { createRouteHandler, withAuth } from '@/server/api/route-handlers';
+import { apiSuccess, apiError, apiUpdated, apiNotFound } from '@/server/api/api-response';
+import { validateRequest } from '@/server/api/request-parser';
+import { comparePasswords, hashPassword } from '@/server/auth/utils/password-utils';
+import { documentEndpoint } from '@/server/api/api-docs';
+import { ApiErrorCode } from '@/server/api/api-error-codes';
 
 // Schema for profile update validation
 const profileUpdateSchema = z.object({

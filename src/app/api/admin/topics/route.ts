@@ -5,23 +5,23 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { topicService } from '@/lib/services/topics/topic-service';
-import { CreateTopicParams } from '@/types/topics';
+import { topicService } from '@/server/services/topics/topic-service';
+import { CreateTopicParams } from '@/shared/types/topics';
 import { 
   apiSuccess, 
   apiServerError,
   apiError
-} from '@/lib/api/api-response';
-import { ApiErrorCode } from '@/lib/api/api-error-codes';
+} from '@/server/api/api-response';
+import { ApiErrorCode } from '@/server/api/api-error-codes';
 import { 
   withAdmin, 
   withErrorHandling,
   AuthenticatedContext
-} from '@/lib/api/route-handlers';
+} from '@/server/api/route-handlers';
 import { 
   parseQueryParams,
   parseJsonBody
-} from '@/lib/api/request-parser';
+} from '@/server/api/request-parser';
 // Không cần import getAuthSession vì đã sử dụng middleware
 
 // Define the schema for query parameters

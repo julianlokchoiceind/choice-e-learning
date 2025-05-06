@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { apiSuccess, apiError, apiValidationError, apiNotFound } from "@/lib/api/api-response";
-import { withAdmin, AuthenticatedContext } from "@/lib/api/route-handlers";
+import { apiSuccess, apiError, apiValidationError, apiNotFound } from '@/server/api/api-response";
+import { withAdmin, AuthenticatedContext } from '@/server/api/route-handlers";
 import { z } from "zod";
-import { parseRequest } from "@/lib/api/request-parser";
-import { studentService } from "@/lib/services/students/student-service";
-import { ApiErrorCode } from "@/lib/api/api-error-codes";
+import { parseRequest } from '@/server/api/request-parser";
+import { studentService } from '@/server/services/students/student-service";
+import { ApiErrorCode } from '@/server/api/api-error-codes";
 
 // Schema for updating a student
 const updateStudentSchema = z.object({

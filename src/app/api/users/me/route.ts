@@ -1,13 +1,13 @@
 import { NextRequest } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth/auth-options';
-import { findUserById } from '@/lib/db/services/user-service';
+import { authOptions } from '@/server/auth/auth-options';
+import { findUserById } from '@/server/db/services/user-service';
 import { 
   apiSuccess, 
   apiUnauthorized, 
   apiNotFound, 
   apiServerError 
-} from '@/lib/api/api-response';
+} from '@/server/api/api-response';
 
 /**
  * GET handler to fetch current user data

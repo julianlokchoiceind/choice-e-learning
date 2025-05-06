@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
-import { Topic, TopicFilter } from '@/types/topics';
+import { Topic, TopicFilter } from '@/shared/types/topics';
 
 // Using TopicFilter from @/types/topics
 

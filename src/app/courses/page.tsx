@@ -3,7 +3,7 @@ import { Metadata } from "next";
 // Add the keyframes for animations in global CSS
 import "@/styles/animations.css";
 import Image from 'next/image';
-import { CoursesSection } from "@/components/courses";
+import { CoursesSection } from '@/client/components/courses";
 
 export const metadata: Metadata = {
   title: "Courses | Choice E-Learning",

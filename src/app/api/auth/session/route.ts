@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth/auth-options';
+import { authOptions } from '@/server/auth/auth-options';
 
 /**
  * GET endpoint to retrieve the current user's session information

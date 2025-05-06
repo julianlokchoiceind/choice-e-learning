@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
-import { Course, CourseListItem } from '@/types/course';
+import { Course, CourseListItem } from '@/shared/types/course';
 
 interface CourseFilter {
   search?: string;

@@ -5,25 +5,25 @@
 
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { getAllCourses } from '@/lib/services/courses/course-service';
-import prisma from '@/lib/db/prisma-client';
+import { getAllCourses } from '@/server/services/courses/course-service';
+import prisma from '@/server/db/prisma-client';
 import { 
   apiSuccess, 
   apiServerError,
   apiError
-} from '@/lib/api/api-response';
-import { ApiErrorCode } from '@/lib/api/api-error-codes';
+} from '@/server/api/api-response';
+import { ApiErrorCode } from '@/server/api/api-error-codes';
 import { 
   createRouteHandler, 
   withErrorHandling, 
   withAdmin 
-} from '@/lib/api/route-handlers';
+} from '@/server/api/route-handlers';
 import { 
   parseQueryParams 
-} from '@/lib/api/request-parser';
+} from '@/server/api/request-parser';
 import { 
   documentEndpoint 
-} from '@/lib/api/api-docs';
+} from '@/server/api/api-docs';
 
 // Define the schema for query parameters with proper input/output types
 const courseQueryParamsSchema = z.object({

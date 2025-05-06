@@ -5,13 +5,13 @@
 
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { topicService } from '@/lib/services/topics/topic-service';
+import { topicService } from '@/server/services/topics/topic-service';
 import { 
   apiSuccess, 
   apiServerError
-} from '@/lib/api/api-response';
-import { withErrorHandling } from '@/lib/api/route-handlers';
-import { parseQueryParams } from '@/lib/api/request-parser';
+} from '@/server/api/api-response';
+import { withErrorHandling } from '@/server/api/route-handlers';
+import { parseQueryParams } from '@/server/api/request-parser';
 
 // Define the schema for query parameters
 const topicQueryParamsSchema = z.object({

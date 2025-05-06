@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserAchievements, checkAndAwardAchievements } from '@/lib/services/achievements/achievement-service';
+import { getUserAchievements, checkAndAwardAchievements } from '@/server/services/achievements/achievement-service';
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth/auth-options';
+import { authOptions } from '@/server/auth/auth-options';
 
 export async function GET(request: NextRequest) {
   try {

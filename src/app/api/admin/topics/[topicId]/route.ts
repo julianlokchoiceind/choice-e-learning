@@ -5,15 +5,15 @@
 
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import { topicService } from '@/lib/services/topics/topic-service';
+import { topicService } from '@/server/services/topics/topic-service';
 import { 
   apiSuccess, 
   apiServerError,
   apiError,
   apiNotFound
-} from '@/lib/api/api-response';
-import { ApiErrorCode } from '@/lib/api/api-error-codes';
-import { withAdmin } from '@/lib/api/route-handlers';
+} from '@/server/api/api-response';
+import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { withAdmin } from '@/server/api/route-handlers';
 
 // Define the schema for topic update
 const updateTopicSchema = z.object({

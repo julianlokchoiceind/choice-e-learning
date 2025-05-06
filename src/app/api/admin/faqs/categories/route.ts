@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
-import { apiSuccess, apiError } from "@/lib/api/api-response";
-import { withAdmin } from "@/lib/api/route-handlers";
-import { faqService } from "@/lib/services/faq/faq-service";
-import { ApiErrorCode } from "@/lib/api/api-error-codes";
+import { apiSuccess, apiError } from '@/server/api/api-response";
+import { withAdmin } from '@/server/api/route-handlers";
+import { faqService } from '@/server/services/faq/faq-service";
+import { ApiErrorCode } from '@/server/api/api-error-codes";
 
 // GET - Get all distinct FAQ categories
 export const GET = withAdmin(async (_req) => {

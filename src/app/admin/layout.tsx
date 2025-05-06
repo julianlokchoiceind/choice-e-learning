@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import AdminSidebar from '@/components/admin/AdminSidebar';
+import AdminSidebar from '@/client/components/admin/AdminSidebar';
 import { MagnifyingGlassIcon, BellIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 

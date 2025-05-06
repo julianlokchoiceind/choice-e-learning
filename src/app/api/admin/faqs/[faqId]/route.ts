@@ -1,10 +1,10 @@
 import { NextRequest } from "next/server";
-import { apiSuccess, apiError, apiValidationError, apiNotFound } from "@/lib/api/api-response";
-import { withAdmin } from "@/lib/api/route-handlers";
+import { apiSuccess, apiError, apiValidationError, apiNotFound } from '@/server/api/api-response";
+import { withAdmin } from '@/server/api/route-handlers";
 import { z } from "zod";
-import { parseRequest } from "@/lib/api/request-parser";
-import { faqService } from "@/lib/services/faq/faq-service";
-import { ApiErrorCode } from "@/lib/api/api-error-codes";
+import { parseRequest } from '@/server/api/request-parser";
+import { faqService } from '@/server/services/faq/faq-service";
+import { ApiErrorCode } from '@/server/api/api-error-codes";
 
 // Schema for updating a FAQ
 const updateFAQSchema = z.object({

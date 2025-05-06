@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
-import { apiSuccess, apiError } from '@/lib/api/api-response';
-import { ApiErrorCode } from '@/lib/api/api-error-codes';
-import { topicService } from '@/lib/services/topics/topic-service';
+import { apiSuccess, apiError } from '@/server/api/api-response';
+import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { topicService } from '@/server/services/topics/topic-service';
 
 /**
  * GET handler for course topics

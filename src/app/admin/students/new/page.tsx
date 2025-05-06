@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { StudentForm } from "@/components/admin/students/StudentForm";
+import { StudentForm } from '@/client/components/admin/students/StudentForm";
 
 export const metadata: Metadata = {
   title: "Add New Student - Admin Dashboard",

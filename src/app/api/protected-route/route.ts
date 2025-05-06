@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
-import { apiSuccess } from '@/lib/api/api-response';
-import { withAuth } from '@/lib/api/route-handlers';
+import { apiSuccess } from '@/server/api/api-response';
+import { withAuth } from '@/server/api/route-handlers';
 
 export const GET = withAuth(async (_req, context) => {
   return apiSuccess({
