@@ -27,8 +27,7 @@ type CourseLessonsParams = {
 // GET handler to fetch all lessons for a course
 export const GET = withErrorHandling(async (
   _req: NextRequest,
-  context: any
-) => {
+  context) => {
   const { courseId } = context.params;
   
   try {
@@ -43,8 +42,7 @@ export const GET = withErrorHandling(async (
 // POST handler to create a new lesson (admin only)
 export const POST = withAdmin(async (
   req: NextRequest, 
-  context: any
-) => {
+  context) => {
   const { courseId } = context.params;
   
   try {

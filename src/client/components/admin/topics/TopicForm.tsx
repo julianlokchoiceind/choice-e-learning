@@ -8,7 +8,7 @@ interface TopicFormProps {
     description: string;
     isActive: boolean;
   };
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data) => Promise<void>;
   isLoading?: boolean;
   courseCount?: number;
 }
@@ -101,25 +101,25 @@ export const TopicForm = ({
         description: formData.description.trim() || undefined,
         isActive: formData.isActive
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error submitting topic:', err);
       setServerError(err.response?.data?.error || 'Failed to submit topic. Please try again.');
     }
   };
   
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-100 p-6">
+    <div className='bg-white rounded-lg shadow-md border border-gray-100 p-6'>
       {/* Server error message */}
       {serverError && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        <div className='mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded'>
           {serverError}
         </div>
       )}
       
       {/* Course usage warning */}
       {topicId && courseCount > 0 && (
-        <div className="mb-6 bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded flex items-start">
-          <ExclamationCircleIcon className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
+        <div className='mb-6 bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded flex items-start'>
+          <ExclamationCircleIcon className='h-5 w-5 mr-2 mt-0.5 flex-shrink-0' />
           <p>
             This topic is currently used by <strong>{courseCount} course{courseCount !== 1 ? 's' : ''}</strong>. 
             Changes to the topic name or status will affect these courses.
@@ -127,15 +127,15 @@ export const TopicForm = ({
         </div>
       )}
       
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className='space-y-6'>
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            Topic Name <span className="text-red-500">*</span>
+          <label htmlFor='name' className='block text-sm font-medium text-gray-700 mb-1'>
+            Topic Name <span className='text-red-500'>*</span>
           </label>
           <input
-            type="text"
-            id="name"
-            name="name"
+            type='text'
+            id='name'
+            name='name'
             value={formData.name}
             onChange={handleChange}
             className={`w-full px-3 py-2 border ${
@@ -144,54 +144,54 @@ export const TopicForm = ({
             disabled={isLoading}
           />
           {formErrors.name && (
-            <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
+            <p className='mt-1 text-sm text-red-600'>{formErrors.name}</p>
           )}
         </div>
         
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor='description' className='block text-sm font-medium text-gray-700 mb-1'>
             Description
           </label>
           <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            rows={4}
+            id='description'
+            name='description'
+            value={"formData.description"}
+            onChange={"handleChange"}
+            rows={"4"}
             className={`w-full px-3 py-2 border ${
               formErrors.description ? 'border-red-500' : 'border-gray-300'
             } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-            disabled={isLoading}
+            disabled={"isLoading"}
           ></textarea>
           {formErrors.description && (
-            <p className="mt-1 text-sm text-red-600">{formErrors.description}</p>
+            <p className='mt-1 text-sm text-red-600'>{formErrors.description}</p>
           )}
         </div>
         
-        <div className="flex items-center">
+        <div className='flex items-center'>
           <input
-            type="checkbox"
-            id="isActive"
-            name="isActive"
+            type='checkbox'
+            id='isActive'
+            name='isActive'
             checked={formData.isActive}
             onChange={(e) => 
               setFormData(prev => ({ ...prev, isActive: e.target.checked }))
             }
-            className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+            className='h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500'
             disabled={isLoading}
           />
-          <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
+          <label htmlFor='isActive' className='ml-2 block text-sm text-gray-700'>
             Active
           </label>
         </div>
         
-        <div className="flex justify-end space-x-4 pt-4">
+        <div className='flex justify-end space-x-4 pt-4'>
           <button
-            type="submit"
-            disabled={isLoading}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            type='submit'
+            disabled={"isLoading"}
+            className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed'
           >
-            {isLoading ? (topicId ? "Saving..." : "Creating...") : (topicId ? "Save Changes" : "Create Topic")}
+            {isLoading ? (topicId ? 'Saving...' : 'Creating...') : (topicId ? 'Save Changes' : 'Create Topic')}
           </button>
         </div>
       </form>

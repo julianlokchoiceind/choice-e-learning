@@ -37,12 +37,12 @@ export default function TopicsFilter({ selectedTopics, onChange }: TopicsFilterP
   
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
+      <label className='block text-sm font-medium text-gray-700 mb-1'>
         Topics ({selectedTopics.length} selected)
       </label>
-      <div className="relative">
-        <details className="w-full">
-          <summary className="px-3 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 flex justify-between items-center">
+      <div className='relative'>
+        <details className='w-full'>
+          <summary className='px-3 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 flex justify-between items-center'>
             <span>
               {selectedTopics.length > 0 
                 ? selectedTopics.length > 1 
@@ -50,33 +50,33 @@ export default function TopicsFilter({ selectedTopics, onChange }: TopicsFilterP
                   : selectedTopics[0]
                 : 'Select topics'}
             </span>
-            <FunnelIcon className="h-4 w-4 text-gray-500" />
+            <FunnelIcon className='h-4 w-4 text-gray-500' />
           </summary>
-          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+          <div className='absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg'>
             {loading && topicNames.length === 0 ? (
-              <div className="p-4 text-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-                <p className="mt-2 text-sm text-gray-600">Loading topics...</p>
+              <div className='p-4 text-center'>
+                <div className='animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500 mx-auto'></div>
+                <p className='mt-2 text-sm text-gray-600'>Loading topics...</p>
               </div>
             ) : (
-              <div className="p-2 max-h-60 overflow-y-auto">
+              <div className='p-2 max-h-60 overflow-y-auto'>
                 {topicNames.length > 0 ? (
                   topicNames.map((topicName) => (
-                    <div key={topicName} className="flex items-center p-2 hover:bg-gray-100 rounded">
+                    <div key={topicName} className='flex items-center p-2 hover:bg-gray-100 rounded'>
                       <input
-                        type="checkbox"
+                        type='checkbox'
                         id={`topic-${topicName}`}
                         checked={selectedTopics.includes(topicName)}
                         onChange={() => handleTopicChange(topicName)}
-                        className="mr-2"
+                        className='mr-2'
                       />
-                      <label htmlFor={`topic-${topicName}`} className="cursor-pointer text-gray-900 flex-grow">
+                      <label htmlFor={`topic-${topicName}`} className='cursor-pointer text-gray-900 flex-grow'>
                         {topicName}
                       </label>
                     </div>
                   ))
                 ) : (
-                  <div className="p-4 text-center text-gray-500">
+                  <div className='p-4 text-center text-gray-500'>
                     {error ? `Error: ${error}` : 'No topics available'}
                   </div>
                 )}

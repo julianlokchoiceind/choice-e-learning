@@ -1,5 +1,12 @@
-const fs = require('fs');
-const path = require('path');
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// Lấy __dirname và __filename trong ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+import fs from 'fs';
+import path from 'path';
 
 const prismaDir = path.join(__dirname, '..', 'node_modules', '.prisma');
 

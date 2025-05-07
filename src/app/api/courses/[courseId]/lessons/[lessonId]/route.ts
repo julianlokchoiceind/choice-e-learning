@@ -29,8 +29,7 @@ type LessonDetailParams = {
 // GET handler to fetch a specific lesson
 export const GET = withErrorHandling(async (
   _req: NextRequest,
-  context: any
-) => {
+  context) => {
   const { lessonId } = context.params;
   
   try {
@@ -50,8 +49,7 @@ export const GET = withErrorHandling(async (
 // PUT handler to update a lesson (admin only)
 export const PUT = withAdmin(async (
   req: NextRequest, 
-  context: any
-) => {
+  context) => {
   const { lessonId, courseId } = context.params;
   
   try {
@@ -120,8 +118,7 @@ export const PUT = withAdmin(async (
 // DELETE handler to delete a lesson (admin only)
 export const DELETE = withAdmin(async (
   _req: NextRequest, 
-  context: any
-) => {
+  context) => {
   const { lessonId, courseId } = context.params;
   
   try {

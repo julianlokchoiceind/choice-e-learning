@@ -18,28 +18,28 @@ const getNotificationStyles = (type: NotificationType) => {
     case 'success':
       return {
         container: 'bg-green-500',
-        icon: <CheckCircleIcon className="h-6 w-6 text-white" aria-hidden="true" />,
+        icon: <CheckCircleIcon className='h-6 w-6 text-white' aria-hidden='true' />,
         textColor: 'text-white',
         boxShadow: 'shadow-[0_8px_16px_rgba(34,197,94,0.3)]'
       };
     case 'error':
       return {
         container: 'bg-red-500',
-        icon: <XCircleIcon className="h-6 w-6 text-white" aria-hidden="true" />,
+        icon: <XCircleIcon className='h-6 w-6 text-white' aria-hidden='true' />,
         textColor: 'text-white',
         boxShadow: 'shadow-[0_8px_16px_rgba(239,68,68,0.3)]'
       };
     case 'info':
       return {
         container: 'bg-indigo-500',
-        icon: <InformationCircleIcon className="h-6 w-6 text-white" aria-hidden="true" />,
+        icon: <InformationCircleIcon className='h-6 w-6 text-white' aria-hidden='true' />,
         textColor: 'text-white',
         boxShadow: 'shadow-[0_8px_16px_rgba(99,102,241,0.3)]'
       };
     default:
       return {
         container: 'bg-gray-500',
-        icon: <InformationCircleIcon className="h-6 w-6 text-white" aria-hidden="true" />,
+        icon: <InformationCircleIcon className='h-6 w-6 text-white' aria-hidden='true' />,
         textColor: 'text-white',
         boxShadow: 'shadow-lg'
       };
@@ -81,11 +81,11 @@ const Notification: React.FC<NotificationProps> = ({
         backdrop-blur-sm
       `}
     >
-      <div className="flex items-center">
-        <div className="flex-shrink-0">
+      <div className='flex items-center'>
+        <div className='flex-shrink-0'>
           {styles.icon}
         </div>
-        <div className="ml-3 mr-8">
+        <div className='ml-3 mr-8'>
           <p className={`text-base font-bold ${styles.textColor}`}>{message}</p>
           {details && (
             <p className={`mt-1 text-sm ${styles.textColor} opacity-90`}>{details}</p>
@@ -94,12 +94,12 @@ const Notification: React.FC<NotificationProps> = ({
         
         {onClose && (
           <button
-            type="button"
-            className="absolute top-4 right-4 bg-transparent rounded-md text-white hover:bg-white/10 focus:outline-none"
+            type='button'
+            className='absolute top-4 right-4 bg-transparent rounded-md text-white hover:bg-white/10 focus:outline-none'
             onClick={onClose}
           >
-            <span className="sr-only">Close</span>
-            <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+            <span className='sr-only'>Close</span>
+            <XMarkIcon className='h-5 w-5' aria-hidden='true' />
           </button>
         )}
       </div>

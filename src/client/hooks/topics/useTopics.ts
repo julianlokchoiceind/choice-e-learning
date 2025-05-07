@@ -29,7 +29,7 @@ interface TopicResponsePaginated {
 type TopicResponse = TopicResponseSimple | TopicResponsePaginated;
 
 // Type guard to check if response has pagination metadata
-function isPaginatedResponse(response: any): response is TopicResponsePaginated {
+function isPaginatedResponse(response): response is TopicResponsePaginated {
   return response && 'meta' in response && !!response.meta?.pagination;
 }
 
@@ -136,7 +136,7 @@ function useTopics(isAdmin = false) {
             }
           };
         }
-      } catch (apiError: any) {
+      } catch (apiError) {
         // Log detailed error information
         console.error('[useTopics] API call failed with error:', apiError);
         if (apiError.response) {
@@ -187,7 +187,7 @@ function useTopics(isAdmin = false) {
       }
       
       return response.data;
-    } catch (err: any) {
+    } catch (err) {
       console.error('[useTopics] Error fetching topics:', err);
       // Provide more detailed error information but don't throw
       const errorMessage = err.response?.data?.error || err.message || 'Failed to fetch topics';
@@ -239,7 +239,7 @@ function useTopics(isAdmin = false) {
       try {
         response = await axios.get<{ success: boolean, data: Topic }>(`${baseUrl}/${id}`);
         console.log('[useTopics] Topic fetch response:', response.data.success);
-      } catch (apiError: any) {
+      } catch (apiError) {
         console.error('[useTopics] API error fetching topic:', apiError);
         if (apiError.response) {
           console.error('[useTopics] Response status:', apiError.response.status);
@@ -323,7 +323,7 @@ function useTopics(isAdmin = false) {
         console.error('[useTopics] API returned success=false:', response.data);
         throw new Error(response.data?.error || 'Failed to create topic');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('[useTopics] Error creating topic:', err);
       
       // Log chi tiết hơn về response error
@@ -368,7 +368,7 @@ function useTopics(isAdmin = false) {
       } else {
         throw new Error('Failed to update topic');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error updating topic:', err);
       setError(err.response?.data?.error || 'Failed to update topic');
       throw err;
@@ -397,7 +397,7 @@ function useTopics(isAdmin = false) {
       } else {
         throw new Error('Failed to delete topic');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error deleting topic:', err);
       setError(err.response?.data?.error || 'Failed to delete topic');
       throw err;

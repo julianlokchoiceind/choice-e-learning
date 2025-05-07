@@ -34,7 +34,7 @@ export default async function Page({ params }: PageProps) {
   }
   
   return (
-    <div className="page-container">
+    <div className='page-container'>
       <h1>{course.title}</h1>
       
       <Suspense fallback={<LoadingState />}>

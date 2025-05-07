@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function LessonsPage() {
   return (
-    <div className="admin-lessons-page">
+    <div className='admin-lessons-page'>
       <h1>Manage Lessons</h1>
       <LessonList />
     </div>

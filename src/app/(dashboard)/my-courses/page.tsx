@@ -1,34 +1,45 @@
 import { Suspense } from 'react';
-import { EnrolledCoursesSection } from '@/client/components/dashboard/EnrolledCoursesSection';
-import { LoadingState } from '@/client/components/common/LoadingState';
-import { getUserCourses } from '@/server/services/dashboard/course-service';
-import { notFound } from 'next/navigation';
+import { getUserCourses } from '@/server/services/courses/course-service';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/server/auth/auth-options';
+import { redirect } from 'next/navigation';
+import { CourseCard } from '@/client/components/courses/CourseCard';
 
-export const metadata = {
-  title: 'My Courses | Choice E-Learning',
-  description: 'View your enrolled courses and track your learning progress',
-};
-
-interface PageProps {
-  params: {
-    : string;
-  };
-}
-
-export async function generateMetadata({ params }: PageProps) {
-  // Metadata implementation
-}
-
-export default async function Page({ params }: PageProps) {
+export default async function MyCoursesPage() {
+  const session = await getServerSession(authOptions);
   
+  if (!session?.user) {
+    redirect('/login');
+  }
   
-  
+  const userId = session.user.id;
+  const enrolledCourses = await getUserCourses(userId);
   
   return (
-    <div className="page-container">
-      <h1>My Courses</h1>
-      <Suspense fallback={<LoadingState />}>
-        <EnrolledCoursesSection />
+    <div className='my-courses-page'>
+      <h1>Khóa học của tôi</h1>
+      
+      <Suspense fallback={<div>Đang tải khóa học...</div>}>
+        <div className='enrolled-courses'>
+          {enrolledCourses.length > 0 ? (
+            <div className='course-grid'>
+              {enrolledCourses.map((course) => (
+                <CourseCard 
+                  key={course.id} 
+                  course={course} 
+                  isEnrolled={true} 
+                />
+              ))}
+            </div>
+          ) : (
+            <div className='empty-state'>
+              <p>Bạn chưa đăng ký khóa học nào.</p>
+              <a href='/courses' className='button primary'>
+                Khám phá khóa học
+              </a>
+            </div>
+          )}
+        </div>
       </Suspense>
     </div>
   );

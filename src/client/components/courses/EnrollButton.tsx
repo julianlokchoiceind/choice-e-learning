@@ -41,7 +41,7 @@ export const EnrollButton = ({ courseId, isEnrolled = false }: EnrollButtonProps
     return (
       <a
         href={`/learn/${courseId}`}
-        className="button primary full-width"
+        className='button primary full-width'
       >
         Tiếp tục học
       </a>
@@ -50,9 +50,9 @@ export const EnrollButton = ({ courseId, isEnrolled = false }: EnrollButtonProps
   
   return (
     <button
-      onClick={handleEnroll}
-      disabled={isLoading}
-      className="button primary full-width"
+      onClick={"handleEnroll"}
+      disabled={"isLoading"}
+      className='button primary full-width'
     >
       {isLoading ? 'Đang xử lý...' : 'Đăng ký khóa học'}
     </button>

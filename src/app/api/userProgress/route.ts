@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/client/utils/db';
+import prisma from '@/server/db/prisma-client';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/server/auth/auth-options';
 import { checkAndAwardAchievements } from '@/server/services/achievements/achievement-service';

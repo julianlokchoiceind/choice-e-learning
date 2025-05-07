@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/client/utils/db';
+import prisma from '@/server/db/prisma-client';
 import { withAdmin } from '@/server/api/route-handlers';
 
 // GET a specific course by ID (admin view)
-export const GET = withAdmin(async (req: NextRequest, context: any) => {
+export const GET = withAdmin(async (req: NextRequest, context) => {
   try {
     const courseId = req.nextUrl.pathname.split('/').pop();
     
@@ -72,7 +72,7 @@ export const GET = withAdmin(async (req: NextRequest, context: any) => {
 });
 
 // PUT - Update a course
-export const PUT = withAdmin(async (req: NextRequest, context: any) => {
+export const PUT = withAdmin(async (req: NextRequest, context) => {
   try {
     const courseId = req.nextUrl.pathname.split('/').pop();
     
@@ -212,7 +212,7 @@ export const PUT = withAdmin(async (req: NextRequest, context: any) => {
 });
 
 // DELETE - Delete a course
-export const DELETE = withAdmin(async (req: NextRequest, context: any) => {
+export const DELETE = withAdmin(async (req: NextRequest, context) => {
   try {
     const courseId = req.nextUrl.pathname.split('/').pop();
     

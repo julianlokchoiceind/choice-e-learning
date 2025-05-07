@@ -1,6 +1,6 @@
-"use server";
+'use server';
 
-import prisma from '@/client/utils/db';
+import prisma from '@/server/db/prisma-client';
 import { Prisma } from '@prisma/client';
 
 /**
@@ -65,7 +65,7 @@ export async function findMany<T extends keyof typeof prisma>(
  */
 export async function findOne<T extends keyof typeof prisma>(
   model: T,
-  where: any,
+  where,
   options: any = {}
 ): Promise<any | null> {
   try {
@@ -89,8 +89,7 @@ export async function findOne<T extends keyof typeof prisma>(
  */
 export async function createRecord<T extends keyof typeof prisma>(
   model: T,
-  data: any
-): Promise<any | null> {
+  data): Promise<any | null> {
   try {
     const record = await (prisma[model] as any).create({
       data
@@ -113,8 +112,7 @@ export async function createRecord<T extends keyof typeof prisma>(
 export async function updateRecord<T extends keyof typeof prisma>(
   model: T,
   id: string,
-  data: any
-): Promise<any | null> {
+  data): Promise<any | null> {
   try {
     // Validate ID format for MongoDB
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {

@@ -11,7 +11,7 @@ export default function CoursesLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="courses-layout">
+    <div className='courses-layout'>
       {children}
     </div>
   );

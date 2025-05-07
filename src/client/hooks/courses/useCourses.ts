@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
-import { Course, CourseListItem } from '@/shared/types/course';
+import { Course, CourseListItem } from '@/shared/types/courses/course';
 
 interface CourseFilter {
   search?: string;
@@ -113,7 +113,7 @@ function useCourses(isAdmin = false) {
           // Return empty default values instead of throwing
           return emptyResponse;
         }
-      } catch (apiError: any) {
+      } catch (apiError) {
         // Log đầy đủ thông tin lỗi
         console.error('[useCourses] API call failed with error:', apiError);
         if (apiError.response) {
@@ -314,7 +314,7 @@ function useCourses(isAdmin = false) {
   /**
    * Create a new course (admin only)
    */
-  const createCourse = useCallback(async (data: any): Promise<Course | CourseListItem | null> => {
+  const createCourse = useCallback(async (data): Promise<Course | CourseListItem | null> => {
     if (!isAdmin) {
       setError('Unauthorized');
       return null;
@@ -343,7 +343,7 @@ function useCourses(isAdmin = false) {
   /**
    * Update an existing course (admin only)
    */
-  const updateCourse = useCallback(async (id: string, data: any): Promise<Course | CourseListItem | null> => {
+  const updateCourse = useCallback(async (id: string, data): Promise<Course | CourseListItem | null> => {
     if (!isAdmin) {
       setError('Unauthorized');
       return null;

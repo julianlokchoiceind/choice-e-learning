@@ -29,8 +29,7 @@ import {
 // GET handler to fetch a specific course by ID
 export const GET = withErrorHandling(async (
   _req: NextRequest,
-  context: RouteContext
-) => {
+  context: RouteContext) => {
   const courseId = context.params.courseId;
   
   try {
@@ -67,8 +66,7 @@ export const GET = withErrorHandling(async (
 // PUT handler for updating a course (admin only)
 export const PUT = withAdmin(async (
   req: NextRequest, 
-  context: AuthenticatedContext
-) => {
+  context: AuthenticatedContext) => {
   const courseId = context.params.courseId;
   
   try {
@@ -130,8 +128,7 @@ export const PUT = withAdmin(async (
 // DELETE handler for deleting a course (admin only)
 export const DELETE = withAdmin(async (
   _req: NextRequest, 
-  context: AuthenticatedContext
-) => {
+  context: AuthenticatedContext) => {
   const courseId = context.params.courseId;
   
   try {

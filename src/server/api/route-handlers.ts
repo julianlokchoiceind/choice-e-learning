@@ -34,14 +34,12 @@ export function extractRouteParam(context: RouteContext, paramName: string): str
 // Kiểu hàm xử lý route cơ bản
 export type HandlerFunction = (
   req: NextRequest,
-  context: RouteContext
-) => Promise<NextResponse | undefined>;
+  context: RouteContext) => Promise<NextResponse | undefined>;
 
 // Kiểu hàm xử lý route đã xác thực
 export type AuthenticatedHandlerFunction = (
   req: NextRequest,
-  context: AuthenticatedContext
-) => Promise<NextResponse | undefined>;
+  context: AuthenticatedContext) => Promise<NextResponse | undefined>;
 
 /**
  * Wrap a route handler with consistent error handling

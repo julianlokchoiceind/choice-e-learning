@@ -90,7 +90,7 @@ export const PATCH = withAdmin(async (req, context) => {
     const updatedTopic = await topicService.updateTopic(topicId, validation.data);
     
     return apiSuccess(updatedTopic, 'Topic updated successfully');
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error updating topic:', error);
     
     // Check for duplicate name error
@@ -126,7 +126,7 @@ export const DELETE = withAdmin(async (_req, context) => {
     await topicService.deleteTopic(topicId);
     
     return apiSuccess({ success: true }, 'Topic deleted successfully');
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error deleting topic:', error);
     
     // Check if the topic is associated with courses

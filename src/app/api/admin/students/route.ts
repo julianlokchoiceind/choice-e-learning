@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
-import { apiSuccess, apiError, apiValidationError } from '@/server/api/api-response";
-import { withAdmin } from '@/server/api/route-handlers";
-import { z } from "zod";
-import { parseRequest } from '@/server/api/request-parser";
-import { studentService } from '@/server/services/students/student-service";
-import { ApiErrorCode } from '@/server/api/api-error-codes";
+import { NextRequest, NextResponse } from 'next/server';
+import { apiSuccess, apiError, apiValidationError } from '@/server/api/api-response';
+import { withAdmin } from '@/server/api/route-handlers';
+import { z } from 'zod';
+import { parseRequest } from '@/server/api/request-parser';
+import { studentService } from '@/server/services/students/student-service';
+import { ApiErrorCode } from '@/server/api/api-error-codes';
 
 // Schema for creating a student
 const createStudentSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email format"),
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Invalid email format'),
   phone: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
@@ -22,11 +22,11 @@ export const GET = withAdmin(async (req: NextRequest) => {
   try {
     const { searchParams } = new URL(req.url);
     
-    const search = searchParams.get("search") || undefined;
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
-    const sortBy = searchParams.get("sortBy") || "createdAt";
-    const sortOrder = (searchParams.get("sortOrder") || "desc") as "asc" | "desc";
+    const search = searchParams.get('search') || undefined;
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const sortBy = searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = (searchParams.get('sortOrder') || 'desc') as 'asc' | 'desc';
     
     console.log('API route: Fetching students with params:', {
       search, page, limit, sortBy, sortOrder
@@ -84,7 +84,7 @@ export const GET = withAdmin(async (req: NextRequest) => {
       });
       
     } catch (serviceError) {
-      console.error("Error from studentService:", serviceError);
+      console.error('Error from studentService:', serviceError);
       // Trả về empty array thay vì lỗi, đảm bảo đúng định dạng
       return NextResponse.json({
         success: true,
@@ -93,7 +93,7 @@ export const GET = withAdmin(async (req: NextRequest) => {
       });
     }
   } catch (error) {
-    console.error("Error fetching students:", error);
+    console.error('Error fetching students:', error);
     // Return an empty success response instead of an error to avoid showing error messages
     return NextResponse.json({
       success: true,
@@ -115,15 +115,15 @@ export const POST = withAdmin(async (req: NextRequest) => {
     
     const student = await studentService.createStudent(body);
     
-    return apiSuccess(student, "Student created successfully", undefined, 201);
+    return apiSuccess(student, 'Student created successfully', undefined, 201);
   } catch (error) {
-    console.error("Error creating student:", error);
+    console.error('Error creating student:', error);
     if (error instanceof z.ZodError) {
       return apiValidationError(error);
     }
     
     return apiError(
-      "Failed to create student",
+      'Failed to create student',
       error instanceof Error ? error.message : undefined,
       ApiErrorCode.SERVER_ERROR
     );

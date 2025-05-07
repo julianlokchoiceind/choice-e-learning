@@ -388,7 +388,7 @@ declare class DbNull extends NullTypesEnumValue {
 }
 
 export declare const Debug: typeof debugCreate & {
-    enable(namespace: any): void;
+    enable(namespace): void;
     disable(): any;
     enabled(namespace: string): boolean;
     log: (...args: string[]) => void;
@@ -634,7 +634,7 @@ export declare class Decimal {
     static exp(n: Decimal.Value): Decimal;
     static floor(n: Decimal.Value): Decimal;
     static hypot(...n: Decimal.Value[]): Decimal;
-    static isDecimal(object: any): object is Decimal;
+    static isDecimal(object): object is Decimal;
     static ln(n: Decimal.Value): Decimal;
     static log(n: Decimal.Value, base?: Decimal.Value): Decimal;
     static log2(n: Decimal.Value): Decimal;
@@ -708,7 +708,7 @@ export declare function defineDmmfProperty(target: object, runtimeDataModel: Run
 
 declare function defineExtension(ext: ExtensionArgs | ((client: Client) => Client)): (client: Client) => Client;
 
-declare const denylist: readonly ["$connect", "$disconnect", "$on", "$transaction", "$use", "$extends"];
+declare const denylist: readonly ['$connect', '$disconnect', '$on', '$transaction', '$use', '$extends'];
 
 declare type Deprecation = ReadonlyDeep_2<{
     sinceVersion: string;
@@ -984,7 +984,7 @@ export declare type DynamicResultExtensionNeeds<TypeMap extends TypeMapDef, M ex
 };
 
 /**
- * Placeholder value for "no text".
+ * Placeholder value for 'no text'.
  */
 export declare const empty: Sql;
 
@@ -1604,7 +1604,7 @@ export declare function getPrismaClient(config: GetPrismaClientConfig): {
          * @param options to set timeouts (callback)
          * @returns
          */
-        $transaction(input: any, options?: any): Promise<any>;
+        $transaction(input, options?): Promise<any>;
         /**
          * Runs the middlewares over params before executing a request
          * @param internalParams
@@ -1909,7 +1909,7 @@ declare type InternalRequestParams = {
     transaction?: PrismaPromiseTransaction;
     unpacker?: Unpacker;
     otelParentCtx?: Context;
-    /** Used to "desugar" a user input into an "expanded" one */
+    /** Used to 'desugar' a user input into an 'expanded' one */
     argsMapper?: (args?: UserArgs_2) => UserArgs_2;
     /** Used to convert args for middleware and back */
     middlewareArgsMapper?: MiddlewareArgsMapper<unknown, unknown>;
@@ -2226,25 +2226,25 @@ declare type Model = ReadonlyDeep_2<{
 }>;
 
 declare enum ModelAction {
-    findUnique = "findUnique",
-    findUniqueOrThrow = "findUniqueOrThrow",
-    findFirst = "findFirst",
-    findFirstOrThrow = "findFirstOrThrow",
-    findMany = "findMany",
-    create = "create",
-    createMany = "createMany",
-    createManyAndReturn = "createManyAndReturn",
-    update = "update",
-    updateMany = "updateMany",
-    updateManyAndReturn = "updateManyAndReturn",
-    upsert = "upsert",
-    delete = "delete",
-    deleteMany = "deleteMany",
-    groupBy = "groupBy",
-    count = "count",// TODO: count does not actually exist in DMMF
-    aggregate = "aggregate",
-    findRaw = "findRaw",
-    aggregateRaw = "aggregateRaw"
+    findUnique = 'findUnique',
+    findUniqueOrThrow = 'findUniqueOrThrow',
+    findFirst = 'findFirst',
+    findFirstOrThrow = 'findFirstOrThrow',
+    findMany = 'findMany',
+    create = 'create',
+    createMany = 'createMany',
+    createManyAndReturn = 'createManyAndReturn',
+    update = 'update',
+    updateMany = 'updateMany',
+    updateManyAndReturn = 'updateManyAndReturn',
+    upsert = 'upsert',
+    delete = 'delete',
+    deleteMany = 'deleteMany',
+    groupBy = 'groupBy',
+    count = 'count',// TODO: count does not actually exist in DMMF
+    aggregate = 'aggregate',
+    findRaw = 'findRaw',
+    aggregateRaw = 'aggregateRaw'
 }
 
 export declare type ModelArg = {
@@ -2336,7 +2336,7 @@ export declare const objectEnumValues: {
     };
 };
 
-declare const officialPrismaAdapters: readonly ["@prisma/adapter-planetscale", "@prisma/adapter-neon", "@prisma/adapter-libsql", "@prisma/adapter-d1", "@prisma/adapter-pg", "@prisma/adapter-pg-worker"];
+declare const officialPrismaAdapters: readonly ['@prisma/adapter-planetscale', '@prisma/adapter-neon', '@prisma/adapter-libsql', '@prisma/adapter-d1', '@prisma/adapter-pg', '@prisma/adapter-pg-worker'];
 
 export declare type Omission = Record<string, boolean | Skip>;
 
@@ -2466,7 +2466,7 @@ export declare type PrismaClientOptions = {
      */
     datasources?: Datasources;
     /**
-     * @default "colorless"
+     * @default 'colorless'
      */
     errorFormat?: ErrorFormat;
     /**
@@ -2837,7 +2837,7 @@ declare class RequestHandler {
      */
     handleAndLogRequestError(params: HandleErrorParams): never;
     handleRequestError({ error, clientMethod, callsite, transaction, args, modelName, globalOmit, }: HandleErrorParams): never;
-    sanitizeMessage(message: any): any;
+    sanitizeMessage(message): any;
     unpack(data: unknown, dataPath: string[], unpacker?: Unpacker): any;
     get [Symbol.toStringTag](): string;
 }
@@ -3055,7 +3055,7 @@ declare type SortOrder = 'asc' | 'desc';
  * An interface that represents a span. A span represents a single operation
  * within a trace. Examples of span might include remote procedure calls or a
  * in-process function calls to sub-components. A Trace has a single, top-level
- * "root" Span that in turn may have zero or more child Spans, which in turn
+ * 'root' Span that in turn may have zero or more child Spans, which in turn
  * may have children.
  *
  * Spans are created by the {@link Tracer.startSpan} method.
@@ -3594,7 +3594,7 @@ declare function validator<C, M extends Exclude<keyof C, `$${string}`>, O extend
  */
 export declare type Value = unknown;
 
-export declare function warnEnvConflicts(envPaths: any): void;
+export declare function warnEnvConflicts(envPaths): void;
 
 export declare const warnOnce: (key: string, message: string, ...args: unknown[]) => void;
 

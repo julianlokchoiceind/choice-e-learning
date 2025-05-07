@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 /**
  * Achievement services for managing user achievements
@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 import prisma from '@/server/db/prisma-client';
 import { safeFindMany, safeFindFirst, safeFindUnique, safeCreate } from '@/server/db/prisma-helper';
 import { UserAchievement, AchievementType } from '@/shared/types/achievement';
-import { Lesson } from '@/shared/types/course';
+import { Lesson } from '@/shared/types/courses/course';
 import { getUserLoginStreak } from '@/server/db/services/user-service';
 
 // Extended lesson interface for internal use

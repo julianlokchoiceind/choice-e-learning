@@ -15,7 +15,7 @@ export default async function LessonDetailPage({ params }: LessonDetailPageProps
   }
   
   return (
-    <div className="admin-lesson-detail">
+    <div className='admin-lesson-detail'>
       <h1>{lesson.title}</h1>
       {/* Lesson details and management UI */}
     </div>

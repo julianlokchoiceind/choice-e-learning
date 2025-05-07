@@ -50,7 +50,7 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
     // Get topics from service with pagination
     const result = await topicService.getAllTopics(publicQueryParams);
     
-    return apiSuccess(result.data, "Topics retrieved successfully", {
+    return apiSuccess(result.data, 'Topics retrieved successfully', {
       pagination: {
         page: result.meta.page,
         pageSize: result.meta.limit,

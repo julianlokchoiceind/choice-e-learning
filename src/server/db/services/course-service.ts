@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import prisma from '@/client/utils/db';
+import prisma from '@/server/db/prisma-client';
 import { Prisma } from '@prisma/client';
-import { Course as CourseType } from '@/shared/types/course';
+import { Course as CourseType } from '@/shared/types/courses/course';
 import { Course as PrismaCourse } from '@prisma/client';
 
 /**

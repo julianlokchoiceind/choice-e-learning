@@ -255,10 +255,10 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className='flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8'>
       {/* Notification */}
       {notification?.show && (
-        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md">
+        <div className='fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md'>
           <Notification
             type={notification.type}
             message={notification.message}
@@ -270,141 +270,141 @@ export default function SignUpPage() {
         </div>
       )}
       
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold tracking-tight text-gray-900">
+      <div className='w-full max-w-md space-y-8'>
+        <div className='text-center'>
+          <h2 className='mt-6 text-3xl font-bold tracking-tight text-gray-900'>
             Create a new account
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className='mt-2 text-sm text-gray-600'>
             Or{' '}
-            <Link href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+            <Link href='/login' className='font-medium text-indigo-600 hover:text-indigo-500'>
               sign in to your existing account
             </Link>
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
+        <form className='mt-8 space-y-6' onSubmit={handleSubmit}>
+          <div className='space-y-4'>
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor='name' className='block text-sm font-medium text-gray-700'>
                 Full name
               </label>
-              <div className="mt-1">
+              <div className='mt-1'>
                 <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  autoComplete="name"
+                  id='name'
+                  name='name'
+                  type='text'
+                  autoComplete='name'
                   required
                   className={`block w-full appearance-none rounded-md border ${
                     fieldErrors.name ? 'border-red-300' : 'border-gray-300'
                   } px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm`}
-                  placeholder="Your full name"
+                  placeholder='Your full name'
                   value={formData.name}
                   onChange={handleChange}
                 />
                 {fieldErrors.name && (
-                  <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
+                  <p className='mt-1 text-sm text-red-600'>{fieldErrors.name}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <label htmlFor="email-address" className="block text-sm font-medium text-gray-700">
+              <label htmlFor='email-address' className='block text-sm font-medium text-gray-700'>
                 Email address
               </label>
-              <div className="mt-1">
+              <div className='mt-1'>
                 <input
-                  id="email-address"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
+                  id='email-address'
+                  name='email'
+                  type='email'
+                  autoComplete='email'
                   required
                   className={`block w-full appearance-none rounded-md border ${
                     fieldErrors.email ? 'border-red-300' : 'border-gray-300'
                   } px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm`}
-                  placeholder="Email address"
+                  placeholder='Email address'
                   value={formData.email}
                   onChange={handleChange}
                 />
                 {fieldErrors.email && (
-                  <p className="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
+                  <p className='mt-1 text-sm text-red-600'>{fieldErrors.email}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor='password' className='block text-sm font-medium text-gray-700'>
                 Password
               </label>
-              <div className="mt-1">
+              <div className='mt-1'>
                 <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"
+                  id='password'
+                  name='password'
+                  type='password'
+                  autoComplete='new-password'
                   required
                   className={`block w-full appearance-none rounded-md border ${
                     fieldErrors.password ? 'border-red-300' : 'border-gray-300'
                   } px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm`}
-                  placeholder="Password"
+                  placeholder='Password'
                   value={formData.password}
                   onChange={handleChange}
                 />
                 {fieldErrors.password && (
-                  <p className="mt-1 text-sm text-red-600">{fieldErrors.password}</p>
+                  <p className='mt-1 text-sm text-red-600'>{fieldErrors.password}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor='confirm-password' className='block text-sm font-medium text-gray-700'>
                 Confirm password
               </label>
-              <div className="mt-1">
+              <div className='mt-1'>
                 <input
-                  id="confirm-password"
-                  name="confirmPassword"
-                  type="password"
-                  autoComplete="new-password"
+                  id='confirm-password'
+                  name='confirmPassword'
+                  type='password'
+                  autoComplete='new-password'
                   required
                   className={`block w-full appearance-none rounded-md border ${
                     fieldErrors.confirmPassword ? 'border-red-300' : 'border-gray-300'
                   } px-3 py-2 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm`}
-                  placeholder="Confirm password"
+                  placeholder='Confirm password'
                   value={formData.confirmPassword}
                   onChange={handleChange}
                 />
                 {fieldErrors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">{fieldErrors.confirmPassword}</p>
+                  <p className='mt-1 text-sm text-red-600'>{fieldErrors.confirmPassword}</p>
                 )}
               </div>
             </div>
 
-            <div className="flex items-start">
-              <div className="flex items-center h-5">
+            <div className='flex items-start'>
+              <div className='flex items-center h-5'>
                 <input
-                  id="terms"
-                  name="terms"
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  id='terms'
+                  name='terms'
+                  type='checkbox'
+                  className='h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500'
                   checked={acceptTerms}
                   onChange={handleChange}
                 />
               </div>
-              <div className="ml-3 text-sm">
-                <label htmlFor="terms" className="font-medium text-gray-700">
+              <div className='ml-3 text-sm'>
+                <label htmlFor='terms' className='font-medium text-gray-700'>
                   I agree to the{' '}
-                  <Link href="/terms" className="text-indigo-600 hover:text-indigo-500">
+                  <Link href='/terms' className='text-indigo-600 hover:text-indigo-500'>
                     Terms of Service
                   </Link>{' '}
                   and{' '}
-                  <Link href="/privacy" className="text-indigo-600 hover:text-indigo-500">
+                  <Link href='/privacy' className='text-indigo-600 hover:text-indigo-500'>
                     Privacy Policy
                   </Link>
                 </label>
                 {fieldErrors.terms && (
-                  <p className="mt-1 text-sm text-red-600">{fieldErrors.terms}</p>
+                  <p className='mt-1 text-sm text-red-600'>{fieldErrors.terms}</p>
                 )}
               </div>
             </div>
@@ -412,58 +412,58 @@ export default function SignUpPage() {
 
           <div>
             <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              type='submit'
+              disabled={"isLoading"}
+              className='group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
             >
               {isLoading ? 'Creating account...' : 'Sign up'}
             </button>
           </div>
           
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+          <div className='mt-6'>
+            <div className='relative'>
+              <div className='absolute inset-0 flex items-center'>
+                <div className='w-full border-t border-gray-300' />
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-gray-500">Or continue with</span>
+              <div className='relative flex justify-center text-sm'>
+                <span className='bg-white px-2 text-gray-500'>Or continue with</span>
               </div>
             </div>
             
-            <div className="mt-6 flex flex-col space-y-3">
+            <div className='mt-6 flex flex-col space-y-3'>
               <button
                 onClick={() => handleSocialLogin('google')}
                 disabled={isLoading}
-                className="flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
               >
-                <FaGoogle className="h-5 w-5 text-red-500 mr-3" />
+                <FaGoogle className='h-5 w-5 text-red-500 mr-3' />
                 <span>Continue with Google</span>
               </button>
               
               <button
                 onClick={() => handleSocialLogin('github')}
                 disabled={isLoading}
-                className="flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
               >
-                <FaGithub className="h-5 w-5 text-gray-900 mr-3" />
+                <FaGithub className='h-5 w-5 text-gray-900 mr-3' />
                 <span>Continue with GitHub</span>
               </button>
               
               <button
                 onClick={() => handleSocialLogin('facebook')}
                 disabled={isLoading}
-                className="flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
               >
-                <FaFacebook className="h-5 w-5 text-[#1877F2] mr-3" />
+                <FaFacebook className='h-5 w-5 text-[#1877F2] mr-3' />
                 <span>Continue with Facebook</span>
               </button>
               
               <button
                 onClick={() => handleSocialLogin('azure-ad')}
                 disabled={isLoading}
-                className="flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
               >
-                <FaMicrosoft className="h-5 w-5 text-[#00A4EF] mr-3" />
+                <FaMicrosoft className='h-5 w-5 text-[#00A4EF] mr-3' />
                 <span>Continue with Microsoft</span>
               </button>
             </div>

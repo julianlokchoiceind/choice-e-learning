@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 import { User } from '@/shared/types/user';
 import { comparePasswords } from '../utils/password-utils';

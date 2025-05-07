@@ -16,7 +16,7 @@ export default async function EditLessonPage({ params }: EditLessonPageProps) {
   }
   
   return (
-    <div className="admin-edit-lesson">
+    <div className='admin-edit-lesson'>
       <h1>Edit Lesson: {lesson.title}</h1>
       <LessonForm lessonId={params.lessonId} courseId={lesson.courseId} initialData={lesson} />
     </div>

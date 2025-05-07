@@ -33,7 +33,7 @@ const CounterScript = () => {
                       counter.textContent = current;
                       setTimeout(updateCounter, 50);
                     } else {
-                      counter.textContent = target.toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ",");
+                      counter.textContent = target.toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');
                     }
                   };
                   

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -15,6 +15,7 @@ import {
   LockClosedIcon
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
+import { CourseCurriculumSidebar } from '@/client/components/layout/CourseCurriculumSidebar';
 
 interface Lesson {
   id: string;
@@ -59,7 +60,7 @@ export default function CourseLearnPage() {
   // Fetch course data
   const fetchCourseData = async () => {
     try {
-      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const apiClient = (await import('@/client/utils/http/api-client')).default;
       const response = await apiClient.get(`/api/courses/${courseId}/content`);
       const data = response.data;
       
@@ -77,7 +78,7 @@ export default function CourseLearnPage() {
   // Fetch user progress
   const fetchProgress = async () => {
     try {
-      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const apiClient = (await import('@/client/utils/http/api-client')).default;
       const response = await apiClient.get(`/api/courses/${courseId}/progress`);
       const data = response.data;
       
@@ -121,11 +122,11 @@ export default function CourseLearnPage() {
       
       try {
         // Fetch enrollment status
-        const apiClient = (await import('@/lib/axios/apiClient')).default;
+        const apiClient = (await import('@/client/utils/http/api-client')).default;
         const response = await apiClient.get(`/api/users/me/courses`);
         const data = response.data;
         
-        if (!data.success || !data.courses.some((c: any) => c.id === courseId)) {
+        if (!data.success || !data.courses.some((c: { id: string }) => c.id === courseId)) {
           // If not enrolled, redirect to course detail page
           router.push(`/courses/${courseId}`);
           return;
@@ -152,7 +153,7 @@ export default function CourseLearnPage() {
     const currentLessonId = courseData.modules[currentModule].lessons[currentLesson].id;
     
     try {
-      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const apiClient = (await import('@/client/utils/http/api-client')).default;
       const response = await apiClient.post(`/api/courses/${courseId}/progress`, {
         lessonId: currentLessonId, 
         completed: true
@@ -230,8 +231,8 @@ export default function CourseLearnPage() {
   // Loading state
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+      <div className='flex justify-center items-center h-screen'>
+        <div className='animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500'></div>
       </div>
     );
   }
@@ -239,11 +240,11 @@ export default function CourseLearnPage() {
   // Error state
   if (error || !courseData) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="bg-red-100 text-red-700 p-6 rounded-lg mb-8">
-          <h2 className="text-xl font-bold mb-2">Error</h2>
+      <div className='container mx-auto px-4 py-12'>
+        <div className='bg-red-100 text-red-700 p-6 rounded-lg mb-8'>
+          <h2 className='text-xl font-bold mb-2'>Error</h2>
           <p>{error || 'Failed to load course content'}</p>
-          <Link href={`/courses/${courseId}`} className="mt-4 inline-block text-blue-600 hover:underline">
+          <Link href={`/courses/${courseId}`} className='mt-4 inline-block text-blue-600 hover:underline'>
             ← Back to Course Overview
           </Link>
         </div>
@@ -255,24 +256,24 @@ export default function CourseLearnPage() {
   const currentLessonData = courseData.modules[currentModule].lessons[currentLesson];
   
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className='min-h-screen bg-gray-50 flex flex-col'>
       {/* Top navigation bar */}
-      <header className="bg-white shadow-sm border-b border-gray-200 py-4 px-6 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center">
-          <Link href={`/courses/${courseId}`} className="text-gray-500 hover:text-gray-700 mr-4">
-            <ArrowLeftIcon className="h-5 w-5" />
+      <header className='bg-white shadow-sm border-b border-gray-200 py-4 px-6 flex items-center justify-between sticky top-0 z-10'>
+        <div className='flex items-center'>
+          <Link href={`/courses/${courseId}`} className='text-gray-500 hover:text-gray-700 mr-4'>
+            <ArrowLeftIcon className='h-5 w-5' />
           </Link>
-          <h1 className="text-lg font-semibold truncate max-w-[200px] sm:max-w-md">
+          <h1 className='text-lg font-semibold truncate max-w-[200px] sm:max-w-md'>
             {courseData.title}
           </h1>
         </div>
-        <div className="flex items-center">
-          <span className="text-sm text-gray-500 hidden sm:inline-block mr-4">
+        <div className='flex items-center'>
+          <span className='text-sm text-gray-500 hidden sm:inline-block mr-4'>
             {progress ? `${progress.progress}% Complete` : '0% Complete'}
           </span>
-          <div className="bg-gray-200 rounded-full h-2 w-24 sm:w-40">
+          <div className='bg-gray-200 rounded-full h-2 w-24 sm:w-40'>
             <div 
-              className="bg-blue-600 h-2 rounded-full" 
+              className='bg-blue-600 h-2 rounded-full' 
               style={{ width: `${progress?.progress || 0}%` }}
             ></div>
           </div>
@@ -280,100 +281,49 @@ export default function CourseLearnPage() {
       </header>
       
       {/* Main content area */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className='flex flex-1 overflow-hidden'>
         {/* Sidebar (curriculum) */}
-        <div 
-          className={`bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto transition-all duration-300 ${
-            isSidebarCollapsed ? 'w-0' : 'w-full sm:w-80'
-          }`}
-        >
-          <div className="p-6">
-            <h2 className="text-xl font-bold mb-4">Course Content</h2>
-            
-            {/* Modules and lessons */}
-            <div className="space-y-4">
-              {courseData.modules.map((module, moduleIndex) => (
-                <div key={module.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="bg-gray-50 p-4 border-b border-gray-200">
-                    <h3 className="font-medium">
-                      Module {moduleIndex + 1}: {module.title}
-                    </h3>
-                  </div>
-                  <div className="divide-y divide-gray-200">
-                    {module.lessons.map((lesson, lessonIndex) => (
-                      <button
-                        key={lesson.id}
-                        onClick={() => navigateToLesson(moduleIndex, lessonIndex)}
-                        className={`w-full text-left p-4 flex items-start hover:bg-gray-50 ${
-                          moduleIndex === currentModule && lessonIndex === currentLesson
-                            ? 'bg-blue-50'
-                            : ''
-                        }`}
-                      >
-                        <div className="flex-shrink-0 mt-0.5 mr-3">
-                          {lesson.completed ? (
-                            <CheckCircleSolid className="h-5 w-5 text-green-500" />
-                          ) : moduleIndex === currentModule && lessonIndex === currentLesson ? (
-                            <PlayCircleIcon className="h-5 w-5 text-blue-500" />
-                          ) : (
-                            <PlayCircleIcon className="h-5 w-5 text-gray-400" />
-                          )}
-                        </div>
-                        <div>
-                          <p className={`text-sm ${
-                            moduleIndex === currentModule && lessonIndex === currentLesson
-                              ? 'font-medium text-blue-600'
-                              : 'text-gray-700'
-                          }`}>
-                            {lesson.title}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1 flex items-center">
-                            <ClockIcon className="h-3 w-3 mr-1" />
-                            {lesson.duration}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <CourseCurriculumSidebar
+          modules={courseData?.modules || []}
+          currentModule={currentModule}
+          currentLesson={currentLesson}
+          onSelectLesson={navigateToLesson}
+          isCollapsed={isSidebarCollapsed}
+        />
         
         {/* Toggle sidebar button (mobile) */}
         <button 
           onClick={toggleSidebar}
-          className="fixed bottom-6 left-6 z-20 sm:hidden bg-blue-600 text-white p-3 rounded-full shadow-lg"
+          className='fixed bottom-6 left-6 z-20 sm:hidden bg-blue-600 text-white p-3 rounded-full shadow-lg'
         >
           {isSidebarCollapsed ? (
-            <BookOpenIcon className="h-6 w-6" />
+            <BookOpenIcon className='h-6 w-6' />
           ) : (
-            <ArrowLeftIcon className="h-6 w-6" />
+            <ArrowLeftIcon className='h-6 w-6' />
           )}
         </button>
         
         {/* Lesson content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-24">
+        <div className='flex-1 overflow-y-auto'>
+          <div className='max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-24'>
             {/* Lesson header */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-4">
+            <div className='mb-8'>
+              <h2 className='text-2xl font-bold mb-4'>
                 {currentLessonData.title}
               </h2>
-              <div className="flex items-center text-sm text-gray-500 mb-6">
-                <ClockIcon className="h-4 w-4 mr-1" />
+              <div className='flex items-center text-sm text-gray-500 mb-6'>
+                <ClockIcon className='h-4 w-4 mr-1' />
                 <span>{currentLessonData.duration}</span>
               </div>
               
               {/* Video placeholder */}
               {currentLessonData.videoUrl && (
-                <div className="aspect-video bg-gray-900 rounded-xl mb-8 overflow-hidden">
+                <div className='aspect-video bg-gray-900 rounded-xl mb-8 overflow-hidden'>
                   <iframe 
-                    src={currentLessonData.videoUrl}
-                    className="w-full h-full" 
-                    title={currentLessonData.title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    src={"currentLessonData.videoUrl"}
+                    className='w-full h-full' 
+                    title={"currentLessonData.title"}
+                    allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' 
                     allowFullScreen
                   ></iframe>
                 </div>
@@ -381,7 +331,7 @@ export default function CourseLearnPage() {
             </div>
             
             {/* Lesson content */}
-            <div className="prose max-w-none mb-16">
+            <div className='prose max-w-none mb-16'>
               {/* This would be the lesson content, coming from an API or CMS */}
               <p>
                 {currentLessonData.content || 'Lesson content will be displayed here. This content can include text, images, code examples, and other interactive elements.'}
@@ -401,17 +351,17 @@ export default function CourseLearnPage() {
                 with detailed explanations, examples, and illustrations.
               </p>
               
-              <div className="bg-gray-100 p-4 rounded-lg my-6">
-                <h4 className="font-medium text-gray-900">Note</h4>
-                <p className="text-gray-700">
+              <div className='bg-gray-100 p-4 rounded-lg my-6'>
+                <h4 className='font-medium text-gray-900'>Note</h4>
+                <p className='text-gray-700'>
                   Important information or tips would be highlighted in blocks like this.
                 </p>
               </div>
             </div>
             
             {/* Lesson navigation */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
-              <div className="max-w-3xl mx-auto flex items-center justify-between">
+            <div className='fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4'>
+              <div className='max-w-3xl mx-auto flex items-center justify-between'>
                 <button
                   onClick={goToPreviousLesson}
                   disabled={currentModule === 0 && currentLesson === 0}
@@ -421,7 +371,7 @@ export default function CourseLearnPage() {
                       : 'text-gray-700 hover:text-blue-600'
                   }`}
                 >
-                  <ArrowLeftIcon className="h-5 w-5 mr-2" />
+                  <ArrowLeftIcon className='h-5 w-5 mr-2' />
                   Previous
                 </button>
                 
@@ -435,8 +385,8 @@ export default function CourseLearnPage() {
                   disabled={currentLessonData.completed}
                 >
                   {currentLessonData.completed ? (
-                    <span className="flex items-center">
-                      <CheckCircleIcon className="h-5 w-5 mr-2" />
+                    <span className='flex items-center'>
+                      <CheckCircleIcon className='h-5 w-5 mr-2' />
                       Completed
                     </span>
                   ) : (
@@ -456,7 +406,7 @@ export default function CourseLearnPage() {
                   }`}
                 >
                   Next
-                  <ArrowRightIcon className="h-5 w-5 ml-2" />
+                  <ArrowRightIcon className='h-5 w-5 ml-2' />
                 </button>
               </div>
             </div>

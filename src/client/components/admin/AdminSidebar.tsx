@@ -73,19 +73,19 @@ export default function AdminSidebar() {
   
   const menuItems: MenuItemProps[] = [
     {
-      icon: <HomeIcon className="h-5 w-5" />,
+      icon: <HomeIcon className='h-5 w-5' />,
       text: 'Dashboard',
       href: '/admin',
       isActive: pathname === '/admin'
     },
     {
-      icon: <UserGroupIcon className="h-5 w-5" />,
+      icon: <UserGroupIcon className='h-5 w-5' />,
       text: 'Students',
       submenu: studentItems,
       isActive: pathname?.startsWith('/admin/students')
     },
     {
-      icon: <BookOpenIcon className="h-5 w-5" />,
+      icon: <BookOpenIcon className='h-5 w-5' />,
       text: 'Courses',
       submenu: [
         { text: 'All Courses', href: '/admin/courses' },
@@ -94,7 +94,7 @@ export default function AdminSidebar() {
       isActive: pathname?.startsWith('/admin/courses')
     },
     {
-      icon: <FolderIcon className="h-5 w-5" />,
+      icon: <FolderIcon className='h-5 w-5' />,
       text: 'Topics',
       submenu: [
         { text: 'All Topics', href: '/admin/topics' },
@@ -103,7 +103,7 @@ export default function AdminSidebar() {
       isActive: pathname?.startsWith('/admin/topics')
     },
     {
-      icon: <QuestionMarkCircleIcon className="h-5 w-5" />,
+      icon: <QuestionMarkCircleIcon className='h-5 w-5' />,
       text: 'FAQs',
       submenu: [
         { text: 'All FAQs', href: '/admin/faqs' },
@@ -112,13 +112,13 @@ export default function AdminSidebar() {
       isActive: pathname?.startsWith('/admin/faqs')
     },
     {
-      icon: <ChartBarIcon className="h-5 w-5" />,
+      icon: <ChartBarIcon className='h-5 w-5' />,
       text: 'Analytics',
       href: '/admin/analytics',
       isActive: pathname?.startsWith('/admin/analytics')
     },
     {
-      icon: <DocumentTextIcon className="h-5 w-5" />,
+      icon: <DocumentTextIcon className='h-5 w-5' />,
       text: 'Quizzes',
       submenu: [
         { text: 'All Quizzes', href: '/admin/quizzes' },
@@ -127,7 +127,7 @@ export default function AdminSidebar() {
       isActive: pathname?.startsWith('/admin/quizzes')
     },
     {
-      icon: <DocumentCheckIcon className="h-5 w-5" />,
+      icon: <DocumentCheckIcon className='h-5 w-5' />,
       text: 'Certificates',
       submenu: [
         { text: 'All Certificates', href: '/admin/certificates' },
@@ -137,19 +137,19 @@ export default function AdminSidebar() {
     },
 
     {
-      icon: <ClockIcon className="h-5 w-5" />,
+      icon: <ClockIcon className='h-5 w-5' />,
       text: 'Calendar',
       href: '/admin/calendar',
       isActive: pathname?.startsWith('/admin/calendar')
     },
     {
-      icon: <BellIcon className="h-5 w-5" />,
+      icon: <BellIcon className='h-5 w-5' />,
       text: 'Notifications',
       href: '/admin/notifications',
       isActive: pathname?.startsWith('/admin/notifications')
     },
     {
-      icon: <Cog6ToothIcon className="h-5 w-5" />,
+      icon: <Cog6ToothIcon className='h-5 w-5' />,
       text: 'Settings',
       href: '/admin/settings',
       isActive: pathname?.startsWith('/admin/settings')
@@ -157,23 +157,23 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <div className="w-64 text-white flex flex-col bg-gradient-to-b from-blue-500 via-blue-600 to-blue-800 shadow-lg h-full">
-      <div className="p-5 flex items-center border-b border-blue-400/30">
-        <div className="mr-3 w-10 h-10 flex-shrink-0">
+    <div className='w-64 text-white flex flex-col bg-gradient-to-b from-blue-500 via-blue-600 to-blue-800 shadow-lg h-full'>
+      <div className='p-5 flex items-center border-b border-blue-400/30'>
+        <div className='mr-3 w-10 h-10 flex-shrink-0'>
           <Image 
             src='/images/logos/choiceind logox2.png' 
-            alt="Choice Logo" 
+            alt='Choice Logo' 
             width={40} 
             height={40} 
-            className="w-full h-full object-contain"
+            className='w-full h-full object-contain'
           />
         </div>
-        <h1 className="text-xl font-bold text-white">Administrator</h1>
+        <h1 className='text-xl font-bold text-white'>Administrator</h1>
       </div>
       
-      <nav className="flex-1 mt-5">
-        <div className="px-4">
-          <div className="space-y-1">
+      <nav className='flex-1 mt-5'>
+        <div className='px-4'>
+          <div className='space-y-1'>
             {menuItems.map((item, index) => (
               <MenuItem 
                 key={index}
@@ -189,19 +189,19 @@ export default function AdminSidebar() {
         </div>
       </nav>
 
-      <div className="px-4 py-6">
+      <div className='px-4 py-6'>
         <Link
           href='/admin/help'
-          className="flex items-center justify-center p-4 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 rounded-lg shadow-md mb-4 transition-all duration-200 transform hover:scale-[1.02] border border-blue-400/20"
+          className='flex items-center justify-center p-4 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 rounded-lg shadow-md mb-4 transition-all duration-200 transform hover:scale-[1.02] border border-blue-400/20'
         >
-          <QuestionMarkCircleIcon className="h-5 w-5 mr-2 text-white" />
-          <span className="font-semibold text-white">Help Desk</span>
+          <QuestionMarkCircleIcon className='h-5 w-5 mr-2 text-white' />
+          <span className='font-semibold text-white'>Help Desk</span>
         </Link>
       </div>
 
-      <div className="border-t border-blue-400/30 mt-auto">
-        <div className="px-5 py-4 text-center">
-          <p className="text-sm text-blue-100">Administrator Dashboard</p>
+      <div className='border-t border-blue-400/30 mt-auto'>
+        <div className='px-5 py-4 text-center'>
+          <p className='text-sm text-blue-100'>Administrator Dashboard</p>
         </div>
       </div>
     </div>
@@ -219,7 +219,7 @@ function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false
   };
 
   return (
-    <div className="mb-1">
+    <div className='mb-1'>
       {submenu ? (
         <button
           onClick={toggleSubmenu}
@@ -229,12 +229,12 @@ function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false
               : 'text-white hover:bg-blue-500/60 hover:text-white'
           }`}
         >
-          <div className="flex items-center">
-            <span className="mr-3">{icon}</span>
+          <div className='flex items-center'>
+            <span className='mr-3'>{icon}</span>
             <span>{text}</span>
           </div>
           <span className={isOpen ? 'rotate-180' : ''}>
-            <ChevronDownIcon className="h-4 w-4" />
+            <ChevronDownIcon className='h-4 w-4' />
           </span>
         </button>
       ) : (
@@ -246,8 +246,8 @@ function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false
               : 'text-white hover:bg-blue-500/60 hover:text-white'
           }`}
         >
-          <div className="flex items-center">
-            <span className="mr-3">{icon}</span>
+          <div className='flex items-center'>
+            <span className='mr-3'>{icon}</span>
             <span>{text}</span>
           </div>
         </Link>
@@ -257,17 +257,17 @@ function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
+              initial='hidden'
+              animate='visible'
+              exit='hidden'
               variants={menuVariants}
             >
-              <div className="pl-10 space-y-1">
+              <div className='pl-10 space-y-1'>
                 {submenu.map((item, index) => (
                   <Link
-                    key={index}
-                    href={item.href}
-                    className="flex items-center px-3 py-2 text-sm text-blue-100 hover:text-white hover:bg-blue-500/50 rounded-md sidebar-menu-item"
+                    key={"index"}
+                    href={"item.href"}
+                    className='flex items-center px-3 py-2 text-sm text-blue-100 hover:text-white hover:bg-blue-500/50 rounded-md sidebar-menu-item'
                   >
                     {item.text}
                   </Link>

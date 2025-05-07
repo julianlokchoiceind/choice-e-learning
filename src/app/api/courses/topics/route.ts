@@ -14,7 +14,7 @@ export async function GET(_req: NextRequest) {
   } catch (error) {
     console.error('Error fetching course topics:', error);
     return apiError(
-      "Failed to fetch topics",
+      'Failed to fetch topics',
       error instanceof Error ? error.message : String(error)
     );
   }

@@ -191,7 +191,7 @@ export class PrismaClient<
    */
   $runCommandRaw(command: Prisma.InputJsonObject): Prisma.PrismaPromise<Prisma.JsonObject>
 
-  $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb<ClientOptions>, ExtArgs, $Utils.Call<Prisma.TypeMapCb<ClientOptions>, {
+  $extends: $Extensions.ExtendsHook<'extends', Prisma.TypeMapCb<ClientOptions>, ExtArgs, $Utils.Call<Prisma.TypeMapCb<ClientOptions>, {
     extArgs: ExtArgs
   }>>
 
@@ -557,7 +557,7 @@ export namespace Prisma {
     [K in keyof O]: O[K] extends undefined ? At<O1, K> : O[K]
   } & {}
 
-  /** Helper Types for "Merge" **/
+  /** Helper Types for 'Merge' **/
   export type IntersectOf<U extends Union> = (
     U extends unknown ? (k: U) => void : never
   ) extends (k: infer I) => void
@@ -606,7 +606,7 @@ export namespace Prisma {
   type _Strict<U, _U = U> = U extends unknown ? U & OptionalFlat<_Record<Exclude<Keys<_U>, keyof U>, never>> : never;
 
   export type Strict<U extends object> = ComputeRaw<_Strict<U>>;
-  /** End Helper Types for "Merge" **/
+  /** End Helper Types for 'Merge' **/
 
   export type Merge<U extends object> = ComputeRaw<_Merge<Strict<U>>>;
 
@@ -740,7 +740,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "course" | "lesson" | "challenge" | "submission" | "review" | "fAQ" | "roadmap"
+      modelProps: 'user' | 'course' | 'lesson' | 'challenge' | 'submission' | 'review' | 'fAQ' | 'roadmap'
       txIsolationLevel: never
     }
     model: {
@@ -1348,7 +1348,7 @@ export namespace Prisma {
       }
     }
   }
-  export const defineExtension: $Extensions.ExtendsHook<"define", Prisma.TypeMapCb, $Extensions.DefaultArgs>
+  export const defineExtension: $Extensions.ExtendsHook<'define', Prisma.TypeMapCb, $Extensions.DefaultArgs>
   export type DefaultPrismaClient = PrismaClient
   export type ErrorFormat = 'pretty' | 'colorless' | 'minimal'
   export interface PrismaClientOptions {
@@ -1361,7 +1361,7 @@ export namespace Prisma {
      */
     datasourceUrl?: string
     /**
-     * @default "colorless"
+     * @default 'colorless'
      */
     errorFormat?: ErrorFormat
     /**
@@ -1469,7 +1469,7 @@ export namespace Prisma {
     | 'groupBy'
 
   /**
-   * These options are being passed into the middleware as "params"
+   * These options are being passed into the middleware as 'params'
    */
   export type MiddlewareParams = {
     model?: ModelName
@@ -1660,7 +1660,7 @@ export namespace Prisma {
     description?: boolean
     order?: boolean
     resources?: boolean
-  }, ExtArgs["result"]["roadmapStep"]>
+  }, ExtArgs['result']['roadmapStep']>
 
 
 
@@ -1672,10 +1672,10 @@ export namespace Prisma {
     resources?: boolean
   }
 
-  export type RoadmapStepOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "order" | "resources", ExtArgs["result"]["roadmapStep"]>
+  export type RoadmapStepOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<'id' | 'title' | 'description' | 'order' | 'resources', ExtArgs['result']['roadmapStep']>
 
   export type $RoadmapStepPayload = {
-    name: "RoadmapStep"
+    name: 'RoadmapStep'
     objects: {}
     scalars: {
       id: string
@@ -1697,11 +1697,11 @@ export namespace Prisma {
    * Fields of the RoadmapStep model
    */
   interface RoadmapStepFieldRefs {
-    readonly id: FieldRef<"RoadmapStep", 'String'>
-    readonly title: FieldRef<"RoadmapStep", 'String'>
-    readonly description: FieldRef<"RoadmapStep", 'String'>
-    readonly order: FieldRef<"RoadmapStep", 'Int'>
-    readonly resources: FieldRef<"RoadmapStep", 'String[]'>
+    readonly id: FieldRef<'RoadmapStep', 'String'>
+    readonly title: FieldRef<'RoadmapStep', 'String'>
+    readonly description: FieldRef<'RoadmapStep', 'String'>
+    readonly order: FieldRef<'RoadmapStep', 'Int'>
+    readonly resources: FieldRef<'RoadmapStep', 'String[]'>
   }
     
 
@@ -1910,7 +1910,7 @@ export namespace Prisma {
     enrolledIn?: boolean | User$enrolledInArgs<ExtArgs>
     submissions?: boolean | User$submissionsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["user"]>
+  }, ExtArgs['result']['user']>
 
 
 
@@ -1925,7 +1925,7 @@ export namespace Prisma {
     enrolledIds?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "password" | "role" | "createdAt" | "updatedAt" | "enrolledIds", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<'id' | 'name' | 'email' | 'password' | 'role' | 'createdAt' | 'updatedAt' | 'enrolledIds', ExtArgs['result']['user']>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     courses?: boolean | User$coursesArgs<ExtArgs>
     reviews?: boolean | User$reviewsArgs<ExtArgs>
@@ -1935,7 +1935,7 @@ export namespace Prisma {
   }
 
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "User"
+    name: 'User'
     objects: {
       courses: Prisma.$CoursePayload<ExtArgs>[]
       reviews: Prisma.$ReviewPayload<ExtArgs>[]
@@ -1951,7 +1951,7 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       enrolledIds: string[]
-    }, ExtArgs["result"]["user"]>
+    }, ExtArgs['result']['user']>
     composites: {}
   }
 
@@ -1975,7 +1975,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends UserFindUniqueArgs>(args: SelectSubset<T, UserFindUniqueArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends UserFindUniqueArgs>(args: SelectSubset<T, UserFindUniqueArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findUnique', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one User that matches the filter or throw an error with `error.code='P2025'`
@@ -1989,7 +1989,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends UserFindUniqueOrThrowArgs>(args: SelectSubset<T, UserFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends UserFindUniqueOrThrowArgs>(args: SelectSubset<T, UserFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findUniqueOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User that matches the filter.
@@ -2004,7 +2004,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends UserFindFirstArgs>(args?: SelectSubset<T, UserFindFirstArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends UserFindFirstArgs>(args?: SelectSubset<T, UserFindFirstArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findFirst', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first User that matches the filter or
@@ -2020,7 +2020,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends UserFindFirstOrThrowArgs>(args?: SelectSubset<T, UserFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends UserFindFirstOrThrowArgs>(args?: SelectSubset<T, UserFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findFirstOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Users that matches the filter.
@@ -2038,7 +2038,7 @@ export namespace Prisma {
      * const userWithIdOnly = await prisma.user.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends UserFindManyArgs>(args?: SelectSubset<T, UserFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends UserFindManyArgs>(args?: SelectSubset<T, UserFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findMany', GlobalOmitOptions>>
 
     /**
      * Create a User.
@@ -2052,7 +2052,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends UserCreateArgs>(args: SelectSubset<T, UserCreateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends UserCreateArgs>(args: SelectSubset<T, UserCreateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'create', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Users.
@@ -2080,7 +2080,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends UserDeleteArgs>(args: SelectSubset<T, UserDeleteArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends UserDeleteArgs>(args: SelectSubset<T, UserDeleteArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'delete', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one User.
@@ -2097,7 +2097,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends UserUpdateArgs>(args: SelectSubset<T, UserUpdateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends UserUpdateArgs>(args: SelectSubset<T, UserUpdateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'update', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Users.
@@ -2149,7 +2149,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends UserUpsertArgs>(args: SelectSubset<T, UserUpsertArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends UserUpsertArgs>(args: SelectSubset<T, UserUpsertArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'upsert', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Users that matches the filter.
@@ -2167,8 +2167,8 @@ export namespace Prisma {
      * @example
      * const user = await prisma.user.aggregateRaw({
      *   pipeline: [
-     *     { $match: { status: "registered" } },
-     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *     { $match: { status: 'registered' } },
+     *     { $group: { _id: '$country', total: { $sum: 1 } } }
      *   ]
      * })
      */
@@ -2213,11 +2213,11 @@ export namespace Prisma {
      *   },
      *   where: {
      *     email: {
-     *       contains: "prisma.io",
+     *       contains: 'prisma.io',
      *     },
      *   },
      *   orderBy: {
-     *     age: "asc",
+     *     age: 'asc',
      *   },
      *   take: 10,
      * })
@@ -2258,18 +2258,18 @@ export namespace Prisma {
       HavingValid extends Has<ByFields, HavingFields>,
       ByEmpty extends T['by'] extends never[] ? True : False,
       InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
+      ? `Error: 'by' must not be empty.`
       : HavingValid extends False
       ? {
           [P in HavingFields]: P extends ByFields
             ? never
             : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            ? `Error: Field '${P}' used in 'having' needs to be provided in 'by'.`
             : [
                 Error,
                 'Field ',
                 P,
-                ` in "having" needs to be provided in "by"`,
+                ` in 'having' needs to be provided in 'by'`,
               ]
         }[HavingFields]
       : 'take' extends Keys<T>
@@ -2279,9 +2279,9 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
+        : 'Error: If you provide 'take', you also need to provide 'orderBy''
       : 'skip' extends Keys<T>
       ? 'orderBy' extends Keys<T>
         ? ByValid extends True
@@ -2289,15 +2289,15 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+        : 'Error: If you provide 'skip', you also need to provide 'orderBy''
       : ByValid extends True
       ? {}
       : {
           [P in OrderFields]: P extends ByFields
             ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
         }[OrderFields]
     >(args: SubsetIntersection<T, UserGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
@@ -2307,17 +2307,17 @@ export namespace Prisma {
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for User.
+   * The delegate class that acts as a 'Promise-like' for User.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    courses<T extends User$coursesArgs<ExtArgs> = {}>(args?: Subset<T, User$coursesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    reviews<T extends User$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, User$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    enrolledIn<T extends User$enrolledInArgs<ExtArgs> = {}>(args?: Subset<T, User$enrolledInArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    submissions<T extends User$submissionsArgs<ExtArgs> = {}>(args?: Subset<T, User$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    readonly [Symbol.toStringTag]: 'PrismaPromise'
+    courses<T extends User$coursesArgs<ExtArgs> = {}>(args?: Subset<T, User$coursesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, 'findMany', GlobalOmitOptions> | Null>
+    reviews<T extends User$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, User$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, 'findMany', GlobalOmitOptions> | Null>
+    enrolledIn<T extends User$enrolledInArgs<ExtArgs> = {}>(args?: Subset<T, User$enrolledInArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, 'findMany', GlobalOmitOptions> | Null>
+    submissions<T extends User$submissionsArgs<ExtArgs> = {}>(args?: Subset<T, User$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, 'findMany', GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2347,14 +2347,14 @@ export namespace Prisma {
    * Fields of the User model
    */
   interface UserFieldRefs {
-    readonly id: FieldRef<"User", 'String'>
-    readonly name: FieldRef<"User", 'String'>
-    readonly email: FieldRef<"User", 'String'>
-    readonly password: FieldRef<"User", 'String'>
-    readonly role: FieldRef<"User", 'Role'>
-    readonly createdAt: FieldRef<"User", 'DateTime'>
-    readonly updatedAt: FieldRef<"User", 'DateTime'>
-    readonly enrolledIds: FieldRef<"User", 'String[]'>
+    readonly id: FieldRef<'User', 'String'>
+    readonly name: FieldRef<'User', 'String'>
+    readonly email: FieldRef<'User', 'String'>
+    readonly password: FieldRef<'User', 'String'>
+    readonly role: FieldRef<'User', 'Role'>
+    readonly createdAt: FieldRef<'User', 'DateTime'>
+    readonly updatedAt: FieldRef<'User', 'DateTime'>
+    readonly enrolledIds: FieldRef<'User', 'String[]'>
   }
     
 
@@ -3082,7 +3082,7 @@ export namespace Prisma {
     students?: boolean | Course$studentsArgs<ExtArgs>
     reviews?: boolean | Course$reviewsArgs<ExtArgs>
     _count?: boolean | CourseCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["course"]>
+  }, ExtArgs['result']['course']>
 
 
 
@@ -3100,7 +3100,7 @@ export namespace Prisma {
     studentIds?: boolean
   }
 
-  export type CourseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "instructorId" | "price" | "imageUrl" | "level" | "topics" | "createdAt" | "updatedAt" | "studentIds", ExtArgs["result"]["course"]>
+  export type CourseOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<'id' | 'title' | 'description' | 'instructorId' | 'price' | 'imageUrl' | 'level' | 'topics' | 'createdAt' | 'updatedAt' | 'studentIds', ExtArgs['result']['course']>
   export type CourseInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     instructor?: boolean | UserDefaultArgs<ExtArgs>
     lessons?: boolean | Course$lessonsArgs<ExtArgs>
@@ -3110,7 +3110,7 @@ export namespace Prisma {
   }
 
   export type $CoursePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Course"
+    name: 'Course'
     objects: {
       instructor: Prisma.$UserPayload<ExtArgs>
       lessons: Prisma.$LessonPayload<ExtArgs>[]
@@ -3129,7 +3129,7 @@ export namespace Prisma {
       createdAt: Date
       updatedAt: Date
       studentIds: string[]
-    }, ExtArgs["result"]["course"]>
+    }, ExtArgs['result']['course']>
     composites: {}
   }
 
@@ -3153,7 +3153,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends CourseFindUniqueArgs>(args: SelectSubset<T, CourseFindUniqueArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends CourseFindUniqueArgs>(args: SelectSubset<T, CourseFindUniqueArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, 'findUnique', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Course that matches the filter or throw an error with `error.code='P2025'`
@@ -3167,7 +3167,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends CourseFindUniqueOrThrowArgs>(args: SelectSubset<T, CourseFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends CourseFindUniqueOrThrowArgs>(args: SelectSubset<T, CourseFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, 'findUniqueOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Course that matches the filter.
@@ -3182,7 +3182,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends CourseFindFirstArgs>(args?: SelectSubset<T, CourseFindFirstArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends CourseFindFirstArgs>(args?: SelectSubset<T, CourseFindFirstArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, 'findFirst', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Course that matches the filter or
@@ -3198,7 +3198,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends CourseFindFirstOrThrowArgs>(args?: SelectSubset<T, CourseFindFirstOrThrowArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends CourseFindFirstOrThrowArgs>(args?: SelectSubset<T, CourseFindFirstOrThrowArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, 'findFirstOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Courses that matches the filter.
@@ -3216,7 +3216,7 @@ export namespace Prisma {
      * const courseWithIdOnly = await prisma.course.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends CourseFindManyArgs>(args?: SelectSubset<T, CourseFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends CourseFindManyArgs>(args?: SelectSubset<T, CourseFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, 'findMany', GlobalOmitOptions>>
 
     /**
      * Create a Course.
@@ -3230,7 +3230,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends CourseCreateArgs>(args: SelectSubset<T, CourseCreateArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends CourseCreateArgs>(args: SelectSubset<T, CourseCreateArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, 'create', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Courses.
@@ -3258,7 +3258,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends CourseDeleteArgs>(args: SelectSubset<T, CourseDeleteArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends CourseDeleteArgs>(args: SelectSubset<T, CourseDeleteArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, 'delete', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Course.
@@ -3275,7 +3275,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends CourseUpdateArgs>(args: SelectSubset<T, CourseUpdateArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends CourseUpdateArgs>(args: SelectSubset<T, CourseUpdateArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, 'update', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Courses.
@@ -3327,7 +3327,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends CourseUpsertArgs>(args: SelectSubset<T, CourseUpsertArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends CourseUpsertArgs>(args: SelectSubset<T, CourseUpsertArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, 'upsert', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Courses that matches the filter.
@@ -3345,8 +3345,8 @@ export namespace Prisma {
      * @example
      * const course = await prisma.course.aggregateRaw({
      *   pipeline: [
-     *     { $match: { status: "registered" } },
-     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *     { $match: { status: 'registered' } },
+     *     { $group: { _id: '$country', total: { $sum: 1 } } }
      *   ]
      * })
      */
@@ -3391,11 +3391,11 @@ export namespace Prisma {
      *   },
      *   where: {
      *     email: {
-     *       contains: "prisma.io",
+     *       contains: 'prisma.io',
      *     },
      *   },
      *   orderBy: {
-     *     age: "asc",
+     *     age: 'asc',
      *   },
      *   take: 10,
      * })
@@ -3436,18 +3436,18 @@ export namespace Prisma {
       HavingValid extends Has<ByFields, HavingFields>,
       ByEmpty extends T['by'] extends never[] ? True : False,
       InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
+      ? `Error: 'by' must not be empty.`
       : HavingValid extends False
       ? {
           [P in HavingFields]: P extends ByFields
             ? never
             : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            ? `Error: Field '${P}' used in 'having' needs to be provided in 'by'.`
             : [
                 Error,
                 'Field ',
                 P,
-                ` in "having" needs to be provided in "by"`,
+                ` in 'having' needs to be provided in 'by'`,
               ]
         }[HavingFields]
       : 'take' extends Keys<T>
@@ -3457,9 +3457,9 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
+        : 'Error: If you provide 'take', you also need to provide 'orderBy''
       : 'skip' extends Keys<T>
       ? 'orderBy' extends Keys<T>
         ? ByValid extends True
@@ -3467,15 +3467,15 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+        : 'Error: If you provide 'skip', you also need to provide 'orderBy''
       : ByValid extends True
       ? {}
       : {
           [P in OrderFields]: P extends ByFields
             ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
         }[OrderFields]
     >(args: SubsetIntersection<T, CourseGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCourseGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
@@ -3485,17 +3485,17 @@ export namespace Prisma {
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for Course.
+   * The delegate class that acts as a 'Promise-like' for Course.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__CourseClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    instructor<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    lessons<T extends Course$lessonsArgs<ExtArgs> = {}>(args?: Subset<T, Course$lessonsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    students<T extends Course$studentsArgs<ExtArgs> = {}>(args?: Subset<T, Course$studentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    reviews<T extends Course$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, Course$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    readonly [Symbol.toStringTag]: 'PrismaPromise'
+    instructor<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findUniqueOrThrow', GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    lessons<T extends Course$lessonsArgs<ExtArgs> = {}>(args?: Subset<T, Course$lessonsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, 'findMany', GlobalOmitOptions> | Null>
+    students<T extends Course$studentsArgs<ExtArgs> = {}>(args?: Subset<T, Course$studentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findMany', GlobalOmitOptions> | Null>
+    reviews<T extends Course$reviewsArgs<ExtArgs> = {}>(args?: Subset<T, Course$reviewsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, 'findMany', GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3525,17 +3525,17 @@ export namespace Prisma {
    * Fields of the Course model
    */
   interface CourseFieldRefs {
-    readonly id: FieldRef<"Course", 'String'>
-    readonly title: FieldRef<"Course", 'String'>
-    readonly description: FieldRef<"Course", 'String'>
-    readonly instructorId: FieldRef<"Course", 'String'>
-    readonly price: FieldRef<"Course", 'Float'>
-    readonly imageUrl: FieldRef<"Course", 'String'>
-    readonly level: FieldRef<"Course", 'Level'>
-    readonly topics: FieldRef<"Course", 'String[]'>
-    readonly createdAt: FieldRef<"Course", 'DateTime'>
-    readonly updatedAt: FieldRef<"Course", 'DateTime'>
-    readonly studentIds: FieldRef<"Course", 'String[]'>
+    readonly id: FieldRef<'Course', 'String'>
+    readonly title: FieldRef<'Course', 'String'>
+    readonly description: FieldRef<'Course', 'String'>
+    readonly instructorId: FieldRef<'Course', 'String'>
+    readonly price: FieldRef<'Course', 'Float'>
+    readonly imageUrl: FieldRef<'Course', 'String'>
+    readonly level: FieldRef<'Course', 'Level'>
+    readonly topics: FieldRef<'Course', 'String[]'>
+    readonly createdAt: FieldRef<'Course', 'DateTime'>
+    readonly updatedAt: FieldRef<'Course', 'DateTime'>
+    readonly studentIds: FieldRef<'Course', 'String[]'>
   }
     
 
@@ -4219,7 +4219,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     course?: boolean | CourseDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["lesson"]>
+  }, ExtArgs['result']['lesson']>
 
 
 
@@ -4234,13 +4234,13 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type LessonOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "content" | "videoUrl" | "order" | "courseId" | "createdAt" | "updatedAt", ExtArgs["result"]["lesson"]>
+  export type LessonOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<'id' | 'title' | 'content' | 'videoUrl' | 'order' | 'courseId' | 'createdAt' | 'updatedAt', ExtArgs['result']['lesson']>
   export type LessonInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     course?: boolean | CourseDefaultArgs<ExtArgs>
   }
 
   export type $LessonPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Lesson"
+    name: 'Lesson'
     objects: {
       course: Prisma.$CoursePayload<ExtArgs>
     }
@@ -4253,7 +4253,7 @@ export namespace Prisma {
       courseId: string
       createdAt: Date
       updatedAt: Date
-    }, ExtArgs["result"]["lesson"]>
+    }, ExtArgs['result']['lesson']>
     composites: {}
   }
 
@@ -4277,7 +4277,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends LessonFindUniqueArgs>(args: SelectSubset<T, LessonFindUniqueArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends LessonFindUniqueArgs>(args: SelectSubset<T, LessonFindUniqueArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, 'findUnique', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Lesson that matches the filter or throw an error with `error.code='P2025'`
@@ -4291,7 +4291,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends LessonFindUniqueOrThrowArgs>(args: SelectSubset<T, LessonFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends LessonFindUniqueOrThrowArgs>(args: SelectSubset<T, LessonFindUniqueOrThrowArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, 'findUniqueOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Lesson that matches the filter.
@@ -4306,7 +4306,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends LessonFindFirstArgs>(args?: SelectSubset<T, LessonFindFirstArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends LessonFindFirstArgs>(args?: SelectSubset<T, LessonFindFirstArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, 'findFirst', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Lesson that matches the filter or
@@ -4322,7 +4322,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends LessonFindFirstOrThrowArgs>(args?: SelectSubset<T, LessonFindFirstOrThrowArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends LessonFindFirstOrThrowArgs>(args?: SelectSubset<T, LessonFindFirstOrThrowArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, 'findFirstOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Lessons that matches the filter.
@@ -4340,7 +4340,7 @@ export namespace Prisma {
      * const lessonWithIdOnly = await prisma.lesson.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends LessonFindManyArgs>(args?: SelectSubset<T, LessonFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends LessonFindManyArgs>(args?: SelectSubset<T, LessonFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, 'findMany', GlobalOmitOptions>>
 
     /**
      * Create a Lesson.
@@ -4354,7 +4354,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends LessonCreateArgs>(args: SelectSubset<T, LessonCreateArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends LessonCreateArgs>(args: SelectSubset<T, LessonCreateArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, 'create', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Lessons.
@@ -4382,7 +4382,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends LessonDeleteArgs>(args: SelectSubset<T, LessonDeleteArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends LessonDeleteArgs>(args: SelectSubset<T, LessonDeleteArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, 'delete', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Lesson.
@@ -4399,7 +4399,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends LessonUpdateArgs>(args: SelectSubset<T, LessonUpdateArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends LessonUpdateArgs>(args: SelectSubset<T, LessonUpdateArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, 'update', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Lessons.
@@ -4451,7 +4451,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends LessonUpsertArgs>(args: SelectSubset<T, LessonUpsertArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends LessonUpsertArgs>(args: SelectSubset<T, LessonUpsertArgs<ExtArgs>>): Prisma__LessonClient<$Result.GetResult<Prisma.$LessonPayload<ExtArgs>, T, 'upsert', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Lessons that matches the filter.
@@ -4469,8 +4469,8 @@ export namespace Prisma {
      * @example
      * const lesson = await prisma.lesson.aggregateRaw({
      *   pipeline: [
-     *     { $match: { status: "registered" } },
-     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *     { $match: { status: 'registered' } },
+     *     { $group: { _id: '$country', total: { $sum: 1 } } }
      *   ]
      * })
      */
@@ -4515,11 +4515,11 @@ export namespace Prisma {
      *   },
      *   where: {
      *     email: {
-     *       contains: "prisma.io",
+     *       contains: 'prisma.io',
      *     },
      *   },
      *   orderBy: {
-     *     age: "asc",
+     *     age: 'asc',
      *   },
      *   take: 10,
      * })
@@ -4560,18 +4560,18 @@ export namespace Prisma {
       HavingValid extends Has<ByFields, HavingFields>,
       ByEmpty extends T['by'] extends never[] ? True : False,
       InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
+      ? `Error: 'by' must not be empty.`
       : HavingValid extends False
       ? {
           [P in HavingFields]: P extends ByFields
             ? never
             : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            ? `Error: Field '${P}' used in 'having' needs to be provided in 'by'.`
             : [
                 Error,
                 'Field ',
                 P,
-                ` in "having" needs to be provided in "by"`,
+                ` in 'having' needs to be provided in 'by'`,
               ]
         }[HavingFields]
       : 'take' extends Keys<T>
@@ -4581,9 +4581,9 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
+        : 'Error: If you provide 'take', you also need to provide 'orderBy''
       : 'skip' extends Keys<T>
       ? 'orderBy' extends Keys<T>
         ? ByValid extends True
@@ -4591,15 +4591,15 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+        : 'Error: If you provide 'skip', you also need to provide 'orderBy''
       : ByValid extends True
       ? {}
       : {
           [P in OrderFields]: P extends ByFields
             ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
         }[OrderFields]
     >(args: SubsetIntersection<T, LessonGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetLessonGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
@@ -4609,14 +4609,14 @@ export namespace Prisma {
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for Lesson.
+   * The delegate class that acts as a 'Promise-like' for Lesson.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__LessonClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    course<T extends CourseDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CourseDefaultArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    readonly [Symbol.toStringTag]: 'PrismaPromise'
+    course<T extends CourseDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CourseDefaultArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, 'findUniqueOrThrow', GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4646,14 +4646,14 @@ export namespace Prisma {
    * Fields of the Lesson model
    */
   interface LessonFieldRefs {
-    readonly id: FieldRef<"Lesson", 'String'>
-    readonly title: FieldRef<"Lesson", 'String'>
-    readonly content: FieldRef<"Lesson", 'String'>
-    readonly videoUrl: FieldRef<"Lesson", 'String'>
-    readonly order: FieldRef<"Lesson", 'Int'>
-    readonly courseId: FieldRef<"Lesson", 'String'>
-    readonly createdAt: FieldRef<"Lesson", 'DateTime'>
-    readonly updatedAt: FieldRef<"Lesson", 'DateTime'>
+    readonly id: FieldRef<'Lesson', 'String'>
+    readonly title: FieldRef<'Lesson', 'String'>
+    readonly content: FieldRef<'Lesson', 'String'>
+    readonly videoUrl: FieldRef<'Lesson', 'String'>
+    readonly order: FieldRef<'Lesson', 'Int'>
+    readonly courseId: FieldRef<'Lesson', 'String'>
+    readonly createdAt: FieldRef<'Lesson', 'DateTime'>
+    readonly updatedAt: FieldRef<'Lesson', 'DateTime'>
   }
     
 
@@ -5232,7 +5232,7 @@ export namespace Prisma {
     updatedAt?: boolean
     submissions?: boolean | Challenge$submissionsArgs<ExtArgs>
     _count?: boolean | ChallengeCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["challenge"]>
+  }, ExtArgs['result']['challenge']>
 
 
 
@@ -5247,14 +5247,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ChallengeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "difficulty" | "startDate" | "endDate" | "createdAt" | "updatedAt", ExtArgs["result"]["challenge"]>
+  export type ChallengeOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<'id' | 'title' | 'description' | 'difficulty' | 'startDate' | 'endDate' | 'createdAt' | 'updatedAt', ExtArgs['result']['challenge']>
   export type ChallengeInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     submissions?: boolean | Challenge$submissionsArgs<ExtArgs>
     _count?: boolean | ChallengeCountOutputTypeDefaultArgs<ExtArgs>
   }
 
   export type $ChallengePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Challenge"
+    name: 'Challenge'
     objects: {
       submissions: Prisma.$SubmissionPayload<ExtArgs>[]
     }
@@ -5267,7 +5267,7 @@ export namespace Prisma {
       endDate: Date
       createdAt: Date
       updatedAt: Date
-    }, ExtArgs["result"]["challenge"]>
+    }, ExtArgs['result']['challenge']>
     composites: {}
   }
 
@@ -5291,7 +5291,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends ChallengeFindUniqueArgs>(args: SelectSubset<T, ChallengeFindUniqueArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends ChallengeFindUniqueArgs>(args: SelectSubset<T, ChallengeFindUniqueArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, 'findUnique', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Challenge that matches the filter or throw an error with `error.code='P2025'`
@@ -5305,7 +5305,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends ChallengeFindUniqueOrThrowArgs>(args: SelectSubset<T, ChallengeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends ChallengeFindUniqueOrThrowArgs>(args: SelectSubset<T, ChallengeFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, 'findUniqueOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Challenge that matches the filter.
@@ -5320,7 +5320,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends ChallengeFindFirstArgs>(args?: SelectSubset<T, ChallengeFindFirstArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends ChallengeFindFirstArgs>(args?: SelectSubset<T, ChallengeFindFirstArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, 'findFirst', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Challenge that matches the filter or
@@ -5336,7 +5336,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends ChallengeFindFirstOrThrowArgs>(args?: SelectSubset<T, ChallengeFindFirstOrThrowArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends ChallengeFindFirstOrThrowArgs>(args?: SelectSubset<T, ChallengeFindFirstOrThrowArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, 'findFirstOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Challenges that matches the filter.
@@ -5354,7 +5354,7 @@ export namespace Prisma {
      * const challengeWithIdOnly = await prisma.challenge.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends ChallengeFindManyArgs>(args?: SelectSubset<T, ChallengeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends ChallengeFindManyArgs>(args?: SelectSubset<T, ChallengeFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, 'findMany', GlobalOmitOptions>>
 
     /**
      * Create a Challenge.
@@ -5368,7 +5368,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends ChallengeCreateArgs>(args: SelectSubset<T, ChallengeCreateArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends ChallengeCreateArgs>(args: SelectSubset<T, ChallengeCreateArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, 'create', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Challenges.
@@ -5396,7 +5396,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends ChallengeDeleteArgs>(args: SelectSubset<T, ChallengeDeleteArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends ChallengeDeleteArgs>(args: SelectSubset<T, ChallengeDeleteArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, 'delete', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Challenge.
@@ -5413,7 +5413,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends ChallengeUpdateArgs>(args: SelectSubset<T, ChallengeUpdateArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends ChallengeUpdateArgs>(args: SelectSubset<T, ChallengeUpdateArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, 'update', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Challenges.
@@ -5465,7 +5465,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends ChallengeUpsertArgs>(args: SelectSubset<T, ChallengeUpsertArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends ChallengeUpsertArgs>(args: SelectSubset<T, ChallengeUpsertArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, 'upsert', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Challenges that matches the filter.
@@ -5483,8 +5483,8 @@ export namespace Prisma {
      * @example
      * const challenge = await prisma.challenge.aggregateRaw({
      *   pipeline: [
-     *     { $match: { status: "registered" } },
-     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *     { $match: { status: 'registered' } },
+     *     { $group: { _id: '$country', total: { $sum: 1 } } }
      *   ]
      * })
      */
@@ -5529,11 +5529,11 @@ export namespace Prisma {
      *   },
      *   where: {
      *     email: {
-     *       contains: "prisma.io",
+     *       contains: 'prisma.io',
      *     },
      *   },
      *   orderBy: {
-     *     age: "asc",
+     *     age: 'asc',
      *   },
      *   take: 10,
      * })
@@ -5574,18 +5574,18 @@ export namespace Prisma {
       HavingValid extends Has<ByFields, HavingFields>,
       ByEmpty extends T['by'] extends never[] ? True : False,
       InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
+      ? `Error: 'by' must not be empty.`
       : HavingValid extends False
       ? {
           [P in HavingFields]: P extends ByFields
             ? never
             : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            ? `Error: Field '${P}' used in 'having' needs to be provided in 'by'.`
             : [
                 Error,
                 'Field ',
                 P,
-                ` in "having" needs to be provided in "by"`,
+                ` in 'having' needs to be provided in 'by'`,
               ]
         }[HavingFields]
       : 'take' extends Keys<T>
@@ -5595,9 +5595,9 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
+        : 'Error: If you provide 'take', you also need to provide 'orderBy''
       : 'skip' extends Keys<T>
       ? 'orderBy' extends Keys<T>
         ? ByValid extends True
@@ -5605,15 +5605,15 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+        : 'Error: If you provide 'skip', you also need to provide 'orderBy''
       : ByValid extends True
       ? {}
       : {
           [P in OrderFields]: P extends ByFields
             ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
         }[OrderFields]
     >(args: SubsetIntersection<T, ChallengeGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetChallengeGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
@@ -5623,14 +5623,14 @@ export namespace Prisma {
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for Challenge.
+   * The delegate class that acts as a 'Promise-like' for Challenge.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__ChallengeClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    submissions<T extends Challenge$submissionsArgs<ExtArgs> = {}>(args?: Subset<T, Challenge$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    readonly [Symbol.toStringTag]: 'PrismaPromise'
+    submissions<T extends Challenge$submissionsArgs<ExtArgs> = {}>(args?: Subset<T, Challenge$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, 'findMany', GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5660,14 +5660,14 @@ export namespace Prisma {
    * Fields of the Challenge model
    */
   interface ChallengeFieldRefs {
-    readonly id: FieldRef<"Challenge", 'String'>
-    readonly title: FieldRef<"Challenge", 'String'>
-    readonly description: FieldRef<"Challenge", 'String'>
-    readonly difficulty: FieldRef<"Challenge", 'Difficulty'>
-    readonly startDate: FieldRef<"Challenge", 'DateTime'>
-    readonly endDate: FieldRef<"Challenge", 'DateTime'>
-    readonly createdAt: FieldRef<"Challenge", 'DateTime'>
-    readonly updatedAt: FieldRef<"Challenge", 'DateTime'>
+    readonly id: FieldRef<'Challenge', 'String'>
+    readonly title: FieldRef<'Challenge', 'String'>
+    readonly description: FieldRef<'Challenge', 'String'>
+    readonly difficulty: FieldRef<'Challenge', 'Difficulty'>
+    readonly startDate: FieldRef<'Challenge', 'DateTime'>
+    readonly endDate: FieldRef<'Challenge', 'DateTime'>
+    readonly createdAt: FieldRef<'Challenge', 'DateTime'>
+    readonly updatedAt: FieldRef<'Challenge', 'DateTime'>
   }
     
 
@@ -6304,7 +6304,7 @@ export namespace Prisma {
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     challenge?: boolean | ChallengeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["submission"]>
+  }, ExtArgs['result']['submission']>
 
 
 
@@ -6319,14 +6319,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type SubmissionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "challengeId" | "content" | "score" | "feedback" | "createdAt" | "updatedAt", ExtArgs["result"]["submission"]>
+  export type SubmissionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<'id' | 'userId' | 'challengeId' | 'content' | 'score' | 'feedback' | 'createdAt' | 'updatedAt', ExtArgs['result']['submission']>
   export type SubmissionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     challenge?: boolean | ChallengeDefaultArgs<ExtArgs>
   }
 
   export type $SubmissionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Submission"
+    name: 'Submission'
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
       challenge: Prisma.$ChallengePayload<ExtArgs>
@@ -6340,7 +6340,7 @@ export namespace Prisma {
       feedback: string | null
       createdAt: Date
       updatedAt: Date
-    }, ExtArgs["result"]["submission"]>
+    }, ExtArgs['result']['submission']>
     composites: {}
   }
 
@@ -6364,7 +6364,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends SubmissionFindUniqueArgs>(args: SelectSubset<T, SubmissionFindUniqueArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends SubmissionFindUniqueArgs>(args: SelectSubset<T, SubmissionFindUniqueArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, 'findUnique', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Submission that matches the filter or throw an error with `error.code='P2025'`
@@ -6378,7 +6378,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends SubmissionFindUniqueOrThrowArgs>(args: SelectSubset<T, SubmissionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends SubmissionFindUniqueOrThrowArgs>(args: SelectSubset<T, SubmissionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, 'findUniqueOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Submission that matches the filter.
@@ -6393,7 +6393,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends SubmissionFindFirstArgs>(args?: SelectSubset<T, SubmissionFindFirstArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends SubmissionFindFirstArgs>(args?: SelectSubset<T, SubmissionFindFirstArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, 'findFirst', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Submission that matches the filter or
@@ -6409,7 +6409,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends SubmissionFindFirstOrThrowArgs>(args?: SelectSubset<T, SubmissionFindFirstOrThrowArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends SubmissionFindFirstOrThrowArgs>(args?: SelectSubset<T, SubmissionFindFirstOrThrowArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, 'findFirstOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Submissions that matches the filter.
@@ -6427,7 +6427,7 @@ export namespace Prisma {
      * const submissionWithIdOnly = await prisma.submission.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends SubmissionFindManyArgs>(args?: SelectSubset<T, SubmissionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends SubmissionFindManyArgs>(args?: SelectSubset<T, SubmissionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, 'findMany', GlobalOmitOptions>>
 
     /**
      * Create a Submission.
@@ -6441,7 +6441,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends SubmissionCreateArgs>(args: SelectSubset<T, SubmissionCreateArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends SubmissionCreateArgs>(args: SelectSubset<T, SubmissionCreateArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, 'create', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Submissions.
@@ -6469,7 +6469,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends SubmissionDeleteArgs>(args: SelectSubset<T, SubmissionDeleteArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends SubmissionDeleteArgs>(args: SelectSubset<T, SubmissionDeleteArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, 'delete', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Submission.
@@ -6486,7 +6486,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends SubmissionUpdateArgs>(args: SelectSubset<T, SubmissionUpdateArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends SubmissionUpdateArgs>(args: SelectSubset<T, SubmissionUpdateArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, 'update', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Submissions.
@@ -6538,7 +6538,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends SubmissionUpsertArgs>(args: SelectSubset<T, SubmissionUpsertArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends SubmissionUpsertArgs>(args: SelectSubset<T, SubmissionUpsertArgs<ExtArgs>>): Prisma__SubmissionClient<$Result.GetResult<Prisma.$SubmissionPayload<ExtArgs>, T, 'upsert', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Submissions that matches the filter.
@@ -6556,8 +6556,8 @@ export namespace Prisma {
      * @example
      * const submission = await prisma.submission.aggregateRaw({
      *   pipeline: [
-     *     { $match: { status: "registered" } },
-     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *     { $match: { status: 'registered' } },
+     *     { $group: { _id: '$country', total: { $sum: 1 } } }
      *   ]
      * })
      */
@@ -6602,11 +6602,11 @@ export namespace Prisma {
      *   },
      *   where: {
      *     email: {
-     *       contains: "prisma.io",
+     *       contains: 'prisma.io',
      *     },
      *   },
      *   orderBy: {
-     *     age: "asc",
+     *     age: 'asc',
      *   },
      *   take: 10,
      * })
@@ -6647,18 +6647,18 @@ export namespace Prisma {
       HavingValid extends Has<ByFields, HavingFields>,
       ByEmpty extends T['by'] extends never[] ? True : False,
       InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
+      ? `Error: 'by' must not be empty.`
       : HavingValid extends False
       ? {
           [P in HavingFields]: P extends ByFields
             ? never
             : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            ? `Error: Field '${P}' used in 'having' needs to be provided in 'by'.`
             : [
                 Error,
                 'Field ',
                 P,
-                ` in "having" needs to be provided in "by"`,
+                ` in 'having' needs to be provided in 'by'`,
               ]
         }[HavingFields]
       : 'take' extends Keys<T>
@@ -6668,9 +6668,9 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
+        : 'Error: If you provide 'take', you also need to provide 'orderBy''
       : 'skip' extends Keys<T>
       ? 'orderBy' extends Keys<T>
         ? ByValid extends True
@@ -6678,15 +6678,15 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+        : 'Error: If you provide 'skip', you also need to provide 'orderBy''
       : ByValid extends True
       ? {}
       : {
           [P in OrderFields]: P extends ByFields
             ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
         }[OrderFields]
     >(args: SubsetIntersection<T, SubmissionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSubmissionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
@@ -6696,15 +6696,15 @@ export namespace Prisma {
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for Submission.
+   * The delegate class that acts as a 'Promise-like' for Submission.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__SubmissionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    challenge<T extends ChallengeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ChallengeDefaultArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    readonly [Symbol.toStringTag]: 'PrismaPromise'
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findUniqueOrThrow', GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    challenge<T extends ChallengeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ChallengeDefaultArgs<ExtArgs>>): Prisma__ChallengeClient<$Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, 'findUniqueOrThrow', GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6734,14 +6734,14 @@ export namespace Prisma {
    * Fields of the Submission model
    */
   interface SubmissionFieldRefs {
-    readonly id: FieldRef<"Submission", 'String'>
-    readonly userId: FieldRef<"Submission", 'String'>
-    readonly challengeId: FieldRef<"Submission", 'String'>
-    readonly content: FieldRef<"Submission", 'String'>
-    readonly score: FieldRef<"Submission", 'Float'>
-    readonly feedback: FieldRef<"Submission", 'String'>
-    readonly createdAt: FieldRef<"Submission", 'DateTime'>
-    readonly updatedAt: FieldRef<"Submission", 'DateTime'>
+    readonly id: FieldRef<'Submission', 'String'>
+    readonly userId: FieldRef<'Submission', 'String'>
+    readonly challengeId: FieldRef<'Submission', 'String'>
+    readonly content: FieldRef<'Submission', 'String'>
+    readonly score: FieldRef<'Submission', 'Float'>
+    readonly feedback: FieldRef<'Submission', 'String'>
+    readonly createdAt: FieldRef<'Submission', 'DateTime'>
+    readonly updatedAt: FieldRef<'Submission', 'DateTime'>
   }
     
 
@@ -7346,7 +7346,7 @@ export namespace Prisma {
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
     course?: boolean | CourseDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["review"]>
+  }, ExtArgs['result']['review']>
 
 
 
@@ -7360,14 +7360,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type ReviewOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "courseId" | "rating" | "comment" | "createdAt" | "updatedAt", ExtArgs["result"]["review"]>
+  export type ReviewOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<'id' | 'userId' | 'courseId' | 'rating' | 'comment' | 'createdAt' | 'updatedAt', ExtArgs['result']['review']>
   export type ReviewInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     course?: boolean | CourseDefaultArgs<ExtArgs>
   }
 
   export type $ReviewPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Review"
+    name: 'Review'
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
       course: Prisma.$CoursePayload<ExtArgs>
@@ -7380,7 +7380,7 @@ export namespace Prisma {
       comment: string
       createdAt: Date
       updatedAt: Date
-    }, ExtArgs["result"]["review"]>
+    }, ExtArgs['result']['review']>
     composites: {}
   }
 
@@ -7404,7 +7404,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends ReviewFindUniqueArgs>(args: SelectSubset<T, ReviewFindUniqueArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends ReviewFindUniqueArgs>(args: SelectSubset<T, ReviewFindUniqueArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, 'findUnique', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Review that matches the filter or throw an error with `error.code='P2025'`
@@ -7418,7 +7418,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends ReviewFindUniqueOrThrowArgs>(args: SelectSubset<T, ReviewFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends ReviewFindUniqueOrThrowArgs>(args: SelectSubset<T, ReviewFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, 'findUniqueOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Review that matches the filter.
@@ -7433,7 +7433,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends ReviewFindFirstArgs>(args?: SelectSubset<T, ReviewFindFirstArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends ReviewFindFirstArgs>(args?: SelectSubset<T, ReviewFindFirstArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, 'findFirst', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Review that matches the filter or
@@ -7449,7 +7449,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends ReviewFindFirstOrThrowArgs>(args?: SelectSubset<T, ReviewFindFirstOrThrowArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends ReviewFindFirstOrThrowArgs>(args?: SelectSubset<T, ReviewFindFirstOrThrowArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, 'findFirstOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Reviews that matches the filter.
@@ -7467,7 +7467,7 @@ export namespace Prisma {
      * const reviewWithIdOnly = await prisma.review.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends ReviewFindManyArgs>(args?: SelectSubset<T, ReviewFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends ReviewFindManyArgs>(args?: SelectSubset<T, ReviewFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, 'findMany', GlobalOmitOptions>>
 
     /**
      * Create a Review.
@@ -7481,7 +7481,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends ReviewCreateArgs>(args: SelectSubset<T, ReviewCreateArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends ReviewCreateArgs>(args: SelectSubset<T, ReviewCreateArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, 'create', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Reviews.
@@ -7509,7 +7509,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends ReviewDeleteArgs>(args: SelectSubset<T, ReviewDeleteArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends ReviewDeleteArgs>(args: SelectSubset<T, ReviewDeleteArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, 'delete', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Review.
@@ -7526,7 +7526,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends ReviewUpdateArgs>(args: SelectSubset<T, ReviewUpdateArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends ReviewUpdateArgs>(args: SelectSubset<T, ReviewUpdateArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, 'update', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Reviews.
@@ -7578,7 +7578,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends ReviewUpsertArgs>(args: SelectSubset<T, ReviewUpsertArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends ReviewUpsertArgs>(args: SelectSubset<T, ReviewUpsertArgs<ExtArgs>>): Prisma__ReviewClient<$Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, 'upsert', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Reviews that matches the filter.
@@ -7596,8 +7596,8 @@ export namespace Prisma {
      * @example
      * const review = await prisma.review.aggregateRaw({
      *   pipeline: [
-     *     { $match: { status: "registered" } },
-     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *     { $match: { status: 'registered' } },
+     *     { $group: { _id: '$country', total: { $sum: 1 } } }
      *   ]
      * })
      */
@@ -7642,11 +7642,11 @@ export namespace Prisma {
      *   },
      *   where: {
      *     email: {
-     *       contains: "prisma.io",
+     *       contains: 'prisma.io',
      *     },
      *   },
      *   orderBy: {
-     *     age: "asc",
+     *     age: 'asc',
      *   },
      *   take: 10,
      * })
@@ -7687,18 +7687,18 @@ export namespace Prisma {
       HavingValid extends Has<ByFields, HavingFields>,
       ByEmpty extends T['by'] extends never[] ? True : False,
       InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
+      ? `Error: 'by' must not be empty.`
       : HavingValid extends False
       ? {
           [P in HavingFields]: P extends ByFields
             ? never
             : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            ? `Error: Field '${P}' used in 'having' needs to be provided in 'by'.`
             : [
                 Error,
                 'Field ',
                 P,
-                ` in "having" needs to be provided in "by"`,
+                ` in 'having' needs to be provided in 'by'`,
               ]
         }[HavingFields]
       : 'take' extends Keys<T>
@@ -7708,9 +7708,9 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
+        : 'Error: If you provide 'take', you also need to provide 'orderBy''
       : 'skip' extends Keys<T>
       ? 'orderBy' extends Keys<T>
         ? ByValid extends True
@@ -7718,15 +7718,15 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+        : 'Error: If you provide 'skip', you also need to provide 'orderBy''
       : ByValid extends True
       ? {}
       : {
           [P in OrderFields]: P extends ByFields
             ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
         }[OrderFields]
     >(args: SubsetIntersection<T, ReviewGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetReviewGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
@@ -7736,15 +7736,15 @@ export namespace Prisma {
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for Review.
+   * The delegate class that acts as a 'Promise-like' for Review.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__ReviewClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    course<T extends CourseDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CourseDefaultArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    readonly [Symbol.toStringTag]: 'PrismaPromise'
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, 'findUniqueOrThrow', GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    course<T extends CourseDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CourseDefaultArgs<ExtArgs>>): Prisma__CourseClient<$Result.GetResult<Prisma.$CoursePayload<ExtArgs>, T, 'findUniqueOrThrow', GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7774,13 +7774,13 @@ export namespace Prisma {
    * Fields of the Review model
    */
   interface ReviewFieldRefs {
-    readonly id: FieldRef<"Review", 'String'>
-    readonly userId: FieldRef<"Review", 'String'>
-    readonly courseId: FieldRef<"Review", 'String'>
-    readonly rating: FieldRef<"Review", 'Int'>
-    readonly comment: FieldRef<"Review", 'String'>
-    readonly createdAt: FieldRef<"Review", 'DateTime'>
-    readonly updatedAt: FieldRef<"Review", 'DateTime'>
+    readonly id: FieldRef<'Review', 'String'>
+    readonly userId: FieldRef<'Review', 'String'>
+    readonly courseId: FieldRef<'Review', 'String'>
+    readonly rating: FieldRef<'Review', 'Int'>
+    readonly comment: FieldRef<'Review', 'String'>
+    readonly createdAt: FieldRef<'Review', 'DateTime'>
+    readonly updatedAt: FieldRef<'Review', 'DateTime'>
   }
     
 
@@ -8341,7 +8341,7 @@ export namespace Prisma {
     category?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-  }, ExtArgs["result"]["fAQ"]>
+  }, ExtArgs['result']['fAQ']>
 
 
 
@@ -8354,10 +8354,10 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type FAQOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "question" | "answer" | "category" | "createdAt" | "updatedAt", ExtArgs["result"]["fAQ"]>
+  export type FAQOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<'id' | 'question' | 'answer' | 'category' | 'createdAt' | 'updatedAt', ExtArgs['result']['fAQ']>
 
   export type $FAQPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "FAQ"
+    name: 'FAQ'
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -8366,7 +8366,7 @@ export namespace Prisma {
       category: string
       createdAt: Date
       updatedAt: Date
-    }, ExtArgs["result"]["fAQ"]>
+    }, ExtArgs['result']['fAQ']>
     composites: {}
   }
 
@@ -8390,7 +8390,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends FAQFindUniqueArgs>(args: SelectSubset<T, FAQFindUniqueArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends FAQFindUniqueArgs>(args: SelectSubset<T, FAQFindUniqueArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, 'findUnique', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one FAQ that matches the filter or throw an error with `error.code='P2025'`
@@ -8404,7 +8404,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends FAQFindUniqueOrThrowArgs>(args: SelectSubset<T, FAQFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends FAQFindUniqueOrThrowArgs>(args: SelectSubset<T, FAQFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, 'findUniqueOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first FAQ that matches the filter.
@@ -8419,7 +8419,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends FAQFindFirstArgs>(args?: SelectSubset<T, FAQFindFirstArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends FAQFindFirstArgs>(args?: SelectSubset<T, FAQFindFirstArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, 'findFirst', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first FAQ that matches the filter or
@@ -8435,7 +8435,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends FAQFindFirstOrThrowArgs>(args?: SelectSubset<T, FAQFindFirstOrThrowArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends FAQFindFirstOrThrowArgs>(args?: SelectSubset<T, FAQFindFirstOrThrowArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, 'findFirstOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more FAQS that matches the filter.
@@ -8453,7 +8453,7 @@ export namespace Prisma {
      * const fAQWithIdOnly = await prisma.fAQ.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends FAQFindManyArgs>(args?: SelectSubset<T, FAQFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends FAQFindManyArgs>(args?: SelectSubset<T, FAQFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, 'findMany', GlobalOmitOptions>>
 
     /**
      * Create a FAQ.
@@ -8467,7 +8467,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends FAQCreateArgs>(args: SelectSubset<T, FAQCreateArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends FAQCreateArgs>(args: SelectSubset<T, FAQCreateArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, 'create', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many FAQS.
@@ -8495,7 +8495,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends FAQDeleteArgs>(args: SelectSubset<T, FAQDeleteArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends FAQDeleteArgs>(args: SelectSubset<T, FAQDeleteArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, 'delete', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one FAQ.
@@ -8512,7 +8512,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends FAQUpdateArgs>(args: SelectSubset<T, FAQUpdateArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends FAQUpdateArgs>(args: SelectSubset<T, FAQUpdateArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, 'update', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more FAQS.
@@ -8564,7 +8564,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends FAQUpsertArgs>(args: SelectSubset<T, FAQUpsertArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends FAQUpsertArgs>(args: SelectSubset<T, FAQUpsertArgs<ExtArgs>>): Prisma__FAQClient<$Result.GetResult<Prisma.$FAQPayload<ExtArgs>, T, 'upsert', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more FAQS that matches the filter.
@@ -8582,8 +8582,8 @@ export namespace Prisma {
      * @example
      * const fAQ = await prisma.fAQ.aggregateRaw({
      *   pipeline: [
-     *     { $match: { status: "registered" } },
-     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *     { $match: { status: 'registered' } },
+     *     { $group: { _id: '$country', total: { $sum: 1 } } }
      *   ]
      * })
      */
@@ -8628,11 +8628,11 @@ export namespace Prisma {
      *   },
      *   where: {
      *     email: {
-     *       contains: "prisma.io",
+     *       contains: 'prisma.io',
      *     },
      *   },
      *   orderBy: {
-     *     age: "asc",
+     *     age: 'asc',
      *   },
      *   take: 10,
      * })
@@ -8673,18 +8673,18 @@ export namespace Prisma {
       HavingValid extends Has<ByFields, HavingFields>,
       ByEmpty extends T['by'] extends never[] ? True : False,
       InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
+      ? `Error: 'by' must not be empty.`
       : HavingValid extends False
       ? {
           [P in HavingFields]: P extends ByFields
             ? never
             : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            ? `Error: Field '${P}' used in 'having' needs to be provided in 'by'.`
             : [
                 Error,
                 'Field ',
                 P,
-                ` in "having" needs to be provided in "by"`,
+                ` in 'having' needs to be provided in 'by'`,
               ]
         }[HavingFields]
       : 'take' extends Keys<T>
@@ -8694,9 +8694,9 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
+        : 'Error: If you provide 'take', you also need to provide 'orderBy''
       : 'skip' extends Keys<T>
       ? 'orderBy' extends Keys<T>
         ? ByValid extends True
@@ -8704,15 +8704,15 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+        : 'Error: If you provide 'skip', you also need to provide 'orderBy''
       : ByValid extends True
       ? {}
       : {
           [P in OrderFields]: P extends ByFields
             ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
         }[OrderFields]
     >(args: SubsetIntersection<T, FAQGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFAQGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
@@ -8722,13 +8722,13 @@ export namespace Prisma {
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for FAQ.
+   * The delegate class that acts as a 'Promise-like' for FAQ.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__FAQClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
+    readonly [Symbol.toStringTag]: 'PrismaPromise'
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8758,12 +8758,12 @@ export namespace Prisma {
    * Fields of the FAQ model
    */
   interface FAQFieldRefs {
-    readonly id: FieldRef<"FAQ", 'String'>
-    readonly question: FieldRef<"FAQ", 'String'>
-    readonly answer: FieldRef<"FAQ", 'String'>
-    readonly category: FieldRef<"FAQ", 'String'>
-    readonly createdAt: FieldRef<"FAQ", 'DateTime'>
-    readonly updatedAt: FieldRef<"FAQ", 'DateTime'>
+    readonly id: FieldRef<'FAQ', 'String'>
+    readonly question: FieldRef<'FAQ', 'String'>
+    readonly answer: FieldRef<'FAQ', 'String'>
+    readonly category: FieldRef<'FAQ', 'String'>
+    readonly createdAt: FieldRef<'FAQ', 'DateTime'>
+    readonly updatedAt: FieldRef<'FAQ', 'DateTime'>
   }
     
 
@@ -9277,7 +9277,7 @@ export namespace Prisma {
     steps?: boolean | RoadmapStepDefaultArgs<ExtArgs>
     createdAt?: boolean
     updatedAt?: boolean
-  }, ExtArgs["result"]["roadmap"]>
+  }, ExtArgs['result']['roadmap']>
 
 
 
@@ -9289,11 +9289,11 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type RoadmapOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "steps" | "createdAt" | "updatedAt", ExtArgs["result"]["roadmap"]>
+  export type RoadmapOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<'id' | 'title' | 'description' | 'steps' | 'createdAt' | 'updatedAt', ExtArgs['result']['roadmap']>
   export type RoadmapInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $RoadmapPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Roadmap"
+    name: 'Roadmap'
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -9301,7 +9301,7 @@ export namespace Prisma {
       description: string
       createdAt: Date
       updatedAt: Date
-    }, ExtArgs["result"]["roadmap"]>
+    }, ExtArgs['result']['roadmap']>
     composites: {
       steps: Prisma.$RoadmapStepPayload[]
     }
@@ -9327,7 +9327,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUnique<T extends RoadmapFindUniqueArgs>(args: SelectSubset<T, RoadmapFindUniqueArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findUnique<T extends RoadmapFindUniqueArgs>(args: SelectSubset<T, RoadmapFindUniqueArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, 'findUnique', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find one Roadmap that matches the filter or throw an error with `error.code='P2025'`
@@ -9341,7 +9341,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findUniqueOrThrow<T extends RoadmapFindUniqueOrThrowArgs>(args: SelectSubset<T, RoadmapFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findUniqueOrThrow<T extends RoadmapFindUniqueOrThrowArgs>(args: SelectSubset<T, RoadmapFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, 'findUniqueOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Roadmap that matches the filter.
@@ -9356,7 +9356,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirst<T extends RoadmapFindFirstArgs>(args?: SelectSubset<T, RoadmapFindFirstArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    findFirst<T extends RoadmapFindFirstArgs>(args?: SelectSubset<T, RoadmapFindFirstArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, 'findFirst', GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find the first Roadmap that matches the filter or
@@ -9372,7 +9372,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    findFirstOrThrow<T extends RoadmapFindFirstOrThrowArgs>(args?: SelectSubset<T, RoadmapFindFirstOrThrowArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    findFirstOrThrow<T extends RoadmapFindFirstOrThrowArgs>(args?: SelectSubset<T, RoadmapFindFirstOrThrowArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, 'findFirstOrThrow', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Roadmaps that matches the filter.
@@ -9390,7 +9390,7 @@ export namespace Prisma {
      * const roadmapWithIdOnly = await prisma.roadmap.findMany({ select: { id: true } })
      * 
      */
-    findMany<T extends RoadmapFindManyArgs>(args?: SelectSubset<T, RoadmapFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+    findMany<T extends RoadmapFindManyArgs>(args?: SelectSubset<T, RoadmapFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, 'findMany', GlobalOmitOptions>>
 
     /**
      * Create a Roadmap.
@@ -9404,7 +9404,7 @@ export namespace Prisma {
      * })
      * 
      */
-    create<T extends RoadmapCreateArgs>(args: SelectSubset<T, RoadmapCreateArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    create<T extends RoadmapCreateArgs>(args: SelectSubset<T, RoadmapCreateArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, 'create', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Create many Roadmaps.
@@ -9432,7 +9432,7 @@ export namespace Prisma {
      * })
      * 
      */
-    delete<T extends RoadmapDeleteArgs>(args: SelectSubset<T, RoadmapDeleteArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    delete<T extends RoadmapDeleteArgs>(args: SelectSubset<T, RoadmapDeleteArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, 'delete', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Update one Roadmap.
@@ -9449,7 +9449,7 @@ export namespace Prisma {
      * })
      * 
      */
-    update<T extends RoadmapUpdateArgs>(args: SelectSubset<T, RoadmapUpdateArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    update<T extends RoadmapUpdateArgs>(args: SelectSubset<T, RoadmapUpdateArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, 'update', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Delete zero or more Roadmaps.
@@ -9501,7 +9501,7 @@ export namespace Prisma {
      *   }
      * })
      */
-    upsert<T extends RoadmapUpsertArgs>(args: SelectSubset<T, RoadmapUpsertArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+    upsert<T extends RoadmapUpsertArgs>(args: SelectSubset<T, RoadmapUpsertArgs<ExtArgs>>): Prisma__RoadmapClient<$Result.GetResult<Prisma.$RoadmapPayload<ExtArgs>, T, 'upsert', GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
 
     /**
      * Find zero or more Roadmaps that matches the filter.
@@ -9519,8 +9519,8 @@ export namespace Prisma {
      * @example
      * const roadmap = await prisma.roadmap.aggregateRaw({
      *   pipeline: [
-     *     { $match: { status: "registered" } },
-     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *     { $match: { status: 'registered' } },
+     *     { $group: { _id: '$country', total: { $sum: 1 } } }
      *   ]
      * })
      */
@@ -9565,11 +9565,11 @@ export namespace Prisma {
      *   },
      *   where: {
      *     email: {
-     *       contains: "prisma.io",
+     *       contains: 'prisma.io',
      *     },
      *   },
      *   orderBy: {
-     *     age: "asc",
+     *     age: 'asc',
      *   },
      *   take: 10,
      * })
@@ -9610,18 +9610,18 @@ export namespace Prisma {
       HavingValid extends Has<ByFields, HavingFields>,
       ByEmpty extends T['by'] extends never[] ? True : False,
       InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
+      ? `Error: 'by' must not be empty.`
       : HavingValid extends False
       ? {
           [P in HavingFields]: P extends ByFields
             ? never
             : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            ? `Error: Field '${P}' used in 'having' needs to be provided in 'by'.`
             : [
                 Error,
                 'Field ',
                 P,
-                ` in "having" needs to be provided in "by"`,
+                ` in 'having' needs to be provided in 'by'`,
               ]
         }[HavingFields]
       : 'take' extends Keys<T>
@@ -9631,9 +9631,9 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
+        : 'Error: If you provide 'take', you also need to provide 'orderBy''
       : 'skip' extends Keys<T>
       ? 'orderBy' extends Keys<T>
         ? ByValid extends True
@@ -9641,15 +9641,15 @@ export namespace Prisma {
           : {
               [P in OrderFields]: P extends ByFields
                 ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+                : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
             }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+        : 'Error: If you provide 'skip', you also need to provide 'orderBy''
       : ByValid extends True
       ? {}
       : {
           [P in OrderFields]: P extends ByFields
             ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            : `Error: Field '${P}' in 'orderBy' needs to be provided in 'by'`
         }[OrderFields]
     >(args: SubsetIntersection<T, RoadmapGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRoadmapGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
   /**
@@ -9659,13 +9659,13 @@ export namespace Prisma {
   }
 
   /**
-   * The delegate class that acts as a "Promise-like" for Roadmap.
+   * The delegate class that acts as a 'Promise-like' for Roadmap.
    * Why is this prefixed with `Prisma__`?
    * Because we want to prevent naming conflicts as mentioned in
    * https://github.com/prisma/prisma-client-js/issues/707
    */
   export interface Prisma__RoadmapClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
+    readonly [Symbol.toStringTag]: 'PrismaPromise'
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9695,11 +9695,11 @@ export namespace Prisma {
    * Fields of the Roadmap model
    */
   interface RoadmapFieldRefs {
-    readonly id: FieldRef<"Roadmap", 'String'>
-    readonly title: FieldRef<"Roadmap", 'String'>
-    readonly description: FieldRef<"Roadmap", 'String'>
-    readonly createdAt: FieldRef<"Roadmap", 'DateTime'>
-    readonly updatedAt: FieldRef<"Roadmap", 'DateTime'>
+    readonly id: FieldRef<'Roadmap', 'String'>
+    readonly title: FieldRef<'Roadmap', 'String'>
+    readonly description: FieldRef<'Roadmap', 'String'>
+    readonly createdAt: FieldRef<'Roadmap', 'DateTime'>
+    readonly updatedAt: FieldRef<'Roadmap', 'DateTime'>
   }
     
 
@@ -10327,14 +10327,14 @@ export namespace Prisma {
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
-    id?: StringFilter<"User"> | string
-    name?: StringFilter<"User"> | string
-    email?: StringFilter<"User"> | string
-    password?: StringFilter<"User"> | string
-    role?: EnumRoleFilter<"User"> | $Enums.Role
-    createdAt?: DateTimeFilter<"User"> | Date | string
-    updatedAt?: DateTimeFilter<"User"> | Date | string
-    enrolledIds?: StringNullableListFilter<"User">
+    id?: StringFilter<'User'> | string
+    name?: StringFilter<'User'> | string
+    email?: StringFilter<'User'> | string
+    password?: StringFilter<'User'> | string
+    role?: EnumRoleFilter<'User'> | $Enums.Role
+    createdAt?: DateTimeFilter<'User'> | Date | string
+    updatedAt?: DateTimeFilter<'User'> | Date | string
+    enrolledIds?: StringNullableListFilter<'User'>
     courses?: CourseListRelationFilter
     reviews?: ReviewListRelationFilter
     enrolledIn?: CourseListRelationFilter
@@ -10362,17 +10362,17 @@ export namespace Prisma {
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
-    name?: StringFilter<"User"> | string
-    password?: StringFilter<"User"> | string
-    role?: EnumRoleFilter<"User"> | $Enums.Role
-    createdAt?: DateTimeFilter<"User"> | Date | string
-    updatedAt?: DateTimeFilter<"User"> | Date | string
-    enrolledIds?: StringNullableListFilter<"User">
+    name?: StringFilter<'User'> | string
+    password?: StringFilter<'User'> | string
+    role?: EnumRoleFilter<'User'> | $Enums.Role
+    createdAt?: DateTimeFilter<'User'> | Date | string
+    updatedAt?: DateTimeFilter<'User'> | Date | string
+    enrolledIds?: StringNullableListFilter<'User'>
     courses?: CourseListRelationFilter
     reviews?: ReviewListRelationFilter
     enrolledIn?: CourseListRelationFilter
     submissions?: SubmissionListRelationFilter
-  }, "id" | "email">
+  }, 'id' | 'email'>
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
@@ -10392,31 +10392,31 @@ export namespace Prisma {
     AND?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
     OR?: UserScalarWhereWithAggregatesInput[]
     NOT?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"User"> | string
-    name?: StringWithAggregatesFilter<"User"> | string
-    email?: StringWithAggregatesFilter<"User"> | string
-    password?: StringWithAggregatesFilter<"User"> | string
-    role?: EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
-    createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
-    enrolledIds?: StringNullableListFilter<"User">
+    id?: StringWithAggregatesFilter<'User'> | string
+    name?: StringWithAggregatesFilter<'User'> | string
+    email?: StringWithAggregatesFilter<'User'> | string
+    password?: StringWithAggregatesFilter<'User'> | string
+    role?: EnumRoleWithAggregatesFilter<'User'> | $Enums.Role
+    createdAt?: DateTimeWithAggregatesFilter<'User'> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<'User'> | Date | string
+    enrolledIds?: StringNullableListFilter<'User'>
   }
 
   export type CourseWhereInput = {
     AND?: CourseWhereInput | CourseWhereInput[]
     OR?: CourseWhereInput[]
     NOT?: CourseWhereInput | CourseWhereInput[]
-    id?: StringFilter<"Course"> | string
-    title?: StringFilter<"Course"> | string
-    description?: StringFilter<"Course"> | string
-    instructorId?: StringFilter<"Course"> | string
-    price?: FloatFilter<"Course"> | number
-    imageUrl?: StringNullableFilter<"Course"> | string | null
-    level?: EnumLevelFilter<"Course"> | $Enums.Level
-    topics?: StringNullableListFilter<"Course">
-    createdAt?: DateTimeFilter<"Course"> | Date | string
-    updatedAt?: DateTimeFilter<"Course"> | Date | string
-    studentIds?: StringNullableListFilter<"Course">
+    id?: StringFilter<'Course'> | string
+    title?: StringFilter<'Course'> | string
+    description?: StringFilter<'Course'> | string
+    instructorId?: StringFilter<'Course'> | string
+    price?: FloatFilter<'Course'> | number
+    imageUrl?: StringNullableFilter<'Course'> | string | null
+    level?: EnumLevelFilter<'Course'> | $Enums.Level
+    topics?: StringNullableListFilter<'Course'>
+    createdAt?: DateTimeFilter<'Course'> | Date | string
+    updatedAt?: DateTimeFilter<'Course'> | Date | string
+    studentIds?: StringNullableListFilter<'Course'>
     instructor?: XOR<UserScalarRelationFilter, UserWhereInput>
     lessons?: LessonListRelationFilter
     students?: UserListRelationFilter
@@ -10446,21 +10446,21 @@ export namespace Prisma {
     AND?: CourseWhereInput | CourseWhereInput[]
     OR?: CourseWhereInput[]
     NOT?: CourseWhereInput | CourseWhereInput[]
-    title?: StringFilter<"Course"> | string
-    description?: StringFilter<"Course"> | string
-    instructorId?: StringFilter<"Course"> | string
-    price?: FloatFilter<"Course"> | number
-    imageUrl?: StringNullableFilter<"Course"> | string | null
-    level?: EnumLevelFilter<"Course"> | $Enums.Level
-    topics?: StringNullableListFilter<"Course">
-    createdAt?: DateTimeFilter<"Course"> | Date | string
-    updatedAt?: DateTimeFilter<"Course"> | Date | string
-    studentIds?: StringNullableListFilter<"Course">
+    title?: StringFilter<'Course'> | string
+    description?: StringFilter<'Course'> | string
+    instructorId?: StringFilter<'Course'> | string
+    price?: FloatFilter<'Course'> | number
+    imageUrl?: StringNullableFilter<'Course'> | string | null
+    level?: EnumLevelFilter<'Course'> | $Enums.Level
+    topics?: StringNullableListFilter<'Course'>
+    createdAt?: DateTimeFilter<'Course'> | Date | string
+    updatedAt?: DateTimeFilter<'Course'> | Date | string
+    studentIds?: StringNullableListFilter<'Course'>
     instructor?: XOR<UserScalarRelationFilter, UserWhereInput>
     lessons?: LessonListRelationFilter
     students?: UserListRelationFilter
     reviews?: ReviewListRelationFilter
-  }, "id">
+  }, 'id'>
 
   export type CourseOrderByWithAggregationInput = {
     id?: SortOrder
@@ -10485,31 +10485,31 @@ export namespace Prisma {
     AND?: CourseScalarWhereWithAggregatesInput | CourseScalarWhereWithAggregatesInput[]
     OR?: CourseScalarWhereWithAggregatesInput[]
     NOT?: CourseScalarWhereWithAggregatesInput | CourseScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"Course"> | string
-    title?: StringWithAggregatesFilter<"Course"> | string
-    description?: StringWithAggregatesFilter<"Course"> | string
-    instructorId?: StringWithAggregatesFilter<"Course"> | string
-    price?: FloatWithAggregatesFilter<"Course"> | number
-    imageUrl?: StringNullableWithAggregatesFilter<"Course"> | string | null
-    level?: EnumLevelWithAggregatesFilter<"Course"> | $Enums.Level
-    topics?: StringNullableListFilter<"Course">
-    createdAt?: DateTimeWithAggregatesFilter<"Course"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Course"> | Date | string
-    studentIds?: StringNullableListFilter<"Course">
+    id?: StringWithAggregatesFilter<'Course'> | string
+    title?: StringWithAggregatesFilter<'Course'> | string
+    description?: StringWithAggregatesFilter<'Course'> | string
+    instructorId?: StringWithAggregatesFilter<'Course'> | string
+    price?: FloatWithAggregatesFilter<'Course'> | number
+    imageUrl?: StringNullableWithAggregatesFilter<'Course'> | string | null
+    level?: EnumLevelWithAggregatesFilter<'Course'> | $Enums.Level
+    topics?: StringNullableListFilter<'Course'>
+    createdAt?: DateTimeWithAggregatesFilter<'Course'> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<'Course'> | Date | string
+    studentIds?: StringNullableListFilter<'Course'>
   }
 
   export type LessonWhereInput = {
     AND?: LessonWhereInput | LessonWhereInput[]
     OR?: LessonWhereInput[]
     NOT?: LessonWhereInput | LessonWhereInput[]
-    id?: StringFilter<"Lesson"> | string
-    title?: StringFilter<"Lesson"> | string
-    content?: StringFilter<"Lesson"> | string
-    videoUrl?: StringNullableFilter<"Lesson"> | string | null
-    order?: IntFilter<"Lesson"> | number
-    courseId?: StringFilter<"Lesson"> | string
-    createdAt?: DateTimeFilter<"Lesson"> | Date | string
-    updatedAt?: DateTimeFilter<"Lesson"> | Date | string
+    id?: StringFilter<'Lesson'> | string
+    title?: StringFilter<'Lesson'> | string
+    content?: StringFilter<'Lesson'> | string
+    videoUrl?: StringNullableFilter<'Lesson'> | string | null
+    order?: IntFilter<'Lesson'> | number
+    courseId?: StringFilter<'Lesson'> | string
+    createdAt?: DateTimeFilter<'Lesson'> | Date | string
+    updatedAt?: DateTimeFilter<'Lesson'> | Date | string
     course?: XOR<CourseScalarRelationFilter, CourseWhereInput>
   }
 
@@ -10530,15 +10530,15 @@ export namespace Prisma {
     AND?: LessonWhereInput | LessonWhereInput[]
     OR?: LessonWhereInput[]
     NOT?: LessonWhereInput | LessonWhereInput[]
-    title?: StringFilter<"Lesson"> | string
-    content?: StringFilter<"Lesson"> | string
-    videoUrl?: StringNullableFilter<"Lesson"> | string | null
-    order?: IntFilter<"Lesson"> | number
-    courseId?: StringFilter<"Lesson"> | string
-    createdAt?: DateTimeFilter<"Lesson"> | Date | string
-    updatedAt?: DateTimeFilter<"Lesson"> | Date | string
+    title?: StringFilter<'Lesson'> | string
+    content?: StringFilter<'Lesson'> | string
+    videoUrl?: StringNullableFilter<'Lesson'> | string | null
+    order?: IntFilter<'Lesson'> | number
+    courseId?: StringFilter<'Lesson'> | string
+    createdAt?: DateTimeFilter<'Lesson'> | Date | string
+    updatedAt?: DateTimeFilter<'Lesson'> | Date | string
     course?: XOR<CourseScalarRelationFilter, CourseWhereInput>
-  }, "id">
+  }, 'id'>
 
   export type LessonOrderByWithAggregationInput = {
     id?: SortOrder
@@ -10560,28 +10560,28 @@ export namespace Prisma {
     AND?: LessonScalarWhereWithAggregatesInput | LessonScalarWhereWithAggregatesInput[]
     OR?: LessonScalarWhereWithAggregatesInput[]
     NOT?: LessonScalarWhereWithAggregatesInput | LessonScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"Lesson"> | string
-    title?: StringWithAggregatesFilter<"Lesson"> | string
-    content?: StringWithAggregatesFilter<"Lesson"> | string
-    videoUrl?: StringNullableWithAggregatesFilter<"Lesson"> | string | null
-    order?: IntWithAggregatesFilter<"Lesson"> | number
-    courseId?: StringWithAggregatesFilter<"Lesson"> | string
-    createdAt?: DateTimeWithAggregatesFilter<"Lesson"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Lesson"> | Date | string
+    id?: StringWithAggregatesFilter<'Lesson'> | string
+    title?: StringWithAggregatesFilter<'Lesson'> | string
+    content?: StringWithAggregatesFilter<'Lesson'> | string
+    videoUrl?: StringNullableWithAggregatesFilter<'Lesson'> | string | null
+    order?: IntWithAggregatesFilter<'Lesson'> | number
+    courseId?: StringWithAggregatesFilter<'Lesson'> | string
+    createdAt?: DateTimeWithAggregatesFilter<'Lesson'> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<'Lesson'> | Date | string
   }
 
   export type ChallengeWhereInput = {
     AND?: ChallengeWhereInput | ChallengeWhereInput[]
     OR?: ChallengeWhereInput[]
     NOT?: ChallengeWhereInput | ChallengeWhereInput[]
-    id?: StringFilter<"Challenge"> | string
-    title?: StringFilter<"Challenge"> | string
-    description?: StringFilter<"Challenge"> | string
-    difficulty?: EnumDifficultyFilter<"Challenge"> | $Enums.Difficulty
-    startDate?: DateTimeFilter<"Challenge"> | Date | string
-    endDate?: DateTimeFilter<"Challenge"> | Date | string
-    createdAt?: DateTimeFilter<"Challenge"> | Date | string
-    updatedAt?: DateTimeFilter<"Challenge"> | Date | string
+    id?: StringFilter<'Challenge'> | string
+    title?: StringFilter<'Challenge'> | string
+    description?: StringFilter<'Challenge'> | string
+    difficulty?: EnumDifficultyFilter<'Challenge'> | $Enums.Difficulty
+    startDate?: DateTimeFilter<'Challenge'> | Date | string
+    endDate?: DateTimeFilter<'Challenge'> | Date | string
+    createdAt?: DateTimeFilter<'Challenge'> | Date | string
+    updatedAt?: DateTimeFilter<'Challenge'> | Date | string
     submissions?: SubmissionListRelationFilter
   }
 
@@ -10602,15 +10602,15 @@ export namespace Prisma {
     AND?: ChallengeWhereInput | ChallengeWhereInput[]
     OR?: ChallengeWhereInput[]
     NOT?: ChallengeWhereInput | ChallengeWhereInput[]
-    title?: StringFilter<"Challenge"> | string
-    description?: StringFilter<"Challenge"> | string
-    difficulty?: EnumDifficultyFilter<"Challenge"> | $Enums.Difficulty
-    startDate?: DateTimeFilter<"Challenge"> | Date | string
-    endDate?: DateTimeFilter<"Challenge"> | Date | string
-    createdAt?: DateTimeFilter<"Challenge"> | Date | string
-    updatedAt?: DateTimeFilter<"Challenge"> | Date | string
+    title?: StringFilter<'Challenge'> | string
+    description?: StringFilter<'Challenge'> | string
+    difficulty?: EnumDifficultyFilter<'Challenge'> | $Enums.Difficulty
+    startDate?: DateTimeFilter<'Challenge'> | Date | string
+    endDate?: DateTimeFilter<'Challenge'> | Date | string
+    createdAt?: DateTimeFilter<'Challenge'> | Date | string
+    updatedAt?: DateTimeFilter<'Challenge'> | Date | string
     submissions?: SubmissionListRelationFilter
-  }, "id">
+  }, 'id'>
 
   export type ChallengeOrderByWithAggregationInput = {
     id?: SortOrder
@@ -10630,28 +10630,28 @@ export namespace Prisma {
     AND?: ChallengeScalarWhereWithAggregatesInput | ChallengeScalarWhereWithAggregatesInput[]
     OR?: ChallengeScalarWhereWithAggregatesInput[]
     NOT?: ChallengeScalarWhereWithAggregatesInput | ChallengeScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"Challenge"> | string
-    title?: StringWithAggregatesFilter<"Challenge"> | string
-    description?: StringWithAggregatesFilter<"Challenge"> | string
-    difficulty?: EnumDifficultyWithAggregatesFilter<"Challenge"> | $Enums.Difficulty
-    startDate?: DateTimeWithAggregatesFilter<"Challenge"> | Date | string
-    endDate?: DateTimeWithAggregatesFilter<"Challenge"> | Date | string
-    createdAt?: DateTimeWithAggregatesFilter<"Challenge"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Challenge"> | Date | string
+    id?: StringWithAggregatesFilter<'Challenge'> | string
+    title?: StringWithAggregatesFilter<'Challenge'> | string
+    description?: StringWithAggregatesFilter<'Challenge'> | string
+    difficulty?: EnumDifficultyWithAggregatesFilter<'Challenge'> | $Enums.Difficulty
+    startDate?: DateTimeWithAggregatesFilter<'Challenge'> | Date | string
+    endDate?: DateTimeWithAggregatesFilter<'Challenge'> | Date | string
+    createdAt?: DateTimeWithAggregatesFilter<'Challenge'> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<'Challenge'> | Date | string
   }
 
   export type SubmissionWhereInput = {
     AND?: SubmissionWhereInput | SubmissionWhereInput[]
     OR?: SubmissionWhereInput[]
     NOT?: SubmissionWhereInput | SubmissionWhereInput[]
-    id?: StringFilter<"Submission"> | string
-    userId?: StringFilter<"Submission"> | string
-    challengeId?: StringFilter<"Submission"> | string
-    content?: StringFilter<"Submission"> | string
-    score?: FloatNullableFilter<"Submission"> | number | null
-    feedback?: StringNullableFilter<"Submission"> | string | null
-    createdAt?: DateTimeFilter<"Submission"> | Date | string
-    updatedAt?: DateTimeFilter<"Submission"> | Date | string
+    id?: StringFilter<'Submission'> | string
+    userId?: StringFilter<'Submission'> | string
+    challengeId?: StringFilter<'Submission'> | string
+    content?: StringFilter<'Submission'> | string
+    score?: FloatNullableFilter<'Submission'> | number | null
+    feedback?: StringNullableFilter<'Submission'> | string | null
+    createdAt?: DateTimeFilter<'Submission'> | Date | string
+    updatedAt?: DateTimeFilter<'Submission'> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     challenge?: XOR<ChallengeScalarRelationFilter, ChallengeWhereInput>
   }
@@ -10674,16 +10674,16 @@ export namespace Prisma {
     AND?: SubmissionWhereInput | SubmissionWhereInput[]
     OR?: SubmissionWhereInput[]
     NOT?: SubmissionWhereInput | SubmissionWhereInput[]
-    userId?: StringFilter<"Submission"> | string
-    challengeId?: StringFilter<"Submission"> | string
-    content?: StringFilter<"Submission"> | string
-    score?: FloatNullableFilter<"Submission"> | number | null
-    feedback?: StringNullableFilter<"Submission"> | string | null
-    createdAt?: DateTimeFilter<"Submission"> | Date | string
-    updatedAt?: DateTimeFilter<"Submission"> | Date | string
+    userId?: StringFilter<'Submission'> | string
+    challengeId?: StringFilter<'Submission'> | string
+    content?: StringFilter<'Submission'> | string
+    score?: FloatNullableFilter<'Submission'> | number | null
+    feedback?: StringNullableFilter<'Submission'> | string | null
+    createdAt?: DateTimeFilter<'Submission'> | Date | string
+    updatedAt?: DateTimeFilter<'Submission'> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     challenge?: XOR<ChallengeScalarRelationFilter, ChallengeWhereInput>
-  }, "id">
+  }, 'id'>
 
   export type SubmissionOrderByWithAggregationInput = {
     id?: SortOrder
@@ -10705,27 +10705,27 @@ export namespace Prisma {
     AND?: SubmissionScalarWhereWithAggregatesInput | SubmissionScalarWhereWithAggregatesInput[]
     OR?: SubmissionScalarWhereWithAggregatesInput[]
     NOT?: SubmissionScalarWhereWithAggregatesInput | SubmissionScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"Submission"> | string
-    userId?: StringWithAggregatesFilter<"Submission"> | string
-    challengeId?: StringWithAggregatesFilter<"Submission"> | string
-    content?: StringWithAggregatesFilter<"Submission"> | string
-    score?: FloatNullableWithAggregatesFilter<"Submission"> | number | null
-    feedback?: StringNullableWithAggregatesFilter<"Submission"> | string | null
-    createdAt?: DateTimeWithAggregatesFilter<"Submission"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Submission"> | Date | string
+    id?: StringWithAggregatesFilter<'Submission'> | string
+    userId?: StringWithAggregatesFilter<'Submission'> | string
+    challengeId?: StringWithAggregatesFilter<'Submission'> | string
+    content?: StringWithAggregatesFilter<'Submission'> | string
+    score?: FloatNullableWithAggregatesFilter<'Submission'> | number | null
+    feedback?: StringNullableWithAggregatesFilter<'Submission'> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<'Submission'> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<'Submission'> | Date | string
   }
 
   export type ReviewWhereInput = {
     AND?: ReviewWhereInput | ReviewWhereInput[]
     OR?: ReviewWhereInput[]
     NOT?: ReviewWhereInput | ReviewWhereInput[]
-    id?: StringFilter<"Review"> | string
-    userId?: StringFilter<"Review"> | string
-    courseId?: StringFilter<"Review"> | string
-    rating?: IntFilter<"Review"> | number
-    comment?: StringFilter<"Review"> | string
-    createdAt?: DateTimeFilter<"Review"> | Date | string
-    updatedAt?: DateTimeFilter<"Review"> | Date | string
+    id?: StringFilter<'Review'> | string
+    userId?: StringFilter<'Review'> | string
+    courseId?: StringFilter<'Review'> | string
+    rating?: IntFilter<'Review'> | number
+    comment?: StringFilter<'Review'> | string
+    createdAt?: DateTimeFilter<'Review'> | Date | string
+    updatedAt?: DateTimeFilter<'Review'> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     course?: XOR<CourseScalarRelationFilter, CourseWhereInput>
   }
@@ -10747,15 +10747,15 @@ export namespace Prisma {
     AND?: ReviewWhereInput | ReviewWhereInput[]
     OR?: ReviewWhereInput[]
     NOT?: ReviewWhereInput | ReviewWhereInput[]
-    userId?: StringFilter<"Review"> | string
-    courseId?: StringFilter<"Review"> | string
-    rating?: IntFilter<"Review"> | number
-    comment?: StringFilter<"Review"> | string
-    createdAt?: DateTimeFilter<"Review"> | Date | string
-    updatedAt?: DateTimeFilter<"Review"> | Date | string
+    userId?: StringFilter<'Review'> | string
+    courseId?: StringFilter<'Review'> | string
+    rating?: IntFilter<'Review'> | number
+    comment?: StringFilter<'Review'> | string
+    createdAt?: DateTimeFilter<'Review'> | Date | string
+    updatedAt?: DateTimeFilter<'Review'> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     course?: XOR<CourseScalarRelationFilter, CourseWhereInput>
-  }, "id">
+  }, 'id'>
 
   export type ReviewOrderByWithAggregationInput = {
     id?: SortOrder
@@ -10776,25 +10776,25 @@ export namespace Prisma {
     AND?: ReviewScalarWhereWithAggregatesInput | ReviewScalarWhereWithAggregatesInput[]
     OR?: ReviewScalarWhereWithAggregatesInput[]
     NOT?: ReviewScalarWhereWithAggregatesInput | ReviewScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"Review"> | string
-    userId?: StringWithAggregatesFilter<"Review"> | string
-    courseId?: StringWithAggregatesFilter<"Review"> | string
-    rating?: IntWithAggregatesFilter<"Review"> | number
-    comment?: StringWithAggregatesFilter<"Review"> | string
-    createdAt?: DateTimeWithAggregatesFilter<"Review"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Review"> | Date | string
+    id?: StringWithAggregatesFilter<'Review'> | string
+    userId?: StringWithAggregatesFilter<'Review'> | string
+    courseId?: StringWithAggregatesFilter<'Review'> | string
+    rating?: IntWithAggregatesFilter<'Review'> | number
+    comment?: StringWithAggregatesFilter<'Review'> | string
+    createdAt?: DateTimeWithAggregatesFilter<'Review'> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<'Review'> | Date | string
   }
 
   export type FAQWhereInput = {
     AND?: FAQWhereInput | FAQWhereInput[]
     OR?: FAQWhereInput[]
     NOT?: FAQWhereInput | FAQWhereInput[]
-    id?: StringFilter<"FAQ"> | string
-    question?: StringFilter<"FAQ"> | string
-    answer?: StringFilter<"FAQ"> | string
-    category?: StringFilter<"FAQ"> | string
-    createdAt?: DateTimeFilter<"FAQ"> | Date | string
-    updatedAt?: DateTimeFilter<"FAQ"> | Date | string
+    id?: StringFilter<'FAQ'> | string
+    question?: StringFilter<'FAQ'> | string
+    answer?: StringFilter<'FAQ'> | string
+    category?: StringFilter<'FAQ'> | string
+    createdAt?: DateTimeFilter<'FAQ'> | Date | string
+    updatedAt?: DateTimeFilter<'FAQ'> | Date | string
   }
 
   export type FAQOrderByWithRelationInput = {
@@ -10811,12 +10811,12 @@ export namespace Prisma {
     AND?: FAQWhereInput | FAQWhereInput[]
     OR?: FAQWhereInput[]
     NOT?: FAQWhereInput | FAQWhereInput[]
-    question?: StringFilter<"FAQ"> | string
-    answer?: StringFilter<"FAQ"> | string
-    category?: StringFilter<"FAQ"> | string
-    createdAt?: DateTimeFilter<"FAQ"> | Date | string
-    updatedAt?: DateTimeFilter<"FAQ"> | Date | string
-  }, "id">
+    question?: StringFilter<'FAQ'> | string
+    answer?: StringFilter<'FAQ'> | string
+    category?: StringFilter<'FAQ'> | string
+    createdAt?: DateTimeFilter<'FAQ'> | Date | string
+    updatedAt?: DateTimeFilter<'FAQ'> | Date | string
+  }, 'id'>
 
   export type FAQOrderByWithAggregationInput = {
     id?: SortOrder
@@ -10834,24 +10834,24 @@ export namespace Prisma {
     AND?: FAQScalarWhereWithAggregatesInput | FAQScalarWhereWithAggregatesInput[]
     OR?: FAQScalarWhereWithAggregatesInput[]
     NOT?: FAQScalarWhereWithAggregatesInput | FAQScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"FAQ"> | string
-    question?: StringWithAggregatesFilter<"FAQ"> | string
-    answer?: StringWithAggregatesFilter<"FAQ"> | string
-    category?: StringWithAggregatesFilter<"FAQ"> | string
-    createdAt?: DateTimeWithAggregatesFilter<"FAQ"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"FAQ"> | Date | string
+    id?: StringWithAggregatesFilter<'FAQ'> | string
+    question?: StringWithAggregatesFilter<'FAQ'> | string
+    answer?: StringWithAggregatesFilter<'FAQ'> | string
+    category?: StringWithAggregatesFilter<'FAQ'> | string
+    createdAt?: DateTimeWithAggregatesFilter<'FAQ'> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<'FAQ'> | Date | string
   }
 
   export type RoadmapWhereInput = {
     AND?: RoadmapWhereInput | RoadmapWhereInput[]
     OR?: RoadmapWhereInput[]
     NOT?: RoadmapWhereInput | RoadmapWhereInput[]
-    id?: StringFilter<"Roadmap"> | string
-    title?: StringFilter<"Roadmap"> | string
-    description?: StringFilter<"Roadmap"> | string
+    id?: StringFilter<'Roadmap'> | string
+    title?: StringFilter<'Roadmap'> | string
+    description?: StringFilter<'Roadmap'> | string
     steps?: RoadmapStepCompositeListFilter | RoadmapStepObjectEqualityInput[]
-    createdAt?: DateTimeFilter<"Roadmap"> | Date | string
-    updatedAt?: DateTimeFilter<"Roadmap"> | Date | string
+    createdAt?: DateTimeFilter<'Roadmap'> | Date | string
+    updatedAt?: DateTimeFilter<'Roadmap'> | Date | string
   }
 
   export type RoadmapOrderByWithRelationInput = {
@@ -10868,12 +10868,12 @@ export namespace Prisma {
     AND?: RoadmapWhereInput | RoadmapWhereInput[]
     OR?: RoadmapWhereInput[]
     NOT?: RoadmapWhereInput | RoadmapWhereInput[]
-    title?: StringFilter<"Roadmap"> | string
-    description?: StringFilter<"Roadmap"> | string
+    title?: StringFilter<'Roadmap'> | string
+    description?: StringFilter<'Roadmap'> | string
     steps?: RoadmapStepCompositeListFilter | RoadmapStepObjectEqualityInput[]
-    createdAt?: DateTimeFilter<"Roadmap"> | Date | string
-    updatedAt?: DateTimeFilter<"Roadmap"> | Date | string
-  }, "id">
+    createdAt?: DateTimeFilter<'Roadmap'> | Date | string
+    updatedAt?: DateTimeFilter<'Roadmap'> | Date | string
+  }, 'id'>
 
   export type RoadmapOrderByWithAggregationInput = {
     id?: SortOrder
@@ -10890,11 +10890,11 @@ export namespace Prisma {
     AND?: RoadmapScalarWhereWithAggregatesInput | RoadmapScalarWhereWithAggregatesInput[]
     OR?: RoadmapScalarWhereWithAggregatesInput[]
     NOT?: RoadmapScalarWhereWithAggregatesInput | RoadmapScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"Roadmap"> | string
-    title?: StringWithAggregatesFilter<"Roadmap"> | string
-    description?: StringWithAggregatesFilter<"Roadmap"> | string
-    createdAt?: DateTimeWithAggregatesFilter<"Roadmap"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Roadmap"> | Date | string
+    id?: StringWithAggregatesFilter<'Roadmap'> | string
+    title?: StringWithAggregatesFilter<'Roadmap'> | string
+    description?: StringWithAggregatesFilter<'Roadmap'> | string
+    createdAt?: DateTimeWithAggregatesFilter<'Roadmap'> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<'Roadmap'> | Date | string
   }
 
   export type UserCreateInput = {
@@ -12836,11 +12836,11 @@ export namespace Prisma {
     AND?: RoadmapStepWhereInput | RoadmapStepWhereInput[]
     OR?: RoadmapStepWhereInput[]
     NOT?: RoadmapStepWhereInput | RoadmapStepWhereInput[]
-    id?: StringFilter<"RoadmapStep"> | string
-    title?: StringFilter<"RoadmapStep"> | string
-    description?: StringFilter<"RoadmapStep"> | string
-    order?: IntFilter<"RoadmapStep"> | number
-    resources?: StringNullableListFilter<"RoadmapStep">
+    id?: StringFilter<'RoadmapStep'> | string
+    title?: StringFilter<'RoadmapStep'> | string
+    description?: StringFilter<'RoadmapStep'> | string
+    order?: IntFilter<'RoadmapStep'> | number
+    resources?: StringNullableListFilter<'RoadmapStep'>
   }
 
   export type CourseCreateWithoutInstructorInput = {
@@ -12995,17 +12995,17 @@ export namespace Prisma {
     AND?: CourseScalarWhereInput | CourseScalarWhereInput[]
     OR?: CourseScalarWhereInput[]
     NOT?: CourseScalarWhereInput | CourseScalarWhereInput[]
-    id?: StringFilter<"Course"> | string
-    title?: StringFilter<"Course"> | string
-    description?: StringFilter<"Course"> | string
-    instructorId?: StringFilter<"Course"> | string
-    price?: FloatFilter<"Course"> | number
-    imageUrl?: StringNullableFilter<"Course"> | string | null
-    level?: EnumLevelFilter<"Course"> | $Enums.Level
-    topics?: StringNullableListFilter<"Course">
-    createdAt?: DateTimeFilter<"Course"> | Date | string
-    updatedAt?: DateTimeFilter<"Course"> | Date | string
-    studentIds?: StringNullableListFilter<"Course">
+    id?: StringFilter<'Course'> | string
+    title?: StringFilter<'Course'> | string
+    description?: StringFilter<'Course'> | string
+    instructorId?: StringFilter<'Course'> | string
+    price?: FloatFilter<'Course'> | number
+    imageUrl?: StringNullableFilter<'Course'> | string | null
+    level?: EnumLevelFilter<'Course'> | $Enums.Level
+    topics?: StringNullableListFilter<'Course'>
+    createdAt?: DateTimeFilter<'Course'> | Date | string
+    updatedAt?: DateTimeFilter<'Course'> | Date | string
+    studentIds?: StringNullableListFilter<'Course'>
   }
 
   export type ReviewUpsertWithWhereUniqueWithoutUserInput = {
@@ -13028,13 +13028,13 @@ export namespace Prisma {
     AND?: ReviewScalarWhereInput | ReviewScalarWhereInput[]
     OR?: ReviewScalarWhereInput[]
     NOT?: ReviewScalarWhereInput | ReviewScalarWhereInput[]
-    id?: StringFilter<"Review"> | string
-    userId?: StringFilter<"Review"> | string
-    courseId?: StringFilter<"Review"> | string
-    rating?: IntFilter<"Review"> | number
-    comment?: StringFilter<"Review"> | string
-    createdAt?: DateTimeFilter<"Review"> | Date | string
-    updatedAt?: DateTimeFilter<"Review"> | Date | string
+    id?: StringFilter<'Review'> | string
+    userId?: StringFilter<'Review'> | string
+    courseId?: StringFilter<'Review'> | string
+    rating?: IntFilter<'Review'> | number
+    comment?: StringFilter<'Review'> | string
+    createdAt?: DateTimeFilter<'Review'> | Date | string
+    updatedAt?: DateTimeFilter<'Review'> | Date | string
   }
 
   export type CourseUpsertWithWhereUniqueWithoutStudentsInput = {
@@ -13073,14 +13073,14 @@ export namespace Prisma {
     AND?: SubmissionScalarWhereInput | SubmissionScalarWhereInput[]
     OR?: SubmissionScalarWhereInput[]
     NOT?: SubmissionScalarWhereInput | SubmissionScalarWhereInput[]
-    id?: StringFilter<"Submission"> | string
-    userId?: StringFilter<"Submission"> | string
-    challengeId?: StringFilter<"Submission"> | string
-    content?: StringFilter<"Submission"> | string
-    score?: FloatNullableFilter<"Submission"> | number | null
-    feedback?: StringNullableFilter<"Submission"> | string | null
-    createdAt?: DateTimeFilter<"Submission"> | Date | string
-    updatedAt?: DateTimeFilter<"Submission"> | Date | string
+    id?: StringFilter<'Submission'> | string
+    userId?: StringFilter<'Submission'> | string
+    challengeId?: StringFilter<'Submission'> | string
+    content?: StringFilter<'Submission'> | string
+    score?: FloatNullableFilter<'Submission'> | number | null
+    feedback?: StringNullableFilter<'Submission'> | string | null
+    createdAt?: DateTimeFilter<'Submission'> | Date | string
+    updatedAt?: DateTimeFilter<'Submission'> | Date | string
   }
 
   export type UserCreateWithoutCoursesInput = {
@@ -13259,14 +13259,14 @@ export namespace Prisma {
     AND?: LessonScalarWhereInput | LessonScalarWhereInput[]
     OR?: LessonScalarWhereInput[]
     NOT?: LessonScalarWhereInput | LessonScalarWhereInput[]
-    id?: StringFilter<"Lesson"> | string
-    title?: StringFilter<"Lesson"> | string
-    content?: StringFilter<"Lesson"> | string
-    videoUrl?: StringNullableFilter<"Lesson"> | string | null
-    order?: IntFilter<"Lesson"> | number
-    courseId?: StringFilter<"Lesson"> | string
-    createdAt?: DateTimeFilter<"Lesson"> | Date | string
-    updatedAt?: DateTimeFilter<"Lesson"> | Date | string
+    id?: StringFilter<'Lesson'> | string
+    title?: StringFilter<'Lesson'> | string
+    content?: StringFilter<'Lesson'> | string
+    videoUrl?: StringNullableFilter<'Lesson'> | string | null
+    order?: IntFilter<'Lesson'> | number
+    courseId?: StringFilter<'Lesson'> | string
+    createdAt?: DateTimeFilter<'Lesson'> | Date | string
+    updatedAt?: DateTimeFilter<'Lesson'> | Date | string
   }
 
   export type UserUpsertWithWhereUniqueWithoutEnrolledInInput = {
@@ -13289,14 +13289,14 @@ export namespace Prisma {
     AND?: UserScalarWhereInput | UserScalarWhereInput[]
     OR?: UserScalarWhereInput[]
     NOT?: UserScalarWhereInput | UserScalarWhereInput[]
-    id?: StringFilter<"User"> | string
-    name?: StringFilter<"User"> | string
-    email?: StringFilter<"User"> | string
-    password?: StringFilter<"User"> | string
-    role?: EnumRoleFilter<"User"> | $Enums.Role
-    createdAt?: DateTimeFilter<"User"> | Date | string
-    updatedAt?: DateTimeFilter<"User"> | Date | string
-    enrolledIds?: StringNullableListFilter<"User">
+    id?: StringFilter<'User'> | string
+    name?: StringFilter<'User'> | string
+    email?: StringFilter<'User'> | string
+    password?: StringFilter<'User'> | string
+    role?: EnumRoleFilter<'User'> | $Enums.Role
+    createdAt?: DateTimeFilter<'User'> | Date | string
+    updatedAt?: DateTimeFilter<'User'> | Date | string
+    enrolledIds?: StringNullableListFilter<'User'>
   }
 
   export type ReviewUpsertWithWhereUniqueWithoutCourseInput = {

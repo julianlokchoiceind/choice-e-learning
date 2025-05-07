@@ -376,4 +376,4 @@ describe('ComponentName Component', () => {
 });`
 };
 
-module.exports = filePatterns;
+export default filePatterns;

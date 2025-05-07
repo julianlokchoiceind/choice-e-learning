@@ -5,7 +5,7 @@ import GitHubProvider from 'next-auth/providers/github';
 import FacebookProvider from 'next-auth/providers/facebook';
 import MicrosoftProvider from 'next-auth/providers/azure-ad';
 import { login, getUserByEmail, updateUserRoleAuth } from './services/auth-service';
-import prisma from '@/client/utils/db';
+import prisma from '@/server/db/prisma-client';
 import { Role } from '@/shared/types/auth/roles';
 import { updateLoginStreak } from '@/server/db/services';
 
@@ -38,7 +38,7 @@ function validateEnvVariables() {
 validateEnvVariables();
 
 // Extend the built-in session types
-declare module "next-auth" {
+declare module 'next-auth' {
   interface User {
     id: string;
     role: Role;
@@ -55,7 +55,7 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
+declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
     role: Role;
@@ -112,9 +112,9 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
       authorization: {
         params: {
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code"
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code'
         }
       }
     }),
@@ -129,19 +129,19 @@ export const authOptions: NextAuthOptions = {
     FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID || '',
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET || '',
-      version: "12.0", // Set latest API version
+      version: '12.0', // Set latest API version
       authorization: {
         params: {
-          scope: "email,public_profile",
-          display: "popup",
-          auth_type: "rerequest"
-        },
+          scope: 'email,public_profile',
+          display: 'popup',
+          auth_type: 'rerequest'
+        }
       },
       userinfo: {
-        url: "https://graph.facebook.com/me",
+        url: 'https://graph.facebook.com/me',
         params: { 
-          fields: "id,name,email,picture" 
-        },
+          fields: 'id,name,email,picture' 
+        }
       },
       profile(profile) {
         console.log('Facebook profile data:', profile);
@@ -150,21 +150,21 @@ export const authOptions: NextAuthOptions = {
           name: profile.name,
           email: profile.email || `${profile.id}@facebook.com`, // Provide fallback email
           image: profile.picture?.data?.url,
-          role: Role.student,
+          role: Role.student
         };
       },
-      checks: ["state"],
+      checks: ['state']
     }),
     
     // Add Microsoft Provider (via Azure AD)
     MicrosoftProvider({
       clientId: process.env.MICROSOFT_CLIENT_ID || '',
       clientSecret: process.env.MICROSOFT_CLIENT_SECRET || '',
-      tenantId: process.env.MICROSOFT_TENANT_ID || "organizations", // Change from "common" to "organizations" 
+      tenantId: process.env.MICROSOFT_TENANT_ID || 'organizations', // Change from 'common' to 'organizations' 
       authorization: {
         params: {
-          scope: "openid profile email User.Read",
-        },
+          scope: 'openid profile email User.Read'
+        }
       },
       profile(profile) {
         console.log('Microsoft profile data:', profile);
@@ -173,10 +173,10 @@ export const authOptions: NextAuthOptions = {
           name: profile.name || profile.preferred_username,
           email: profile.email || profile.preferred_username || `${profile.sub || profile.oid}@microsoft.com`, // Provide fallback email
           image: null,
-          role: Role.student,
+          role: Role.student
         };
       },
-      checks: ["pkce", "state"],
+      checks: ['pkce', 'state']
     }),
   ],
   callbacks: {
@@ -324,46 +324,40 @@ export const authOptions: NextAuthOptions = {
         
         return true;
       } catch (error) {
-        console.error('Error in signIn callback:', error);
+        console.error('SignIn callback error:', error);
         return false;
       }
     },
     
     async jwt({ token, user, account }) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role || Role.student;
+      // Initial sign in
+      if (account && user) {
+        return {
+          ...token,
+          id: user.id,
+          role: user.role
+        };
       }
       return token;
     },
     
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-      }
-      return session;
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id,
+          role: token.role
+        }
+      };
     },
     
     async redirect({ url, baseUrl }) {
-      console.log('Redirect callback called with:', { url, baseUrl });
-      
-      try {
-        // Handle redirect after sign in
-        if (url.startsWith('/')) {
-          // For relative URLs, prefix with base URL
-          return `${baseUrl}${url}`;
-        } else if (new URL(url).origin === baseUrl) {
-          // Allow redirects to same origin
-          return url;
-        }
-        // Default to dashboard for all other cases
-        return `${baseUrl}/dashboard`;
-      } catch (error) {
-        console.error('Error in redirect callback:', error);
-        return `${baseUrl}/dashboard`;
-      }
-    },
+      // Handle nextauth.js redirects
+      if (url.startsWith(baseUrl)) return url;
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      return baseUrl;
+    }
   },
   pages: {
     signIn: '/login',
@@ -373,7 +367,7 @@ export const authOptions: NextAuthOptions = {
     newUser: '/dashboard'
   },
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
@@ -394,7 +388,7 @@ export const authOptions: NextAuthOptions = {
       if (process.env.NODE_ENV === 'development' && process.env.DEBUG === 'true') {
         console.log(`[NextAuth][Debug]: ${message}`);
       }
-    },
+    }
   },
   events: {
     async signIn({ user, account, isNewUser }) {
@@ -403,7 +397,7 @@ export const authOptions: NextAuthOptions = {
         userId: user.id
       });
     }
-  },
+  }
 };
 
 export default authOptions;

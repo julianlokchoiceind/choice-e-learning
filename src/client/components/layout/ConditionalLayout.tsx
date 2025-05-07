@@ -26,7 +26,7 @@ const ConditionalLayout = ({ children }: ConditionalLayoutProps) => {
   return (
     <>
       <Header />
-      <main className="flex-grow pt-[44px]">
+      <main className='flex-grow pt-[44px]'>
         {children}
       </main>
       <Footer />

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Course } from '@/shared/types/courses/course';
+import { Course } from '@/shared/types/courses/courses/course';
 
 interface CourseCardProps {
   course: Course;
@@ -24,25 +24,25 @@ export const CourseCard = ({ course, onEnroll, isEnrolled = false }: CourseCardP
   };
   
   return (
-    <div className="course-card">
-      <div className="course-card-header">
+    <div className='course-card'>
+      <div className='course-card-header'>
         <h3>{course.title}</h3>
       </div>
-      <div className="course-card-body">
+      <div className='course-card-body'>
         <p>{course.description}</p>
         {/* Thông tin khác */}
       </div>
-      <div className="course-card-footer">
+      <div className='course-card-footer'>
         {!isEnrolled ? (
           <button 
-            onClick={handleEnroll} 
-            disabled={isLoading}
-            className="button primary"
+            onClick={"handleEnroll"} 
+            disabled={"isLoading"}
+            className='button primary'
           >
             {isLoading ? 'Đang xử lý...' : 'Đăng ký ngay'}
           </button>
         ) : (
-          <a href={`/courses/${course.id}`} className="button outline">
+          <a href={`/courses/${course.id}`} className='button outline'>
             Tiếp tục học
           </a>
         )}

@@ -40,7 +40,7 @@ const topicQueryParamsSchema = z.object({
 
 // Define the schema for topic creation
 const createTopicSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100),
+  name: z.string().min(1, 'Name is required').max(100),
   description: z.string().optional(),
   isActive: z.boolean().optional().default(true)
 });
@@ -53,7 +53,7 @@ export const GET = withAdmin(async (req: NextRequest) => {
   if (!queryResult.success) {
     // Trả về empty success response thay vì lỗi
     console.error('Invalid query parameters:', queryResult.error);
-    return apiSuccess([], "Topics retrieved successfully", {
+    return apiSuccess([], 'Topics retrieved successfully', {
       pagination: {
         page: 1,
         pageSize: 10,
@@ -78,7 +78,7 @@ export const GET = withAdmin(async (req: NextRequest) => {
     // Get topics from service with pagination
     const result = await topicService.getAllTopics(queryResult.data);
     
-    return apiSuccess(result.data, "Topics retrieved successfully", {
+    return apiSuccess(result.data, 'Topics retrieved successfully', {
       pagination: {
         page: result.meta.page,
         pageSize: result.meta.limit,
@@ -91,7 +91,7 @@ export const GET = withAdmin(async (req: NextRequest) => {
   } catch (error) {
     console.error('Error fetching topics:', error);
     // Trả về empty success response thay vì lỗi 500
-    return apiSuccess([], "Topics retrieved successfully", {
+    return apiSuccess([], 'Topics retrieved successfully', {
       pagination: {
         page: 1,
         pageSize: 10,
@@ -172,7 +172,7 @@ export const POST = withAdmin(async (req: NextRequest, context: AuthenticatedCon
     console.log('Topic created successfully:', newTopic);
     
     return apiSuccess(newTopic, 'Topic created successfully', undefined, 201);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating topic:', error);
     console.error('Error stack:', error.stack);
     

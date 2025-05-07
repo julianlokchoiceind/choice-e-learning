@@ -39,10 +39,10 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   // Show loading indicator while authentication state is being determined
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-indigo-500"></div>
-          <p className="mt-2 text-gray-600">Loading...</p>
+      <div className='flex h-screen items-center justify-center'>
+        <div className='text-center'>
+          <div className='h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-indigo-500'></div>
+          <p className='mt-2 text-gray-600'>Loading...</p>
         </div>
       </div>
     );

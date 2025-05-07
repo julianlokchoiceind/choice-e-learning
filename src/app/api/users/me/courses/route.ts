@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/client/utils/db';
+import prisma from '@/server/db/prisma-client';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/server/auth/auth-options';
-import { EnrolledCourse } from '@/shared/types/course';
+import { EnrolledCourse } from '@/shared/types/courses/course';
 
 import { checkAndAwardAchievements } from '@/server/services/achievements/achievement-service';
 
@@ -230,7 +230,7 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    // Check and award achievements (like "Course Starter")
+    // Check and award achievements (like 'Course Starter')
     await checkAndAwardAchievements(userId);
     
     return NextResponse.json({ 

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -62,7 +62,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
       try {
         // Thêm timestamp vào request URL để tránh caching
         const timestamp = Date.now();
-        const apiClient = (await import('@/lib/axios/apiClient')).default;
+        const apiClient = (await import('@/client/utils/http/api-client')).default;
         const response = await apiClient.get(`/api/courses/${courseId}?t=${timestamp}`, {
           headers: {
             'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -109,11 +109,11 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
       if (!session?.user?.id) return;
       
       try {
-        const apiClient = (await import('@/lib/axios/apiClient')).default;
+        const apiClient = (await import('@/client/utils/http/api-client')).default;
         const response = await apiClient.get(`/api/users/me/courses`);
         const data = response.data;
         if (data.success) {
-          const enrolled = data.courses.some((c: any) => c.id === courseId);
+          const enrolled = data.courses.some((c) => c.id === courseId);
           setIsEnrolled(enrolled);
         }
       } catch (err) {
@@ -138,7 +138,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
     setEnrollmentError(null);
     
     try {
-      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const apiClient = (await import('@/client/utils/http/api-client')).default;
       const response = await apiClient.post(`/api/courses/${courseId}/enroll`);
       const data = response.data;
       
@@ -170,7 +170,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
     setEnrollmentError(null);
     
     try {
-      const apiClient = (await import('@/lib/axios/apiClient')).default;
+      const apiClient = (await import('@/client/utils/http/api-client')).default;
       const response = await apiClient.delete(`/api/courses/${courseId}/enroll`);
       const data = response.data;
       
@@ -191,8 +191,8 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
   // Loading state
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+      <div className='flex justify-center items-center h-screen'>
+        <div className='animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500'></div>
       </div>
     );
   }
@@ -200,11 +200,11 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
   // Error state
   if (error || !course) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="bg-red-100 text-red-700 p-6 rounded-lg mb-8">
-          <h2 className="text-xl font-bold mb-2">Error</h2>
+      <div className='container mx-auto px-4 py-12'>
+        <div className='bg-red-100 text-red-700 p-6 rounded-lg mb-8'>
+          <h2 className='text-xl font-bold mb-2'>Error</h2>
           <p>{error || 'Course not found'}</p>
-          <Link href="/courses" className="mt-4 inline-block text-blue-600 hover:underline">
+          <Link href='/courses' className='mt-4 inline-block text-blue-600 hover:underline'>
             ← Back to Courses
           </Link>
         </div>
@@ -213,27 +213,27 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className='min-h-screen bg-gray-50'>
       {/* Course Hero Section */}
-      <section className="pt-24 pb-12 bg-gradient-to-br from-[#000428] to-[#004e92]">
-        <div className="max-w-[980px] mx-auto px-6 md:px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+      <section className='pt-24 pb-12 bg-gradient-to-br from-[#000428] to-[#004e92]'>
+        <div className='max-w-[980px] mx-auto px-6 md:px-4'>
+          <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
             {course.title}
           </h1>
-          <p className="text-xl text-white/80 max-w-2xl mb-8">
+          <p className='text-xl text-white/80 max-w-2xl mb-8'>
             {course.description}
           </p>
-          <div className="flex flex-wrap gap-4 text-white/70">
-            <span className="flex items-center">
-              <UserIcon className="h-5 w-5 mr-2" />
+          <div className='flex flex-wrap gap-4 text-white/70'>
+            <span className='flex items-center'>
+              <UserIcon className='h-5 w-5 mr-2' />
               {course.instructor.name}
             </span>
-            <span className="flex items-center">
-              <ClockIcon className="h-5 w-5 mr-2" />
+            <span className='flex items-center'>
+              <ClockIcon className='h-5 w-5 mr-2' />
               {course.totalHours || 0} hours
             </span>
-            <span className="flex items-center">
-              <AcademicCapIcon className="h-5 w-5 mr-2" />
+            <span className='flex items-center'>
+              <AcademicCapIcon className='h-5 w-5 mr-2' />
               {course.level}
             </span>
           </div>
@@ -241,80 +241,80 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
       </section>
 
       {/* Course Content */}
-      <section className="py-12">
-        <div className="max-w-[980px] mx-auto px-6 md:px-4">
-          <div className="grid md:grid-cols-3 gap-8">
+      <section className='py-12'>
+        <div className='max-w-[980px] mx-auto px-6 md:px-4'>
+          <div className='grid md:grid-cols-3 gap-8'>
             {/* Main Content */}
-            <div className="md:col-span-2">
-              <h2 className="text-2xl font-bold mb-6">What you&apos;ll learn</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div className='md:col-span-2'>
+              <h2 className='text-2xl font-bold mb-6'>What you&apos;ll learn</h2>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-8'>
                 {course.learningPoints && course.learningPoints.map((point: string, index: number) => (
-                  <div key={index} className="flex items-start">
-                    <CheckCircleIcon className="h-6 w-6 text-[#0066cc] mr-2 flex-shrink-0" />
+                  <div key={index} className='flex items-start'>
+                    <CheckCircleIcon className='h-6 w-6 text-[#0066cc] mr-2 flex-shrink-0' />
                     <span>{point}</span>
                   </div>
                 ))}
               </div>
 
-              <h2 className="text-2xl font-bold mb-6">Requirements</h2>
-              <ul className="list-disc list-inside space-y-2 text-[#1d1d1f]">
+              <h2 className='text-2xl font-bold mb-6'>Requirements</h2>
+              <ul className='list-disc list-inside space-y-2 text-[#1d1d1f]'>
                 {course.prerequisites && course.prerequisites.map((prereq: string, index: number) => (
-                  <li key={index}>{prereq}</li>
+                  <li key={"index"}>{prereq}</li>
                 ))}
               </ul>
             </div>
 
             {/* Sidebar */}
-            <div className="bg-[#f5f5f7] rounded-2xl p-6">
-              <div className="text-center mb-6">
-                <span className="text-3xl font-bold text-[#1d1d1f]">${course.price}</span>
-                <p className="text-[#86868b]">Lifetime Access</p>
+            <div className='bg-[#f5f5f7] rounded-2xl p-6'>
+              <div className='text-center mb-6'>
+                <span className='text-3xl font-bold text-[#1d1d1f]'>${course.price}</span>
+                <p className='text-[#86868b]'>Lifetime Access</p>
               </div>
               {isEnrolled ? (
                 <>
-                  <Link href={`/courses/${courseId}/learn`} className="w-full block text-center bg-[#0066cc] text-white font-medium py-3 px-6 rounded-full hover:bg-[#0077ed] transition-colors mb-4">
+                  <Link href={`/courses/${courseId}/learn`} className='w-full block text-center bg-[#0066cc] text-white font-medium py-3 px-6 rounded-full hover:bg-[#0077ed] transition-colors mb-4'>
                     Continue Learning
                   </Link>
                   <button 
-                    onClick={handleUnenroll}
-                    disabled={unenrolling}
-                    className="w-full bg-white text-red-600 font-medium py-3 px-6 rounded-full border border-red-600 hover:bg-red-50 transition-colors"
+                    onClick={"handleUnenroll"}
+                    disabled={"unenrolling"}
+                    className='w-full bg-white text-red-600 font-medium py-3 px-6 rounded-full border border-red-600 hover:bg-red-50 transition-colors'
                   >
                     {unenrolling ? 'Unenrolling...' : 'Unenroll from Course'}
                   </button>
                 </>
               ) : (
                 <button 
-                  onClick={handleEnroll}
-                  disabled={enrolling}
-                  className="w-full bg-[#0066cc] text-white font-medium py-3 px-6 rounded-full hover:bg-[#0077ed] transition-colors mb-4 disabled:opacity-70"
+                  onClick={"handleEnroll"}
+                  disabled={"enrolling"}
+                  className='w-full bg-[#0066cc] text-white font-medium py-3 px-6 rounded-full hover:bg-[#0077ed] transition-colors mb-4 disabled:opacity-70'
                 >
                   {enrolling ? 'Enrolling...' : 'Enroll Now'}
               </button>
               )}
               {!isEnrolled && (
-              <button className="w-full bg-white text-[#0066cc] font-medium py-3 px-6 rounded-full border border-[#0066cc] hover:bg-[#f5f5f7] transition-colors">
+              <button className='w-full bg-white text-[#0066cc] font-medium py-3 px-6 rounded-full border border-[#0066cc] hover:bg-[#f5f5f7] transition-colors'>
                 Add to Wishlist
               </button>
               )}
 
               {enrollmentError && (
-                <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+                <div className='mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm'>
                   {enrollmentError}
                 </div>
               )}
 
-              <div className="mt-6 space-y-4 text-[#1d1d1f]">
-                <div className="flex items-center">
-                  <DevicePhoneMobileIcon className="h-5 w-5 mr-3 text-[#86868b]" />
+              <div className='mt-6 space-y-4 text-[#1d1d1f]'>
+                <div className='flex items-center'>
+                  <DevicePhoneMobileIcon className='h-5 w-5 mr-3 text-[#86868b]' />
                   <span>Access on mobile and desktop</span>
                 </div>
-                <div className="flex items-center">
-                  <DocumentTextIcon className="h-5 w-5 mr-3 text-[#86868b]" />
+                <div className='flex items-center'>
+                  <DocumentTextIcon className='h-5 w-5 mr-3 text-[#86868b]' />
                   <span>Certificate of completion</span>
                 </div>
-                <div className="flex items-center">
-                  <ChatBubbleLeftRightIcon className="h-5 w-5 mr-3 text-[#86868b]" />
+                <div className='flex items-center'>
+                  <ChatBubbleLeftRightIcon className='h-5 w-5 mr-3 text-[#86868b]' />
                   <span>Community support</span>
                 </div>
               </div>

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/client/utils/db';
+import prisma from '@/server/db/prisma-client';
 import { requireAdmin } from '@/server/auth/auth-middleware';
 import { Role } from '@/shared/types/auth/roles';
 import { Role as PrismaRole } from '@prisma/client';

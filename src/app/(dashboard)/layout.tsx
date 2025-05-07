@@ -1,12 +1,10 @@
 'use client';
 
-import { Sidebar } from '@/client/components/layout/Sidebar';
 import { useAuth } from '@/client/hooks/auth/useAuth';
 
 import { ReactNode } from 'react';
-import { Header } from './Header';
-import { Footer } from './Footer';
-import { Sidebar } from './Sidebar';
+import Header from '@/client/components/layout/Header';
+import Footer from '@/client/components/layout/Footer';
 
 interface DashboardLayoutProps {
   children: ReactNode;

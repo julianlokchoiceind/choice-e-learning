@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import { signIn, signOut, useSession } from 'next-auth/react';
@@ -42,7 +42,7 @@ export function useAuth() {
       console.log('Calling register API with:', { ...credentials, password: '******' });
       
       try {
-        const response = await import('@/lib/axios/apiClient').then(module => {
+        const response = await import('@/client/utils/http/api-client').then(module => {
           const apiClient = module.default;
           return apiClient.post('/api/auth/register', credentials);
         });
@@ -67,7 +67,7 @@ export function useAuth() {
           
           return false;
         }
-      } catch (axiosError: any) {
+      } catch (axiosError) {
         console.error('Registration failed:', axiosError.response?.data || axiosError);
         
         // Prepare a user-friendly error message

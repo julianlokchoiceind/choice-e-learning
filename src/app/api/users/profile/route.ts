@@ -5,7 +5,7 @@
 
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
-import prisma from '@/client/utils/db';
+import prisma from '@/server/db/prisma-client';
 import { createRouteHandler, withAuth } from '@/server/api/route-handlers';
 import { apiSuccess, apiError, apiUpdated, apiNotFound } from '@/server/api/api-response';
 import { validateRequest } from '@/server/api/request-parser';
@@ -24,8 +24,8 @@ const profileUpdateSchema = z.object({
   // If new password is provided, current password must also be provided
   return !(data.newPassword && !data.currentPassword);
 }, {
-  message: "Current password is required when changing password",
-  path: ["currentPassword"]
+  message: 'Current password is required when changing password',
+  path: ['currentPassword']
 });
 
 // Document the API endpoint

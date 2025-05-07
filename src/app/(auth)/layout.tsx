@@ -1,18 +1,16 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { Header } from './Header';
-import { Footer } from './Footer';
-import { Sidebar } from './Sidebar';
+
+// Layout for auth pages: just render children
 
 interface AuthLayoutProps {
   children: ReactNode;
-  showSidebar?: boolean;
-  hideFooter?: boolean;
+  // showSidebar and hideFooter props are unused here
 }
 
-export function AuthLayout({ children, showSidebar = false, hideFooter = false }: AuthLayoutProps) {
-  // AuthLayout implementation
+export function AuthLayout({ children }: AuthLayoutProps) {
+  return <>{children}</>;
 }
 
 export default AuthLayout;

@@ -34,7 +34,7 @@ function createPrismaClient(): PrismaClient {
             while (true) {
               try {
                 return await query(args);
-              } catch (error: any) {
+              } catch (error) {
                 // Log the error
                 console.error(`Prisma Client Error in operation: ${operation}:`, error);
                 
@@ -65,7 +65,7 @@ function createPrismaClient(): PrismaClient {
       while (true) {
         try {
           return await next(params);
-        } catch (error: any) {
+        } catch (error) {
           // Log the error
           console.error(`Prisma Client Error in ${params.model}.${params.action}:`, error);
           
@@ -121,14 +121,19 @@ function isPrismaRetryableError(error: any): boolean {
 // Ensure we only create the client once
 let prismaInstance: PrismaClient;
 
-if (process.env.NODE_ENV === 'production') {
-  prismaInstance = createPrismaClient();
-} else {
-  // Use global in development to avoid duplicates during hot reloading
-  if (!global.prisma) {
-    global.prisma = createPrismaClient();
+try {
+  if (process.env.NODE_ENV === 'production') {
+    prismaInstance = createPrismaClient();
+  } else {
+    // Use global in development to avoid duplicates during hot reloading
+    if (!global.prisma) {
+      global.prisma = createPrismaClient();
+    }
+    prismaInstance = global.prisma;
   }
-  prismaInstance = global.prisma;
+} catch (error) {
+  console.error('Failed to initialize Prisma client:', error);
+  throw error;
 }
 
 export default prismaInstance;

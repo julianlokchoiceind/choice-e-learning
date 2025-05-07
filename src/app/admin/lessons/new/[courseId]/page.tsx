@@ -16,7 +16,7 @@ export default async function NewLessonPage({ params }: NewLessonPageProps) {
   }
   
   return (
-    <div className="admin-new-lesson">
+    <div className='admin-new-lesson'>
       <h1>Add New Lesson to: {course.title}</h1>
       <LessonForm courseId={params.courseId} />
     </div>

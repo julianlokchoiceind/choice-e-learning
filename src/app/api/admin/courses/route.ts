@@ -27,37 +27,37 @@ function processImageUrl(originalUrl?: string | null): string {
 
 // Schema for chapter validation
 const chapterSchema = z.object({
-  title: z.string().min(1, "Chapter title is required"),
+  title: z.string().min(1, 'Chapter title is required'),
   description: z.string().optional(),
-  order: z.number().int().min(1, "Order must be a positive integer")
+  order: z.number().int().min(1, 'Order must be a positive integer')
 });
 
 // Schema for resource validation
 const resourceSchema = z.object({
-  title: z.string().min(1, "Resource title is required"),
-  url: z.string().url("Must be a valid URL"),
+  title: z.string().min(1, 'Resource title is required'),
+  url: z.string().url('Must be a valid URL'),
   type: z.string()
 });
 
 // Schema for lesson validation
 const lessonSchema = z.object({
-  title: z.string().min(1, "Lesson title is required"),
-  description: z.string().optional().default(""),
-  order: z.number().int().min(1, "Order must be a positive integer"),
-  videoUrl: z.string().url("Must be a valid URL"),
+  title: z.string().min(1, 'Lesson title is required'),
+  description: z.string().optional().default(''),
+  order: z.number().int().min(1, 'Order must be a positive integer'),
+  videoUrl: z.string().url('Must be a valid URL'),
   chapterId: z.string().optional(),
   resources: z.array(resourceSchema).optional().default([])
 });
 
 // Schema for course validation
 const courseSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  price: z.number().min(0, "Price must be a positive number"),
-  level: z.enum(["beginner", "intermediate", "advanced", "all"]),
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().min(10, 'Description must be at least 10 characters'),
+  price: z.number().min(0, 'Price must be a positive number'),
+  level: z.enum(['beginner', 'intermediate', 'advanced', 'all']),
   topics: z.array(z.string()),
-  videoUrl: z.string().url("Must be a valid URL").optional(),
-  imageUrl: z.string().url("Must be a valid URL").optional(),
+  videoUrl: z.string().url('Must be a valid URL').optional(),
+  imageUrl: z.string().url('Must be a valid URL').optional(),
   chapters: z.array(chapterSchema).optional(),
   lessons: z.array(lessonSchema),
   slug: z.string().optional() // Add this line to include slug property
@@ -67,7 +67,7 @@ const courseSchema = z.object({
 const VALID_LEVEL_VALUES = ['beginner', 'intermediate', 'advanced', 'all'];
 
 // POST - Create a new course
-export const POST = withAdmin(async (req: Request, context: any) => {
+export const POST = withAdmin(async (req: Request, context) => {
   try {
     console.log('Admin user creating course:', context.user.email);
     
@@ -280,7 +280,7 @@ export const POST = withAdmin(async (req: Request, context: any) => {
     return NextResponse.json({
       success: true,
       data: newCourse,
-      message: "Course created successfully"
+      message: 'Course created successfully'
     }, { status: 201 });
   } catch (error) {
     console.error('Error creating course:', error);
@@ -291,7 +291,7 @@ export const POST = withAdmin(async (req: Request, context: any) => {
   }
 });
 
-export const GET = withAdmin(async (req: NextRequest, context: any) => {
+export const GET = withAdmin(async (req: NextRequest, context) => {
   console.log('======= GET ADMIN COURSES API CALLED =======');
   console.log('User:', context.user?.email);
   try {
@@ -431,32 +431,20 @@ export const GET = withAdmin(async (req: NextRequest, context: any) => {
     console.log(`Returning ${formattedCourses.length} courses to client`);
     console.log(`Pagination info: page ${page}/${totalPages}, total items: ${totalItems}`);
 
-    try {
-      const response = {
-        success: true,
-        courses: formattedCourses,
-        meta: {
-          pagination: {
-            page,
-            pageSize: limit,
-            totalItems,
-            totalPages,
-            hasNextPage: page < totalPages,
-            hasPrevPage: page > 1
-          }
+    return NextResponse.json({
+      success: true,
+      courses: formattedCourses,
+      meta: {
+        pagination: {
+          page,
+          pageSize: limit,
+          totalItems,
+          totalPages,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
         }
-      };
-      console.log('Sending response structure:', Object.keys(response));
-      return NextResponse.json(response);
-    } catch (responseError) {
-      console.error('Error creating response:', responseError);
-      return NextResponse.json({
-        success: true,
-        courses: [],
-        error: 'Error formatting response'
-      });
-    }
-
+      }
+    });
   } catch (error) {
     console.error('Error fetching courses:', error);
     return NextResponse.json({

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React from 'react';
 import { FeatureKey, isFeatureEnabled } from '@/shared/config/feature-flags';

@@ -1,5 +1,5 @@
-import prisma from '@/server/db/prisma-client";
-import { User, Prisma } from "@prisma/client";
+import prisma from '@/server/db/prisma-client';
+import { User, Prisma } from '@prisma/client';
 import { Role } from '@/shared/types/auth/roles';
 
 // Type for formatted student data from User model
@@ -31,9 +31,9 @@ export const studentService = {
     try {
       console.log('Starting getAllStudents service function');
       
-      // Get users with role "student"
+      // Get users with role 'student'
       const userWhere: Prisma.UserWhereInput = {
-        role: "student"
+        role: 'student'
       };
       
       console.log('Using query criteria:', JSON.stringify(userWhere));
@@ -64,7 +64,7 @@ export const studentService = {
         orderBy: { [sortBy]: sortOrder }
       });
       
-      // Get users with role "student"
+      // Get users with role 'student'
       const studentUsers = await prisma.user.findMany({
         where: userWhere,
         skip,
@@ -114,18 +114,18 @@ export const studentService = {
 
       return result;
     } catch (error) {
-      console.error("Error in getAllStudents:", error);
+      console.error('Error in getAllStudents:', error);
       throw error;
     }
   },
   
   getStudentById: async (id: string) => {
     try {
-      // Find a user with role "student"
+      // Find a user with role 'student'
       const user = await prisma.user.findFirst({
         where: { 
           id,
-          role: "student"
+          role: 'student'
         },
       });
       
@@ -168,7 +168,7 @@ export const studentService = {
       const userData: any = {
         name: data.name,
         email: data.email,
-        role: "student" as const,
+        role: 'student' as const,
         phone: data.phone,
         address: data.address,
         city: data.city,
@@ -183,7 +183,7 @@ export const studentService = {
         userData.password = Math.random().toString(36).substring(2, 15); // Mật khẩu tạm
       }
       
-      // Create a User with role "student"
+      // Create a User with role 'student'
       const user = await prisma.user.create({
         data: userData,
       });
@@ -204,7 +204,7 @@ export const studentService = {
         updatedAt: user.updatedAt
       };
     } catch (error) {
-      console.error("Error in createStudent:", error);
+      console.error('Error in createStudent:', error);
       throw error;
     }
   },
@@ -221,11 +221,11 @@ export const studentService = {
     providerId?: string;
   }) => {
     try {
-      // Check if this is a User with role "student"
+      // Check if this is a User with role 'student'
       const user = await prisma.user.findFirst({
         where: { 
           id,
-          role: "student"
+          role: 'student'
         },
       });
       
@@ -272,11 +272,11 @@ export const studentService = {
   deleteStudent: async (id: string) => {
     try {
       console.log(`Starting delete operation for student ${id}`);
-      // Check if this is a User with role "student"
+      // Check if this is a User with role 'student'
       const user = await prisma.user.findFirst({
         where: { 
           id,
-          role: "student"
+          role: 'student'
         },
         include: {
           // Include related data to check for connections
@@ -313,11 +313,11 @@ export const studentService = {
         const updatedUser = await prisma.user.update({
           where: { id },
           data: {
-            role: "deleted_user",
+            role: 'deleted_user',
           },
         });
         console.log(`Successfully updated student ${id} to role deleted_user`);
-        return { id, success: true, method: "role_update" };
+        return { id, success: true, method: 'role_update' };
       } else {
         // Không có dữ liệu liên quan - xóa hoàn toàn
         try {
@@ -326,17 +326,17 @@ export const studentService = {
             where: { id },
           });
           console.log(`Successfully deleted student ${id} from database`);
-          return { id, success: true, method: "full_delete" };
+          return { id, success: true, method: 'full_delete' };
         } catch (deleteError) {
           // Nếu không thể xóa, sử dụng phương pháp cập nhật role
           console.error(`Failed to delete student ${id}, using role update instead:`, deleteError);
           await prisma.user.update({
             where: { id },
             data: {
-              role: "deleted_user",
+              role: 'deleted_user',
             },
           });
-          return { id, success: true, method: "role_update_fallback" };
+          return { id, success: true, method: 'role_update_fallback' };
         }
       }
     } catch (error) {

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState, useCallback } from 'react';
 import axios from 'axios';
@@ -51,7 +51,7 @@ export function useStudents() {
    * Fetch students with filtering and pagination
    */
   const fetchStudents = useCallback(async (filters: StudentFilter = {}) => {
-    console.log("[HOOK] Starting fetchStudents with filters:", filters);
+    console.log('[HOOK] Starting fetchStudents with filters:', filters);
     setLoading(true);
     setError(null);
     
@@ -128,7 +128,7 @@ export function useStudents() {
         }
 
         // Xử lý dữ liệu thành công
-        console.log("Found data in response:", responseData.data.length, "students");
+        console.log('Found data in response:', responseData.data.length, 'students');
         const studentData = responseData.data;
         const meta = responseData.meta || {
           total: studentData.length,
@@ -138,7 +138,7 @@ export function useStudents() {
         };
 
         // Parse dates và xử lý null/undefined
-        const studentsWithDates = studentData.map((student: any) => {
+        const studentsWithDates = studentData.map(($1) => {
         console.log('Processing student data:', {
           id: student.id,
           name: student.name || 'Unknown',
@@ -162,9 +162,9 @@ export function useStudents() {
 
         console.log(`Successfully processed ${studentsWithDates.length} students`);
         
-        console.log("[HOOK] Setting students state with data:", studentsWithDates.length, "students");
+        console.log('[HOOK] Setting students state with data:', studentsWithDates.length, 'students');
         setStudents(studentsWithDates);
-        console.log("[HOOK] Setting pagination state with data:", meta);
+        console.log('[HOOK] Setting pagination state with data:', meta);
         setPagination(meta);
 
         return {
@@ -191,7 +191,7 @@ export function useStudents() {
           }
         };
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching students:', err);
       // Don't set error state to avoid showing error messages
       // setError(err?.response?.data?.error || err?.message || 'Failed to fetch students');
@@ -206,7 +206,7 @@ export function useStudents() {
         }
       };
     } finally {
-      console.log("[HOOK] fetchStudents completed, setting loading=false");
+      console.log('[HOOK] fetchStudents completed, setting loading=false');
       setLoading(false);
     }
   }, []);
@@ -234,7 +234,7 @@ export function useStudents() {
       } else {
         throw new Error(response.data.error || 'Failed to fetch student');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching student:', err);
       setError(err?.response?.data?.error || err?.message || 'Failed to fetch student');
       return null;
@@ -265,7 +265,7 @@ export function useStudents() {
       } else {
         throw new Error(response.data.error || 'Failed to create student');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error creating student:', err);
       setError(err?.response?.data?.error || err?.message || 'Failed to create student');
       throw err;
@@ -296,7 +296,7 @@ export function useStudents() {
       } else {
         throw new Error(response.data.error || 'Failed to update student');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error updating student:', err);
       setError(err?.response?.data?.error || err?.message || 'Failed to update student');
       throw err;
@@ -320,7 +320,7 @@ export function useStudents() {
       } else {
         throw new Error(response.data.error || 'Failed to delete student');
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error deleting student:', err);
       setError(err?.response?.data?.error || err?.message || 'Failed to delete student');
       throw err;

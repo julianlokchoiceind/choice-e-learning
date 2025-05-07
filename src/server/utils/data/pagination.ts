@@ -128,7 +128,7 @@ export function generatePageLinks(
  * @param query Object containing query parameters
  * @returns Validated pagination parameters
  */
-export function extractPaginationParams(query: any): PaginationParams {
+export function extractPaginationParams(query): PaginationParams {
   const page = query?.page ? Number(query.page) : 1;
   const limit = query?.limit ? Number(query.limit) : 10;
   

@@ -1,28 +1,25 @@
+Object.defineProperty(exports, '__esModule', { value: true });
 
-Object.defineProperty(exports, "__esModule", { value: true });
-
-const {
+import { 
   Decimal,
   objectEnumValues,
   makeStrictEnum,
   Public,
   getRuntime,
   skip
-} = require('./runtime/index-browser.js')
+ } from './runtime/index-browser.js'
 
+export const Prisma = {};
 
-const Prisma = {}
-
-exports.Prisma = Prisma
-exports.$Enums = {}
+exports.$Enums = {};
 
 /**
  * Prisma Client JS version: 6.6.0
  * Query Engine version: f676762280b54cd07c770017ed3711ddde35f37a
  */
 Prisma.prismaVersion = {
-  client: "6.6.0",
-  engine: "f676762280b54cd07c770017ed3711ddde35f37a"
+  client: '6.6.0',
+  engine: 'f676762280b54cd07c770017ed3711ddde35f37a'
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -103,8 +100,6 @@ Prisma.NullTypes = {
   JsonNull: objectEnumValues.classes.JsonNull,
   AnyNull: objectEnumValues.classes.AnyNull
 }
-
-
 
 /**
  * Enums
@@ -204,19 +199,19 @@ exports.Prisma.QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
 };
-exports.Role = exports.$Enums.Role = {
+export const Role = exports.$Enums.Role = {
   student: 'student',
   instructor: 'instructor',
   admin: 'admin'
 };
 
-exports.Level = exports.$Enums.Level = {
+export const Level = exports.$Enums.Level = {
   beginner: 'beginner',
   intermediate: 'intermediate',
   advanced: 'advanced'
 };
 
-exports.Difficulty = exports.$Enums.Difficulty = {
+export const Difficulty = exports.$Enums.Difficulty = {
   easy: 'easy',
   medium: 'medium',
   hard: 'hard'
@@ -260,6 +255,6 @@ If this is unexpected, please open an issue: https://pris.ly/prisma-prisma-bug-r
   }
 }
 
-exports.PrismaClient = PrismaClient
+export const PrismaClient = PrismaClient
 
 Object.assign(exports, Prisma)

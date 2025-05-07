@@ -54,28 +54,28 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
       
       // Default fallback UI
       return (
-        <div className="p-6 max-w-lg mx-auto my-8 bg-white rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h2>
-          <p className="text-gray-700 mb-4">
+        <div className='p-6 max-w-lg mx-auto my-8 bg-white rounded-lg shadow-md'>
+          <h2 className='text-2xl font-bold text-red-600 mb-4'>Something went wrong</h2>
+          <p className='text-gray-700 mb-4'>
             We&apos;re sorry, but there was an error loading this content.
           </p>
           {this.state.error && (
-            <div className="bg-red-50 p-4 rounded-md mb-4">
-              <p className="font-mono text-sm text-red-800">
+            <div className='bg-red-50 p-4 rounded-md mb-4'>
+              <p className='font-mono text-sm text-red-800'>
                 {this.state.error.toString()}
               </p>
             </div>
           )}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className='flex flex-col sm:flex-row gap-4'>
             <button
               onClick={() => this.setState({ hasError: false, error: null })}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors'
             >
               Try again
             </button>
             <Link
-              href="/"
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors text-center"
+              href='/'
+              className='px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors text-center'
             >
               Return to home
             </Link>

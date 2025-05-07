@@ -1,11 +1,11 @@
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 /**
  * Course services for managing course data and operations
  */
 import prisma from '@/server/db/prisma-client';
 import { safeFindMany, safeFindUnique } from '@/server/db/prisma-helper';
-import { CourseListItem, CourseDetails, UserCourseStats, Course, Lesson } from '@/shared/types/course';
+import { CourseListItem, CourseDetails, UserCourseStats, Course, Lesson } from '@/shared/types/courses/course';
 import { UserProgress } from '@/shared/types/progress';
 
 
@@ -86,7 +86,7 @@ export async function getAllCourses(): Promise<CourseListItem[]> {
         
         // Calculate rating
         const rating = Array.isArray(course.reviews) && course.reviews.length > 0 
-          ? Number((course.reviews.reduce((acc: number, review: any) => acc + (review?.rating || 0), 0) / course.reviews.length).toFixed(1))
+          ? Number((course.reviews.reduce((acc: number, review) => acc + (review?.rating || 0), 0) / course.reviews.length).toFixed(1))
           : 4.5; // Default if no reviews
         
         // Chuẩn hóa URL hình ảnh (chỉ dùng một trường imageUrl)
@@ -170,7 +170,7 @@ export async function getCourseById(courseId: string) {
       : null;
     
     // Process reviews to include user names
-    const processedReviews = Array.isArray(course.reviews) ? course.reviews.map((review: any) => {
+    const processedReviews = Array.isArray(course.reviews) ? course.reviews.map((review) => {
       return {
         name: review?.user?.name || 'Anonymous',
         rating: review?.rating || 5,
@@ -182,7 +182,7 @@ export async function getCourseById(courseId: string) {
     
     // Calculate rating
     const rating = Array.isArray(course.reviews) && course.reviews.length > 0 
-      ? Number((course.reviews.reduce((acc: number, review: any) => acc + (review?.rating || 0), 0) / course.reviews.length).toFixed(1))
+      ? Number((course.reviews.reduce((acc: number, review) => acc + (review?.rating || 0), 0) / course.reviews.length).toFixed(1))
       : 4.5; // Default if no reviews
     
     // Chuẩn hóa URL hình ảnh
@@ -414,7 +414,7 @@ export async function getUserStats(userId: string): Promise<UserCourseStats> {
             if (!lesson || !lesson.id) continue;
             
             const progressEntry = Array.isArray(userProgress) 
-              ? userProgress.find((p: any) => 
+              ? userProgress.find((p) => 
                   p?.courseId === courseId && 
                   p?.lessonId === lesson.id && 
                   p?.completed
@@ -477,8 +477,8 @@ function calculateStreak(userProgress: UserProgress[]): number {
   
   // Get all dates when user completed lessons
   const completionDates = userProgress
-    .filter((p: any) => p?.completed)
-    .map((p: any) => new Date(p?.completedAt || p?.updatedAt || Date.now()))
+    .filter((p) => p?.completed)
+    .map((p) => new Date(p?.completedAt || p?.updatedAt || Date.now()))
     .sort((a, b) => b.getTime() - a.getTime()); // Sort in descending order
   
   if (completionDates.length === 0) {
@@ -565,7 +565,7 @@ export async function getFeaturedCourses(limit = 5): Promise<CourseListItem[]> {
           : null;
         
         const rating = Array.isArray(course.reviews) && course.reviews.length > 0 
-          ? Number((course.reviews.reduce((acc: number, review: any) => acc + (review?.rating || 0), 0) / course.reviews.length).toFixed(1))
+          ? Number((course.reviews.reduce((acc: number, review) => acc + (review?.rating || 0), 0) / course.reviews.length).toFixed(1))
           : 4.5;
         
         return {
@@ -655,7 +655,7 @@ export async function searchCourses(query: string, limit = 10): Promise<CourseLi
           : null;
         
         const rating = Array.isArray(course.reviews) && course.reviews.length > 0 
-          ? Number((course.reviews.reduce((acc: number, review: any) => acc + (review?.rating || 0), 0) / course.reviews.length).toFixed(1))
+          ? Number((course.reviews.reduce((acc: number, review) => acc + (review?.rating || 0), 0) / course.reviews.length).toFixed(1))
           : 4.5;
         
         return {

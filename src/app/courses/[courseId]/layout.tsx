@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import React from 'react';
 import { notFound } from 'next/navigation';
-import prisma from '@/client/utils/db';
+import prisma from '@/server/db/prisma-client';
 
 // Generate dynamic metadata for the course detail page
 export async function generateMetadata(
@@ -49,7 +49,7 @@ export default function CourseDetailLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="course-detail-layout">
+    <div className='course-detail-layout'>
       {children}
     </div>
   );

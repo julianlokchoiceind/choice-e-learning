@@ -2,7 +2,7 @@
  * @file User service
  * @description Provides functions for user management
  */
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 import prisma from '@/server/db/prisma-client';
 import { Prisma } from '@prisma/client';

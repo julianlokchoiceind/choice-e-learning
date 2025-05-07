@@ -72,123 +72,123 @@ export default function ReviewsPage() {
       <CounterScript />
       
       {/* Hero Section with Gradient Background */}
-      <section className="min-h-[500px] flex items-center justify-center overflow-hidden" 
+      <section className='min-h-[500px] flex items-center justify-center overflow-hidden' 
                style={{ 
                  background: 'linear-gradient(180deg, #1e2a78 0%, #0b1120 100%)',
                  paddingTop: '100px',
                  paddingBottom: '60px'
                }}>
-        <div className="max-w-[980px] mx-auto px-4 text-center">
-          <h1 className="text-[48px] md:text-[56px] font-bold text-white mb-4 tracking-tight">
+        <div className='max-w-[980px] mx-auto px-4 text-center'>
+          <h1 className='text-[48px] md:text-[56px] font-bold text-white mb-4 tracking-tight'>
             Student Reviews
           </h1>
-          <p className="text-[21px] leading-[1.381] text-white/80 max-w-[680px] mx-auto">
+          <p className='text-[21px] leading-[1.381] text-white/80 max-w-[680px] mx-auto'>
             Hear from our students about their experiences with Choice E-Learning courses.
             Join thousands of successful students who have transformed their skills and careers.
           </p>
         </div>
       </section>
 
-      <div className="container mx-auto px-4 py-16">
+      <div className='container mx-auto px-4 py-16'>
         {/* Stats Section with Animation */}
-        <div className="stats-section grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-          <div className="bg-white rounded-xl shadow-md p-6 text-center">
-            <div className="flex justify-center mb-4">
-              <StarIcon className="h-8 w-8 text-yellow-400" />
+        <div className='stats-section grid grid-cols-2 md:grid-cols-4 gap-6 mb-16'>
+          <div className='bg-white rounded-xl shadow-md p-6 text-center'>
+            <div className='flex justify-center mb-4'>
+              <StarIcon className='h-8 w-8 text-yellow-400' />
             </div>
-            <div className="text-[36px] font-bold text-[#0066cc]">
-              <span className="counter-value decimal" data-target="4.8">0</span>
+            <div className='text-[36px] font-bold text-[#0066cc]'>
+              <span className='counter-value decimal' data-target='4.8'>0</span>
             </div>
-            <div className="text-[#86868b]">Average Rating</div>
+            <div className='text-[#86868b]'>Average Rating</div>
           </div>
-          <div className="bg-white rounded-xl shadow-md p-6 text-center">
-            <div className="flex justify-center mb-4">
-              <UserIcon className="h-8 w-8 text-[#0066cc]" />
+          <div className='bg-white rounded-xl shadow-md p-6 text-center'>
+            <div className='flex justify-center mb-4'>
+              <UserIcon className='h-8 w-8 text-[#0066cc]' />
             </div>
-            <div className="text-[36px] font-bold text-[#0066cc]">
-              <span className="counter-value" data-target="15000">0</span>+
+            <div className='text-[36px] font-bold text-[#0066cc]'>
+              <span className='counter-value' data-target='15000'>0</span>+
             </div>
-            <div className="text-[#86868b]">Students</div>
+            <div className='text-[#86868b]'>Students</div>
           </div>
-          <div className="bg-white rounded-xl shadow-md p-6 text-center">
-            <div className="flex justify-center mb-4">
-              <ChatBubbleLeftEllipsisIcon className="h-8 w-8 text-[#0066cc]" />
+          <div className='bg-white rounded-xl shadow-md p-6 text-center'>
+            <div className='flex justify-center mb-4'>
+              <ChatBubbleLeftEllipsisIcon className='h-8 w-8 text-[#0066cc]' />
             </div>
-            <div className="text-[36px] font-bold text-[#0066cc]">
-              <span className="counter-value" data-target="5200">0</span>+
+            <div className='text-[36px] font-bold text-[#0066cc]'>
+              <span className='counter-value' data-target='5200'>0</span>+
             </div>
-            <div className="text-[#86868b]">Reviews</div>
+            <div className='text-[#86868b]'>Reviews</div>
           </div>
-          <div className="bg-white rounded-xl shadow-md p-6 text-center">
-            <div className="flex justify-center mb-4">
-              <CheckBadgeIcon className="h-8 w-8 text-[#0066cc]" />
+          <div className='bg-white rounded-xl shadow-md p-6 text-center'>
+            <div className='flex justify-center mb-4'>
+              <CheckBadgeIcon className='h-8 w-8 text-[#0066cc]' />
             </div>
-            <div className="text-[36px] font-bold text-[#0066cc]">
-              <span className="counter-value" data-target="98">0</span>%
+            <div className='text-[36px] font-bold text-[#0066cc]'>
+              <span className='counter-value' data-target='98'>0</span>%
             </div>
-            <div className="text-[#86868b]">Satisfaction Rate</div>
+            <div className='text-[#86868b]'>Satisfaction Rate</div>
           </div>
         </div>
         
         {/* Featured Reviews */}
-        <section className="mb-16">
-          <h2 className="text-[32px] font-semibold mb-8 text-[#1d1d1f]">Featured Reviews</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <section className='mb-16'>
+          <h2 className='text-[32px] font-semibold mb-8 text-[#1d1d1f]'>Featured Reviews</h2>
+          <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
             {featuredReviews.map((review) => (
               <div 
                 key={review.id} 
-                className="card hover:shadow-lg hover:scale-[1.01] transition-all duration-300"
+                className='card hover:shadow-lg hover:scale-[1.01] transition-all duration-300'
               >
-                <div className="p-6">
-                  <div className="flex items-center mb-4">
-                    <div className="relative w-10 h-10 rounded-full overflow-hidden mr-3">
+                <div className='p-6'>
+                  <div className='flex items-center mb-4'>
+                    <div className='relative w-10 h-10 rounded-full overflow-hidden mr-3'>
                       <Image
                         src={review.avatar}
                         alt={review.name}
                         fill
-                        className="object-cover"
+                        className='object-cover'
                       />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-[17px] text-[#1d1d1f]">{review.name}</h3>
-                      <p className="text-[14px] text-[#86868b]">{review.title}</p>
+                      <h3 className='font-semibold text-[17px] text-[#1d1d1f]'>{review.name}</h3>
+                      <p className='text-[14px] text-[#86868b]'>{review.title}</p>
                     </div>
                   </div>
                   
-                  <div className="flex items-center mb-2">
+                  <div className='flex items-center mb-2'>
                     {Array(5).fill(0).map((_, i) => (
                       <StarIcon 
                         key={i} 
                         className={`h-4 w-4 ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`} 
                       />
                     ))}
-                    <span className="ml-2 text-[#86868b] text-sm">{review.date}</span>
+                    <span className='ml-2 text-[#86868b] text-sm'>{review.date}</span>
                   </div>
                   
                   <div>
                     <Link 
                       href={`/courses/${review.courseId}`}
-                      className="text-[#0066cc] text-[14px] leading-[1.42859] hover:underline font-medium mb-2 inline-block"
+                      className='text-[#0066cc] text-[14px] leading-[1.42859] hover:underline font-medium mb-2 inline-block'
                     >
                       {review.courseName}
                     </Link>
-                    <p className="text-[15px] text-[#1d1d1f] line-clamp-4">{review.text}</p>
+                    <p className='text-[15px] text-[#1d1d1f] line-clamp-4'>{review.text}</p>
                   </div>
                   
                   {review.response && (
-                    <div className="bg-[#f5f5f7] p-3 rounded-md mt-3">
-                      <p className="text-sm font-medium mb-1">Response from instructor:</p>
-                      <p className="text-sm text-[#86868b] line-clamp-2">{review.response}</p>
+                    <div className='bg-[#f5f5f7] p-3 rounded-md mt-3'>
+                      <p className='text-sm font-medium mb-1'>Response from instructor:</p>
+                      <p className='text-sm text-[#86868b] line-clamp-2'>{review.response}</p>
                     </div>
                   )}
                 </div>
               </div>
             ))}
           </div>
-          <div className="text-center mt-8">
+          <div className='text-center mt-8'>
             <Link 
-              href="/all-reviews"
-              className="button-primary inline-block"
+              href='/all-reviews'
+              className='button-primary inline-block'
             >
               View All Reviews
             </Link>
@@ -196,27 +196,27 @@ export default function ReviewsPage() {
         </section>
         
         {/* Reviews by Course */}
-        <section className="mb-16">
-          <h2 className="text-xl md:text-2xl font-semibold mb-8 text-[#1d1d1f]">Reviews by Course</h2>
+        <section className='mb-16'>
+          <h2 className='text-xl md:text-2xl font-semibold mb-8 text-[#1d1d1f]'>Reviews by Course</h2>
           
-          <div className="bg-white rounded-xl overflow-hidden shadow-md">
+          <div className='bg-white rounded-xl overflow-hidden shadow-md'>
             {courseReviews.map((course, idx) => (
               <div key={course.id} className={idx !== 0 ? 'border-t border-gray-200' : ''}>
-                <div className="p-4 hover:bg-[#f5f5f7] transition-colors">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <div className="relative w-12 h-12 rounded-md overflow-hidden mr-4">
+                <div className='p-4 hover:bg-[#f5f5f7] transition-colors'>
+                  <div className='flex justify-between items-center'>
+                    <div className='flex items-center'>
+                      <div className='relative w-12 h-12 rounded-md overflow-hidden mr-4'>
                         <Image
                           src={course.image}
                           alt={course.name}
                           fill
-                          className="object-cover"
+                          className='object-cover'
                         />
                       </div>
                       <div>
-                        <h3 className="font-medium text-lg">{course.name}</h3>
-                        <div className="flex items-center">
-                          <div className="flex mr-2">
+                        <h3 className='font-medium text-lg'>{course.name}</h3>
+                        <div className='flex items-center'>
+                          <div className='flex mr-2'>
                             {Array(5).fill(0).map((_, i) => (
                               <StarIcon 
                                 key={i} 
@@ -224,13 +224,13 @@ export default function ReviewsPage() {
                               />
                             ))}
                           </div>
-                          <span className="text-sm text-[#86868b]">{course.rating.toFixed(1)} ({course.reviewsCount} reviews)</span>
+                          <span className='text-sm text-[#86868b]'>{course.rating.toFixed(1)} ({course.reviewsCount} reviews)</span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center text-[#86868b]">
-                      <ChatBubbleLeftEllipsisIcon className="h-5 w-5 mr-1" />
-                      <span className="text-sm">{course.reviewsCount}</span>
+                    <div className='flex items-center text-[#86868b]'>
+                      <ChatBubbleLeftEllipsisIcon className='h-5 w-5 mr-1' />
+                      <span className='text-sm'>{course.reviewsCount}</span>
                     </div>
                   </div>
                 </div>
@@ -240,16 +240,16 @@ export default function ReviewsPage() {
         </section>
         
         {/* Submit Review CTA */}
-        <section className="rounded-2xl p-10 text-center"
+        <section className='rounded-2xl p-10 text-center'
                  style={{ background: 'linear-gradient(180deg, #3b82f6 0%, #1e40af 100%)' }}>
-          <h2 className="text-2xl font-bold mb-3 text-white">Share Your Experience</h2>
-          <p className="text-white/80 mb-6 max-w-2xl mx-auto">
+          <h2 className='text-2xl font-bold mb-3 text-white'>Share Your Experience</h2>
+          <p className='text-white/80 mb-6 max-w-2xl mx-auto'>
             Your feedback helps other students make informed decisions and helps us improve our courses.
             Please share your honest thoughts about your learning experience.
           </p>
           <Link 
-            href="/dashboard"
-            className="bg-white text-[#004e92] font-medium px-8 py-4 rounded-full inline-block hover:shadow-lg transition-all hover:scale-105"
+            href='/dashboard'
+            className='bg-white text-[#004e92] font-medium px-8 py-4 rounded-full inline-block hover:shadow-lg transition-all hover:scale-105'
           >
             Write a Review
           </Link>

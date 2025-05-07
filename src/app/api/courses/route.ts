@@ -260,7 +260,7 @@ const getCourses = withErrorHandling(async (req: NextRequest) => {
 export const GET = getCourses;
 
 // POST handler for creating courses (admin only)
-export const POST = withAdmin(async (req: NextRequest, context: any) => {
+export const POST = withAdmin(async (req: NextRequest, context) => {
   try {
     const body = await req.json();
     
@@ -273,13 +273,13 @@ export const POST = withAdmin(async (req: NextRequest, context: any) => {
       level: z.enum(['beginner', 'intermediate', 'advanced', 'all']),
       topics: z.array(z.string()),
       lessons: z.array(z.object({
-        title: z.string().min(1, "Lesson title is required"),
-        description: z.string().optional().default(""),
-        order: z.number().int().min(1, "Order must be a positive integer"),
-        videoUrl: z.string().url("Must be a valid URL"),
+        title: z.string().min(1, 'Lesson title is required'),
+        description: z.string().optional().default(''),
+        order: z.number().int().min(1, 'Order must be a positive integer'),
+        videoUrl: z.string().url('Must be a valid URL'),
         resources: z.array(z.object({
-          title: z.string().min(1, "Resource title is required"),
-          url: z.string().url("Must be a valid URL"),
+          title: z.string().min(1, 'Resource title is required'),
+          url: z.string().url('Must be a valid URL'),
           type: z.string()
         })).optional().default([])
       })).min(1, { message: 'At least one lesson is required' })

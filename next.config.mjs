@@ -8,6 +8,20 @@
  * - Webpack customizations: Handles font loading and Node.js polyfills
  */
 
+// Node.js built-in modules first
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// Third-party modules next
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import webpack from 'webpack';
+
+// Local imports last (if any)
+// import { something } from '@/somewhere';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Enable React Strict Mode
@@ -55,16 +69,24 @@ const nextConfig = {
   // Webpack configuration
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      // Don't resolve Node.js builtins on the client side
+      // Polyfills for Node.js modules in browser
       config.resolve.fallback = {
         ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        dns: false,
-        tls: false,
-        child_process: false,
-        tty: false
+        events: 'events',
+        stream: 'stream-browserify',
+        buffer: 'buffer',
+        util: 'util',
+        path: 'path-browserify',
+        process: 'process/browser'
       };
+
+      // Add ProvidePlugin to provide global modules
+      config.plugins.push(
+        new webpack.ProvidePlugin({
+          process: 'process/browser',
+          Buffer: ['buffer', 'Buffer'],
+        })
+      );
     }
     
     // Add rule for font files with proper file-loader configuration

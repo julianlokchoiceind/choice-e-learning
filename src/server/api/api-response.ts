@@ -103,8 +103,8 @@ export function apiError(
  * @param zodError Zod validation error
  * @returns NextResponse with formatted validation error
  */
-export function apiValidationError(zodError: any): NextResponse {
-  const errorDetails = zodError.errors.map((err: any) => 
+export function apiValidationError(zodError): NextResponse {
+  const errorDetails = zodError.errors.map(($1) => 
     `${err.path.join('.')}: ${err.message}`
   );
   

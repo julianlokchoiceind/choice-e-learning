@@ -246,7 +246,7 @@ class TopicService {
       
       if (existingTopic) {
         console.log('Found existing topic:', existingTopic);
-        throw new Error(`Topic with name "${cleanData.name}" already exists`);
+        throw new Error(`Topic with name '${cleanData.name}' already exists`);
       }
       console.log('No existing topic found with the same name/slug');
       
@@ -270,7 +270,7 @@ class TopicService {
         
         console.log('Topic created successfully:', newTopic);
         return newTopic;
-      } catch (dbError: any) {
+      } catch (dbError) {
         console.error('Database error creating topic:', dbError);
         
         // Xử lý lỗi Prisma chi tiết hơn
@@ -278,9 +278,9 @@ class TopicService {
           // Lỗi trùng unique, tạo thông báo rõ ràng hơn
           const target = dbError.meta?.target || [];
           if (target.includes('name')) {
-            throw new Error(`Topic with name "${cleanData.name}" already exists`);
+            throw new Error(`Topic with name '${cleanData.name}' already exists`);
           } else if (target.includes('slug')) {
-            throw new Error(`Topic with slug "${slug}" already exists`);
+            throw new Error(`Topic with slug '${slug}' already exists`);
           } else {
             throw new Error(`Topic with the same unique value already exists`);
           }
@@ -322,7 +322,7 @@ class TopicService {
         });
         
         if (existingTopic) {
-          throw new Error(`Topic with name "${data.name}" already exists`);
+          throw new Error(`Topic with name '${data.name}' already exists`);
         }
         
         updateData.slug = slug;

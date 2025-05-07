@@ -1,7 +1,7 @@
 import { Inter } from 'next/font/google';
 import './globals.css';
-import ConditionalLayout from '@/client/components/layout/ConditionalLayout";
-import AuthSessionProvider from '@/client/components/providers/SessionProvider";
+import ConditionalLayout from '@/client/components/layout/ConditionalLayout';
+import { AuthSessionProvider } from '@/client/providers';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang='en'>
       <body className={`${inter.className} bg-slate-50 text-slate-900`}>
         <AuthSessionProvider>
           <ConditionalLayout>
