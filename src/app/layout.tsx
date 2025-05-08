@@ -21,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang='en'>
-      <body className={`${inter.className} bg-slate-50 text-slate-900`}>
+      <body className={`${inter.className} ${inter.variable} font-sans bg-slate-50 text-slate-900`}>
         <AuthSessionProvider>
           <ConditionalLayout>
             {children}

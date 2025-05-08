@@ -1,9 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/client/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/shared/**/*.{js,ts,jsx,tsx,mdx}',
+    content: [
+      './src/**/*.{js,ts,jsx,tsx,mdx}'  // Bắt tất cả files trong src
+    ],
   ],
   theme: {
     extend: {
