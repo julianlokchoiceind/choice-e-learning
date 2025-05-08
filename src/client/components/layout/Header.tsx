@@ -37,9 +37,9 @@ const LoadingHeader = () => (
           {[
             { name: 'Courses', href: '/courses' },
             { name: 'Challenges', href: '/challenges' },
-            { name: 'Reviews', href: '/reviews' },
-            { name: 'FAQ', href: '/faq' },
-            { name: 'Roadmap', href: '/roadmap' },
+            { name: 'Reviews', href: '/(marketing)/reviews' },
+            { name: 'FAQ', href: '/(marketing)/faq' },
+            { name: 'Roadmap', href: '/(marketing)/roadmap' },
           ].map((item) => (
             <li key={item.name} className='h-full'>
               <Link 
@@ -160,9 +160,9 @@ const Header = () => {
               {[
                 { name: 'Courses', href: '/courses' },
                 { name: 'Challenges', href: '/challenges' },
-                { name: 'Reviews', href: '/reviews' },
-                { name: 'FAQ', href: '/faq' },
-                { name: 'Roadmap', href: '/roadmap' },
+                { name: 'Reviews', href: '/(marketing)/reviews' },
+                { name: 'FAQ', href: '/(marketing)/faq' },
+                { name: 'Roadmap', href: '/(marketing)/roadmap' },
               ].map((item) => (
                 <li key={item.name} className='h-full'>
                   <Link 
@@ -179,7 +179,7 @@ const Header = () => {
             <div className='flex items-center space-x-4 min-w-[120px] justify-end relative'>
               {isAuthenticated ? (
                 <>
-                  <Link href='/dashboard' aria-label='Dashboard' className='text-white/80 hover:text-white transition-colors'>
+                  <Link href='/(dashboard)/dashboard' aria-label='Dashboard' className='text-white/80 hover:text-white transition-colors'>
                     <UserIcon className='h-4 w-4' />
                   </Link>
                   <span className='hidden md:block text-white/80 text-xs'>
@@ -195,10 +195,10 @@ const Header = () => {
                 </>
               ) : (
                 <>
-                  <Link href='/login' className='hidden md:block text-white/80 hover:text-white text-xs font-medium transition-colors'>
+                  <Link href='/(auth)/login' className='hidden md:block text-white/80 hover:text-white text-xs font-medium transition-colors'>
                     Sign In
                   </Link>
-                  <Link href='/signup' className='hidden md:block bg-white/10 hover:bg-white/20 text-white text-xs font-medium py-1 px-3 rounded-full transition-colors'>
+                  <Link href='/(auth)/signup' className='hidden md:block bg-white/10 hover:bg-white/20 text-white text-xs font-medium py-1 px-3 rounded-full transition-colors'>
                     Sign Up
                   </Link>
                 </>
@@ -243,9 +243,9 @@ const Header = () => {
                   {[
                     { name: 'Courses', href: '/courses' },
                     { name: 'Challenges', href: '/challenges' },
-                    { name: 'Reviews', href: '/reviews' },
-                    { name: 'FAQ', href: '/faq' },
-                    { name: 'Roadmap', href: '/roadmap' },
+                    { name: 'Reviews', href: '/(marketing)/reviews' },
+                    { name: 'FAQ', href: '/(marketing)/faq' },
+                    { name: 'Roadmap', href: '/(marketing)/roadmap' },
                   ].map((item) => (
                     <li key={item.name}>
                       <Link 
@@ -265,7 +265,7 @@ const Header = () => {
                     {isAuthenticated ? (
                       <>
                         <Link 
-                          href='/dashboard' 
+                          href='/(dashboard)/dashboard' 
                           className='block text-white text-xl font-medium hover:text-white/80 transition-colors py-2.5 px-6 rounded-full border border-white/20 text-center'
                           onClick={toggleMobileMenu}
                         >
@@ -284,14 +284,14 @@ const Header = () => {
                     ) : (
                       <>
                         <Link 
-                          href='/login' 
+                          href='/(auth)/login' 
                           className='block text-white text-xl font-medium hover:text-white/80 transition-colors py-2.5 px-6 rounded-full border border-white/20 text-center'
                           onClick={toggleMobileMenu}
                         >
                           Sign In
                         </Link>
                         <Link 
-                          href='/signup' 
+                          href='/(auth)/signup' 
                           className='block bg-white/10 hover:bg-white/20 text-white text-xl font-medium py-2.5 px-6 rounded-full text-center transition-colors'
                           onClick={toggleMobileMenu}
                         >

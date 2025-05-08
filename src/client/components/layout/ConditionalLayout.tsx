@@ -12,12 +12,17 @@ type ConditionalLayoutProps = {
 const ConditionalLayout = ({ children }: ConditionalLayoutProps) => {
   const pathname = usePathname();
   
-  // Don't show footer on admin pages
+  // Don't show header/footer for route groups or admin pages
   const isAdminPage = pathname?.startsWith('/admin');
-  // Không áp dụng padding-top cho homepage
+  const isRouteGroup = 
+    pathname?.startsWith('/(auth)') || 
+    pathname?.startsWith('/(dashboard)') || 
+    pathname?.startsWith('/(marketing)');
+  
+  // Don't apply padding-top for homepage
   const isHomepage = pathname === '/';
   
-  if (isAdminPage) {
+  if (isAdminPage || isRouteGroup) {
     return (
       <>
         {children}
