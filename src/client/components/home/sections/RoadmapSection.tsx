@@ -17,7 +17,7 @@ interface RoadmapSectionProps {
  */
 const RoadmapSection = ({ roadmaps }: RoadmapSectionProps) => {
   return (
-    <section className='section-full py-20 md:py-[120px] bg-white'>
+    <section className='py-20 md:py-[120px] bg-white'>
       <div className='max-w-[980px] mx-auto px-6 md:px-4'>
         <h2 className='text-3xl md:text-4xl font-bold mb-6 text-center'>Your Learning Roadmap</h2>
         <p className='text-[21px] leading-[1.381] text-[#86868b] max-w-[600px] mx-auto mb-16 text-center'>

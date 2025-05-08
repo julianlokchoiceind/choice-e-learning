@@ -18,13 +18,13 @@ interface PopularCoursesSectionProps {
  */
 const PopularCoursesSection = ({ courses }: PopularCoursesSectionProps) => {
   return (
-    <section className='section-tight py-20 md:py-[100px] bg-[#f5f5f7]'>
+    <section className='py-20 md:py-[100px] bg-[#f5f5f7]'>
       <div className='max-w-[980px] mx-auto px-6 md:px-4'>
         <h2 className='text-3xl md:text-4xl font-bold text-center mb-12'>Popular Right Now</h2>
         
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
           {courses.map((course) => (
-            <Link key={course.id} href={`/courses/${course.id}`} className='card flex group items-center p-5 hover:shadow-lg hover:scale-[1.01] transition-all duration-300'>
+            <Link key={course.id} href={`/courses/${course.id}`} className='bg-white rounded-[18px] overflow-hidden shadow-md transition-transform duration-300 flex group items-center p-5 hover:shadow-lg hover:scale-[1.01]'>
               <div className='relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden'>
                 <Image
                   src={course.image}

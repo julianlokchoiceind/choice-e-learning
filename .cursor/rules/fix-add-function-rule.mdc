@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Trước khi fix bất kỳ lỗi hay phát triển bất kỳ tính năng mới nào hãy vào [new-fuction-development-structure.mdc](mdc:.cursor/rules/new-fuction-development-structure.mdc) xem lại cấu trúc thư mục, xong rồi check codebase xem lỗi đó hiện giờ có nằm trong những file nào hiện có trong codebase không, check toàn diện như import có bị sai không, file có đặt đúng vị trí như file RULE nãy tôi kêu bạn đọc không, và những vấn đề tồn động trong file hiện có chứ KHÔNG BAO GIỜ TỰ Ý ĐI THÊM FILE MỚI, trước khi tạo bất kỳ file nào mới luôn hỏi ý kiến của tôi trước

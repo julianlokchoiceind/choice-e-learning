@@ -9,7 +9,7 @@ import Link from 'next/link';
  */
 const CTASection = () => {
   return (
-    <section className='section-tight py-16 md:py-20'>
+    <section className='py-16 md:py-20'>
       <div className='max-w-[980px] mx-auto px-6 md:px-4'>
         <div className='text-center rounded-2xl p-10'
              style={{ background: 'linear-gradient(180deg, #3b82f6 0%, #1e40af 100%)' }}>

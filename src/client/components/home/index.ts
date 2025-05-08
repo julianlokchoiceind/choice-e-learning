@@ -3,4 +3,4 @@
  */
 
 export * from './sections';
-export * from './ClientComponents';
+export { default as ClientComponents } from './ClientComponents';

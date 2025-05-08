@@ -1,3 +1,15 @@
+/* Tailwind directives - must be before any imports or custom styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 
+ * IMPORTANT: CSS imports must be after Tailwind directives
+ * This is because Tailwind needs to process these styles AFTER its core styles
+ */
+@import "../styles/animations.css";
+@import "../styles/transitions.css";
+
 /* Admin Form Fixes for Firefox and Safari */
 input:not(:placeholder-shown) {
   opacity: 1 !important;
@@ -21,11 +33,6 @@ input:focus {
 .force-input-focus {
   -webkit-text-fill-color: currentcolor !important;
 }
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@import "../styles/transitions.css";
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -96,31 +103,7 @@ body {
   to { transform: translateY(0); }
 }
 
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
-}
-
-@keyframes float-slow {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-15px); }
-}
-
-@keyframes float-slow-reverse {
-  0%, 100% { transform: translateY(0) rotate(5deg); }
-  50% { transform: translateY(-12px) rotate(-2deg); }
-}
-
-@keyframes float-slow-alt {
-  0%, 100% { transform: translateY(0) rotate(-3deg); }
-  50% { transform: translateY(-15px) rotate(3deg); }
-}
-
-@keyframes float-alt {
-  0%, 100% { transform: translateY(0) rotate(3deg); }
-  50% { transform: translateY(-10px) rotate(-3deg); }
-}
+/* Float animations are now imported from animations.css to avoid duplication */
 
 /* Animation classes */
 .animate-fade {
@@ -145,26 +128,6 @@ body {
 
 .animate-ticker {
   animation: ticker 30s linear infinite;
-}
-
-.animate-float {
-  animation: float 5s ease-in-out infinite;
-}
-
-.animate-float-slow {
-  animation: float-slow 7s ease-in-out infinite;
-}
-
-.animate-float-slow-reverse {
-  animation: float-slow-reverse 8s ease-in-out infinite;
-}
-
-.animate-float-slow-alt {
-  animation: float-slow-alt 9s ease-in-out infinite;
-}
-
-.animate-float-alt {
-  animation: float-alt 6s ease-in-out infinite;
 }
 
 /* Base styles with Tailwind */
@@ -252,6 +215,21 @@ body {
   
   .section-tight {
     padding: 40px 0;
+  }
+}
+
+/* Core responsive layout fixes */
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
 

@@ -4,7 +4,14 @@ import reactHooks from 'eslint-plugin-react-hooks';
 export default tseslint.config({
   ignores: [
     'node_modules/**',
-    'src/generated/**',
+    'src/generated/**/*',
+    '**/runtime/*.js',
+    '**/index-browser.js',
+    '**/edge-esm.js',
+    '**/edge.js',
+    '**/library.js',
+    '**/react-native.js',
+    '**/wasm.js',
     'prisma/generated/**',
     '.next/**',
     'out/**',

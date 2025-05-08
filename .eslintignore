@@ -13,10 +13,19 @@ build/
 dist/
 
 # Generated files
-src/generated/**
+src/generated/**/*
 prisma/generated/**
 .vercel
 *.d.ts
+
+# Prisma generated files
+**/runtime/*.js
+**/index-browser.js
+**/edge-esm.js
+**/edge.js
+**/library.js
+**/react-native.js
+**/wasm.js
 
 # Debug files
 npm-debug.log*

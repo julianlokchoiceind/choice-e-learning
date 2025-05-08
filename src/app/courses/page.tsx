@@ -1,9 +1,9 @@
-import { Metadata } from 'next';
+'use client';
 
-// Add the keyframes for animations in global CSS
-import '@/styles/animations.css';
+import { Metadata } from 'next';
 import Image from 'next/image';
 import { CoursesSection } from '@/client/components/courses';
+import { useTopics } from '@/client/hooks/topics';
 
 export const metadata: Metadata = {
   title: 'Courses | Choice E-Learning',

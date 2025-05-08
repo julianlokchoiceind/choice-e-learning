@@ -33,7 +33,7 @@ const TestimonialsSection = () => {
   ];
 
   return (
-    <section className='section-full py-20 md:py-[90px] bg-white overflow-hidden'>
+    <section className='py-20 md:py-[90px] bg-white overflow-hidden'>
       <div className='max-w-[980px] mx-auto px-6 md:px-4'>
         <h2 className='text-3xl md:text-4xl font-bold text-center mb-12'>Student Stories</h2>
 
@@ -43,7 +43,7 @@ const TestimonialsSection = () => {
               {/* Double the testimonials for seamless loop */}
               {[...testimonials, ...testimonials].map((testimonial, i) => (
                 <div key={i} className='flex-shrink-0 w-[350px] m-4'>
-                  <div className='card p-8 shadow-lg bg-white rounded-xl hover:shadow-xl hover:scale-[1.01] transition-all duration-300 h-full'>
+                  <div className='bg-white rounded-[18px] overflow-hidden shadow-md transition-transform duration-300 p-8 shadow-lg rounded-xl hover:shadow-xl hover:scale-[1.01] h-full'>
                     <div className='flex items-center mb-6'>
                       <div className='relative w-12 h-12 rounded-full overflow-hidden mr-4'>
                         <Image

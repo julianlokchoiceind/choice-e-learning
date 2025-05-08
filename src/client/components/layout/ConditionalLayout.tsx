@@ -14,6 +14,8 @@ const ConditionalLayout = ({ children }: ConditionalLayoutProps) => {
   
   // Don't show footer on admin pages
   const isAdminPage = pathname?.startsWith('/admin');
+  // Không áp dụng padding-top cho homepage
+  const isHomepage = pathname === '/';
   
   if (isAdminPage) {
     return (
@@ -26,7 +28,7 @@ const ConditionalLayout = ({ children }: ConditionalLayoutProps) => {
   return (
     <>
       <Header />
-      <main className='flex-grow pt-[44px]'>
+      <main className={`flex-grow ${isHomepage ? '' : 'pt-[44px]'}`}>
         {children}
       </main>
       <Footer />

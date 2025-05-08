@@ -299,6 +299,7 @@ Mỗi loại file phải tuân theo patterns tương ứng trong 17 patterns đ�
 - Sử dụng named exports thay vì default exports khi có thể
 - Sử dụng alias imports từ file index
 - Sử dụng đúng đường dẫn: `@/client/...`, `@/server/...`, `@/shared/...`
+- Luôn luôn sử dụng alias import (CỰC KỲ ƯU TIÊN CHO TOÀN BỘ FILE HỆ THỐNG)
 
 ### 5. Tuân thủ Cấu trúc Phẳng
 

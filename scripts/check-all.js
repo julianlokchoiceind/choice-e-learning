@@ -25,7 +25,8 @@ function runCommand(cmd, title, isNextBuild = false) {
 
 const results = [];
 
-const eslintResult = runCommand('npx eslint . --format stylish', 'ESLint Errors');
+// Sử dụng cùng pattern với lệnh lint trong package.json
+const eslintResult = runCommand('npx eslint src/app src/client src/server src/shared --no-error-on-unmatched-pattern --format stylish', 'ESLint Errors');
 const tscResult = runCommand('npx tsc --noEmit', 'TypeScript Errors');
 const nextResult = runCommand('npx next build', 'Next.js Build Errors', true);
 

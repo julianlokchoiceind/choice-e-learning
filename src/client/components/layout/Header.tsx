@@ -176,7 +176,7 @@ const Header = () => {
             </ul>
             
             {/* Right Side Links - with fixed width containers to prevent layout shifts */}
-            <div className='flex items-center space-x-4 min-w-[120px] justify-end'>
+            <div className='flex items-center space-x-4 min-w-[120px] justify-end relative'>
               {isAuthenticated ? (
                 <>
                   <Link href='/dashboard' aria-label='Dashboard' className='text-white/80 hover:text-white transition-colors'>

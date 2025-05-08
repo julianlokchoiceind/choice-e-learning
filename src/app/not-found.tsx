@@ -37,7 +37,7 @@ export default function NotFound() {
           <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
             {quickLinks.map((link, index) => (
               <Link 
-                key={"index"}
+                key={index}
                 href={link.href}
                 className='p-3 card text-sm hover:text-primary transition-colors'
               >

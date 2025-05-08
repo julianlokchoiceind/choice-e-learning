@@ -27,7 +27,7 @@ const HowItWorksSection = () => {
   ];
 
   return (
-    <section className='section-tight py-20 md:py-[100px] bg-[#f5f5f7]'>
+    <section className='py-20 md:py-[100px] bg-[#f5f5f7]'>
       <div className='max-w-[980px] mx-auto px-6 md:px-4'>
         <h2 className='text-3xl md:text-4xl font-bold text-center mb-12'>How It Works</h2>
 
