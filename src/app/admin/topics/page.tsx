@@ -78,7 +78,7 @@ export default function TopicsPage() {
         console.error('[TopicsPage] Error fetching topics in effect:', err);
         // Error is already handled in the hook, so we don't need to do anything here
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[TopicsPage] Exception in topics fetch effect:', error);
       // Continue rendering with empty data
     }
@@ -99,7 +99,7 @@ export default function TopicsPage() {
       });
       
       setCurrentPage(1);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[TopicsPage] Exception in search handler:', error);
       // Continue with UI
     }
@@ -132,7 +132,7 @@ export default function TopicsPage() {
         console.error('[TopicsPage] Error during status change:', err);
         // Error is already handled in the hook
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[TopicsPage] Exception in status change handler:', error);
       // Continue with UI
     }
@@ -152,7 +152,7 @@ export default function TopicsPage() {
         console.error(`[TopicsPage] Error when fetching page ${page}:`, err);
         // Error is already handled in the hook
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`[TopicsPage] Exception in page change handler:`, error);
       // Continue with UI
     }
@@ -176,13 +176,13 @@ export default function TopicsPage() {
           console.error('[TopicsPage] Error refreshing after delete:', err);
           // Error is already handled in the hook
         });
-      } catch (deleteError) {
+      } catch (deleteError: unknown) {
         console.error(`[TopicsPage] Error when trying to delete topic ${id}:`, deleteError);
         // Continue with UI
       }
       
       setConfirmDelete(null);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('[TopicsPage] Exception in delete handler:', err);
       setConfirmDelete(null); // Reset the confirmation state
     }
@@ -217,7 +217,7 @@ export default function TopicsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className='py-2 pl-10 pr-4 block w-full sm:w-80 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)] outline-none'
-              onKeyDown={(e) => {
+              onKeyDown={(e: any) => {
                 if (e.key === 'Enter') {
                   handleSearch();
                 }
@@ -235,7 +235,7 @@ export default function TopicsPage() {
               <option value='inactive'>Inactive Only</option>
             </select>
             <button
-              onClick={"handleSearch"}
+              onClick={handleSearch}
               className='py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md admin-button'
             >
               Search

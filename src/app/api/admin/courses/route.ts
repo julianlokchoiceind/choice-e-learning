@@ -125,7 +125,7 @@ export const POST = withAdmin(async (req: Request, context) => {
 
     // Từ mảng tên topic, tìm (hoặc tạo) các Topic trong DB
     const topicObjects = await Promise.all(
-      topics.map(async (topicName) => {
+      topics.map(async (topicName: any) => {
         // Tìm topic theo tên
         let topic = await prisma.topic.findFirst({
           where: { name: { equals: topicName } }
@@ -173,9 +173,9 @@ export const POST = withAdmin(async (req: Request, context) => {
     }
 
     try {
-      // Step 1: Create chapters if any
+      // Create chapters first
       console.log('Creating chapters:', chapters.length);
-      const createdChapters = [];
+      const createdChapters: any[] = [];
       for (const chapter of chapters) {
         try {
           const newChapter = await prisma.chapter.create({
@@ -188,7 +188,7 @@ export const POST = withAdmin(async (req: Request, context) => {
           });
           console.log('Created chapter:', newChapter);
           createdChapters.push(newChapter);
-        } catch (chapterError) {
+        } catch (chapterError: unknown) {
           console.error('Error creating chapter:', chapterError);
           // Continue to next chapter if this one fails
         }
@@ -257,7 +257,7 @@ export const POST = withAdmin(async (req: Request, context) => {
           });
 
           console.log('Lesson created successfully:', createdLesson.id);
-        } catch (lessonError) {
+        } catch (lessonError: unknown) {
           console.error('Error creating lesson:', lessonError, 'Lesson data:', {
             title: lesson.title,
             order: lesson.order,
@@ -266,7 +266,7 @@ export const POST = withAdmin(async (req: Request, context) => {
           // Continue to next lesson if this one fails
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error creating course content:', error);
       // Consider rolling back the course creation if content creation fails
       await prisma.course.delete({ where: { id: newCourse.id } });
@@ -282,7 +282,7 @@ export const POST = withAdmin(async (req: Request, context) => {
       data: newCourse,
       message: 'Course created successfully'
     }, { status: 201 });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating course:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to create course', details: (error as Error).message },
@@ -352,14 +352,14 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
       totalPages = Math.ceil(totalItems / limit);
       skip = (page - 1) * limit;
       console.log('Pagination setup - page:', page, 'limit:', limit, 'skip:', skip);
-    } catch (countError) {
+    } catch (countError: unknown) {
       console.error('Error counting courses:', countError);
       throw countError;
     }
 
     // Fetch paginated courses with relations
     console.log('Fetching courses with Prisma...');
-    let courses = [];
+    let courses: any[] = [];
     try {
       courses = await prisma.course.findMany({
         where,
@@ -377,20 +377,16 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
       });
       console.log('Courses fetched successfully, count:', courses.length);
       if (courses.length > 0) {
-        console.log('Sample course:', { 
-          id: courses[0].id,
-          title: courses[0].title,
-          fields: Object.keys(courses[0])
-        });
+        console.log('First course:', courses[0].title);
       }
-    } catch (fetchError) {
+    } catch (fetchError: unknown) {
       console.error('Error fetching courses:', fetchError);
       throw fetchError;
     }
 
-    // Format response
+    // Format courses for response
     console.log('Formatting courses for response...');
-    let formattedCourses = [];
+    let formattedCourses: any[] = [];
     try {
       formattedCourses = courses.map(course => ({
         id: course.id,
@@ -398,12 +394,11 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
         description: course.description,
         price: course.price,
         level: course.level,
-        topics: Array.isArray(course.topics) ? course.topics : [],
-        // Đảm bảo imageUrl luôn được chuẩn hóa
+        topics: course.topics,
         imageUrl: processImageUrl(course.imageUrl),
-        studentCount: course._count.students,
-        studentsCount: course._count.students, // Thêm alias cho tương thích
-        lessonsCount: course._count.lessons,
+        studentCount: course._count?.students || 0,
+        studentsCount: course._count?.students || 0,
+        lessonsCount: course._count?.lessons || 0,
         createdAt: course.createdAt,
         updatedAt: course.updatedAt
       }));
@@ -416,7 +411,7 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
         });
       }
       console.log('Formatted courses successfully, count:', formattedCourses.length);
-    } catch (formatError) {
+    } catch (formatError: unknown) {
       console.error('Error formatting courses:', formatError);
       // Fallback to minimal format if there's an error
       formattedCourses = courses.map(course => ({
@@ -427,6 +422,16 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
         studentsCount: 0
       }));
     }
+
+    // Return simplified list if there are too many courses
+    console.log('Returning simplified course list...');
+    const simplified: any[] = courses.map(course => ({
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      studentCount: course._count?.students || 0,
+      studentsCount: course._count?.students || 0
+    }));
 
     console.log(`Returning ${formattedCourses.length} courses to client`);
     console.log(`Pagination info: page ${page}/${totalPages}, total items: ${totalItems}`);
@@ -445,7 +450,7 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
         }
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching courses:', error);
     return NextResponse.json({
       success: false,

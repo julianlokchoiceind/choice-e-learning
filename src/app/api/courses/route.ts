@@ -12,7 +12,7 @@ import {
   apiServerError,
   apiError
 } from '@/server/api/api-response';
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 import { 
   createRouteHandler, 
   withErrorHandling, 
@@ -250,7 +250,7 @@ const getCourses = withErrorHandling(async (req: NextRequest) => {
     }
     
     return response;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching courses:', error);
     return apiServerError('Failed to fetch courses');
   }
@@ -333,7 +333,7 @@ export const POST = withAdmin(async (req: NextRequest, context) => {
               resourcesData: lesson.resources ? JSON.stringify(lesson.resources) : '[]'
             }
           });
-        } catch (lessonError) {
+        } catch (lessonError: unknown) {
           console.error('Error creating lesson:', lessonError);
           // Continue to next lesson if this one fails
         }
@@ -341,7 +341,7 @@ export const POST = withAdmin(async (req: NextRequest, context) => {
     }
     
     return apiSuccess(newCourse, 'Course created successfully', undefined, 201);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating course:', error);
     return apiServerError('Failed to create course');
   }

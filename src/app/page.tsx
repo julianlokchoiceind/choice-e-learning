@@ -20,7 +20,16 @@ import {
   StarIcon
 } from '@heroicons/react/24/outline';
 import { getTotalStudentCount } from '@/server/services/courses/course-service';
-import ClientComponents from '@/client/components/home/ClientComponents';
+
+// Import sections directly
+import {
+  FeaturedCoursesSection,
+  PopularCoursesSection,
+  RoadmapSection,
+  HowItWorksSection,
+  TestimonialsSection,
+  CTASection
+} from '@/client/components/home/sections';
 
 // Simplified roadmap data without React components
 const roadmapsData = [
@@ -105,7 +114,7 @@ export default function Home() {
                   priority
                   className='object-cover object-center rounded-2xl'
                   sizes='(max-width: 768px) 100vw, 50vw'
-                  onError={(e) => {
+                  onError={(e: any) => {
                     console.error('Error loading hero image');
                     e.currentTarget.src = 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=2071&auto=format&fit=crop';
                   }}
@@ -135,13 +144,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Render rest of sections using client components */}
-      <ClientComponents.FeaturedCoursesSection courses={featuredCourses} />
-      <ClientComponents.PopularCoursesSection courses={coursesWithRealData} />
-      <ClientComponents.RoadmapSection roadmaps={roadmapsData} />
-      <ClientComponents.HowItWorksSection />
-      <ClientComponents.TestimonialsSection />
-      <ClientComponents.CTASection />
+      {/* Render sections directly */}
+      <FeaturedCoursesSection courses={featuredCourses} />
+      <PopularCoursesSection courses={coursesWithRealData} />
+      <RoadmapSection roadmaps={roadmapsData} />
+      <HowItWorksSection />
+      <TestimonialsSection />
+      <CTASection />
     </div>
   );
 }

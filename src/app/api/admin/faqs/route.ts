@@ -4,7 +4,7 @@ import { withAdmin } from '@/server/api/route-handlers';
 import { z } from 'zod';
 import { parseRequest } from '@/server/api/request-parser';
 import { faqService } from '@/server/services/faq/faq-service';
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 
 // Schema for creating a FAQ
 const createFAQSchema = z.object({
@@ -35,7 +35,7 @@ export const GET = withAdmin(async (req: NextRequest) => {
     });
     
     return apiSuccess(result);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching FAQs:', error);
     return apiError(
       'Failed to fetch FAQs',
@@ -53,7 +53,7 @@ export const POST = withAdmin(async (req: NextRequest) => {
     const faq = await faqService.createFAQ(body);
     
     return apiSuccess(faq, 'FAQ created successfully', undefined, 201);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating FAQ:', error);
     if (error instanceof z.ZodError) {
       return apiValidationError(error);

@@ -1,4 +1,9 @@
 // Định nghĩa các mẫu file pattern tuân theo hướng dẫn tái cấu trúc
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const filePatterns = {
   // Pattern 1: Component Pattern
   componentPattern: `'use client';
@@ -376,4 +381,5 @@ describe('ComponentName Component', () => {
 });`
 };
 
+export { filePatterns };
 export default filePatterns;

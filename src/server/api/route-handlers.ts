@@ -5,9 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateUser, checkUserRole, requireAdmin, requireSelfOrAdmin } from '@/server/auth/auth-middleware';
-import { Role } from '@/shared/types/auth/roles';
+import { UserRole } from '@/shared/types/auth/roles';
 import { apiError, apiServerError, apiUnauthorized } from './api-response';
-import { ApiErrorCode } from './api-error-codes';
+import { ApiErrorCode } from './api-errors';
 
 // Định nghĩa kiểu dữ liệu cho route handler
 export type RouteParams = Record<string, string>;
@@ -51,7 +51,7 @@ export function withErrorHandling(handler: HandlerFunction): HandlerFunction {
     try {
       const result = await handler(req, context);
       return result || apiServerError('Handler returned undefined');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`API error [${req.method} ${req.nextUrl.pathname}]:`, error);
       console.error('Error stack:', (error as Error).stack);
       
@@ -100,7 +100,7 @@ export function withAuth(handler: AuthenticatedHandlerFunction): HandlerFunction
  */
 export function withRole(
   handler: AuthenticatedHandlerFunction, 
-  roles: Role | Role[]
+  roles: UserRole | UserRole[]
 ): HandlerFunction {
   return withErrorHandling(async function roleWrapper(req, context) {
     // Check user role
@@ -141,7 +141,7 @@ export function withAdmin(handler: AuthenticatedHandlerFunction): HandlerFunctio
     // Create new context with admin user data
     const authContext: AuthenticatedContext = {
       ...context,
-      user: auth.user || { id: '', role: Role.student, email: '' }
+      user: auth.user || { id: '', role: UserRole.STUDENT, email: '' }
     };
     
     if (auth.user) {
@@ -161,7 +161,7 @@ export function withAdmin(handler: AuthenticatedHandlerFunction): HandlerFunctio
       const result = await handler(req, authContext);
       console.log(`Admin API response for ${req.url} sent successfully`);
       return result || apiServerError('Admin handler returned undefined');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Admin API error for ${req.url}:`, error);
       throw error;
     }
@@ -231,7 +231,7 @@ export function createRouteHandler(
       const handler = handlers[method]!;
       const result = await handler(req, context);
       return result || apiServerError(`Handler for method ${method} returned undefined`);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`API error [${method} ${req.nextUrl.pathname}]:`, error);
       console.error('Error stack:', (error as Error).stack);
       

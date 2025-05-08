@@ -3,7 +3,7 @@
  * Provides functionalities to manage topics for courses
  */
 
-import prismaInstance from '@/server/db/prisma-client';
+import prisma from '@/server/db/prisma-client';
 import { Topic, TopicFilter, CreateTopicParams, UpdateTopicParams } from '@/shared/types/topics';
 import { slugify } from '@/server/utils/string-utils';
 
@@ -44,7 +44,7 @@ class TopicService {
 
   constructor() {
     // Cast prismaInstance to our extended type
-    this.prisma = prismaInstance as unknown as ExtendedPrismaClient;
+    this.prisma = prisma as unknown as ExtendedPrismaClient;
   }
 
   /**
@@ -120,7 +120,7 @@ class TopicService {
           hasPrevPage: page > 1
         }
       };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error in getAllTopics:', error);
       // Return empty result on error
       return {
@@ -146,7 +146,7 @@ class TopicService {
         where: { isActive: true },
         orderBy: { name: 'asc' }
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error in getAllActiveTopics:', error);
       return [];
     }
@@ -175,7 +175,7 @@ class TopicService {
           }
         }
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error in getTopicById for id ${id}:`, error);
       return null;
     }
@@ -226,7 +226,7 @@ class TopicService {
         }
         
         console.log('Generated slug:', slug);
-      } catch (slugError) {
+      } catch (slugError: unknown) {
         console.error('Error generating slug:', slugError);
         // Tạo slug an toàn theo cách thủ công
         slug = `topic-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -270,13 +270,16 @@ class TopicService {
         
         console.log('Topic created successfully:', newTopic);
         return newTopic;
-      } catch (dbError) {
+      } catch (dbError: unknown) {
         console.error('Database error creating topic:', dbError);
         
         // Xử lý lỗi Prisma chi tiết hơn
-        if (dbError.code === 'P2002') {
+        if (typeof dbError === 'object' && dbError !== null && 'code' in dbError && dbError.code === 'P2002') {
           // Lỗi trùng unique, tạo thông báo rõ ràng hơn
-          const target = dbError.meta?.target || [];
+          const meta = typeof dbError === 'object' && dbError !== null && 'meta' in dbError ? dbError.meta : null;
+          const target = meta && typeof meta === 'object' && meta !== null && 'target' in meta ? 
+            Array.isArray(meta.target) ? meta.target : [] : [];
+          
           if (target.includes('name')) {
             throw new Error(`Topic with name '${cleanData.name}' already exists`);
           } else if (target.includes('slug')) {
@@ -287,9 +290,11 @@ class TopicService {
         }
         
         // Lỗi khác
-        throw new Error(`Database error: ${dbError.message || 'Unknown error'}`);
+        const errorMessage = typeof dbError === 'object' && dbError !== null && 'message' in dbError ? 
+          String(dbError.message) : 'Unknown error';
+        throw new Error(`Database error: ${errorMessage}`);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error in createTopic service:', error);
       throw error;
     }
@@ -341,7 +346,7 @@ class TopicService {
           }
         }
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error in updateTopic for id ${id}:`, error);
       throw error;
     }
@@ -376,7 +381,7 @@ class TopicService {
       return await this.prisma.topic.delete({
         where: { id }
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error in deleteTopic for id ${id}:`, error);
       throw error;
     }
@@ -428,7 +433,7 @@ class TopicService {
       });
       
       console.log(`Topic ${topicId} successfully added to course ${courseId}`);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error in addTopicToCourse for topicId=${topicId}, courseId=${courseId}:`, error);
       throw error;
     }
@@ -481,7 +486,7 @@ class TopicService {
       });
       
       console.log(`Topic ${topicId} successfully removed from course ${courseId}`);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error in removeTopicFromCourse for topicId=${topicId}, courseId=${courseId}:`, error);
       throw error;
     }

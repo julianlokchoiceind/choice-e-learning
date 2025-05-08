@@ -67,12 +67,26 @@ export function useAuth() {
           
           return false;
         }
-      } catch (axiosError) {
-        console.error('Registration failed:', axiosError.response?.data || axiosError);
+      } catch (axiosError: unknown) {
+        console.error('Registration failed:', 
+          typeof axiosError === 'object' && axiosError !== null && 
+          'response' in axiosError && axiosError.response !== null ? 
+          axiosError.response : axiosError);
         
         // Prepare a user-friendly error message
-        const errorMessage = axiosError.response?.data?.error || 'Registration failed';
-        const errorStatus = axiosError.response?.status || 400;
+        const errorMessage = 
+          typeof axiosError === 'object' && axiosError !== null && 
+          'response' in axiosError && typeof axiosError.response === 'object' && 
+          axiosError.response !== null && 'data' in axiosError.response && 
+          typeof axiosError.response.data === 'object' && axiosError.response.data !== null && 
+          'error' in axiosError.response.data ? 
+          String(axiosError.response.data.error) : 'Registration failed';
+          
+        const errorStatus = 
+          typeof axiosError === 'object' && axiosError !== null && 
+          'response' in axiosError && typeof axiosError.response === 'object' && 
+          axiosError.response !== null && 'status' in axiosError.response ? 
+          Number(axiosError.response.status) : 400;
         
         // Set appropriate error
         setError({ 
@@ -106,7 +120,7 @@ export function useAuth() {
         console.log('Auto-login successful');
         router.push('/dashboard');
         return true;
-      } catch (loginError) {
+      } catch (loginError: unknown) {
         // This catch block is unlikely to execute due to redirect: true
         console.error('Error during auto-login:', loginError);
         
@@ -119,7 +133,7 @@ export function useAuth() {
         router.push(`/login?registered=true&email=${encodeURIComponent(credentials.email)}`);
         return true;
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Registration process error:', err);
       const errorMessage = (err as Error).message || 'An unknown error occurred';
       setError({ 
@@ -166,7 +180,7 @@ export function useAuth() {
       router.push('/dashboard');
       
       return true;
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Login process error:', err);
       const errorMessage = (err as Error).message || 'Invalid email or password';
       setError({ 
@@ -191,7 +205,7 @@ export function useAuth() {
       console.log('Logout successful, redirecting to home');
       router.push('/');
       return { success: true, message: 'Successfully logged out!' };
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Logout error:', err);
       setError({ 
         message: (err as Error).message,

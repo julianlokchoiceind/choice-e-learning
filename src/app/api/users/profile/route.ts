@@ -11,7 +11,7 @@ import { apiSuccess, apiError, apiUpdated, apiNotFound } from '@/server/api/api-
 import { validateRequest } from '@/server/api/request-parser';
 import { comparePasswords, hashPassword } from '@/server/auth/utils/password-utils';
 import { documentEndpoint } from '@/server/api/api-docs';
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 
 // Schema for profile update validation
 const profileUpdateSchema = z.object({
@@ -202,7 +202,7 @@ const updateProfile = withAuth(async (req, { user }) => {
     
     // Return success with updated user data
     return apiUpdated(userData);
-  } catch (error) {
+  } catch (error: unknown) {
     if ((error as any).code === 'P2025') {
       return apiNotFound('User');
     }

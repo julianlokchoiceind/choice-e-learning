@@ -7,7 +7,7 @@ import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { FormattedStudent } from '@/shared/types/student';
+import { FormattedStudent } from '@/shared/types/students/student';
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -86,7 +86,7 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
             } else {
               throw new Error('Invalid response format');
             }
-          } catch (err) {
+          } catch (err: unknown) {
             lastError = err;
             console.error(`Fetch student attempt ${attempts + 1} failed:`, err);
             attempts++;
@@ -101,9 +101,14 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
         if (!success) {
           throw lastError;
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error fetching student after all retries:', error);
-        const errorMessage = error.response?.data?.error || error.message || 'Failed to fetch student data. Please try again.';
+        const errorMessage = typeof error === 'object' && error !== null && 'response' in error && 
+          typeof error.response === 'object' && error.response !== null && 'data' in error.response && 
+          typeof error.response.data === 'object' && error.response.data !== null && 'error' in error.response.data ? 
+          String(error.response.data.error) :
+          error instanceof Error ? error.message : 
+          'Failed to fetch student data. Please try again.';
         setError(errorMessage);
         
         // Provide a way to recover by returning to the list page
@@ -147,7 +152,7 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
             } else {
               throw new Error(response.data.error || 'Failed to update student');
             }
-          } catch (err) {
+          } catch (err: unknown) {
             lastError = err;
             console.error(`Update student attempt ${attempts + 1} failed:`, err);
             attempts++;
@@ -181,9 +186,14 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
       setTimeout(() => {
         router.push('/admin/students');
       }, 1500);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error saving student:', error);
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to save student. Please try again.';
+      const errorMessage = typeof error === 'object' && error !== null && 'response' in error && 
+        typeof error.response === 'object' && error.response !== null && 'data' in error.response && 
+        typeof error.response.data === 'object' && error.response.data !== null && 'error' in error.response.data ? 
+        String(error.response.data.error) :
+        error instanceof Error ? error.message : 
+        'Failed to save student. Please try again.';
       setError(errorMessage);
     } finally {
       setLoading(false);

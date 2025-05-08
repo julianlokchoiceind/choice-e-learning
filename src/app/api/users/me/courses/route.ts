@@ -85,7 +85,7 @@ export async function GET(request: NextRequest) {
     }, {} as Record<string, { completedLessons: number, totalTimeSpent: number }>);
     
     // Format the response data
-    const enrolledCourses: EnrolledCourse[] = courses.map((course) => {
+    const enrolledCourses: EnrolledCourse[] = courses.map((course: any) => {
       const courseId = course.id;
       
       // Get total lessons for the course
@@ -132,7 +132,7 @@ export async function GET(request: NextRequest) {
       courses: enrolledCourses
     });
     
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching enrolled courses:', error);
     return NextResponse.json({ 
       success: false, 
@@ -239,7 +239,7 @@ export async function POST(request: NextRequest) {
       enrollmentId: `${userId}_${courseId}`
     });
     
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error enrolling in course:', error);
     return NextResponse.json({ 
       success: false, 

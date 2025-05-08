@@ -25,7 +25,6 @@ export default async function LearnPage() {
               {enrolledCourses.map((course) => (
                 <div key={course.id} className='course-card'>
                   <h3>{course.title}</h3>
-                  <p>{course.description}</p>
                   <a href={`/learn/${course.id}`} className='button primary'>
                     Tiếp tục học
                   </a>

@@ -24,7 +24,7 @@ export async function findLessonById(
         course: true
       } : undefined
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error finding lesson by ID:', error);
     return null;
   }
@@ -41,7 +41,7 @@ export async function getLessonsForCourse(courseId: string): Promise<Lesson[]> {
       where: { courseId },
       orderBy: { order: 'asc' }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error getting lessons for course:', error);
     return [];
   }
@@ -67,7 +67,7 @@ export async function createLesson(data: Prisma.LessonCreateInput): Promise<Less
     return await prisma.lesson.create({
       data
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating lesson:', error);
     return null;
   }
@@ -88,7 +88,7 @@ export async function updateLesson(
       where: { id },
       data
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating lesson:', error);
     return null;
   }
@@ -131,7 +131,7 @@ export async function deleteLesson(id: string): Promise<Lesson | null> {
     });
     
     return deletedLesson;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting lesson:', error);
     return null;
   }
@@ -174,7 +174,7 @@ export async function reorderLessons(
     );
     
     return true;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error reordering lessons:', error);
     return false;
   }

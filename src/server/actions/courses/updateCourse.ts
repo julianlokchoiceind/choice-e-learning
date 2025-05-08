@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth';
 import { z } from 'zod';
 import { authOptions } from '@/server/auth/auth-options';
 import { courseSchema } from '@/shared/schemas/courses';
+import { UserRole } from '@/shared/types/auth/roles';
 
 export async function updateCourse(courseId: string, formData: FormData) {
   try {
@@ -17,7 +18,7 @@ export async function updateCourse(courseId: string, formData: FormData) {
     
     // Kiểm tra quyền
     const userRole = session.user.role;
-    if (!userRole || !['ADMIN', 'INSTRUCTOR'].includes(userRole)) {
+    if (!userRole || userRole !== UserRole.ADMIN) {
       return { error: 'Không có quyền cập nhật khóa học' };
     }
     
@@ -58,7 +59,7 @@ export async function updateCourse(courseId: string, formData: FormData) {
     revalidatePath(`/courses/${courseId}`);
     
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Update course error:', error);
     
     return { 

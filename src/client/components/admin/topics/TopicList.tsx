@@ -35,7 +35,7 @@ export const TopicList = ({ topics, onDelete, isLoading = false }: TopicListProp
     try {
       await onDelete(id);
       setConfirmDelete(null);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error deleting topic:', err);
     }
   };

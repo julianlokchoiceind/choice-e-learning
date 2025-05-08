@@ -60,7 +60,7 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
         hasPrevPage: result.meta.page > 1
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching public topics:', error);
     return apiServerError('Failed to fetch topics');
   }

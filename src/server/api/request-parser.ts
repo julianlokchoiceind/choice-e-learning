@@ -6,7 +6,7 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { apiError, apiValidationError } from './api-response';
-import { ApiErrorCode } from './api-error-codes';
+import { ApiErrorCode } from './api-errors';
 
 /**
  * Parse and validate request body against Zod schema
@@ -57,7 +57,7 @@ export async function parseJsonBody<T = any>(req: NextRequest): Promise<{
     let requestText: string;
     try {
       requestText = await req.text();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error reading request body:', error);
       return {
         success: false,
@@ -74,7 +74,7 @@ export async function parseJsonBody<T = any>(req: NextRequest): Promise<{
     try {
       const data = JSON.parse(requestText) as T;
       return { success: true, data };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('JSON parse error:', error);
       return {
         success: false,
@@ -86,7 +86,7 @@ export async function parseJsonBody<T = any>(req: NextRequest): Promise<{
         )
       };
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Unexpected error parsing request:', error);
     return {
       success: false,
@@ -178,7 +178,7 @@ export function parseQueryParams<Output, Input = Output>(
       success: true,
       data: validation.data
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error parsing query params:', error);
     return {
       success: false,
@@ -218,7 +218,7 @@ export function getPathParam(req: NextRequest, paramName: string): string | null
     }
     
     return null;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error extracting path parameter:', error);
     return null;
   }

@@ -136,12 +136,16 @@ function useTopics(isAdmin = false) {
             }
           };
         }
-      } catch (apiError) {
+      } catch (apiError: unknown) {
         // Log detailed error information
         console.error('[useTopics] API call failed with error:', apiError);
-        if (apiError.response) {
-          console.error('[useTopics] Response status:', apiError.response.status);
-          console.error('[useTopics] Response data:', apiError.response.data);
+        
+        if (typeof apiError === 'object' && apiError !== null && 'response' in apiError) {
+          const errorResponse = apiError.response;
+          if (typeof errorResponse === 'object' && errorResponse !== null) {
+            console.error('[useTopics] Response status:', 'status' in errorResponse ? errorResponse.status : 'unknown');
+            console.error('[useTopics] Response data:', 'data' in errorResponse ? errorResponse.data : 'unknown');
+          }
         }
         
         // Set empty results and return default response
@@ -187,10 +191,15 @@ function useTopics(isAdmin = false) {
       }
       
       return response.data;
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('[useTopics] Error fetching topics:', err);
       // Provide more detailed error information but don't throw
-      const errorMessage = err.response?.data?.error || err.message || 'Failed to fetch topics';
+      const errorMessage = typeof err === 'object' && err !== null && 'response' in err &&
+        typeof err.response === 'object' && err.response !== null && 'data' in err.response &&
+        typeof err.response.data === 'object' && err.response.data !== null && 'error' in err.response.data ?
+        String(err.response.data.error) :
+        err instanceof Error ? err.message :
+        'Failed to fetch topics';
       setError(errorMessage);
       
       // Set empty values
@@ -239,11 +248,15 @@ function useTopics(isAdmin = false) {
       try {
         response = await axios.get<{ success: boolean, data: Topic }>(`${baseUrl}/${id}`);
         console.log('[useTopics] Topic fetch response:', response.data.success);
-      } catch (apiError) {
+      } catch (apiError: unknown) {
         console.error('[useTopics] API error fetching topic:', apiError);
-        if (apiError.response) {
-          console.error('[useTopics] Response status:', apiError.response.status);
-          console.error('[useTopics] Response data:', apiError.response.data);
+        
+        if (typeof apiError === 'object' && apiError !== null && 'response' in apiError) {
+          const errorResponse = apiError.response;
+          if (typeof errorResponse === 'object' && errorResponse !== null) {
+            console.error('[useTopics] Response status:', 'status' in errorResponse ? errorResponse.status : 'unknown');
+            console.error('[useTopics] Response data:', 'data' in errorResponse ? errorResponse.data : 'unknown');
+          }
         }
         
         // Return null instead of throwing
@@ -262,7 +275,7 @@ function useTopics(isAdmin = false) {
         setError('Failed to fetch topic');
         return null;
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('[useTopics] Error in fetchTopicById:', err);
       setError('Failed to fetch topic');
       setTopic(null);
@@ -323,26 +336,28 @@ function useTopics(isAdmin = false) {
         console.error('[useTopics] API returned success=false:', response.data);
         throw new Error(response.data?.error || 'Failed to create topic');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('[useTopics] Error creating topic:', err);
       
       // Log chi tiết hơn về response error
-      if (err.response) {
-        console.error('[useTopics] Error status:', err.response.status);
-        console.error('[useTopics] Error data:', err.response.data);
-      } else if (err.request) {
-        // Yêu cầu được gửi nhưng không nhận được phản hồi
-        console.error('[useTopics] No response received:', err.request);
-        setError('Server did not respond. Please try again.');
-        throw new Error('Server did not respond');
-      } else {
-        // Lỗi khi thiết lập yêu cầu
-        console.error('[useTopics] Request setup error:', err.message);
+      if (typeof err === 'object' && err !== null && 'response' in err) {
+        const errorResponse = err.response;
+        if (typeof errorResponse === 'object' && errorResponse !== null) {
+          console.error('[useTopics] Response status:', 'status' in errorResponse ? errorResponse.status : 'unknown');
+          console.error('[useTopics] Response data:', 'data' in errorResponse ? errorResponse.data : 'unknown');
+        }
       }
       
-      // Set thông báo lỗi
-      setError(err.response?.data?.error || err.message || 'Failed to create topic');
-      throw err;
+      // Trích xuất thông báo lỗi từ response nếu có
+      const errorMessage = typeof err === 'object' && err !== null && 'response' in err &&
+        typeof err.response === 'object' && err.response !== null && 'data' in err.response &&
+        typeof err.response.data === 'object' && err.response.data !== null && 'error' in err.response.data ?
+        String(err.response.data.error) :
+        err instanceof Error ? err.message :
+        'Failed to create topic';
+      
+      setError(errorMessage);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -368,9 +383,17 @@ function useTopics(isAdmin = false) {
       } else {
         throw new Error('Failed to update topic');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error updating topic:', err);
-      setError(err.response?.data?.error || 'Failed to update topic');
+      
+      const errorMessage = typeof err === 'object' && err !== null && 'response' in err &&
+        typeof err.response === 'object' && err.response !== null && 'data' in err.response &&
+        typeof err.response.data === 'object' && err.response.data !== null && 'error' in err.response.data ?
+        String(err.response.data.error) :
+        err instanceof Error ? err.message :
+        'Failed to update topic';
+      
+      setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
@@ -397,10 +420,18 @@ function useTopics(isAdmin = false) {
       } else {
         throw new Error('Failed to delete topic');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error deleting topic:', err);
-      setError(err.response?.data?.error || 'Failed to delete topic');
-      throw err;
+      
+      const errorMessage = typeof err === 'object' && err !== null && 'response' in err &&
+        typeof err.response === 'object' && err.response !== null && 'data' in err.response &&
+        typeof err.response.data === 'object' && err.response.data !== null && 'error' in err.response.data ?
+        String(err.response.data.error) :
+        err instanceof Error ? err.message :
+        'Failed to delete topic';
+      
+      setError(errorMessage);
+      return false;
     } finally {
       setLoading(false);
     }

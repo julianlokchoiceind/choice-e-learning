@@ -25,7 +25,7 @@ export async function findById<T extends keyof typeof prisma>(
     });
     
     return record;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error finding ${String(model)} by ID:`, error);
     return null;
   }
@@ -50,7 +50,7 @@ export async function findMany<T extends keyof typeof prisma>(
     });
     
     return records;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error finding ${String(model)} records:`, error);
     return [];
   }
@@ -75,7 +75,7 @@ export async function findOne<T extends keyof typeof prisma>(
     });
     
     return record;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error finding ${String(model)} record:`, error);
     return null;
   }
@@ -96,7 +96,7 @@ export async function createRecord<T extends keyof typeof prisma>(
     });
     
     return record;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error creating ${String(model)}:`, error);
     return null;
   }
@@ -126,7 +126,7 @@ export async function updateRecord<T extends keyof typeof prisma>(
     });
     
     return record;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error updating ${String(model)}:`, error);
     return null;
   }
@@ -154,7 +154,7 @@ export async function deleteRecord<T extends keyof typeof prisma>(
     });
     
     return record;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error deleting ${String(model)}:`, error);
     return null;
   }
@@ -176,7 +176,7 @@ export async function countRecords<T extends keyof typeof prisma>(
     });
     
     return count;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error counting ${String(model)} records:`, error);
     return 0;
   }
@@ -192,7 +192,7 @@ export async function executeTransaction<T>(
 ): Promise<T | null> {
   try {
     return await prisma.$transaction(fn);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Transaction error:', error);
     return null;
   }

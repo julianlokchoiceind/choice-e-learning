@@ -4,7 +4,7 @@ import { withAdmin } from '@/server/api/route-handlers';
 import { z } from 'zod';
 import { parseRequest } from '@/server/api/request-parser';
 import { studentService } from '@/server/services/students/student-service';
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 
 // Schema for creating a student
 const createStudentSchema = z.object({
@@ -83,7 +83,7 @@ export const GET = withAdmin(async (req: NextRequest) => {
         meta: result.meta
       });
       
-    } catch (serviceError) {
+    } catch (serviceError: unknown) {
       console.error('Error from studentService:', serviceError);
       // Trả về empty array thay vì lỗi, đảm bảo đúng định dạng
       return NextResponse.json({
@@ -92,7 +92,7 @@ export const GET = withAdmin(async (req: NextRequest) => {
         meta: { total: 0, page, limit, totalPages: 0 }
       });
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching students:', error);
     // Return an empty success response instead of an error to avoid showing error messages
     return NextResponse.json({
@@ -116,7 +116,7 @@ export const POST = withAdmin(async (req: NextRequest) => {
     const student = await studentService.createStudent(body);
     
     return apiSuccess(student, 'Student created successfully', undefined, 201);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating student:', error);
     if (error instanceof z.ZodError) {
       return apiValidationError(error);

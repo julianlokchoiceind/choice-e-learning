@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Roadmap } from '../../../types/course';
+import { Roadmap } from '@/shared/types/courses/course';
 
 interface RoadmapSectionProps {
   roadmaps: Roadmap[];

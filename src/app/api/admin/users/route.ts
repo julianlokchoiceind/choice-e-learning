@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/server/db/prisma-client';
 import { requireAdmin } from '@/server/auth/auth-middleware';
-import { Role } from '@/shared/types/auth/roles';
+import { UserRole } from '@/shared/types/auth/roles';
 import { Role as PrismaRole } from '@prisma/client';
 
 export async function GET(req: NextRequest) {
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     const filter: any = {};
     
     // Add role filter if specified and valid
-    if (role && Object.values(Role).includes(role as Role)) {
+    if (role && Object.values(UserRole).includes(role as UserRole)) {
       filter.role = role;
     }
     
@@ -107,7 +107,7 @@ export async function GET(req: NextRequest) {
         sortOrder
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching users:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch users' },

@@ -84,7 +84,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
         } else {
           setError(data.error || 'Failed to fetch course details');
         }
-      } catch (err) {
+      } catch (err: unknown) {
         setError((err as Error).message);
       } finally {
         setLoading(false);
@@ -116,7 +116,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
           const enrolled = data.courses.some((c) => c.id === courseId);
           setIsEnrolled(enrolled);
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Error checking enrollment status:', err);
       }
     };
@@ -149,7 +149,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
       } else {
         setEnrollmentError(data.error || 'Failed to enroll in course');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       setEnrollmentError((err as Error).message);
     } finally {
       setEnrolling(false);
@@ -181,7 +181,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
       } else {
         setEnrollmentError(data.error || 'Failed to unenroll from course');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       setEnrollmentError((err as Error).message);
     } finally {
       setUnenrolling(false);
@@ -276,8 +276,8 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
                     Continue Learning
                   </Link>
                   <button 
-                    onClick={"handleUnenroll"}
-                    disabled={"unenrolling"}
+                    onClick={handleUnenroll}
+                    disabled={unenrolling}
                     className='w-full bg-white text-red-600 font-medium py-3 px-6 rounded-full border border-red-600 hover:bg-red-50 transition-colors'
                   >
                     {unenrolling ? 'Unenrolling...' : 'Unenroll from Course'}
@@ -285,12 +285,12 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
                 </>
               ) : (
                 <button 
-                  onClick={"handleEnroll"}
-                  disabled={"enrolling"}
+                  onClick={handleEnroll}
+                  disabled={enrolling}
                   className='w-full bg-[#0066cc] text-white font-medium py-3 px-6 rounded-full hover:bg-[#0077ed] transition-colors mb-4 disabled:opacity-70'
                 >
                   {enrolling ? 'Enrolling...' : 'Enroll Now'}
-              </button>
+                </button>
               )}
               {!isEnrolled && (
               <button className='w-full bg-white text-[#0066cc] font-medium py-3 px-6 rounded-full border border-[#0066cc] hover:bg-[#f5f5f7] transition-colors'>

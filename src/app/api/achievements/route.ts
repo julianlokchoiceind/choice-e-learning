@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
         console.error('Error checking and awarding achievements:', error);
         // Continue with getting existing achievements even if awarding fails
       });
-    } catch (awardError) {
+    } catch (awardError: unknown) {
       console.error('Error in award achievements step:', awardError);
       // Continue with getting existing achievements
     }
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       success: true, 
       achievements 
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in achievements API route:', error);
     // Include error details in development
     const errorDetails = process.env.NODE_ENV === 'development' ? 

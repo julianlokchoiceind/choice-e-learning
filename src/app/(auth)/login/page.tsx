@@ -37,7 +37,7 @@ export default function LoginPage() {
       try {
         const providers = await getProviders();
         console.log('Available NextAuth providers:', providers);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Error fetching providers:', err);
       }
     }
@@ -121,7 +121,7 @@ export default function LoginPage() {
           // Redirect will happen via next-auth after this
         }, 1500);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Login error:', err);
       setNotification({
         show: true,
@@ -179,7 +179,7 @@ export default function LoginPage() {
       
       console.log('SignIn result:', result);
       // Note: The rest of this function might not execute due to redirect: true
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`${provider} login error:`, error);
       setNotification({
         show: true,
@@ -340,7 +340,7 @@ export default function LoginPage() {
           <div>
             <button
               type='submit'
-              disabled={"isLoading"}
+              disabled={isLoading}
               className='group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
             >
               {isLoading ? 'Signing in...' : 'Sign in'}

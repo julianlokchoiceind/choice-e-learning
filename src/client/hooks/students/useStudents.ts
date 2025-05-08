@@ -138,27 +138,27 @@ export function useStudents() {
         };
 
         // Parse dates và xử lý null/undefined
-        const studentsWithDates = studentData.map(($1) => {
-        console.log('Processing student data:', {
-          id: student.id,
-          name: student.name || 'Unknown',
-          email: student.email,
-          role: student.role
-        });
-        
-        return {
-          id: student.id,
-          name: student.name || 'Unknown',
+        const studentsWithDates = studentData.map((student) => {
+          console.log('Processing student data:', {
+            id: student.id,
+            name: student.name || 'Unknown',
             email: student.email,
-              phone: student.phone || '-',
-              address: student.address || '-',
-              city: student.city || '-',
-              grade: student.grade || '-',
-              imageUrl: student.imageUrl,
-              createdAt: new Date(student.createdAt),
-              updatedAt: new Date(student.updatedAt)
-            };
+            role: student.role
           });
+          
+          return {
+            id: student.id,
+            name: student.name || 'Unknown',
+            email: student.email,
+            phone: student.phone || '-',
+            address: student.address || '-',
+            city: student.city || '-',
+            grade: student.grade || '-',
+            imageUrl: student.imageUrl,
+            createdAt: new Date(student.createdAt),
+            updatedAt: new Date(student.updatedAt)
+          };
+        });
 
         console.log(`Successfully processed ${studentsWithDates.length} students`);
         
@@ -171,7 +171,7 @@ export function useStudents() {
           data: studentsWithDates,
           meta
         };
-      } catch (parseError) {
+      } catch (parseError: unknown) {
         console.error('Error parsing student data:', parseError);
         // Fallback to empty arrays instead of throwing errors
         setStudents([]);
@@ -191,7 +191,7 @@ export function useStudents() {
           }
         };
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching students:', err);
       // Don't set error state to avoid showing error messages
       // setError(err?.response?.data?.error || err?.message || 'Failed to fetch students');
@@ -234,9 +234,15 @@ export function useStudents() {
       } else {
         throw new Error(response.data.error || 'Failed to fetch student');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching student:', err);
-      setError(err?.response?.data?.error || err?.message || 'Failed to fetch student');
+      const errorMessage = typeof err === 'object' && err !== null && 'response' in err && 
+        typeof err.response === 'object' && err.response !== null && 'data' in err.response && 
+        typeof err.response.data === 'object' && err.response.data !== null && 'error' in err.response.data ? 
+        String(err.response.data.error) : 
+        err instanceof Error ? err.message : 
+        'Failed to fetch student';
+      setError(errorMessage);
       return null;
     } finally {
       setLoading(false);
@@ -265,9 +271,15 @@ export function useStudents() {
       } else {
         throw new Error(response.data.error || 'Failed to create student');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error creating student:', err);
-      setError(err?.response?.data?.error || err?.message || 'Failed to create student');
+      const errorMessage = typeof err === 'object' && err !== null && 'response' in err && 
+        typeof err.response === 'object' && err.response !== null && 'data' in err.response && 
+        typeof err.response.data === 'object' && err.response.data !== null && 'error' in err.response.data ? 
+        String(err.response.data.error) : 
+        err instanceof Error ? err.message : 
+        'Failed to create student';
+      setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
@@ -296,9 +308,15 @@ export function useStudents() {
       } else {
         throw new Error(response.data.error || 'Failed to update student');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error updating student:', err);
-      setError(err?.response?.data?.error || err?.message || 'Failed to update student');
+      const errorMessage = typeof err === 'object' && err !== null && 'response' in err && 
+        typeof err.response === 'object' && err.response !== null && 'data' in err.response && 
+        typeof err.response.data === 'object' && err.response.data !== null && 'error' in err.response.data ? 
+        String(err.response.data.error) : 
+        err instanceof Error ? err.message : 
+        'Failed to update student';
+      setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
@@ -320,9 +338,15 @@ export function useStudents() {
       } else {
         throw new Error(response.data.error || 'Failed to delete student');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error deleting student:', err);
-      setError(err?.response?.data?.error || err?.message || 'Failed to delete student');
+      const errorMessage = typeof err === 'object' && err !== null && 'response' in err && 
+        typeof err.response === 'object' && err.response !== null && 'data' in err.response && 
+        typeof err.response.data === 'object' && err.response.data !== null && 'error' in err.response.data ? 
+        String(err.response.data.error) : 
+        err instanceof Error ? err.message : 
+        'Failed to delete student';
+      setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);

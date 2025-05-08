@@ -19,7 +19,7 @@ export async function hashPassword(password: string): Promise<string> {
     const hash = await bcrypt.hash(password, salt);
     
     return hash;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in hashPassword function:', error);
     throw new Error(`Failed to hash password: ${(error as Error).message}`);
   }
@@ -35,7 +35,7 @@ export async function comparePasswords(password: string, hashedPassword: string 
   try {
     if (!hashedPassword) return false;
     return await bcrypt.compare(password, hashedPassword);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error comparing passwords:', error);
     return false;
   }

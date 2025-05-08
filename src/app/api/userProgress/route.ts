@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
         id: result.id
       });
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in user progress API route:', error);
     return NextResponse.json({ 
       success: false, 
@@ -178,7 +178,7 @@ export async function GET(request: NextRequest) {
         timeSpent: entry.timeSpent
       }))
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in user progress API route:', error);
     return NextResponse.json({ 
       success: false, 

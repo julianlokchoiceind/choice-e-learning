@@ -47,7 +47,7 @@ const CounterScript = () => {
           };
           
           // Start animation when element is in view
-          const observer = new IntersectionObserver((entries) => {
+          const observer = new IntersectionObserver((entries: any) => {
             entries.forEach(entry => {
               if (entry.isIntersecting) {
                 startCounting();

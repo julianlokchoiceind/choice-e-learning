@@ -5,7 +5,7 @@ import { comparePasswords } from '../utils/password-utils';
 import { findUserByEmail, findUserById, createUser as createUserRecord, updateUserRole as updateUserRoleDb, updateUserLoginInfo } from '@/server/db/services/user-service';
 import { CreateUserRequest } from '@/shared/types/user';
 
-import { Role } from '@/shared/types/auth/roles';
+import { UserRole } from '@/shared/types/auth/roles';
 
 /**
  * Interface for login credentials
@@ -98,7 +98,7 @@ export async function login(credentials: LoginCredentials): Promise<AuthResponse
       success: true,
       data: userWithoutPassword
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Login error:', error);
     return {
       success: false,
@@ -149,7 +149,7 @@ export async function register(credentials: RegisterCredentials): Promise<AuthRe
       name: credentials.name,
       email: credentials.email.toLowerCase(),
       password: credentials.password,
-      role: Role.student
+      role: UserRole.STUDENT
     };
     
     const user = await createUserRecord(newUserData);
@@ -169,7 +169,7 @@ export async function register(credentials: RegisterCredentials): Promise<AuthRe
       success: true,
       data: user
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Register error:', error);
     return {
       success: false,
@@ -199,7 +199,7 @@ export async function getUserById(id: string): Promise<Omit<User, 'password'> | 
     const { password, ...userWithoutPassword } = user;
     
     return userWithoutPassword;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Get user error:', error);
     return null;
   }
@@ -222,7 +222,7 @@ export async function getUserByEmail(email: string): Promise<Omit<User, 'passwor
     const { password, ...userWithoutPassword } = user;
     
     return userWithoutPassword;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Get user by email error:', error);
     return null;
   }
@@ -279,7 +279,7 @@ export async function createUser(userData: CreateUserRequest): Promise<AuthRespo
       success: true,
       data: user
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Create user error:', error);
     return {
       success: false,
@@ -295,12 +295,12 @@ export async function createUser(userData: CreateUserRequest): Promise<AuthRespo
 /**
  * Update user role
  * @param userId User ID
- * @param newRole New role
- * @returns Success status and updated user or error
+ * @param newRole New role for the user
+ * @returns Authentication response with updated user data
  */
 export async function updateUserRoleAuth(
   userId: string, 
-  newRole: Role.student | Role.admin
+  newRole: UserRole
 ): Promise<AuthResponse<Omit<User, 'password'>>> {
   try {
     if (!userId || !newRole) {
@@ -315,7 +315,7 @@ export async function updateUserRoleAuth(
     }
     
     // Validate role value
-    if (newRole !== Role.student && newRole !== Role.admin) {
+    if (newRole !== UserRole.STUDENT && newRole !== UserRole.ADMIN) {
       return {
         success: false,
         error: {
@@ -344,7 +344,7 @@ export async function updateUserRoleAuth(
       success: true,
       data: updatedUser
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Update user role error:', error);
     return {
       success: false,
@@ -367,10 +367,10 @@ export async function updateUserRoleAuth(
 export async function hasPermission(
   userId: string,
   resourceOwnerId: string | null,
-  userRole: Role.student | Role.admin
+  userRole: UserRole
 ): Promise<boolean> {
   // Admins have permission to do anything
-  if (userRole === Role.admin) {
+  if (userRole === UserRole.ADMIN) {
     return true;
   }
 

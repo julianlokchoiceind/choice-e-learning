@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaChevronRight } from 'react-icons/fa';
-import { Testimonial } from '../../../types/course';
+import { Testimonial } from '@/shared/types/courses/course';
 
 /**
  * Testimonials section for the homepage

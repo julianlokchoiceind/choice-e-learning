@@ -30,7 +30,7 @@ export const EnrollButton = ({ courseId, isEnrolled = false }: EnrollButtonProps
       // Redirect to course page or dashboard
       router.push(`/learn/${courseId}`);
       router.refresh();
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error enrolling in course:', error);
     } finally {
       setIsLoading(false);
@@ -50,8 +50,8 @@ export const EnrollButton = ({ courseId, isEnrolled = false }: EnrollButtonProps
   
   return (
     <button
-      onClick={"handleEnroll"}
-      disabled={"isLoading"}
+      onClick={handleEnroll}
+      disabled={isLoading}
       className='button primary full-width'
     >
       {isLoading ? 'Đang xử lý...' : 'Đăng ký khóa học'}

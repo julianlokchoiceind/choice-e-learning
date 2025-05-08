@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import { Role } from '@/shared/types/auth/roles';
+import { UserRole } from '@/shared/types/auth/roles';
 
 /**
  * Auth middleware for protected routes
  */
-export async function authMiddleware(req: NextRequest, requiredRole?: Role) {
+export async function authMiddleware(req: NextRequest, requiredRole?: UserRole) {
   try {
     // Get the JWT token from the session
     const token = await getToken({ 
@@ -26,10 +26,10 @@ export async function authMiddleware(req: NextRequest, requiredRole?: Role) {
     
     // Check if user has required role
     if (requiredRole) {
-      const userRole = token.role as Role;
+      const userRole = token.role as UserRole;
       
       // Admin role check
-      if (requiredRole === Role.admin && userRole !== Role.admin) {
+      if (requiredRole === UserRole.ADMIN && userRole !== UserRole.ADMIN) {
         return {
           success: false,
           response: NextResponse.json(
@@ -45,10 +45,10 @@ export async function authMiddleware(req: NextRequest, requiredRole?: Role) {
       success: true,
       user: {
         id: token.id as string,
-        role: token.role as Role,
+        role: token.role as UserRole,
       }
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Auth middleware error:', error);
     return {
       success: false,
@@ -64,7 +64,7 @@ export async function authMiddleware(req: NextRequest, requiredRole?: Role) {
  * Admin middleware for admin-only routes
  */
 export async function adminMiddleware(req: NextRequest) {
-  return authMiddleware(req, Role.admin);
+  return authMiddleware(req, UserRole.ADMIN);
 }
 
 /**
@@ -73,5 +73,5 @@ export async function adminMiddleware(req: NextRequest) {
  * @returns NextResponse with the appropriate status code and message
  */
 export async function authenticationMiddleware(req: NextRequest) {
-  return authMiddleware(req, Role.student);
+  return authMiddleware(req, UserRole.STUDENT);
 }

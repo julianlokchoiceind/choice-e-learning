@@ -44,7 +44,7 @@ export default function EditTopicPage({ params }: { params: { topicId: string } 
             setCourseCount(0);
           }
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Error loading topic:', err);
         setServerError('Failed to load topic details');
       } finally {
@@ -116,9 +116,10 @@ export default function EditTopicPage({ params }: { params: { topicId: string } 
       if (updatedTopic) {
         router.push('/admin/topics');
       }
-    } catch (err) {
-      console.error('Error updating topic:', err);
-      setServerError(err.response?.data?.error || 'Failed to update topic. Please try again.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error('Error updating topic:', errorMessage);
+      setServerError(errorMessage);
     }
   };
   
@@ -190,13 +191,13 @@ export default function EditTopicPage({ params }: { params: { topicId: string } 
             <textarea
               id='description'
               name='description'
-              value={"formData.description"}
-              onChange={"handleChange"}
-              rows={"4"}
+              value={formData.description}
+              onChange={handleChange}
+              rows={4}
               className={`w-full px-3 py-2 border ${
                 formErrors.description ? 'border-red-500' : 'border-gray-300'
               } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-              disabled={"loading"}
+              disabled={loading}
             ></textarea>
             {formErrors.description && (
               <p className='mt-1 text-sm text-red-600'>{formErrors.description}</p>
@@ -229,7 +230,7 @@ export default function EditTopicPage({ params }: { params: { topicId: string } 
             </Link>
             <button
               type='submit'
-              disabled={"loading"}
+              disabled={loading}
               className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed'
             >
               {loading ? 'Saving...' : 'Save Changes'}

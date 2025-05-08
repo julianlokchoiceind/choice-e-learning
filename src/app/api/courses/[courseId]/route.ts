@@ -13,7 +13,7 @@ import {
   apiError,
   apiNotFound
 } from '@/server/api/api-response';
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 import { 
   createRouteHandler, 
   withErrorHandling, 
@@ -57,7 +57,7 @@ export const GET = withErrorHandling(async (
     }
     
     return response;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error fetching course ${courseId}:`, error);
     return apiServerError('Failed to fetch course details');
   }
@@ -119,7 +119,7 @@ export const PUT = withAdmin(async (
     });
     
     return apiSuccess(updatedCourse, 'Course updated successfully');
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error updating course ${courseId}:`, error);
     return apiServerError('Failed to update course');
   }
@@ -147,7 +147,7 @@ export const DELETE = withAdmin(async (
     });
     
     return apiSuccess(null, 'Course deleted successfully');
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error deleting course ${courseId}:`, error);
     return apiServerError('Failed to delete course');
   }

@@ -60,7 +60,7 @@ export default function Dashboard() {
             setStats(data.stats);
           }
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error fetching user stats:', error);
       } finally {
         setLoading(false);
@@ -77,7 +77,7 @@ export default function Dashboard() {
             setEnrolledCourses(data.courses);
           }
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error fetching enrolled courses:', error);
       }
     };
@@ -92,7 +92,7 @@ export default function Dashboard() {
             setAchievements(data.achievements);
           }
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error fetching achievements:', error);
       }
     };

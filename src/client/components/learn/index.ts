@@ -1,1 +1,5 @@
-// Export components
+import { LessonPlayer } from './LessonPlayer';
+
+export {
+  LessonPlayer
+};

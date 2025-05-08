@@ -12,22 +12,22 @@ const apiClient = axios.create({
 
 // Interceptor để xử lý request
 apiClient.interceptors.request.use(
-  (config) => {
+  (config: any) => {
     // Có thể thêm logic xử lý request ở đây, như thêm token
     return config;
   },
-  (error) => {
+  (error: any) => {
     return Promise.reject(error);
   }
 );
 
 // Interceptor để xử lý response
 apiClient.interceptors.response.use(
-  (response) => {
+  (response: any) => {
     // Trả về response.data trực tiếp
     return response;
   },
-  (error) => {
+  (error: any) => {
     // Xử lý lỗi response
     return Promise.reject(error);
   }

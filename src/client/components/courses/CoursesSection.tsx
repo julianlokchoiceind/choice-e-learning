@@ -187,14 +187,14 @@ export default function CoursesSection() {
         {/* Action buttons */}
         <div className='mt-4 flex justify-between'>
           <button
-            onClick={"handleSearch"}
+            onClick={handleSearch}
             className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
           >
             Search
           </button>
           
           <button
-            onClick={"clearFilters"}
+            onClick={clearFilters}
             className='px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400'
           >
             Clear Filters

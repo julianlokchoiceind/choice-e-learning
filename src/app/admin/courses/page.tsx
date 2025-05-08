@@ -63,7 +63,7 @@ export default function CoursesPage() {
         ...getSortParams(sortOption)
       });
       
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error deleting course:', error);
       // Silent error handling, no UI feedback
     } finally {
@@ -150,14 +150,14 @@ export default function CoursesPage() {
         console.error('[CoursesPage] Error in effect when fetching courses:', err);
         // Error is already handled in the hook, so we don't need to do anything here
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[CoursesPage] Exception in courses fetch effect:', error);
       // Continue rendering with empty data
     }
   }, [debouncedSearchQuery, selectedLevel, sortOption, fetchCourses]);
 
   // Get CSS class for level badge - using case-insensitive matching
-  const getLevelBadgeClass = (level: string) => {
+  const getLevelBadgeClass = (level?: string) => {
     // Handle null/undefined case
     if (!level) return 'bg-purple-100 text-purple-800';
     
@@ -182,7 +182,7 @@ export default function CoursesPage() {
   };
   
   // Format level for display
-  const formatLevel = (level: string): string => {
+  const formatLevel = (level?: string): string => {
     if (!level) return 'Unknown';
     
     // Normalize to lowercase first
@@ -240,7 +240,7 @@ export default function CoursesPage() {
               id='level-filter'
               className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm'
               value={selectedLevel}
-              onChange={(e) => {
+              onChange={(e: any) => {
                 // Lấy giá trị và gọi thông báo debug
                 let newLevel = e.target.value.trim();
                 console.log(`Level dropdown changed to: '${newLevel}'`);
@@ -277,7 +277,7 @@ export default function CoursesPage() {
               id='sort-filter'
               className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm'
               value={sortOption}
-              onChange={(e) => {
+              onChange={(e: any) => {
                 setSortOption(e.target.value);
               }}
             >
@@ -337,7 +337,7 @@ export default function CoursesPage() {
                             alt={course.title || 'Course image'}
                             className='h-full w-full object-cover'
                             width={500} height={300}
-                            onError={(e) => {
+                            onError={(e: any) => {
                               (e.target as HTMLImageElement).src = '/images/placeholder-course.jpg';
                             }}
                           />
@@ -421,7 +421,7 @@ export default function CoursesPage() {
                         console.error('[CoursesPage] Error when fetching previous page:', err);
                         // Error is already handled in the hook
                       });
-                    } catch (error) {
+                    } catch (error: unknown) {
                       console.error('[CoursesPage] Exception in prev page handler:', error);
                     }
                   }}
@@ -446,7 +446,7 @@ export default function CoursesPage() {
                           console.error(`[CoursesPage] Error when fetching page ${page}:`, err);
                           // Error is already handled in the hook
                         });
-                      } catch (error) {
+                      } catch (error: unknown) {
                         console.error(`[CoursesPage] Exception in page ${page} handler:`, error);
                       }
                     }}
@@ -473,7 +473,7 @@ export default function CoursesPage() {
                         console.error('[CoursesPage] Error when fetching next page:', err);
                         // Error is already handled in the hook
                       });
-                    } catch (error) {
+                    } catch (error: unknown) {
                       console.error('[CoursesPage] Exception in next page handler:', error);
                     }
                   }}

@@ -37,7 +37,7 @@ export async function login(formData: FormData) {
     revalidatePath('/dashboard');
     
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Login error:', error);
     
     if (error instanceof AuthError) {

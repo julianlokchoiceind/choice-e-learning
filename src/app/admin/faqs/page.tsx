@@ -115,7 +115,7 @@ export default function FAQsAdminPage() {
         limit: 10,
       });
       setConfirmDelete(null);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error deleting FAQ:', err);
     }
   };

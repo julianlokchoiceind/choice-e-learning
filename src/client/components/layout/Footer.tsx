@@ -39,11 +39,11 @@ const Footer = () => {
                 ].map((item, idx) => (
                   <li key={idx} className='text-xs leading-[1.33337] text-[#424245] py-[0.8rem] md:py-1'>
                     {item.external ? (
-                      <a href={"item.href"} target='_blank' rel='noopener noreferrer' className='hover:text-[#0066cc]'>
+                      <a href={item.href} target='_blank' rel='noopener noreferrer' className='hover:text-[#0066cc]'>
                         {item.name}
                       </a>
                     ) : (
-                      <Link href={"item.href"} className='hover:text-[#0066cc]'>
+                      <Link href={item.href} className='hover:text-[#0066cc]'>
                         {item.name}
                       </Link>
                     )}
@@ -76,11 +76,11 @@ const Footer = () => {
                 ].map((item, idx) => (
                   <li key={idx} className='text-xs leading-[1.33337] text-[#424245] py-[0.8rem] md:py-1'>
                     {item.external ? (
-                      <a href={"item.href"} className='hover:text-[#0066cc]'>
+                      <a href={item.href} className='hover:text-[#0066cc]'>
                         {item.name}
                       </a>
                     ) : (
-                      <Link href={"item.href"} className='hover:text-[#0066cc]'>
+                      <Link href={item.href} className='hover:text-[#0066cc]'>
                         {item.name}
                       </Link>
                     )}

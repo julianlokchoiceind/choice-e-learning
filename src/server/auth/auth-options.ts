@@ -6,7 +6,7 @@ import FacebookProvider from 'next-auth/providers/facebook';
 import MicrosoftProvider from 'next-auth/providers/azure-ad';
 import { login, getUserByEmail, updateUserRoleAuth } from './services/auth-service';
 import prisma from '@/server/db/prisma-client';
-import { Role } from '@/shared/types/auth/roles';
+import { UserRole } from '@/shared/types/auth/roles';
 import { updateLoginStreak } from '@/server/db/services';
 
 // Check if environment variables are set
@@ -41,7 +41,7 @@ validateEnvVariables();
 declare module 'next-auth' {
   interface User {
     id: string;
-    role: Role;
+    role: UserRole;
   }
   
   interface Session {
@@ -50,7 +50,7 @@ declare module 'next-auth' {
       name?: string | null;
       email?: string | null;
       image?: string | null;
-      role: Role;
+      role: UserRole;
     }
   }
 }
@@ -58,7 +58,7 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
-    role: Role;
+    role: UserRole;
   }
 }
 
@@ -96,9 +96,9 @@ export const authOptions: NextAuthOptions = {
             id: result.data.id,
             name: result.data.name,
             email: result.data.email,
-            role: result.data.role as Role
+            role: result.data.role as UserRole
           };
-        } catch (error) {
+        } catch (error: unknown) {
           console.error('Authentication error:', error);
           // Re-throw to be handled by NextAuth
           throw error;
@@ -150,7 +150,7 @@ export const authOptions: NextAuthOptions = {
           name: profile.name,
           email: profile.email || `${profile.id}@facebook.com`, // Provide fallback email
           image: profile.picture?.data?.url,
-          role: Role.student
+          role: UserRole.STUDENT
         };
       },
       checks: ['state']
@@ -173,7 +173,7 @@ export const authOptions: NextAuthOptions = {
           name: profile.name || profile.preferred_username,
           email: profile.email || profile.preferred_username || `${profile.sub || profile.oid}@microsoft.com`, // Provide fallback email
           image: null,
-          role: Role.student
+          role: UserRole.STUDENT
         };
       },
       checks: ['pkce', 'state']
@@ -258,14 +258,14 @@ export const authOptions: NextAuthOptions = {
                   // Note: Add more fields as needed based on your User model
                 }
               });
-            } catch (updateError) {
+            } catch (updateError: unknown) {
               console.error('Error updating user login history:', updateError);
               // Continue with sign in even if update fails
             }
             
             // Set the user ID for the session
             user.id = existingUser.id;
-            user.role = existingUser.role as Role;
+            user.role = existingUser.role as UserRole;
             
           } else {
             // Create a new user from OAuth data
@@ -284,9 +284,9 @@ export const authOptions: NextAuthOptions = {
               
               console.log('Created new user from OAuth:', newUser.id);
               user.id = newUser.id;
-              user.role = newUser.role as Role;
+              user.role = newUser.role as UserRole;
               
-            } catch (createError) {
+            } catch (createError: unknown) {
               console.error('Error creating new user:', createError);
               throw new Error('Failed to create user account');
             }
@@ -300,7 +300,7 @@ export const authOptions: NextAuthOptions = {
                 // Update user login info to track streak
                 try {
                   await updateLoginStreak(existingUser.id);
-                } catch (loginError) {
+                } catch (loginError: unknown) {
                   console.error('Error updating login info:', loginError);
                   // Don't fail login if this fails
                 }
@@ -310,20 +310,20 @@ export const authOptions: NextAuthOptions = {
                   // We need to dynamically import this to avoid circular dependencies
                   const { checkAndAwardAchievements } = await import('@/server/services/achievements/achievement-service');
                   await checkAndAwardAchievements(existingUser.id);
-                } catch (achievementError) {
+                } catch (achievementError: unknown) {
                   console.error('Error checking achievements:', achievementError);
                   // Don't fail login if achievements check fails
                 }
               }
             }
-          } catch (error) {
+          } catch (error: unknown) {
             console.error('Error updating login history:', error);
             // Don't prevent login if this fails
           }
         }
         
         return true;
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('SignIn callback error:', error);
         return false;
       }
@@ -378,12 +378,12 @@ export const authOptions: NextAuthOptions = {
         console.error(`[NextAuth][Error][${code}]:`, metadata);
       }
     },
-    warn: (code) => {
+    warn: (code: any) => {
       if (code !== 'DEBUG_ENABLED') {
         console.warn(`[NextAuth][Warning][${code}]`);
       }
     },
-    debug: (message) => {
+    debug: (message: any) => {
       // Only log debug messages in development with DEBUG flag enabled
       if (process.env.NODE_ENV === 'development' && process.env.DEBUG === 'true') {
         console.log(`[NextAuth][Debug]: ${message}`);

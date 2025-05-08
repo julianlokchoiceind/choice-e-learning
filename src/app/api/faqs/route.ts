@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { apiSuccess, apiError } from '@/server/api/api-response';
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 import { faqService } from '@/server/services/faq/faq-service';
 
 // GET - Get all public FAQs with filtering and pagination
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     });
     
     return apiSuccess(result);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching public FAQs:', error);
     return apiError(
       'Failed to fetch FAQs',

@@ -12,7 +12,7 @@ import {
   apiError,
   apiNotFound
 } from '@/server/api/api-response';
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 import { withAdmin } from '@/server/api/route-handlers';
 
 // Define the schema for topic update
@@ -45,12 +45,12 @@ export const GET = withAdmin(async (_req, context) => {
       
       console.log(`[API] Successfully retrieved topic: ${topic.name}`);
       return apiSuccess(topic, 'Topic retrieved successfully');
-    } catch (serviceError) {
+    } catch (serviceError: unknown) {
       console.error(`[API] Service error fetching topic ${topicId}:`, serviceError);
       // Trả về dữ liệu rỗng thay vì lỗi server
       return apiSuccess(null, 'Topic could not be retrieved');
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('[API] Error in GET topic handler:', error);
     // Trả về dữ liệu rỗng thay vì lỗi server
     return apiSuccess(null, 'Failed to fetch topic');
@@ -90,11 +90,11 @@ export const PATCH = withAdmin(async (req, context) => {
     const updatedTopic = await topicService.updateTopic(topicId, validation.data);
     
     return apiSuccess(updatedTopic, 'Topic updated successfully');
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating topic:', error);
     
     // Check for duplicate name error
-    if (error.message && error.message.includes('already exists')) {
+    if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string' && error.message.includes('already exists')) {
       return apiError(
         error.message,
         undefined,
@@ -126,11 +126,11 @@ export const DELETE = withAdmin(async (_req, context) => {
     await topicService.deleteTopic(topicId);
     
     return apiSuccess({ success: true }, 'Topic deleted successfully');
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting topic:', error);
     
     // Check if the topic is associated with courses
-    if (error.message && error.message.includes('associated with')) {
+    if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string' && error.message.includes('associated with')) {
       return apiError(
         error.message,
         undefined,

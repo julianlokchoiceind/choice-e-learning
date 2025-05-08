@@ -1,9 +1,6 @@
+/**
+ * Export all home components for easy import elsewhere
+ */
+
+export * from './sections';
 export * from './ClientComponents';
-export * from './TestimonialsSection';
-export * from './RoadmapSection';
-export * from './PopularCoursesSection';
-export * from './index';
-export * from './HowItWorksSection';
-export * from './HeroSection';
-export * from './FeaturedCoursesSection';
-export * from './CTASection';

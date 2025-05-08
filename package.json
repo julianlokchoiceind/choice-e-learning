@@ -16,7 +16,10 @@
     "lint:fix": "eslint src --fix --ignore-path .eslintignore",
     "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,json,css}'",
     "fix-eslint-errors": "node scripts/fix-eslint-errors.js",
-    "check-all": "node scripts/check-all.js"
+    "check-all": "node scripts/check-all.js",
+    "ts:check": "tsc --noEmit",
+    "ts:fix": "node src/scripts/fix-typescript-errors.js",
+    "ts:analyze": "node src/scripts/check-typescript-errors.js"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",

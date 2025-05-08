@@ -113,7 +113,7 @@ export async function POST(
       },
       enrollmentId: `${userId}_${courseId}`
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error enrolling in course:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to enroll in course' },
@@ -207,7 +207,7 @@ export async function DELETE(
         title: course.title
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error unenrolling from course:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to unenroll from course' },

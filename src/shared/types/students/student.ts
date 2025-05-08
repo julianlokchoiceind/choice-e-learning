@@ -1,19 +1,17 @@
 import { User } from '@prisma/client';
-import { Role } from './auth/roles';
+import { UserRole } from '@/shared/types/auth/roles';
 
 // This represents a User with role 'student' with only the fields needed for student management
 export interface FormattedStudent {
   id: string;
   name: string;
   email: string;
-  phone: string | null;
-  address: string | null;
-  city: string | null;
-  grade: string | null;
-  imageUrl: string | null;
-  provider?: string | null;
-  providerId?: string | null;
-  role?: Role;
+  role: UserRole;
+  phone?: string | null;
+  address?: string | null;
+  city?: string | null;
+  grade?: string | null;
+  imageUrl?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

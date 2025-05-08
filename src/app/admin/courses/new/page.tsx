@@ -692,7 +692,7 @@ export default function NewCoursePage() {
         }
         throw new Error(errorMessage);
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error submitting course:', error);
       alert('Error creating course: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {

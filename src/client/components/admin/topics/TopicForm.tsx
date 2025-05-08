@@ -101,9 +101,14 @@ export const TopicForm = ({
         description: formData.description.trim() || undefined,
         isActive: formData.isActive
       });
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error submitting topic:', err);
-      setServerError(err.response?.data?.error || 'Failed to submit topic. Please try again.');
+      const errorMessage = typeof err === 'object' && err !== null && 'response' in err && 
+        typeof err.response === 'object' && err.response !== null && 'data' in err.response && 
+        typeof err.response.data === 'object' && err.response.data !== null && 'error' in err.response.data ? 
+        String(err.response.data.error) : 
+        'Failed to submit topic. Please try again.';
+      setServerError(errorMessage);
     }
   };
   
@@ -155,13 +160,13 @@ export const TopicForm = ({
           <textarea
             id='description'
             name='description'
-            value={"formData.description"}
-            onChange={"handleChange"}
-            rows={"4"}
+            value={formData.description}
+            onChange={handleChange}
+            rows={4}
             className={`w-full px-3 py-2 border ${
               formErrors.description ? 'border-red-500' : 'border-gray-300'
             } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-            disabled={"isLoading"}
+            disabled={isLoading}
           ></textarea>
           {formErrors.description && (
             <p className='mt-1 text-sm text-red-600'>{formErrors.description}</p>
@@ -188,7 +193,7 @@ export const TopicForm = ({
         <div className='flex justify-end space-x-4 pt-4'>
           <button
             type='submit'
-            disabled={"isLoading"}
+            disabled={isLoading}
             className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed'
           >
             {isLoading ? (topicId ? 'Saving...' : 'Creating...') : (topicId ? 'Save Changes' : 'Create Topic')}

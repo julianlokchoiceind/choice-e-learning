@@ -56,7 +56,7 @@ export default function EditFAQPage({ params }: EditFAQPageProps) {
             newCategory: '',
           });
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Error loading FAQ data:', err);
         setSubmitError('Failed to load FAQ data');
       } finally {
@@ -112,7 +112,7 @@ export default function EditFAQPage({ params }: EditFAQPageProps) {
       
       // Redirect to FAQ list page on success
       router.push('/admin/faqs');
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error updating FAQ:', err);
       setSubmitError(
         'Failed to update FAQ. Please check your inputs and try again.'

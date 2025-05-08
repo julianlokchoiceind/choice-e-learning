@@ -3,8 +3,8 @@
  * @description Type definitions for users, accounts, and profiles
  */
 
-import { Role } from './auth/roles';
-import { Course } from './course';
+import { UserRole } from '@/shared/types/auth/roles';
+import { Course } from '@/shared/types/courses/course';
 
 /**
  * Extended User interface from Prisma schema
@@ -13,7 +13,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: Role;
+  role: UserRole;
   password: string | null;  // Not exposed to client, can be null for OAuth users
   createdAt: Date;
   updatedAt: Date;
@@ -45,7 +45,7 @@ export interface CreateUserRequest {
   name: string;
   email: string;
   password: string;
-  role?: Role;
+  role?: UserRole;
 }
 
 /**
@@ -55,16 +55,26 @@ export interface UpdateUserRequest {
   name?: string;
   email?: string;
   password?: string;
-  role?: Role;
+  role?: UserRole;
 }
 
 /**
  * User profile interface - expanded user info for profile pages
  */
-export interface UserProfile extends Omit<User, 'password'> {
-  image?: string | null;
-  coursesEnrolled?: number;
-  challengesCompleted?: number;
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  phone?: string;
+  address?: string;
+  city?: string;
+  grade?: string;
+  imageUrl?: string;
+  bio?: string;
+  avatar?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 /**

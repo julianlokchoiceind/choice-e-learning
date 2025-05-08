@@ -32,8 +32,13 @@ export function useLesson(lessonId: string, options: UseLessonOptions = {}) {
       });
       
       setIsCompleted(progressResponse.data?.completed || false);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Không thể tải bài học. Vui lòng thử lại sau.');
+    } catch (err: unknown) {
+      const errorMessage = typeof err === 'object' && err !== null && 'response' in err &&
+        typeof err.response === 'object' && err.response !== null && 'data' in err.response &&
+        typeof err.response.data === 'object' && err.response.data !== null && 'message' in err.response.data ?
+        String(err.response.data.message) : 'Không thể tải bài học. Vui lòng thử lại sau.';
+      
+      setError(errorMessage);
       console.error('Error fetching lesson:', err);
     } finally {
       setIsLoading(false);
@@ -52,8 +57,13 @@ export function useLesson(lessonId: string, options: UseLessonOptions = {}) {
       
       setIsCompleted(true);
       return true;
-    } catch (err) {
-      setError(err.response?.data?.message || 'Không thể đánh dấu hoàn thành. Vui lòng thử lại sau.');
+    } catch (err: unknown) {
+      const errorMessage = typeof err === 'object' && err !== null && 'response' in err &&
+        typeof err.response === 'object' && err.response !== null && 'data' in err.response &&
+        typeof err.response.data === 'object' && err.response.data !== null && 'message' in err.response.data ?
+        String(err.response.data.message) : 'Không thể đánh dấu hoàn thành. Vui lòng thử lại sau.';
+      
+      setError(errorMessage);
       console.error('Error completing lesson:', err);
       return false;
     }
@@ -70,7 +80,7 @@ export function useLesson(lessonId: string, options: UseLessonOptions = {}) {
       });
       
       return true;
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error updating progress:', err);
       return false;
     }

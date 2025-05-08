@@ -1,4 +1,4 @@
-import { Role } from '@/shared/types/auth/roles';
+import { UserRole } from '@/shared/types/auth/roles';
 import { User } from 'next-auth';
 
 /**
@@ -13,7 +13,7 @@ import { User } from 'next-auth';
  */
 export function isAdmin(user: User | null | undefined): boolean {
   if (!user) return false;
-  return user.role === Role.admin;
+  return user.role === UserRole.ADMIN;
 }
 
 /**
@@ -23,7 +23,7 @@ export function isAdmin(user: User | null | undefined): boolean {
  */
 export function isStudent(user: User | null | undefined): boolean {
   if (!user) return false;
-  return user.role === Role.student;
+  return user.role === UserRole.STUDENT;
 }
 
 /**
@@ -32,11 +32,11 @@ export function isStudent(user: User | null | undefined): boolean {
  * @param requiredRole The required role
  * @returns True if the user has the required role, false otherwise
  */
-export function hasRole(user: User | null | undefined, requiredRole: Role): boolean {
+export function hasRole(user: User | null | undefined, requiredRole: UserRole): boolean {
   if (!user) return false;
   
   // Admin role has access to everything
-  if (user.role === Role.admin) return true;
+  if (user.role === UserRole.ADMIN) return true;
   
   // Check if user has the specific required role
   return user.role === requiredRole;
@@ -61,7 +61,7 @@ export function hasPermission(user: User | null | undefined, resourceOwnerId: st
   if (!user) return false;
   
   // Admins have permission to do anything
-  if (user.role === Role.admin) return true;
+  if (user.role === UserRole.ADMIN) return true;
   
   // If no resource owner, only admins have permission
   if (!resourceOwnerId) return false;

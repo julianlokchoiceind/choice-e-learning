@@ -1,7 +1,18 @@
-export * from './session';
-export * from './roles';
-export * from './middleware';
+// Auth session
 export * from './auth-options';
+export { 
+  isAdmin,
+  isAuthenticated,
+  isStudent,
+  checkUserRole
+} from './session';
+
+// Auth roles
+export { hasPermission } from './roles';
+
+// Auth errors
+export type { AuthError } from './services';
+
+export * from './middleware';
 export * from './auth-middleware';
-export * from './services';
 export * from './utils';

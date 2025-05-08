@@ -62,7 +62,7 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
       success: true,
       data: transformedCourse
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching course:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch course' },
@@ -140,7 +140,7 @@ export const PUT = withAdmin(async (req: NextRequest, context) => {
         updatedAt: updatedCourse.updatedAt
       });
       
-    } catch (error) {
+    } catch (error: unknown) {
       // Course not found
       return NextResponse.json(
         { success: false, error: 'Course not found' },
@@ -202,7 +202,7 @@ export const PUT = withAdmin(async (req: NextRequest, context) => {
     response.headers.set('Expires', '0');
     
     return response;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating course:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update course' },
@@ -247,14 +247,14 @@ export const DELETE = withAdmin(async (req: NextRequest, context) => {
         data: { success: true },
         message: 'Course and associated lessons deleted successfully'
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error deleting course:', error);
       return NextResponse.json(
         { success: false, error: 'Failed to delete course' },
         { status: 500 }
       );
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in course deletion route:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to delete course' },

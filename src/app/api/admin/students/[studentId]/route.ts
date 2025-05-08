@@ -4,7 +4,7 @@ import { withAdmin, AuthenticatedContext } from '@/server/api/route-handlers';
 import { z } from 'zod';
 import { parseRequest } from '@/server/api/request-parser';
 import { studentService } from '@/server/services/students/student-service';
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 
 // Schema for updating a student
 const updateStudentSchema = z.object({
@@ -49,7 +49,7 @@ export const GET = withAdmin(async (req: NextRequest, context: AuthenticatedCont
     
     console.log(`Successfully retrieved student: ${student.name} (${student.email})`);
     return apiSuccess(student);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching student:', error);
     return apiError(
       `Failed to fetch student data`,
@@ -78,7 +78,7 @@ export const PATCH = withAdmin(async (req: NextRequest, context: AuthenticatedCo
     );
     
     return apiSuccess(updatedStudent, 'Student updated successfully');
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating student:', error);
     
     if (error instanceof z.ZodError) {
@@ -127,7 +127,7 @@ export const DELETE = withAdmin(async (req: NextRequest, context: AuthenticatedC
         console.log(`Student with ID ${studentId} not found during delete operation`);
         return apiNotFound('Student');
       }
-    } catch (checkError) {
+    } catch (checkError: unknown) {
       // If we can't even check if the student exists, proceed with delete attempt anyway
       console.warn(`Could not verify student existence before delete: ${checkError}`);
     }
@@ -151,7 +151,7 @@ export const DELETE = withAdmin(async (req: NextRequest, context: AuthenticatedC
       success: true, 
       method: result.method || 'unknown'
     }, successMessage);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting student:', error);
     
     if (error instanceof Error && error.message.includes('not found')) {

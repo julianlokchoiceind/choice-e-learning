@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { HowItWorksStep } from '../../../types/course';
+import { HowItWorksStep } from '@/shared/types/courses/course';
 
 /**
  * How It Works section for the homepage

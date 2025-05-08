@@ -113,12 +113,16 @@ function useCourses(isAdmin = false) {
           // Return empty default values instead of throwing
           return emptyResponse;
         }
-      } catch (apiError) {
+      } catch (apiError: unknown) {
         // Log đầy đủ thông tin lỗi
         console.error('[useCourses] API call failed with error:', apiError);
-        if (apiError.response) {
-          console.error('[useCourses] Response status:', apiError.response.status);
-          console.error('[useCourses] Response data:', apiError.response.data);
+        
+        if (typeof apiError === 'object' && apiError !== null && 'response' in apiError) {
+          const errorResponse = apiError.response;
+          if (typeof errorResponse === 'object' && errorResponse !== null) {
+            console.error('[useCourses] Response status:', 'status' in errorResponse ? errorResponse.status : 'unknown');
+            console.error('[useCourses] Response data:', 'data' in errorResponse ? errorResponse.data : 'unknown');
+          }
         }
         
         // Return empty default values instead of throwing
@@ -164,7 +168,7 @@ function useCourses(isAdmin = false) {
             hasPrevPage: Boolean(response.data.meta.pagination.hasPrevPage)
           };
           setPagination(paginationData);
-        } catch (paginationError) {
+        } catch (paginationError: unknown) {
           console.error('Error processing pagination data:', paginationError);
           // Sử dụng giá trị mặc định nếu có lỗi
           setPagination({
@@ -192,7 +196,7 @@ function useCourses(isAdmin = false) {
       } else {
         throw new Error('Failed to fetch courses');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('[useCourses] Error fetching courses:', err);
       setError('Failed to fetch courses');
       
@@ -244,7 +248,7 @@ function useCourses(isAdmin = false) {
       } else {
         throw new Error('Failed to fetch course');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching course:', err);
       setError('Failed to fetch course');
       // Don't throw error, instead return null
@@ -294,7 +298,7 @@ function useCourses(isAdmin = false) {
       ];
       setTopics(fallbackTopics);
       return fallbackTopics;
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching course topics:', err);
       setError('Failed to fetch course topics');
       
@@ -331,7 +335,7 @@ function useCourses(isAdmin = false) {
       } else {
         throw new Error('Failed to create course');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error creating course:', err);
       setError('Failed to create course');
       throw err;
@@ -361,7 +365,7 @@ function useCourses(isAdmin = false) {
       } else {
         throw new Error('Failed to update course');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error updating course:', err);
       setError('Failed to update course');
       throw err;
@@ -392,7 +396,7 @@ function useCourses(isAdmin = false) {
       } else {
         throw new Error('Failed to delete course');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error deleting course:', err);
       setError('Failed to delete course');
       throw err;

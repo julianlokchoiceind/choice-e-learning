@@ -3,7 +3,7 @@
  * Provides common file upload validation and configuration settings
  */
 
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 
 export type FileMetadata = {
   fileName: string;

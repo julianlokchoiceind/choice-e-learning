@@ -43,7 +43,7 @@ const LoadingHeader = () => (
           ].map((item) => (
             <li key={item.name} className='h-full'>
               <Link 
-                href={"item.href"} 
+                href={item.href} 
                 className='flex h-full items-center px-3 text-white/80 hover:text-white text-xs font-normal transition-colors'
               >
                 {item.name}
@@ -102,11 +102,11 @@ const Header = () => {
             redirect: true, 
             callbackUrl: '/' 
           });
-        } catch (signOutError) {
+        } catch (signOutError: unknown) {
           console.error('Sign out error:', signOutError);
         }
       }, 1500); // 1.5 second delay to show the notification
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Sign out failed:', error);
       setNotification({
         show: true,
@@ -166,7 +166,7 @@ const Header = () => {
               ].map((item) => (
                 <li key={item.name} className='h-full'>
                   <Link 
-                    href={"item.href"} 
+                    href={item.href} 
                     className='flex h-full items-center px-3 text-white/80 hover:text-white text-xs font-normal transition-colors'
                   >
                     {item.name}
@@ -249,9 +249,9 @@ const Header = () => {
                   ].map((item) => (
                     <li key={item.name}>
                       <Link 
-                        href={"item.href"} 
+                        href={item.href} 
                         className='block text-white text-2xl font-medium hover:text-white/80 transition-colors py-1.5'
-                        onClick={"toggleMobileMenu"}
+                        onClick={toggleMobileMenu}
                       >
                         {item.name}
                       </Link>
@@ -267,7 +267,7 @@ const Header = () => {
                         <Link 
                           href='/dashboard' 
                           className='block text-white text-xl font-medium hover:text-white/80 transition-colors py-2.5 px-6 rounded-full border border-white/20 text-center'
-                          onClick={"toggleMobileMenu"}
+                          onClick={toggleMobileMenu}
                         >
                           Dashboard
                         </Link>
@@ -286,14 +286,14 @@ const Header = () => {
                         <Link 
                           href='/login' 
                           className='block text-white text-xl font-medium hover:text-white/80 transition-colors py-2.5 px-6 rounded-full border border-white/20 text-center'
-                          onClick={"toggleMobileMenu"}
+                          onClick={toggleMobileMenu}
                         >
                           Sign In
                         </Link>
                         <Link 
                           href='/signup' 
                           className='block bg-white/10 hover:bg-white/20 text-white text-xl font-medium py-2.5 px-6 rounded-full text-center transition-colors'
-                          onClick={"toggleMobileMenu"}
+                          onClick={toggleMobileMenu}
                         >
                           Sign Up
                         </Link>

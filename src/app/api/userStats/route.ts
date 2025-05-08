@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       success: true, 
       stats 
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in userStats API route:', error);
     // Include error details in development mode
     const errorDetails = process.env.NODE_ENV === 'development' ? 

@@ -63,7 +63,7 @@ export async function updateLoginStreak(userId: string): Promise<boolean> {
     });
     
     return true;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating login streak:', error);
     return false;
   }
@@ -82,7 +82,7 @@ export async function getUserLoginStreak(userId: string): Promise<number> {
     }) as any;
     
     return userData?.loginStreak || 0;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error getting user login streak:', error);
     return 0;
   }

@@ -38,7 +38,7 @@ export async function findCourseById(
         }
       } : undefined
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error finding course by ID:', error);
     return null;
   }
@@ -110,7 +110,7 @@ export async function getCourses(
       total,
       pages
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error getting courses:', error);
     return {
       courses: [],
@@ -133,7 +133,7 @@ export async function createCourse(data: Prisma.CourseCreateInput): Promise<Pris
         lessons: true
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating course:', error);
     return null;
   }
@@ -161,7 +161,7 @@ export async function updateCourse(
         }
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating course:', error);
     return null;
   }
@@ -180,7 +180,7 @@ export async function deleteCourse(id: string): Promise<PrismaCourse | null> {
         lessons: true
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting course:', error);
     return null;
   }
@@ -205,7 +205,7 @@ export async function enrollStudent(
         }
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error enrolling student:', error);
     return null;
   }
@@ -230,7 +230,7 @@ export async function unenrollStudent(
         }
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error unenrolling student:', error);
     return null;
   }
@@ -312,7 +312,7 @@ export async function getEnrolledCourses(
       total,
       pages
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error getting enrolled courses:', error);
     return {
       courses: [],

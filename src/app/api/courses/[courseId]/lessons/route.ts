@@ -6,7 +6,7 @@ import {
   apiError,
   apiNotFound
 } from '@/server/api/api-response';
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 import { 
   createRouteHandler, 
   withErrorHandling, 
@@ -33,7 +33,7 @@ export const GET = withErrorHandling(async (
   try {
     const lessons = await getLessonsForCourse(courseId);
     return apiSuccess(lessons);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error fetching lessons for course ${courseId}:`, error);
     return apiServerError('Failed to fetch lessons');
   }
@@ -44,6 +44,11 @@ export const POST = withAdmin(async (
   req: NextRequest, 
   context) => {
   const { courseId } = context.params;
+  
+  // Check if courseId is defined
+  if (!courseId) {
+    return apiError('Course ID is required', {}, ApiErrorCode.VALIDATION_ERROR);
+  }
   
   try {
     const body = await req.json();
@@ -99,7 +104,7 @@ export const POST = withAdmin(async (
     }
     
     return apiSuccess(newLesson, 'Lesson created successfully');
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error creating lesson for course ${courseId}:`, error);
     return apiServerError('Failed to create lesson');
   }

@@ -33,7 +33,7 @@ export async function register(formData: FormData) {
     revalidatePath('/login');
     
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Registration error:', error);
     
     return { 

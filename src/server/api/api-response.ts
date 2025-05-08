@@ -4,7 +4,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { ApiErrorCode, getDefaultErrorMessage, errorCodeToStatusMap } from './api-error-codes';
+import { ApiErrorCode, getDefaultErrorMessage, HTTP_STATUS_MAP } from './api-errors';
 
 export type ApiSuccessResponse<T = any> = {
   success: true;
@@ -81,7 +81,7 @@ export function apiError(
     };
     
     return NextResponse.json(response, { 
-      status: status ?? errorCodeToStatusMap[errorCode] 
+      status: status ?? HTTP_STATUS_MAP[errorCode] 
     });
   }
   
@@ -93,7 +93,7 @@ export function apiError(
     ...(code && { code })
   };
   
-  const statusCode = code ? errorCodeToStatusMap[code] : status ?? 400;
+  const statusCode = code ? HTTP_STATUS_MAP[code] : status ?? 400;
   
   return NextResponse.json(response, { status: statusCode });
 }
@@ -104,7 +104,7 @@ export function apiError(
  * @returns NextResponse with formatted validation error
  */
 export function apiValidationError(zodError): NextResponse {
-  const errorDetails = zodError.errors.map(($1) => 
+  const errorDetails = zodError.errors.map((err) => 
     `${err.path.join('.')}: ${err.message}`
   );
   

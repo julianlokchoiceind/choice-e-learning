@@ -34,7 +34,7 @@ export default function TopicDetailPage({ params }: { params: { topicId: string 
         if (topicData) {
           setTopic(topicData);
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Error loading topic:', err);
         setServerError('Failed to load topic details');
       } finally {
@@ -54,9 +54,13 @@ export default function TopicDetailPage({ params }: { params: { topicId: string 
     try {
       await deleteTopic(params.topicId);
       router.push('/admin/topics');
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error deleting topic:', err);
-      setServerError(err.response?.data?.error || 'Failed to delete topic. Please try again.');
+      setServerError(
+        err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response && err.response.data && typeof err.response.data === 'object' && 'error' in err.response.data && typeof err.response.data.error === 'string'
+          ? err.response.data.error
+          : 'Failed to delete topic. Please try again.'
+      );
       setConfirmDelete(false);
     } finally {
       setDeleteInProgress(false);
@@ -227,7 +231,7 @@ export default function TopicDetailPage({ params }: { params: { topicId: string 
         <div className='p-6'>
           {hasAssociatedCourses ? (
             <div className='space-y-4'>
-              {topic.courses && topic.courses.map(($1) => (
+              {topic.courses && topic.courses.map((course) => (
                 <div key={course.id} className='flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50'>
                   <div className='flex items-center'>
                     <div className='flex-shrink-0'>

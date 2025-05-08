@@ -1,7 +1,6 @@
 'use server';
 
 import prisma from './prisma-client';
-import { Role } from '@/shared/types/auth/roles';
 
 /**
  * Kiểm tra và tạo dữ liệu học viên mẫu nếu cần
@@ -27,7 +26,7 @@ export async function bootstrapStudentData() {
           name: 'Nguyen Van A',
           email: 'student1@example.com',
           password: 'hashed_password_123', // Should be hashed in production
-          role: 'student' as Role,
+          role: 'student',
           phone: '0901234567',
           city: 'Ho Chi Minh',
           grade: '12'
@@ -36,7 +35,7 @@ export async function bootstrapStudentData() {
           name: 'Tran Thi B',
           email: 'student2@example.com',
           password: 'hashed_password_123', // Should be hashed in production
-          role: 'student' as Role,
+          role: 'student',
           phone: '0909876543',
           city: 'Ha Noi',
           grade: '11'
@@ -45,7 +44,7 @@ export async function bootstrapStudentData() {
           name: 'Le Van C',
           email: 'student3@example.com',
           password: 'hashed_password_123', // Should be hashed in production
-          role: 'student' as Role,
+          role: 'student',
           phone: '0907654321',
           city: 'Da Nang',
           grade: '10'
@@ -61,7 +60,15 @@ export async function bootstrapStudentData() {
         
         if (!existingUser) {
           await prisma.user.create({
-            data: student
+            data: {
+              name: student.name,
+              email: student.email,
+              password: student.password,
+              role: 'student',
+              phone: student.phone,
+              city: student.city,
+              grade: student.grade
+            }
           });
           console.log(`Created student: ${student.name} (${student.email})`);
         } else {
@@ -74,7 +81,7 @@ export async function bootstrapStudentData() {
     
     // Trả về true nếu thành công
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error bootstrapping student data:', error);
     return { success: false, error };
   }
@@ -94,7 +101,7 @@ export async function initializeDatabase() {
     
     console.log('Database initialization completed successfully.');
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error initializing database:', error);
     return { success: false, error };
   }

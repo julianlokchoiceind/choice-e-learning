@@ -4,7 +4,7 @@ import { withAdmin } from '@/server/api/route-handlers';
 import { z } from 'zod';
 import { parseRequest } from '@/server/api/request-parser';
 import { faqService } from '@/server/services/faq/faq-service';
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 
 // Schema for updating a FAQ
 const updateFAQSchema = z.object({
@@ -29,7 +29,7 @@ export const GET = withAdmin(async (_req, context) => {
     }
     
     return apiSuccess(faq);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching FAQ:', error);
     return apiError(
       'Failed to fetch FAQ',
@@ -61,7 +61,7 @@ export const PATCH = withAdmin(async (req, context) => {
     const updatedFAQ = await faqService.updateFAQ(faqId as string, body);
     
     return apiSuccess(updatedFAQ, 'FAQ updated successfully');
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating FAQ:', error);
     if (error instanceof z.ZodError) {
       return apiValidationError(error);
@@ -95,7 +95,7 @@ export const DELETE = withAdmin(async (_req, context) => {
     await faqService.deleteFAQ(faqId as string);
     
     return apiSuccess({ success: true }, 'FAQ deleted successfully');
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting FAQ:', error);
     return apiError(
       'Failed to delete FAQ',

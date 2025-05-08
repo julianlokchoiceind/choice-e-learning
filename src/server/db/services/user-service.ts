@@ -10,7 +10,7 @@ import { User, SafeUser } from '@/shared/types/user';
 import { hashPassword, comparePasswords } from '@/server/auth/utils/password-utils';
 import { CreateUserRequest } from '@/shared/types/user';
 import { Role as PrismaRole } from '@prisma/client';
-import { Role } from '@/shared/types/auth/roles';
+import { UserRole } from '@/shared/types/auth/roles';
 import { mapAppRoleToPrismaRole, mapPrismaRoleToAppRole } from '@/server/utils/role-mapper';
 
 /**
@@ -36,7 +36,7 @@ export async function findUserById(id: string): Promise<User | null> {
       password: user.password || '',
       role: mapPrismaRoleToAppRole(user.role)
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error finding user by ID:', error);
     return null;
   }
@@ -63,7 +63,7 @@ export async function findUserByEmail(email: string): Promise<User | null> {
       password: user.password || '',
       role: mapPrismaRoleToAppRole(user.role)
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error finding user by email:', error);
     return null;
   }
@@ -85,7 +85,7 @@ export async function createUser(userData: CreateUserRequest): Promise<Omit<User
         name: userData.name,
         email: userData.email.toLowerCase(),
         password: hashedPassword,
-        role: mapAppRoleToPrismaRole(userData.role || Role.student),
+        role: mapAppRoleToPrismaRole(userData.role || UserRole.STUDENT),
       }
     });
     
@@ -97,7 +97,7 @@ export async function createUser(userData: CreateUserRequest): Promise<Omit<User
       ...userWithoutPassword,
       role: mapPrismaRoleToAppRole(user.role)
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating user:', error);
     return null;
   }
@@ -121,7 +121,7 @@ export async function updateUser(
     
     // Map role if provided
     if (data.role) {
-      data.role = mapAppRoleToPrismaRole(data.role as unknown as Role);
+      data.role = mapAppRoleToPrismaRole(data.role as unknown as UserRole);
     }
     
     const user = await prisma.user.update({
@@ -137,7 +137,7 @@ export async function updateUser(
       ...userWithoutPassword,
       role: mapPrismaRoleToAppRole(user.role)
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating user:', error);
     return null;
   }
@@ -151,7 +151,7 @@ export async function updateUser(
  */
 export async function updateUserRole(
   id: string, 
-  role: Role
+  role: UserRole
 ): Promise<Omit<User, 'password'> | null> {
   try {
     const user = await prisma.user.update({
@@ -167,7 +167,7 @@ export async function updateUserRole(
       ...userWithoutPassword,
       role: mapPrismaRoleToAppRole(user.role)
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating user role:', error);
     return null;
   }
@@ -204,7 +204,7 @@ export async function verifyUserCredentials(
       ...userWithoutPassword,
       role: mapPrismaRoleToAppRole(user.role)
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error verifying credentials:', error);
     return null;
   }
@@ -261,7 +261,7 @@ export async function getUsers(
       total,
       pages
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error getting users:', error);
     return {
       users: [],
@@ -338,7 +338,7 @@ export async function updateLoginStreak(id: string): Promise<boolean> {
     });
     
     return true;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating login streak:', error);
     return false;
   }
@@ -360,7 +360,7 @@ export async function getUserLoginStreak(userId: string): Promise<number> {
     });
     
     return userData?.loginStreak || 0;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error getting user login streak:', error);
     return 0;
   }
@@ -385,7 +385,7 @@ export async function deleteUser(id: string): Promise<Omit<User, 'password'> | n
       ...userWithoutPassword,
       role: mapPrismaRoleToAppRole(user.role)
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting user:', error);
     return null;
   }
@@ -400,7 +400,7 @@ export async function updateUserLoginInfo(id: string): Promise<boolean> {
   try {
     if (!id) return false;
     return await updateLoginStreak(id);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating user login info:', error);
     return false;
   }

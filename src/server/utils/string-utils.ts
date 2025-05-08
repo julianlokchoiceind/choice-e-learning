@@ -32,7 +32,7 @@ export function slugify(text: string): string {
     }
     
     return slugged;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in slugify function:', error);
     // Emergency fallback with timestamp to ensure uniqueness
     return `topic-${Date.now()}`;

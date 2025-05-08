@@ -34,7 +34,7 @@ export async function generateMetadata(
       title: `${course.title} | Choice E-Learning`,
       description: course.description.substring(0, 155) + (course.description.length > 155 ? '...' : ''),
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error generating course metadata:', error);
     return {
       title: 'Course Details | Choice E-Learning',

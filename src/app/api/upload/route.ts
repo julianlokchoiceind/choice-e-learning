@@ -10,7 +10,7 @@ import {
   apiServerError,
   apiError
 } from '@/server/api/api-response';
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 import { 
   withErrorHandling, 
   withAdmin 
@@ -74,7 +74,7 @@ export const POST = withAdmin(
       
       // Return the upload result
       return apiSuccess({ url: fileUrl }, 'File uploaded successfully');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error uploading file:', error);
       return apiServerError('Failed to upload file');
     }

@@ -9,8 +9,6 @@ interface AuthLayoutProps {
   // showSidebar and hideFooter props are unused here
 }
 
-export function AuthLayout({ children }: AuthLayoutProps) {
+export default function AuthLayout({ children }: AuthLayoutProps) {
   return <>{children}</>;
 }
-
-export default AuthLayout;

@@ -23,7 +23,7 @@ export function useUserState() {
         } else {
           setError('Failed to load user data');
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Error fetching user data:', err);
         setError('Error loading user data');
       } finally {

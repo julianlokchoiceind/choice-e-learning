@@ -126,7 +126,7 @@ export const StudentDetail = ({ studentId }: StudentDetailProps) => {
         } else {
           throw new Error('Invalid API response format');
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error fetching student:', error);
         setError('Failed to fetch student details. Please try again.');
       } finally {
@@ -147,9 +147,17 @@ export const StudentDetail = ({ studentId }: StudentDetailProps) => {
         } else {
           throw new Error(response.data?.error || 'Unknown error');
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error deleting student:', error);
-        setError(error.response?.data?.error || error.message || 'Failed to delete student. Please try again.');
+        setError(
+          typeof error === 'object' && error !== null && 'response' in error && 
+          error.response && typeof error.response === 'object' && 'data' in error.response && 
+          error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data
+            ? String(error.response.data.error)
+            : typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string'
+              ? error.message
+              : 'Failed to delete student. Please try again.'
+        );
       }
     }
   };

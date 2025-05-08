@@ -6,7 +6,7 @@ import {
   apiError,
   apiNotFound
 } from '@/server/api/api-response';
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 import { 
   createRouteHandler, 
   withErrorHandling, 
@@ -40,7 +40,7 @@ export const GET = withErrorHandling(async (
     }
     
     return apiSuccess(lesson);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error fetching lesson ${lessonId}:`, error);
     return apiServerError('Failed to fetch lesson details');
   }
@@ -51,6 +51,11 @@ export const PUT = withAdmin(async (
   req: NextRequest, 
   context) => {
   const { lessonId, courseId } = context.params;
+  
+  // Check if lessonId is defined
+  if (!lessonId) {
+    return apiError('Lesson ID is required', {}, ApiErrorCode.VALIDATION_ERROR);
+  }
   
   try {
     const body = await req.json();
@@ -109,7 +114,7 @@ export const PUT = withAdmin(async (
     }
     
     return apiSuccess(updatedLesson, 'Lesson updated successfully');
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error updating lesson ${lessonId}:`, error);
     return apiServerError('Failed to update lesson');
   }
@@ -120,6 +125,11 @@ export const DELETE = withAdmin(async (
   _req: NextRequest, 
   context) => {
   const { lessonId, courseId } = context.params;
+  
+  // Check if lessonId is defined
+  if (!lessonId) {
+    return apiError('Lesson ID is required', {}, ApiErrorCode.VALIDATION_ERROR);
+  }
   
   try {
     // Check if lesson exists
@@ -146,7 +156,7 @@ export const DELETE = withAdmin(async (
     }
     
     return apiSuccess(null, 'Lesson deleted successfully');
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Error deleting lesson ${lessonId}:`, error);
     return apiServerError('Failed to delete lesson');
   }

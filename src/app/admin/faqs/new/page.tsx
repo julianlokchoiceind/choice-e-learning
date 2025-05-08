@@ -72,7 +72,7 @@ export default function NewFAQPage() {
       
       // Redirect to FAQ list page on success
       router.push('/admin/faqs');
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error creating FAQ:', err);
       setSubmitError(
         'Failed to create FAQ. Please check your inputs and try again.'

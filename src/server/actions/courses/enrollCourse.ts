@@ -41,7 +41,7 @@ export async function enrollCourse(formData: FormData) {
     revalidatePath(`/courses/${courseId}`);
     
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Enroll course error:', error);
     
     return { 

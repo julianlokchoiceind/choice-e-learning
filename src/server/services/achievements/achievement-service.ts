@@ -10,11 +10,18 @@ import { Lesson } from '@/shared/types/courses/course';
 import { getUserLoginStreak } from '@/server/db/services/user-service';
 
 // Extended lesson interface for internal use
-interface ExtendedLesson extends Omit<Lesson, 'videoUrl' | 'chapterId'> {
+interface ExtendedLesson {
+  id: string;
+  title: string;
+  content: string;
+  order: number;
+  courseId: string;
   videoUrl: string | null;
   duration: string | null;
   resourcesData: string | null;
   chapterId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
   [key: string]: any;
 }
 
@@ -71,7 +78,7 @@ export async function getUserAchievements(userId: string): Promise<UserAchieveme
       earnedAt: achievement.earnedAt,
       type: achievement.type as AchievementType,
     }));
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching user achievements:', error);
     return [];
   }
@@ -147,7 +154,7 @@ export async function createAchievement(
       earnedAt: now,
       type,
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating achievement:', error);
     return null;
   }
@@ -317,7 +324,7 @@ export async function checkAndAwardAchievements(userId: string): Promise<UserAch
     }
     
     return newAchievements;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error checking and awarding achievements:', error);
     return [];
   }
@@ -350,7 +357,7 @@ async function checkDailyStreakAchievement(
         achievementsArray.push(streakAchievement);
       }
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error checking daily streak achievement:', error);
   }
 }

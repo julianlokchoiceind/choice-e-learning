@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
       authenticated: true,
       user: session.user 
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching session:', error);
     return NextResponse.json(
       { 

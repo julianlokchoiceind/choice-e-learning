@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FaChevronRight } from 'react-icons/fa';
-import { PopularCourse } from '../../../types/course';
+import { PopularCourse } from '@/shared/types/courses/course';
 
 interface PopularCoursesSectionProps {
   courses: PopularCourse[];

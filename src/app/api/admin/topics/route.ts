@@ -12,7 +12,7 @@ import {
   apiServerError,
   apiError
 } from '@/server/api/api-response';
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 import { 
   withAdmin, 
   withErrorHandling,
@@ -71,7 +71,7 @@ export const GET = withAdmin(async (req: NextRequest) => {
     try {
       const topicsCount = await topicService.getAllTopics({ limit: 1 });
       console.log(`DEBUG: Topic service returned data with ${topicsCount.data.length} topics`);
-    } catch (dbError) {
+    } catch (dbError: unknown) {
       console.error('DEBUG: Database error during count:', dbError);
     }
     
@@ -88,7 +88,7 @@ export const GET = withAdmin(async (req: NextRequest) => {
         hasPrevPage: result.meta.page > 1
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching topics:', error);
     // Trả về empty success response thay vì lỗi 500
     return apiSuccess([], 'Topics retrieved successfully', {
@@ -123,7 +123,7 @@ export const POST = withAdmin(async (req: NextRequest, context: AuthenticatedCon
     try {
       rawBody = await clonedReq.text();
       console.log('Raw request body:', rawBody);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error reading raw body:', err);
     }
     
@@ -132,7 +132,7 @@ export const POST = withAdmin(async (req: NextRequest, context: AuthenticatedCon
     try {
       body = rawBody ? JSON.parse(rawBody) : null;
       console.log('Parsed body:', body);
-    } catch (parseErr) {
+    } catch (parseErr: unknown) {
       console.error('JSON parse error:', parseErr);
       return NextResponse.json(
         { success: false, error: 'Invalid JSON body' },
@@ -172,12 +172,14 @@ export const POST = withAdmin(async (req: NextRequest, context: AuthenticatedCon
     console.log('Topic created successfully:', newTopic);
     
     return apiSuccess(newTopic, 'Topic created successfully', undefined, 201);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating topic:', error);
-    console.error('Error stack:', error.stack);
+    if (typeof error === 'object' && error !== null && 'stack' in error) {
+      console.error('Error stack:', error.stack);
+    }
     
     // Check for duplicate name error
-    if (error.message && error.message.includes('already exists')) {
+    if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string' && error.message.includes('already exists')) {
       return apiError(
         error.message,
         undefined,
@@ -186,15 +188,18 @@ export const POST = withAdmin(async (req: NextRequest, context: AuthenticatedCon
     }
     
     // Kiểm tra lỗi Prisma
-    if (error.code) {
+    if (typeof error === 'object' && error !== null && 'code' in error) {
       console.error('Prisma error code:', error.code);
       return apiError(
-        `Database error: ${error.message || 'Unknown error'}`,
+        `Database error: ${typeof error === 'object' && error !== null && 'message' in error ? error.message : 'Unknown error'}`,
         { code: error.code },
         ApiErrorCode.SERVER_ERROR
       );
     }
     
-    return apiServerError('Failed to create topic', { message: error.message });
+    return apiServerError('Failed to create topic', { 
+      message: typeof error === 'object' && error !== null && 'message' in error ? 
+        String(error.message) : 'Unknown error' 
+    });
   }
 });

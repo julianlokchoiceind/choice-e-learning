@@ -38,7 +38,7 @@ export default function NotFound() {
             {quickLinks.map((link, index) => (
               <Link 
                 key={"index"}
-                href={"link.href"}
+                href={link.href}
                 className='p-3 card text-sm hover:text-primary transition-colors'
               >
                 {link.label}

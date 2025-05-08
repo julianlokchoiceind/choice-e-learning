@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from './auth-options';
-import { Role } from '@/shared/types/auth/roles';
+import { UserRole } from '@/shared/types/auth/roles';
 
 /**
  * Get the current user's session on the server side
@@ -24,14 +24,14 @@ export async function getCurrentUser() {
  * @param requiredRole The role required to access a resource
  * @returns True if the user has the required role, false otherwise
  */
-export async function checkUserRole(requiredRole: Role) {
+export async function checkUserRole(requiredRole: UserRole) {
   const user = await getCurrentUser();
   
   if (!user) return false;
   
   // If admin role is required, only admin can access
-  if (requiredRole === Role.admin) {
-    return user.role === Role.admin;
+  if (requiredRole === UserRole.ADMIN) {
+    return user.role === UserRole.ADMIN;
   }
   
   // If student role is required, anyone authenticated can access
@@ -52,7 +52,7 @@ export async function isAuthenticated() {
  * @returns True if admin, false otherwise
  */
 export async function isAdmin() {
-  return await checkUserRole(Role.admin);
+  return await checkUserRole(UserRole.ADMIN);
 }
 
 /**

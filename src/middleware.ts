@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
+import { UserRole } from '@/shared/types/auth/roles';
 
 /**
  * Paths that require authentication
@@ -47,7 +48,7 @@ export async function middleware(request: NextRequest) {
   // Check admin routes
   if (token && adminRoutes.some(route => pathname.startsWith(route))) {
     // Redirect if not admin
-    if (token.role !== 'admin') {
+    if (String(token.role).toLowerCase() !== UserRole.ADMIN.toLowerCase()) {
       return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
   }

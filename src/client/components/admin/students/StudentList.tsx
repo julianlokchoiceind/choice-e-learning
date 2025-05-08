@@ -119,7 +119,7 @@ export default function StudentList() {
             setStudents([...result.data]);
           }
         }, 100);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Error in StudentList useEffect:', err);
         // Silent error handling - no UI error display
       }
@@ -144,7 +144,7 @@ export default function StudentList() {
         sortOrder,
       });
       router.push('/admin/students?page=1');
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error in search:', err);
       // Silent error handling
     }
@@ -242,7 +242,7 @@ export default function StudentList() {
       // Update the local state to remove the deleted student
       setStudents(prevStudents => prevStudents.filter(student => student.id !== id));
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error deleting student:', err);
       // Silently handle error - no notification displayed
     }
@@ -300,7 +300,7 @@ export default function StudentList() {
               className='py-2 pl-10 pr-4 block w-full sm:w-80 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)] outline-none'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
+              onKeyDown={(e: any) => {
                 if (e.key === 'Enter') {
                   handleSearch(e);
                 }
@@ -313,7 +313,7 @@ export default function StudentList() {
               id='sort-filter'
               className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm'
               value={getCurrentSort()}
-              onChange={(e) => {
+              onChange={(e: any) => {
                 handleSortChange(e.target.value);
               }}
             >

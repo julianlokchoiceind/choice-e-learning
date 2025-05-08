@@ -107,20 +107,22 @@ export default function NewTopicPage() {
         console.error('Failed to create topic: returned null');
         setServerError('Failed to create topic. Please try again.');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error creating topic:', err);
       
       // Show detailed error information
-      const errorResponse = err.response?.data;
+      const errorResponse = typeof err === 'object' && err !== null && 'response' in err && 
+        typeof err.response === 'object' && err.response !== null && 'data' in err.response ? 
+        err.response.data : null;
       console.error('Error response:', errorResponse);
       
       // Extract error message from response or use a default
       let errorMessage = 'Failed to create topic. Please try again.';
       
-      if (errorResponse?.error) {
-        errorMessage = errorResponse.error;
-      } else if (err?.message) {
-        // Only use error.message if it&apos;s helpful (not generic)
+      if (errorResponse && typeof errorResponse === 'object' && 'error' in errorResponse) {
+        errorMessage = String(errorResponse.error);
+      } else if (typeof err === 'object' && err !== null && 'message' in err && typeof err.message === 'string') {
+        // Only use error.message if it's helpful (not generic)
         if (err.message !== 'Request failed with status code 500' &&
             !err.message.includes('Network Error')) {
           errorMessage = err.message;
@@ -179,13 +181,13 @@ export default function NewTopicPage() {
             <textarea
               id='description'
               name='description'
-              value={"formData.description"}
-              onChange={"handleChange"}
-              rows={"4"}
+              value={formData.description}
+              onChange={handleChange}
+              rows={4}
               className={`w-full px-3 py-2 border ${
                 formErrors.description ? 'border-red-500' : 'border-gray-300'
               } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-              disabled={"loading"}
+              disabled={loading}
             ></textarea>
             {formErrors.description && (
               <p className='mt-1 text-sm text-red-600'>{formErrors.description}</p>
@@ -218,7 +220,7 @@ export default function NewTopicPage() {
             </Link>
             <button
               type='submit'
-              disabled={"loading"}
+              disabled={loading}
               className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed'
             >
               {loading ? 'Creating...' : 'Create Topic'}

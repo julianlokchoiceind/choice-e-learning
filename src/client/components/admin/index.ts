@@ -1,9 +1,1 @@
-export * from './CourseManager';
-export * from './AdminSidebar';
-export * from './TopicList';
-export * from './TopicForm';
-export * from './index';
-export * from './StudentList';
-export * from './StudentForm';
-export * from './StudentDetail';
-export * from './TopicSelector';
+export { default as AdminSidebar } from './AdminSidebar';

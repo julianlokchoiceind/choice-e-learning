@@ -3,12 +3,12 @@
 import { useAuth } from '@/client/hooks/auth/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { Role } from '@/shared/types/auth/roles';
+import { UserRole } from '@/shared/types/auth/roles';
 import { hasRole } from '@/server/auth/roles';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: Role;
+  requiredRole?: UserRole;
 }
 
 /**

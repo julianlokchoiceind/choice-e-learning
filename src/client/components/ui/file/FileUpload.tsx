@@ -104,7 +104,7 @@ export default function FileUpload({
 
       // Update the image URL using the callback
       onImageUpload(result.data.url);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error uploading file:', err);
       setError('Failed to upload image. Please try again.');
     } finally {

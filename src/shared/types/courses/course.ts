@@ -33,21 +33,23 @@ export interface Chapter {
 export interface Course {
   id: string;
   title: string;
+  slug: string;
   description: string;
-  imageUrl?: string;
-  image?: string; // Alternative property name used in some places
-  level: string;
   price: number;
-  topics: string[];
-  creatorId?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  imageUrl?: string;
+  isPublished?: boolean;
+  level?: string;
+  duration?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  topics?: string[];
+  lessons?: Lesson[];
+  authorId?: string;
   // Relationships that might come from Prisma
   creator?: any;
   students?: any[];
   studentsCount?: number; // Count of students enrolled in the course
   chapters?: Chapter[];
-  lessons?: any[];
   reviews?: any[];
   // Virtual counts from Prisma
   _count?: {
@@ -90,20 +92,17 @@ export interface CreateCourseParams {
   description: string;
   price: number;
   imageUrl?: string;
-  level: string;
-  topics: string[];
+  level?: string;
+  duration?: number;
+  topics?: string[];
+  isPublished?: boolean;
 }
 
 /**
  * Course update parameters
  */
-export interface UpdateCourseParams {
-  title?: string;
-  description?: string;
-  price?: number;
-  imageUrl?: string;
-  level?: string;
-  topics?: string[];
+export interface UpdateCourseParams extends Partial<CreateCourseParams> {
+  id: string;
 }
 
 /**
@@ -179,14 +178,15 @@ export interface CourseReview {
 export interface Lesson {
   id: string;
   title: string;
-  content: string;
-  videoUrl?: string;
-  order: number;
   courseId: string;
-  chapterId?: string;
+  order: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  content?: string;
+  videoUrl?: string | null;
+  chapterId?: string | null;
+  duration?: number;
   chapter?: Chapter;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 /**
@@ -204,11 +204,18 @@ export interface CreateChapterParams {
  */
 export interface CreateLessonParams {
   title: string;
-  content: string;
-  videoUrl?: string;
-  order: number;
   courseId: string;
-  chapterId?: string;
+  order: number;
+  content?: string;
+  videoUrl?: string | null;
+  chapterId?: string | null;
+}
+
+/**
+ * Lesson update parameters
+ */
+export interface UpdateLessonParams extends Partial<CreateLessonParams> {
+  id: string;
 }
 
 /**
@@ -240,16 +247,14 @@ export interface UserCourseStats {
  * User progress interface for tracking course completion
  * @deprecated Use UserProgress from the progress module instead
  */
-export interface CourseUserProgress {
-  id?: string;
+export interface UserProgress {
+  id: string;
   userId: string;
   courseId: string;
   lessonId: string;
   completed: boolean;
   completedAt?: Date;
-  timeSpent?: number;
-  updatedAt: Date;
-  createdAt?: Date;
+  createdAt: Date;
 }
 
 /**

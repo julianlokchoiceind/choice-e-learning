@@ -109,7 +109,7 @@ export default function CourseManager() {
         if (data.courses && Array.isArray(data.courses)) {
           console.log('Using courses array from response, found', data.courses.length, 'courses');
           // Ensure all courses have proper imageUrl
-          const processedCourses = data.courses.map((course) => {
+          const processedCourses = data.courses.map((course: any) => {
             return {
               ...course,
               // Ensure imageUrl exists (fallback to default if not)
@@ -120,7 +120,7 @@ export default function CourseManager() {
         } else if (data.data && Array.isArray(data.data)) {
           console.log('Using data array from response, found', data.data.length, 'courses');
           // Ensure all courses have proper imageUrl
-          const processedCourses = data.data.map((course) => {
+          const processedCourses = data.data.map((course: any) => {
             return {
               ...course,
               // Ensure imageUrl exists (fallback to default if not)
@@ -136,7 +136,7 @@ export default function CourseManager() {
         console.error('API returned error:', data.error || 'Unknown error');
         throw new Error(data.error || 'Failed to fetch courses');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error in fetchCourses:', err);
       setError((err as Error).message);
     } finally {
@@ -262,7 +262,7 @@ export default function CourseManager() {
         setSelectedCourse(null);
         setSubmitSuccess(false);
       }, 1000);
-    } catch (err) {
+    } catch (err: unknown) {
       setError((err as Error).message);
     } finally {
       setIsSubmitting(false);

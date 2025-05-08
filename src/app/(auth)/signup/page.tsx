@@ -161,7 +161,7 @@ export default function SignUpPage() {
         
         // The register function in useAuth now handles the redirect to dashboard
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Registration error:', err);
       setNotification({
         show: true,
@@ -188,7 +188,7 @@ export default function SignUpPage() {
       try {
         const providers = await getProviders();
         console.log('Available NextAuth providers:', providers);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Error fetching providers:', err);
       }
     }
@@ -244,7 +244,7 @@ export default function SignUpPage() {
       
       console.log('SignIn result:', result);
       // Note: The rest of this function might not execute due to redirect: true
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`${provider} login error:`, error);
       setNotification({
         show: true,
@@ -413,7 +413,7 @@ export default function SignUpPage() {
           <div>
             <button
               type='submit'
-              disabled={"isLoading"}
+              disabled={isLoading}
               className='group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
             >
               {isLoading ? 'Creating account...' : 'Sign up'}

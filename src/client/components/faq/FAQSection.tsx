@@ -85,7 +85,7 @@ export default function FAQSection() {
   const groupFAQsByCategory = (faqs: FAQ[]) => {
     const grouped: Record<string, FAQ[]> = {};
     
-    faqs.forEach((faq) => {
+    faqs.forEach((faq: any) => {
       if (!grouped[faq.category]) {
         grouped[faq.category] = [];
       }
@@ -129,7 +129,7 @@ export default function FAQSection() {
           </div>
           
           <button
-            onClick={"handleSearch"}
+            onClick={handleSearch}
             className='px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors'
           >
             Search

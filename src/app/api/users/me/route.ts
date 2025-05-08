@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
       loginStreak: userData.loginStreak || 0,
       lastLoginAt: userData.lastLoginAt || null
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching user data:', error);
     return apiServerError('Failed to fetch user data');
   }

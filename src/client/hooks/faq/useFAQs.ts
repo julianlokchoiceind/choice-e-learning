@@ -60,7 +60,7 @@ export function useFAQs(isAdmin = false) {
       setPagination(response.data.data.meta);
       
       return response.data.data;
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching FAQs:', err);
       setError('Failed to fetch FAQs');
       throw err;
@@ -85,7 +85,7 @@ export function useFAQs(isAdmin = false) {
       const response = await axios.get<{ data: FAQ }>(`${baseUrl}/${id}`);
       setFaq(response.data.data);
       return response.data.data;
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching FAQ:', err);
       setError('Failed to fetch FAQ');
       throw err;
@@ -105,7 +105,7 @@ export function useFAQs(isAdmin = false) {
       const response = await axios.get<{ data: string[] }>(`${baseUrl}/categories`);
       setCategories(response.data.data);
       return response.data.data;
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching FAQ categories:', err);
       setError('Failed to fetch FAQ categories');
       throw err;
@@ -129,7 +129,7 @@ export function useFAQs(isAdmin = false) {
     try {
       const response = await axios.post<{ data: FAQ }>(`${baseUrl}`, data);
       return response.data.data;
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error creating FAQ:', err);
       setError('Failed to create FAQ');
       throw err;
@@ -153,7 +153,7 @@ export function useFAQs(isAdmin = false) {
     try {
       const response = await axios.patch<{ data: FAQ }>(`${baseUrl}/${id}`, data);
       return response.data.data;
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error updating FAQ:', err);
       setError('Failed to update FAQ');
       throw err;
@@ -177,7 +177,7 @@ export function useFAQs(isAdmin = false) {
     try {
       const response = await axios.delete<{ data: { success: boolean } }>(`${baseUrl}/${id}`);
       return response.data.data;
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error deleting FAQ:', err);
       setError('Failed to delete FAQ');
       throw err;

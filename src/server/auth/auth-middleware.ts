@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/server/auth/auth-options';
-import { Role } from '@/shared/types/auth/roles';
+import { UserRole } from '@/shared/types/auth/roles';
 import { apiUnauthorized, apiForbidden } from '@/server/api/api-response';
 
 /**
@@ -20,7 +20,7 @@ export async function getAuthSession(req: NextRequest) {
       session,
       user: session?.user || null
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Auth middleware error:', error);
     return {
       session: null,
@@ -52,7 +52,7 @@ export async function authenticateUser(req: NextRequest) {
       success: true,
       user
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Authentication error:', error);
     return {
       success: false,
@@ -67,7 +67,7 @@ export async function authenticateUser(req: NextRequest) {
  * @param requiredRoles Single role or array of roles required
  * @returns An object with success and user data
  */
-export async function checkUserRole(req: NextRequest, requiredRoles: Role | Role[]) {
+export async function checkUserRole(req: NextRequest, requiredRoles: UserRole | UserRole[]) {
   try {
     // Authenticate the user first
     const auth = await authenticateUser(req);
@@ -79,8 +79,16 @@ export async function checkUserRole(req: NextRequest, requiredRoles: Role | Role
     // Convert requiredRoles to an array if it's not already
     const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
     
+    // Convert user role to string for comparison
+    const userRole = String(auth.user.role).toLowerCase();
+    
     // Check if user has any of the required roles
-    if (!roles.includes(auth.user.role)) {
+    const hasRole = roles.some(role => {
+      const roleStr = String(role).toLowerCase();
+      return roleStr === userRole;
+    });
+    
+    if (!hasRole) {
       return {
         success: false,
         response: apiForbidden()
@@ -92,7 +100,7 @@ export async function checkUserRole(req: NextRequest, requiredRoles: Role | Role
       success: true,
       user: auth.user
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Role check error:', error);
     return {
       success: false,
@@ -107,7 +115,7 @@ export async function checkUserRole(req: NextRequest, requiredRoles: Role | Role
  * @returns An object with success and user data
  */
 export async function requireAdmin(req: NextRequest) {
-  return checkUserRole(req, Role.admin);
+  return checkUserRole(req, UserRole.ADMIN);
 }
 
 /**
@@ -130,7 +138,8 @@ export async function requireSelfOrAdmin(_req: NextRequest, ownerId: string) {
     }
     
     // Check if user is the resource owner or an admin
-    if (user.id !== ownerId && user.role !== Role.admin) {
+    const userRole = String(user.role).toLowerCase();
+    if (user.id !== ownerId && userRole !== UserRole.ADMIN.toLowerCase()) {
       return {
         success: false,
         response: apiForbidden()
@@ -142,11 +151,72 @@ export async function requireSelfOrAdmin(_req: NextRequest, ownerId: string) {
       success: true,
       user
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Owner/admin check error:', error);
     return {
       success: false,
       response: apiUnauthorized()
     };
   }
+}
+
+// Handler type for Next.js App Router
+type RouteHandler = (
+  req: NextRequest,
+  context: any
+) => Promise<NextResponse>;
+
+/**
+ * Higher-order function to protect API routes with authentication
+ * Compatible with both App Router and Pages Router
+ */
+export function withAuth(
+  handler: RouteHandler,
+  options?: { roles?: UserRole | UserRole[] }
+): RouteHandler {
+  return async (req: NextRequest, context: any) => {
+    try {
+      // Get the authenticated session
+      const { session, user } = await getAuthSession(req);
+      
+      // Check if user is authenticated
+      if (!session || !user) {
+        return apiUnauthorized();
+      }
+      
+      // Check roles if specified
+      if (options?.roles) {
+        const roles = Array.isArray(options.roles) ? options.roles : [options.roles];
+        const userRole = String(user.role).toLowerCase();
+        
+        const hasRequiredRole = roles.some(role => 
+          String(role).toLowerCase() === userRole
+        );
+        
+        if (!hasRequiredRole) {
+          return apiForbidden();
+        }
+      }
+      
+      // Add session to context
+      const contextWithSession = {
+        ...context,
+        session,
+        user
+      };
+      
+      // Call the handler with the authenticated context
+      return handler(req, contextWithSession);
+    } catch (error: any) {
+      console.error('Auth middleware error:', error);
+      return apiUnauthorized(error?.message || 'Authentication error');
+    }
+  };
+}
+
+/**
+ * Middleware to check if user has admin role
+ */
+export function withAdminAuth(handler: RouteHandler): RouteHandler {
+  return withAuth(handler, { roles: [UserRole.ADMIN] });
 }

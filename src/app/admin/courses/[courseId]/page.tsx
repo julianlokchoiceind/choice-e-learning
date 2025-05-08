@@ -51,7 +51,7 @@ export default function CourseDetailPage() {
         } else {
           throw new Error('Invalid response from server');
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Error fetching course:', err);
         setError('Failed to load course data. Please try again.');
       } finally {
@@ -76,7 +76,7 @@ export default function CourseDetailPage() {
       // Redirect to courses page after successful deletion
       router.push('/admin/courses');
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error deleting course:', err);
       alert(`Failed to delete course: ${(err as Error).message || 'Unknown error'}`);
     }

@@ -1,6 +1,6 @@
 import prisma from '@/server/db/prisma-client';
 import { User, Prisma } from '@prisma/client';
-import { Role } from '@/shared/types/auth/roles';
+import { UserRole } from '@/shared/types/auth/roles';
 
 // Type for formatted student data from User model
 export type FormattedStudent = {
@@ -113,7 +113,7 @@ export const studentService = {
       });
 
       return result;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error in getAllStudents:', error);
       throw error;
     }
@@ -146,7 +146,7 @@ export const studentService = {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error in getStudentById for ID ${id}:`, error);
       throw error;
     }
@@ -203,7 +203,7 @@ export const studentService = {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error in createStudent:', error);
       throw error;
     }
@@ -263,7 +263,7 @@ export const studentService = {
         createdAt: updatedUser.createdAt,
         updatedAt: updatedUser.updatedAt
       };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error in updateStudent for ID ${id}:`, error);
       throw error;
     }
@@ -327,7 +327,7 @@ export const studentService = {
           });
           console.log(`Successfully deleted student ${id} from database`);
           return { id, success: true, method: 'full_delete' };
-        } catch (deleteError) {
+        } catch (deleteError: unknown) {
           // Nếu không thể xóa, sử dụng phương pháp cập nhật role
           console.error(`Failed to delete student ${id}, using role update instead:`, deleteError);
           await prisma.user.update({
@@ -339,7 +339,7 @@ export const studentService = {
           return { id, success: true, method: 'role_update_fallback' };
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(`Error in deleteStudent for ID ${id}:`, error);
       throw error;
     }

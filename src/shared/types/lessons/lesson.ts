@@ -9,13 +9,15 @@ export interface Lesson {
   id: string;
   title: string;
   content: string;
-  videoUrl?: string;
+  videoUrl?: string | null;
   order: number;
   courseId: string;
-  chapterId?: string;
+  chapterId?: string | null;
   chapter?: Chapter;
   createdAt: Date;
   updatedAt: Date;
+  duration?: string | null;
+  resourcesData?: string | null;
 }
 
 /**

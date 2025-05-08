@@ -101,7 +101,7 @@ export default function EditCoursePage() {
         } else {
           throw new Error('Invalid response from server');
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Error fetching course:', err);
         setError('Failed to load course data. Please try again.');
       } finally {
@@ -129,7 +129,7 @@ export default function EditCoursePage() {
       } else {
         throw new Error('Invalid response from server');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error fetching lessons:', err);
       setLessonError('Failed to load lessons. Please try again.');
     } finally {
@@ -182,7 +182,7 @@ export default function EditCoursePage() {
         throw new Error(responseData.error || 'Failed to update course');
       }
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error updating course:', err);
       setError((err as Error).message || 'Failed to update course. Please try again.');
     } finally {
@@ -236,7 +236,7 @@ export default function EditCoursePage() {
       setIsLessonFormVisible(false);
       fetchLessons();
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(`Error ${editingLessonId ? 'updating' : 'creating'} lesson:`, err);
       setLessonError((err as Error).message || `Failed to ${editingLessonId ? 'update' : 'create'} lesson. Please try again.`);
     } finally {
@@ -277,7 +277,7 @@ export default function EditCoursePage() {
       // Reload lessons
       fetchLessons();
       
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Error deleting lesson:', err);
       setLessonError((err as Error).message || 'Failed to delete lesson. Please try again.');
     } finally {

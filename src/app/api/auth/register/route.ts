@@ -11,7 +11,7 @@ import {
   apiError, 
   apiServerError 
 } from '@/server/api/api-response';
-import { ApiErrorCode } from '@/server/api/api-error-codes';
+import { ApiErrorCode } from '@/server/api/api-errors';
 import { 
   validateRequest 
 } from '@/server/api/request-parser';
@@ -124,7 +124,7 @@ const registerUser = withErrorHandling(async (req: NextRequest) => {
       role: result.data?.role,
       createdAt: result.data?.createdAt
     }, 'User registered successfully');
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Registration error:', error);
     console.error('Error stack:', (error as Error).stack);
     

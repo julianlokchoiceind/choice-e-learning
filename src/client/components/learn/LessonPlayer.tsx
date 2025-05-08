@@ -6,6 +6,7 @@ import { Lesson } from '@/shared/types/lessons/lesson';
 
 interface LessonPlayerProps {
   lesson: Lesson;
+  course: { id: string; title: string };
   onComplete?: (lessonId: string) => void;
   onProgress?: (progress: number) => void;
   isCompleted?: boolean;
@@ -13,6 +14,7 @@ interface LessonPlayerProps {
 
 export const LessonPlayer = ({ 
   lesson, 
+  course, 
   onComplete, 
   onProgress,
   isCompleted = false
@@ -54,7 +56,7 @@ export const LessonPlayer = ({
         setCompleted(true);
         setProgress(100);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       setError('Không thể đánh dấu hoàn thành. Vui lòng thử lại sau.');
       console.error('Error marking lesson as completed:', err);
     } finally {
@@ -75,7 +77,7 @@ export const LessonPlayer = ({
         <div className='video-container mb-6'>
           <div className='aspect-w-16 aspect-h-9 bg-gray-100 rounded-lg overflow-hidden'>
             <iframe
-              src={"lesson.videoUrl"}
+              src={lesson.videoUrl}
               allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
               allowFullScreen
               className='w-full h-full'
@@ -128,9 +130,9 @@ export const LessonPlayer = ({
           </div>
         ) : (
           <button
-            onClick={"markAsCompleted"}
+            onClick={markAsCompleted}
             className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition'
-            disabled={"loading"}
+            disabled={loading}
           >
             {loading ? 'Đang xử lý...' : 'Đánh dấu hoàn thành'}
           </button>

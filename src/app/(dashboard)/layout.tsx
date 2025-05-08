@@ -1,19 +1,21 @@
 'use client';
 
-import { useAuth } from '@/client/hooks/auth/useAuth';
-
 import { ReactNode } from 'react';
 import Header from '@/client/components/layout/Header';
 import Footer from '@/client/components/layout/Footer';
 
-interface DashboardLayoutProps {
+interface LayoutProps {
   children: ReactNode;
-  showSidebar?: boolean;
-  hideFooter?: boolean;
 }
 
-export function DashboardLayout({ children, showSidebar = false, hideFooter = false }: DashboardLayoutProps) {
-  // DashboardLayout implementation
+export default function Layout({ children }: LayoutProps) {
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-grow">
+        {children}
+      </main>
+      <Footer />
+    </div>
+  );
 }
-
-export default DashboardLayout;

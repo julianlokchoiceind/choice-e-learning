@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: PageProps) {
   
   return {
     title: `${course.title} | Choice E-Learning`,
-    description: course.description,
+    description: `Learn ${course.title} at Choice E-Learning`,
   };
 }
 

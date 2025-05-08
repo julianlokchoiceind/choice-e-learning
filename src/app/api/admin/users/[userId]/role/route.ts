@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/server/auth/auth-middleware';
-import { Role } from '@/shared/types/auth/roles';
+import { UserRole } from '@/shared/types/auth/roles';
 import { Role as PrismaRole } from '@prisma/client';
 import { getUserById, updateUserRoleAuth as updateUserRole } from '@/server/auth/services/auth-service';
 import { z } from 'zod';
 
 // Schema for role update validation
 const roleUpdateSchema = z.object({
-  role: z.enum(['student', 'instructor', 'admin'])
+  role: z.enum(['student', 'admin', 'guest'])
 });
 
 // GET handler to fetch user's role
@@ -51,7 +51,7 @@ export async function GET(
         role: user.role
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching user role:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch user role' },
@@ -100,8 +100,18 @@ export async function PUT(
     // Extract validated data
     const { role } = validation.data;
     
-    // Convert string role to Role enum
-    const roleEnum = role === 'admin' ? Role.admin : role === 'student' ? Role.student : Role.student;
+    // Convert string role to UserRole enum
+    let roleEnum: UserRole;
+    switch(role) {
+      case 'admin': 
+        roleEnum = UserRole.ADMIN;
+        break;
+      case 'guest':
+        roleEnum = UserRole.GUEST;
+        break;
+      default:
+        roleEnum = UserRole.STUDENT;
+    }
     
     // Prevent admin from changing their own role (safety measure)
     if (auth.user?.id === userId) {
@@ -130,7 +140,7 @@ export async function PUT(
         role
       }
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating user role:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update user role' },
@@ -164,7 +174,7 @@ export async function PATCH(
     const body = await req.json();
     
     const roleSchema = z.object({
-      role: z.enum(['admin', 'student', 'instructor'])
+      role: z.enum(['admin', 'student', 'guest'])
     });
 
     const validationResult = roleSchema.safeParse(body);
@@ -194,8 +204,18 @@ export async function PATCH(
       });
     }
 
-    // Convert string role to Role enum
-    const roleEnum = role === 'admin' ? Role.admin : role === 'student' ? Role.student : Role.student;
+    // Convert string role to UserRole enum
+    let roleEnum: UserRole;
+    switch(role) {
+      case 'admin': 
+        roleEnum = UserRole.ADMIN;
+        break;
+      case 'guest':
+        roleEnum = UserRole.GUEST;
+        break;
+      default:
+        roleEnum = UserRole.STUDENT;
+    }
     
     // Update user's role using Auth Service
     const updateResult = await updateUserRole(userId, roleEnum);
@@ -213,7 +233,7 @@ export async function PATCH(
       userId,
       role
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating user role:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update user role' },

@@ -69,7 +69,7 @@ export default function CourseLearnPage() {
       } else {
         setError(data.error || 'Failed to fetch course content');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       setError('An error occurred while fetching course data');
       console.error(err);
     }
@@ -107,7 +107,7 @@ export default function CourseLearnPage() {
       } else {
         console.error(data.error || 'Failed to fetch progress');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('An error occurred while fetching progress', err);
     }
   };
@@ -135,7 +135,7 @@ export default function CourseLearnPage() {
         // Fetch course data and progress
         await fetchCourseData();
         await fetchProgress();
-      } catch (err) {
+      } catch (err: unknown) {
         setError('Failed to check enrollment status');
         console.error(err);
       } finally {
@@ -170,7 +170,7 @@ export default function CourseLearnPage() {
         // Update progress
         await fetchProgress();
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to mark lesson as completed', err);
     }
   };

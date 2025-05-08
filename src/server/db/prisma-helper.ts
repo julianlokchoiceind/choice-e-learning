@@ -20,7 +20,7 @@ export async function safeExec<T>(
 ): Promise<T> {
   try {
     return await operation();
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`${logPrefix} failed:`, error);
     
     if (defaultValue !== undefined) {

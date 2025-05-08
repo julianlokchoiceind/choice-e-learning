@@ -34,7 +34,7 @@ function createPrismaClient(): PrismaClient {
             while (true) {
               try {
                 return await query(args);
-              } catch (error) {
+              } catch (error: unknown) {
                 // Log the error
                 console.error(`Prisma Client Error in operation: ${operation}:`, error);
                 
@@ -65,7 +65,7 @@ function createPrismaClient(): PrismaClient {
       while (true) {
         try {
           return await next(params);
-        } catch (error) {
+        } catch (error: unknown) {
           // Log the error
           console.error(`Prisma Client Error in ${params.model}.${params.action}:`, error);
           
@@ -94,7 +94,7 @@ function createPrismaClient(): PrismaClient {
       .catch((e) => console.error('Failed to connect to database:', e));
     
     return client;
-  } catch (e) {
+  } catch (e: unknown) {
     console.error('Error creating Prisma client:', e);
     throw e;
   }
@@ -131,7 +131,7 @@ try {
     }
     prismaInstance = global.prisma;
   }
-} catch (error) {
+} catch (error: unknown) {
   console.error('Failed to initialize Prisma client:', error);
   throw error;
 }

@@ -15,7 +15,7 @@ interface SessionProviderProps {
  */
 const SessionProvider = ({ children, session }: SessionProviderProps) => {
   return (
-    <NextAuthSessionProvider session={"session"}>
+    <NextAuthSessionProvider session={session}>
       {children}
     </NextAuthSessionProvider>
   );

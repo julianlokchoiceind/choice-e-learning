@@ -41,7 +41,7 @@ export default function EnrolledCoursesSection({ courses: initialCourses }: Enro
       } else {
         setError(data.error || 'Failed to unenroll from course');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       setError((err as Error).message);
     } finally {
       setUnenrollingCourseId(null);

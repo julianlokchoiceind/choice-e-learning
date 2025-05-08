@@ -1,6 +1,6 @@
 'use client';
 
-import { Course } from '@/shared/types/courses/courses/course';
+import { Course } from '@/shared/types/courses/course';
 import { EnrollButton } from './EnrollButton';
 
 interface CourseDetailProps {
