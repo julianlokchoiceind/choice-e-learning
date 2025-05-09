@@ -10,7 +10,7 @@ import Image from 'next/image';
  */
 const HeroSection = () => {
   return (
-    <section className='relative w-full min-h-screen overflow-hidden'
+    <section className='relative w-full min-h-screen flex items-center overflow-hidden'
              style={{
                background: 'linear-gradient(180deg, #1e2a78 0%, #0b1120 100%)'
              }}>
@@ -25,10 +25,10 @@ const HeroSection = () => {
            }}>
       </div>
       
-      <div className='relative h-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='grid lg:grid-cols-2 gap-8 lg:gap-12 h-full items-center'>
+      <div className='relative w-full max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12'>
+        <div className='grid lg:grid-cols-2 gap-8 lg:gap-12 items-center'>
           {/* Left Content */}
-          <div className='flex flex-col justify-center space-y-8 pt-20 lg:pt-0'>
+          <div className='flex flex-col justify-center space-y-8'>
             <div className='space-y-6'>
               <h1 className='text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1]'>
                 Let&apos;s Work <br />
@@ -53,16 +53,16 @@ const HeroSection = () => {
           </div>
 
           {/* Right Content */}
-          <div className='relative flex items-center justify-center h-full'>
+          <div className='relative flex items-center justify-center'>
             {/* Main Image Container */}
-            <div className='relative w-full max-w-[550px] aspect-[4/5] md:aspect-[5/6] lg:aspect-[4/5]'>
+            <div className='relative w-full max-w-[550px] aspect-square sm:aspect-[4/5] md:aspect-[5/6] lg:aspect-[4/5] mx-auto'>
               <Image
                 src='https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=1974&auto=format&fit=crop'
                 alt='Professional coding instructor'
                 fill
                 priority
                 className='object-cover object-center rounded-2xl'
-                sizes='(max-width: 768px) 100vw, 50vw'
+                sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 500px'
                 onError={(e: any) => {
                   console.error('Error loading hero image');
                   e.currentTarget.src = 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=2071&auto=format&fit=crop';
@@ -70,20 +70,20 @@ const HeroSection = () => {
               />
               
               {/* Floating Tech Badges */}
-              <div className='absolute top-[15%] right-[-5%] z-10 transform translate-x-0 hover:translate-x-2 transition-transform duration-300'>
-                <div className='px-6 py-2 bg-[#3B82F6] text-white rounded-full shadow-lg animate-float backdrop-blur-sm'>
+              <div className='absolute top-[15%] right-[-5%] sm:right-[-8%] z-10 transform translate-x-0 hover:translate-x-2 transition-transform duration-300'>
+                <div className='px-4 sm:px-6 py-2 bg-[#3B82F6] text-white rounded-full shadow-lg animate-float backdrop-blur-sm text-sm sm:text-base'>
                   JavaScript
                 </div>
               </div>
               
-              <div className='absolute top-[40%] right-[-10%] z-10 transform translate-x-0 hover:translate-x-2 transition-transform duration-300'>
-                <div className='px-6 py-2 bg-[#22C55E] text-white rounded-full shadow-lg animate-float-slow backdrop-blur-sm'>
+              <div className='absolute top-[40%] right-[-8%] sm:right-[-12%] z-10 transform translate-x-0 hover:translate-x-2 transition-transform duration-300'>
+                <div className='px-4 sm:px-6 py-2 bg-[#22C55E] text-white rounded-full shadow-lg animate-float-slow backdrop-blur-sm text-sm sm:text-base'>
                   React Development
                 </div>
               </div>
               
-              <div className='absolute bottom-[20%] right-[-5%] z-10 transform translate-x-0 hover:translate-x-2 transition-transform duration-300'>
-                <div className='px-6 py-2 bg-[#A855F7] text-white rounded-full shadow-lg animate-float-alt backdrop-blur-sm'>
+              <div className='absolute bottom-[20%] right-[-5%] sm:right-[-8%] z-10 transform translate-x-0 hover:translate-x-2 transition-transform duration-300'>
+                <div className='px-4 sm:px-6 py-2 bg-[#A855F7] text-white rounded-full shadow-lg animate-float-alt backdrop-blur-sm text-sm sm:text-base'>
                   Full-Stack Coding
                 </div>
               </div>

@@ -5,11 +5,6 @@ import Image from 'next/image';
 import { CoursesSection } from '@/client/components/courses';
 import { useTopics } from '@/client/hooks/topics';
 
-export const metadata: Metadata = {
-  title: 'Courses | Choice E-Learning',
-  description: 'Browse our extensive catalog of online courses to enhance your skills and knowledge.',
-};
-
 // Featured courses for the hero section
 const featuredCourses = [
   {

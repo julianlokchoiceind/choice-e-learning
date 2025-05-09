@@ -13,16 +13,9 @@ const ConditionalLayout = ({ children }: ConditionalLayoutProps) => {
   const pathname = usePathname();
   
   // Don't show header/footer for route groups or admin pages
-  const isAdminPage = pathname?.startsWith('/admin');
-  const isRouteGroup = 
-    pathname?.startsWith('/(auth)') || 
-    pathname?.startsWith('/(dashboard)') || 
-    pathname?.startsWith('/(marketing)');
+  const isAdminPage = /^\/admin/.test(pathname || '');
   
-  // Don't apply padding-top for homepage
-  const isHomepage = pathname === '/';
-  
-  if (isAdminPage || isRouteGroup) {
+  if (isAdminPage) {
     return (
       <>
         {children}
@@ -33,7 +26,7 @@ const ConditionalLayout = ({ children }: ConditionalLayoutProps) => {
   return (
     <>
       <Header />
-      <main className={`flex-grow ${isHomepage ? '' : 'pt-[44px]'}`}>
+      <main>
         {children}
       </main>
       <Footer />

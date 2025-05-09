@@ -5,10 +5,13 @@ import { UserRole } from '@/shared/types/auth/roles';
 
 /**
  * Paths that require authentication
+ * Note: Route groups like (dashboard) don't appear in the URL
  */
 const authRoutes = [
   '/dashboard',
   '/profile',
+  '/my-courses',
+  '/learn',
   '/courses/my',
   '/admin',
 ];
