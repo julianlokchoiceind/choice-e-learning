@@ -1,10 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    content: [
       './src/**/*.{js,ts,jsx,tsx,mdx}'  // Bắt tất cả files trong src
     ],
-  ],
   theme: {
     extend: {
       colors: {
