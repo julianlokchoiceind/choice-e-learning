@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
-import { TopicSelector } from '@/client/components/admin/courses';
+import { TopicSelector, CourseFormTabs, DraftStatusBadge, CurriculumTab } from '@/client/components/admin/courses';
 import FileUpload from '@/client/components/ui/file/FileUpload';
-import { CourseFormTabs, DraftStatusBadge } from '@/client/components/courses';
+import { Chapter } from '@/shared/types/courses/course';
 
 interface FormValues {
   title: string;
@@ -22,6 +22,8 @@ export default function NewCoursePage() {
   const [activeTab, setActiveTab] = useState('basic-info');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(new Date());
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [lessons, setLessons] = useState<any[]>([]);
   
   // Form values
   const [values, setValues] = useState<FormValues>({
@@ -57,6 +59,13 @@ export default function NewCoursePage() {
     setLastSaved(new Date());
   };
   
+  // Handle curriculum updates
+  const handleUpdateCurriculum = (updatedChapters: Chapter[], updatedLessons: any[]) => {
+    setChapters(updatedChapters);
+    setLessons(updatedLessons);
+    setLastSaved(new Date());
+  };
+  
   // Handle form submission (publish)
   const handlePublish = async () => {
     setIsSubmitting(true);
@@ -78,14 +87,24 @@ export default function NewCoursePage() {
         topics: values.topics,
         imageUrl: values.imageUrl || 'https://via.placeholder.com/800x400',
         status: 'published',
-        // Add minimal required lesson for API
-        lessons: [
+        chapters: chapters.map(chapter => ({
+          title: chapter.title,
+          description: chapter.description || '',
+          order: chapter.order
+        })),
+        lessons: lessons.length > 0 ? lessons.map(lesson => ({
+          title: lesson.title,
+          description: lesson.content || '',
+          videoUrl: lesson.videoUrl || 'https://www.youtube.com/watch?v=placeholder',
+          order: lesson.order,
+          chapterId: lesson.chapterId
+        })) : [
           {
             title: 'Introduction',
             order: 1,
             videoUrl: 'https://www.youtube.com/watch?v=placeholder',
-      description: '',
-      resources: []
+            description: '',
+            resources: []
           }
         ]
       };
@@ -96,7 +115,7 @@ export default function NewCoursePage() {
       
       if (response.data.success) {
         router.push('/admin/courses');
-    } else {
+      } else {
         throw new Error(response.data.error || 'Failed to create course');
       }
     } catch (error) {
@@ -121,14 +140,24 @@ export default function NewCoursePage() {
         topics: values.topics,
         imageUrl: values.imageUrl || 'https://via.placeholder.com/800x400',
         status: 'draft',
-        // Add minimal required lesson for API
-        lessons: [
+        chapters: chapters.map(chapter => ({
+          title: chapter.title,
+          description: chapter.description || '',
+          order: chapter.order
+        })),
+        lessons: lessons.length > 0 ? lessons.map(lesson => ({
+          title: lesson.title,
+          description: lesson.content || '',
+          videoUrl: lesson.videoUrl || 'https://www.youtube.com/watch?v=placeholder',
+          order: lesson.order,
+          chapterId: lesson.chapterId
+        })) : [
           {
-          title: 'Introduction',
-          order: 1,
-          videoUrl: 'https://www.youtube.com/watch?v=placeholder',
-          description: '',
-          resources: []
+            title: 'Introduction',
+            order: 1,
+            videoUrl: 'https://www.youtube.com/watch?v=placeholder',
+            description: '',
+            resources: []
           }
         ]
       };
@@ -255,6 +284,14 @@ export default function NewCoursePage() {
     </div>
   );
   
+  // Render curriculum tab
+  const renderCurriculumTab = () => (
+    <CurriculumTab
+      initialChapters={chapters}
+      onUpdateCurriculum={handleUpdateCurriculum}
+    />
+  );
+  
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -262,37 +299,38 @@ export default function NewCoursePage() {
           <div className="flex items-center space-x-3">
             <h1 className="text-2xl font-bold text-gray-900">Create New Course</h1>
             <DraftStatusBadge />
-                                        </div>
-                                        
+          </div>
+          
           <div className="flex space-x-4">
-                                            <button
+            <button
               type="button"
               onClick={handleSaveDraft}
               disabled={isSubmitting}
               className="px-6 py-2.5 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 transition-colors"
             >
               Save Draft
-                                            </button>
+            </button>
             
-                                                  <button
+            <button
               type="button"
               onClick={handlePublish}
               disabled={isSubmitting}
               className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-70"
             >
               {isSubmitting ? 'Publishing...' : 'Publish Course'}
-                                                  </button>
-                                                </div>
-                                            </div>
+            </button>
+          </div>
+        </div>
         
         {/* Tabs Navigation */}
         <div className="mb-6">
           <CourseFormTabs activeTab={activeTab} onTabChange={handleTabChange} />
-                      </div>
+        </div>
         
         {/* Tab Content */}
         <div>
           {activeTab === 'basic-info' && renderBasicInfoTab()}
+          {activeTab === 'curriculum' && renderCurriculumTab()}
           
           {/* Navigation Buttons */}
           <div className="flex justify-between items-center mt-6">
@@ -300,30 +338,30 @@ export default function NewCoursePage() {
               {lastSaved && (
                 <span className="text-sm text-gray-500">
                   Last saved: Just now
-                    </span>
+                </span>
               )}
-      </div>
-      
+            </div>
+            
             <div className="flex space-x-4">
-        <Link
+              <Link
                 href="/admin/courses"
                 className="flex items-center text-gray-600 hover:text-gray-800 py-2.5 px-6 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-        >
+              >
                 Back
-        </Link>
-      
-        <button
+              </Link>
+              
+              <button
                 type="button"
                 onClick={() => handleTabChange('curriculum')}
                 className="flex items-center bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-8 rounded-md transition-colors"
               >
                 Next
                 <ArrowRightIcon className="h-4 w-4 ml-1" />
-        </button>
-    </div>
-      </div>
+              </button>
             </div>
           </div>
+        </div>
+      </div>
     </div>
   );
 }
