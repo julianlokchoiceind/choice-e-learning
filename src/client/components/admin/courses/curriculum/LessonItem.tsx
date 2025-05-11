@@ -23,7 +23,7 @@ const LessonItem: React.FC<LessonItemProps> = ({
           type="button"
           onClick={() => window.location.href = `/admin/lessons/${lesson.id}/edit`}
           className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
-          title="Chỉnh sửa nội dung"
+          title="Edit content"
         >
           <PencilIcon className="h-4 w-4" />
         </button>
@@ -32,7 +32,7 @@ const LessonItem: React.FC<LessonItemProps> = ({
           type="button"
           onClick={onDelete}
           className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-          title="Xóa bài học"
+          title="Delete lesson"
         >
           <TrashIcon className="h-4 w-4" />
         </button>

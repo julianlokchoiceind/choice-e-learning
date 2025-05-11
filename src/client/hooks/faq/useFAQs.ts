@@ -35,7 +35,7 @@ export function useFAQs(isAdmin = false) {
   });
 
   // Base URL depending on if admin or public
-  const baseUrl = isAdmin ? '/api/admin/faqs' : '/api/faqs';
+  const baseUrl = isAdmin ? '/api/admin/faqs' : '/api/marketing/faqs';
 
   /**
    * Fetch FAQs with filtering and pagination

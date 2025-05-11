@@ -92,7 +92,7 @@ export default function FileUpload({
         }
       };
       
-      const response = await apiClient.post('/api/upload', formData, uploadConfig);
+      const response = await apiClient.post('/api/admin/upload', formData, uploadConfig);
       
       // Parse the response
       const result = response.data;

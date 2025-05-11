@@ -110,7 +110,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
       
       try {
         const apiClient = (await import('@/client/utils/http/api-client')).default;
-        const response = await apiClient.get(`/api/users/me/courses`);
+        const response = await apiClient.get(`/api/dashboard/user/me/courses`);
         const data = response.data;
         if (data.success) {
           const enrolled = data.courses.some((c) => c.id === courseId);

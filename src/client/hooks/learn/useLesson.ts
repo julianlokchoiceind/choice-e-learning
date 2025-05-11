@@ -27,7 +27,7 @@ export function useLesson(lessonId: string, options: UseLessonOptions = {}) {
       setLesson(response.data);
       
       // Kiểm tra xem bài học đã hoàn thành chưa
-      const progressResponse = await apiClient.get('/api/userProgress', {
+      const progressResponse = await apiClient.get('/api/dashboard/progress', {
         params: { lessonId }
       });
       
@@ -49,7 +49,7 @@ export function useLesson(lessonId: string, options: UseLessonOptions = {}) {
     if (!lessonId || !lesson) return;
     
     try {
-      await apiClient.post('/api/userProgress', {
+      await apiClient.post('/api/dashboard/progress', {
         lessonId,
         courseId: lesson.courseId,
         completed: true
@@ -73,7 +73,7 @@ export function useLesson(lessonId: string, options: UseLessonOptions = {}) {
     if (!lessonId || !lesson) return;
     
     try {
-      await apiClient.post('/api/userProgress', {
+      await apiClient.post('/api/dashboard/progress', {
         lessonId,
         courseId: lesson.courseId,
         progress

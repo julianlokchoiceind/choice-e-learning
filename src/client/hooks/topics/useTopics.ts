@@ -46,7 +46,7 @@ function useTopics(isAdmin = false) {
   });
 
   // Base URL depending on if admin or public
-  const baseUrl = isAdmin ? '/api/admin/topics' : '/api/topics';
+  const baseUrl = isAdmin ? '/api/admin/topics' : '/api/courses/topics';
 
   /**
    * Fetch topics with filtering and pagination

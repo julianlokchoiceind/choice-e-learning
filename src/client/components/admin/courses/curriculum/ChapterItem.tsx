@@ -37,7 +37,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
         
         <div>
           <h3 className="font-medium text-gray-900">
-            Chương {chapter.order}: {chapter.title}
+            Chapter {chapter.order}: {chapter.title}
           </h3>
           {chapter.description && (
             <p className="text-sm text-gray-500 mt-1">{chapter.description}</p>
@@ -47,14 +47,14 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
       
       <div className="flex items-center space-x-2">
         <span className="text-sm text-gray-500">
-          {chapter.lessons?.length || 0} bài học
+          {chapter.lessons?.length || 0} lessons
         </span>
         
         <button
           type="button"
           onClick={onAddLesson}
           className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded"
-          title="Thêm bài học"
+          title="Add lesson"
         >
           <PlusIcon className="h-5 w-5" />
         </button>
@@ -63,7 +63,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
           type="button"
           onClick={onEdit}
           className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded"
-          title="Chỉnh sửa chương"
+          title="Edit chapter"
         >
           <PencilIcon className="h-5 w-5" />
         </button>
@@ -72,7 +72,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
           type="button"
           onClick={onDelete}
           className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-          title="Xóa chương"
+          title="Delete chapter"
         >
           <TrashIcon className="h-5 w-5" />
         </button>

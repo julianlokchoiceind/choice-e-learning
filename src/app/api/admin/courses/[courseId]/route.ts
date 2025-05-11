@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/server/db/prisma-client';
-import { withAdmin } from '@/server/api/route-handlers';
+import { withAdmin, AuthenticatedContext } from '@/server/api/route-handlers';
 
 // GET a specific course by ID (admin view)
-export const GET = withAdmin(async (req: NextRequest, context) => {
+export const GET = withAdmin(async (req: NextRequest, context: AuthenticatedContext) => {
   try {
-    const courseId = req.nextUrl.pathname.split('/').pop();
+    const courseId = context.params.courseId;
     
     // Validate course ID
     if (!courseId) {
@@ -72,9 +72,9 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
 });
 
 // PUT - Update a course
-export const PUT = withAdmin(async (req: NextRequest, context) => {
+export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedContext) => {
   try {
-    const courseId = req.nextUrl.pathname.split('/').pop();
+    const courseId = context.params.courseId;
     
     // Validate course ID
     if (!courseId) {
@@ -212,9 +212,9 @@ export const PUT = withAdmin(async (req: NextRequest, context) => {
 });
 
 // DELETE - Delete a course
-export const DELETE = withAdmin(async (req: NextRequest, context) => {
+export const DELETE = withAdmin(async (req: NextRequest, context: AuthenticatedContext) => {
   try {
-    const courseId = req.nextUrl.pathname.split('/').pop();
+    const courseId = context.params.courseId;
     
     // Validate course ID
     if (!courseId) {
@@ -261,4 +261,4 @@ export const DELETE = withAdmin(async (req: NextRequest, context) => {
       { status: 500 }
     );
   }
-});
+}); 

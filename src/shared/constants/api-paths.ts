@@ -50,13 +50,13 @@ export const ADMIN_PATHS = {
 
 // FAQ endpoints
 export const FAQ_PATHS = {
-  BASE: `${API_BASE_PATH}/faqs`,
-  CATEGORIES: `${API_BASE_PATH}/faqs/categories`,
+  BASE: `${API_BASE_PATH}/marketing/faqs`,
+  CATEGORIES: `${API_BASE_PATH}/marketing/faqs/categories`,
 };
 
 // Topic endpoints
 export const TOPIC_PATHS = {
-  BASE: `${API_BASE_PATH}/topics`,
+  BASE: `${API_BASE_PATH}/courses/topics`,
 };
 
 // File upload endpoints

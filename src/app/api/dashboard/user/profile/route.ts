@@ -30,7 +30,7 @@ const profileUpdateSchema = z.object({
 
 // Document the API endpoint
 documentEndpoint({
-  path: '/api/users/profile',
+  path: '/api/dashboard/user/profile',
   method: 'GET',
   description: 'Get the current user\'s profile information',
   requiresAuth: true,
@@ -74,7 +74,7 @@ documentEndpoint({
 });
 
 documentEndpoint({
-  path: '/api/users/profile',
+  path: '/api/dashboard/user/profile',
   method: 'PUT',
   description: 'Update the current user\'s profile information',
   requiresAuth: true,
@@ -212,4 +212,4 @@ const updateProfile = withAuth(async (req, { user }) => {
 
 // Export the route handler with method routing
 export const GET = getProfile;
-export const PUT = updateProfile;
+export const PUT = updateProfile; 

@@ -123,7 +123,7 @@ export default function CourseLearnPage() {
       try {
         // Fetch enrollment status
         const apiClient = (await import('@/client/utils/http/api-client')).default;
-        const response = await apiClient.get(`/api/users/me/courses`);
+        const response = await apiClient.get(`/api/dashboard/user/me/courses`);
         const data = response.data;
         
         if (!data.success || !data.courses.some((c: { id: string }) => c.id === courseId)) {

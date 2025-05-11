@@ -1,11 +1,15 @@
+/**
+ * Marketing FAQ Categories API endpoint
+ * Provides access to FAQ category data for marketing pages
+ */
+
 import { NextRequest } from 'next/server';
 import { apiSuccess, apiError } from '@/server/api/api-response';
-import { withAdmin } from '@/server/api/route-handlers';
-import { faqService } from '@/server/services/faq/faq-service';
 import { ApiErrorCode } from '@/server/api/api-errors';
+import { faqService } from '@/server/services/faq/faq-service';
 
-// GET - Get all distinct FAQ categories
-export const GET = withAdmin(async (_req: any) => {
+// GET - Get all FAQ categories
+export async function GET(req: NextRequest) {
   try {
     const categories = await faqService.getAllCategories();
     return apiSuccess(categories);
@@ -17,4 +21,4 @@ export const GET = withAdmin(async (_req: any) => {
       ApiErrorCode.SERVER_ERROR
     );
   }
-});
+} 

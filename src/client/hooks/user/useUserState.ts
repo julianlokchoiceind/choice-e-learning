@@ -17,7 +17,7 @@ export function useUserState() {
       }
 
       try {
-        const response = await axios.get('/api/users/me');
+        const response = await axios.get('/api/dashboard/user/me');
         if (response.data.success) {
           setUser(response.data.data);
         } else {

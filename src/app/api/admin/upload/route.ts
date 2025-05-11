@@ -1,6 +1,6 @@
 /**
- * File upload API endpoint
- * Handles file uploads for various parts of the application
+ * Admin File upload API endpoint
+ * Handles file uploads for various parts of the application (admin only)
  */
 
 import { NextRequest } from 'next/server';
@@ -79,4 +79,4 @@ export const POST = withAdmin(
       return apiServerError('Failed to upload file');
     }
   })
-);
+); 

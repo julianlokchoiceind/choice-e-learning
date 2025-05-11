@@ -54,7 +54,7 @@ export default function Dashboard() {
         if (session?.user?.id) {
           // Use axios to call the server action from the client component
           const apiClient = (await import('@/client/utils/http/api-client')).default;
-          const response = await apiClient.get(`/api/userStats?userId=${session.user.id}`);
+          const response = await apiClient.get(`/api/dashboard/stats?userId=${session.user.id}`);
           const data = response.data;
           if (data.success) {
             setStats(data.stats);
@@ -71,7 +71,7 @@ export default function Dashboard() {
       try {
         if (session?.user?.id) {
           const apiClient = (await import('@/client/utils/http/api-client')).default;
-          const response = await apiClient.get(`/api/enrolledCourses?userId=${session.user.id}`);
+          const response = await apiClient.get(`/api/dashboard/courses/enrolled?userId=${session.user.id}`);
           const data = response.data;
           if (data.success && data.courses) {
             setEnrolledCourses(data.courses);
@@ -86,7 +86,7 @@ export default function Dashboard() {
       try {
         if (session?.user?.id) {
           const apiClient = (await import('@/client/utils/http/api-client')).default;
-          const response = await apiClient.get('/api/achievements');
+          const response = await apiClient.get('/api/dashboard/achievements');
           const data = response.data;
           if (data.success && data.achievements) {
             setAchievements(data.achievements);

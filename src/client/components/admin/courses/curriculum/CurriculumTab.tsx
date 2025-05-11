@@ -19,11 +19,11 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
   const [isAddingChapter, setIsAddingChapter] = useState(false);
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
   
-  // Xử lý thêm chapter mới
+  // Handle adding new chapter
   const handleAddChapter = (chapter: Partial<Chapter>) => {
     const newChapter = {
       id: `temp-${Date.now()}`,
-      title: chapter.title || 'Chương mới',
+      title: chapter.title || 'New chapter',
       description: chapter.description || '',
       order: chapters.length + 1,
       courseId: '',
@@ -37,7 +37,7 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
     setChapters(updatedChapters);
     setIsAddingChapter(false);
     
-    // Tạo mảng lessons cho API
+    // Create lessons array for API
     const allLessons = updatedChapters.flatMap(chapter => 
       (chapter.lessons || []).map(lesson => ({
         ...lesson,
@@ -48,7 +48,7 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
     onUpdateCurriculum(updatedChapters, allLessons);
   };
   
-  // Xử lý chỉnh sửa chapter
+  // Handle editing chapter
   const handleEditChapter = (chapterId: string, data: Partial<Chapter>) => {
     const updatedChapters = chapters.map(chapter => 
       chapter.id === chapterId ? { ...chapter, ...data } : chapter
@@ -57,7 +57,7 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
     setChapters(updatedChapters);
     setEditingChapterId(null);
     
-    // Tạo mảng lessons cho API
+    // Create lessons array for API
     const allLessons = updatedChapters.flatMap(chapter => 
       (chapter.lessons || []).map(lesson => ({
         ...lesson,
@@ -68,12 +68,12 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
     onUpdateCurriculum(updatedChapters, allLessons);
   };
   
-  // Xử lý xóa chapter
+  // Handle deleting chapter
   const handleDeleteChapter = (chapterId: string) => {
-    if (confirm('Bạn có chắc muốn xóa chương này và tất cả bài học trong đó?')) {
+    if (confirm('Are you sure you want to delete this chapter and all its lessons?')) {
       const updatedChapters = chapters.filter(chapter => chapter.id !== chapterId);
       
-      // Cập nhật lại thứ tự các chapter
+      // Update chapter order
       const reorderedChapters = updatedChapters.map((chapter, index) => ({
         ...chapter,
         order: index + 1
@@ -81,7 +81,7 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
       
       setChapters(reorderedChapters);
       
-      // Tạo mảng lessons cho API
+      // Create lessons array for API
       const allLessons = reorderedChapters.flatMap(chapter => 
         (chapter.lessons || []).map(lesson => ({
           ...lesson,
@@ -93,13 +93,13 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
     }
   };
   
-  // Xử lý thêm bài học mới cho chapter
+  // Handle adding new lesson to chapter
   const handleAddLesson = (chapterId: string, lesson: any) => {
     const updatedChapters = chapters.map(chapter => {
       if (chapter.id === chapterId) {
         const newLesson = {
           id: `temp-lesson-${Date.now()}`,
-          title: lesson.title || 'Bài học mới',
+          title: lesson.title || 'New lesson',
           content: '',
           videoUrl: 'https://www.youtube.com/watch?v=placeholder',
           order: (chapter.lessons?.length || 0) + 1,
@@ -120,7 +120,7 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
     
     setChapters(updatedChapters);
     
-    // Tạo mảng lessons cho API
+    // Create lessons array for API
     const allLessons = updatedChapters.flatMap(chapter => 
       (chapter.lessons || []).map(lesson => ({
         ...lesson,
@@ -131,14 +131,14 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
     onUpdateCurriculum(updatedChapters, allLessons);
   };
   
-  // Xử lý xóa bài học
+  // Handle deleting lesson
   const handleDeleteLesson = (chapterId: string, lessonId: string) => {
-    if (confirm('Bạn có chắc muốn xóa bài học này?')) {
+    if (confirm('Are you sure you want to delete this lesson?')) {
       const updatedChapters = chapters.map(chapter => {
         if (chapter.id === chapterId) {
           const filteredLessons = (chapter.lessons || []).filter(lesson => lesson.id !== lessonId);
           
-          // Cập nhật lại thứ tự các bài học
+          // Update lesson order
           const reorderedLessons = filteredLessons.map((lesson, index) => ({
             ...lesson,
             order: index + 1
@@ -154,7 +154,7 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
       
       setChapters(updatedChapters);
       
-      // Tạo mảng lessons cho API
+      // Create lessons array for API
       const allLessons = updatedChapters.flatMap(chapter => 
         (chapter.lessons || []).map(lesson => ({
           ...lesson,
@@ -169,7 +169,7 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-800">Nội dung khóa học</h2>
+        <h2 className="text-xl font-semibold text-gray-800">Course Content</h2>
         
         <button
           type="button"
@@ -177,7 +177,7 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
           className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
         >
           <PlusIcon className="h-5 w-5 mr-1" />
-          Thêm chương
+          Add Chapter
         </button>
       </div>
       
@@ -192,7 +192,7 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
       
       {chapters.length === 0 ? (
         <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-lg">
-          <p className="text-gray-500">Chưa có chương nào. Bắt đầu bằng cách thêm chương đầu tiên.</p>
+          <p className="text-gray-500">No chapters yet. Start by adding the first chapter.</p>
         </div>
       ) : (
         <ChapterList

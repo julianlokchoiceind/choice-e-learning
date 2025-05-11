@@ -42,11 +42,11 @@ const ChapterForm: React.FC<ChapterFormProps> = ({
     const newErrors: Record<string, string> = {};
     
     if (!formData.title.trim()) {
-      newErrors.title = 'Tên chương không được để trống';
+      newErrors.title = 'Chapter name cannot be empty';
     }
     
     if (!formData.order.trim() || isNaN(parseInt(formData.order))) {
-      newErrors.order = 'Thứ tự phải là số';
+      newErrors.order = 'Order must be a number';
     }
     
     setErrors(newErrors);
@@ -69,7 +69,7 @@ const ChapterForm: React.FC<ChapterFormProps> = ({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex justify-between items-center mb-2">
         <h3 className="text-lg font-medium text-gray-800">
-          {initialData?.id ? 'Chỉnh sửa chương' : 'Thêm chương mới'}
+          {initialData?.id ? 'Edit Chapter' : 'Add New Chapter'}
         </h3>
         <button
           type="button"
@@ -82,7 +82,7 @@ const ChapterForm: React.FC<ChapterFormProps> = ({
       
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-          Tên chương
+          Chapter Name
         </label>
         <input
           type="text"
@@ -90,7 +90,7 @@ const ChapterForm: React.FC<ChapterFormProps> = ({
           name="title"
           value={formData.title}
           onChange={handleChange}
-          placeholder="Nhập tên chương"
+          placeholder="Enter chapter name"
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
@@ -98,14 +98,14 @@ const ChapterForm: React.FC<ChapterFormProps> = ({
       
       <div>
         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-          Mô tả (tùy chọn)
+          Description (optional)
         </label>
         <textarea
           id="description"
           name="description"
           value={formData.description}
           onChange={handleChange}
-          placeholder="Mô tả ngắn gọn về chương này"
+          placeholder="Brief description of this chapter"
           rows={2}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
@@ -116,14 +116,14 @@ const ChapterForm: React.FC<ChapterFormProps> = ({
           type="submit"
           className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
         >
-          {initialData?.id ? 'Cập nhật' : 'Thêm chương'}
+          {initialData?.id ? 'Update' : 'Add Chapter'}
         </button>
         <button
           type="button"
           onClick={onCancel}
           className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
         >
-          Hủy
+          Cancel
         </button>
       </div>
     </form>

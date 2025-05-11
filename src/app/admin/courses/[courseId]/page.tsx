@@ -43,7 +43,7 @@ export default function CourseDetailPage() {
         setError(null);
         
         const apiClient = (await import('@/client/utils/http/api-client')).default;
-        const response = await apiClient.get(`/api/courses/${courseId}`);
+        const response = await apiClient.get(`/api/admin/courses/${courseId}`);
         const data = response.data;
         
         if (data.success && data.data) {

@@ -25,7 +25,7 @@ export const LessonList = () => {
     setError(null);
     
     try {
-      let url = `/api/lessons?page=${page}&limit=10`;
+      let url = `/api/admin/lessons?page=${page}&limit=10`;
       if (courseId) {
         url += `&courseId=${courseId}`;
       }
@@ -52,7 +52,7 @@ export const LessonList = () => {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch('/api/courses');
+      const response = await fetch('/api/admin/courses');
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -87,7 +87,7 @@ export const LessonList = () => {
     }
     
     try {
-      const response = await fetch(`/api/lessons/${lessonId}`, {
+      const response = await fetch(`/api/admin/lessons/${lessonId}`, {
         method: 'DELETE',
       });
       

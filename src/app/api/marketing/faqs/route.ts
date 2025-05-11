@@ -1,3 +1,8 @@
+/**
+ * Marketing FAQs API endpoint
+ * Provides access to FAQ data for marketing pages
+ */
+
 import { NextRequest } from 'next/server';
 import { apiSuccess, apiError } from '@/server/api/api-response';
 import { ApiErrorCode } from '@/server/api/api-errors';
@@ -35,4 +40,4 @@ export async function GET(req: NextRequest) {
       ApiErrorCode.SERVER_ERROR
     );
   }
-}
+} 
