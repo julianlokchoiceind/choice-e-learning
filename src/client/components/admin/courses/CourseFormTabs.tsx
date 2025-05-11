@@ -9,7 +9,7 @@ interface CourseFormTabsProps {
 
 const CourseFormTabs: FC<CourseFormTabsProps> = ({ activeTab, onTabChange }) => {
   const tabs = [
-    { id: 'basic-info', label: 'Basic Info' },
+    { id: 'basicInfo', label: 'Basic Info' },
     { id: 'curriculum', label: 'Curriculum' },
     { id: 'media-resources', label: 'Media & Resources' },
     { id: 'settings-pricing', label: 'Settings & Pricing' },

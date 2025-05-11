@@ -19,7 +19,7 @@ interface FormValues {
 
 export default function NewCoursePage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState('basic-info');
+  const [activeTab, setActiveTab] = useState('basicInfo');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(new Date());
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -225,7 +225,7 @@ export default function NewCoursePage() {
         
         {/* Tab Content */}
         <div>
-          {activeTab === 'basic-info' && (
+          {activeTab === 'basicInfo' && (
             <BasicInfoTab 
               values={values} 
               handleChange={handleChange} 
