@@ -70,54 +70,7 @@ A comprehensive e-learning platform built with Next.js, featuring both robust fr
 - **File Storage:** AWS S3 or similar cloud storage
 - **API Architecture:** RESTful endpoints in Next.js API routes
 
-## Backend Structure
-```
-/src
-  /app
-    /api
-      /auth
-      /courses
-      /challenges
-      /reviews
-      /faq
-      /roadmap
-      /admin
-  /lib
-    /db
-    /auth
-  /services
-  /types
-  /utils
-  /config
-  /middleware
-```
-
-## Implementation Priority
-⓵ PHASE 1: Core Infrastructure (MongoDB Atlas setup, DB connection, Auth configuration)
-⓶ PHASE 2: Data Models & Types
-⓷ PHASE 3: Authentication & User Management
-⓸ PHASE 4: Course Functionality
-⓹ PHASE 5: Supporting Features (Challenges, Reviews, FAQ, Roadmap)
-⓺ PHASE 6: Admin Functionality
-
-## MongoDB Atlas Configuration
-- Create MongoDB Atlas account and project
-- Set up cluster with appropriate tier (start with free tier for development)
-- Configure network access (IP whitelisting)
-- Create database user with appropriate permissions
-- Obtain connection string for application
-- Configure environment variables in Next.js application
-- Set up database indexes for performance optimization
-
-## Security Requirements
-- Input validation for all endpoints
-- Protection against common vulnerabilities
-- Secure storage of sensitive data
-- HTTPS enforcement
-- MongoDB Atlas network security configuration
-- Environment variable management for database credentials
-
-
+## Structure
 src/
 │
 ├── app/                            # Next.js App Router
@@ -648,3 +601,22 @@ src/
 │   └── index.css                   # Re-export all styles
 │
 └── middleware.ts                   # Next.js middleware
+
+## MongoDB Atlas Configuration
+- Create MongoDB Atlas account and project
+- Set up cluster with appropriate tier (start with free tier for development)
+- Configure network access (IP whitelisting)
+- Create database user with appropriate permissions
+- Obtain connection string for application
+- Configure environment variables in Next.js application
+- Set up database indexes for performance optimization
+
+## Security Requirements
+- Input validation for all endpoints
+- Protection against common vulnerabilities
+- Secure storage of sensitive data
+- HTTPS enforcement
+- MongoDB Atlas network security configuration
+- Environment variable management for database credentials
+
+
