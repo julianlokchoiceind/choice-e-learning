@@ -14,6 +14,14 @@ export enum CourseLevel {
 }
 
 /**
+ * Course status enum
+ */
+export enum CourseStatus {
+  DRAFT = 'draft',
+  PUBLISHED = 'published'
+}
+
+/**
  * Chapter interface
  */
 export interface Chapter {
@@ -40,6 +48,7 @@ export interface Course {
   isPublished?: boolean;
   level?: string;
   duration?: number;
+  status?: CourseStatus;
   createdAt?: Date;
   updatedAt?: Date;
   topics?: string[];
@@ -96,6 +105,7 @@ export interface CreateCourseParams {
   duration?: number;
   topics?: string[];
   isPublished?: boolean;
+  status?: CourseStatus;
 }
 
 /**
@@ -126,6 +136,8 @@ export interface CourseListItem {
   learningPoints?: string[];
   topics?: string[]; // Added to fix build error
   updatedAt?: Date; // Added to match what's returned by the service
+  status?: CourseStatus; // Added to show course publication status
+  isPublished?: boolean; // Added as fallback for status
 }
 
 /**

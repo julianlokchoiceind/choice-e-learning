@@ -125,21 +125,48 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
     
     try {
       // Update course with Prisma
-      const updatedCourse = await prisma.course.update({
-        where: { id: courseId },
-        data: {
-          ...updateData,
-          // Luôn đảm bảo updatedAt được cập nhật, tránh trường hợp Next.js cache lại
-          updatedAt: new Date()
+      let updatedCourse;
+      try {
+        updatedCourse = await prisma.course.update({
+          where: { id: courseId },
+          data: {
+            ...updateData,
+            // Luôn đảm bảo updatedAt được cập nhật, tránh trường hợp Next.js cache lại
+            updatedAt: new Date()
+          }
+        });
+        
+        // Log thông tin để debug
+        console.log(`Updated course ${courseId}`, {
+          imageUrl: updatedCourse.imageUrl,
+          updatedAt: updatedCourse.updatedAt
+        });
+      } catch (updateError: any) {
+        console.error('Error updating course:', updateError);
+        
+        // Check if the error is related to the status field
+        if (updateError.message && updateError.message.includes('Unknown argument `status`')) {
+          console.log('Status field error detected, trying without status field');
+          
+          // Create a new update data object without the status field
+          const { status, ...updateDataWithoutStatus } = updateData;
+          
+          // Try updating the course without the status field
+          updatedCourse = await prisma.course.update({
+            where: { id: courseId },
+            data: {
+              ...updateDataWithoutStatus,
+              updatedAt: new Date()
+            }
+          });
+          
+          // If we got here, the course was updated without the status field
+          console.log('Course updated successfully without status field');
+        } else {
+          // If it's another error, rethrow it
+          throw updateError;
         }
-      });
-      
-      // Log thông tin để debug
-      console.log(`Updated course ${courseId}`, {
-        imageUrl: updatedCourse.imageUrl,
-        updatedAt: updatedCourse.updatedAt
-      });
-      
+      }
     } catch (error: unknown) {
       // Course not found
       return NextResponse.json(

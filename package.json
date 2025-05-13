@@ -19,7 +19,9 @@
     "check-all": "node scripts/check-all.mjs",
     "ts:check": "tsc --noEmit",
     "ts:fix": "node src/scripts/fix-typescript-errors.mjs",
-    "ts:analyze": "node src/scripts/check-typescript-errors.mjs"
+    "ts:analyze": "node src/scripts/check-typescript-errors.mjs",
+    "update-courses": "node scripts/update-courses-status.mjs",
+    "restart-server": "npx prisma generate && npm run dev"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
@@ -30,6 +32,7 @@
     "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
     "buffer": "^6.0.3",
+    "dotenv": "^16.5.0",
     "events": "^3.3.0",
     "framer-motion": "^12.7.3",
     "jose": "^6.0.10",
@@ -61,7 +64,7 @@
     "file-loader": "^6.2.0",
     "fs-extra": "^11.3.0",
     "glob": "^11.0.2",
-    "mongodb": "^6.15.0",
+    "mongodb": "^6.16.0",
     "path": "^0.12.7",
     "path-browserify": "^1.0.1",
     "postcss": "^8.4.33",

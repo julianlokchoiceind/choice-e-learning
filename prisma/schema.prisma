@@ -65,6 +65,18 @@ model Topic {
   @@map("topics")
 }
 
+enum Level {
+  beginner
+  intermediate
+  advanced
+  all
+}
+
+enum CourseStatus {
+  draft
+  published
+}
+
 model Course {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
@@ -72,6 +84,7 @@ model Course {
   price       Float
   imageUrl    String?
   level       Level
+  status      CourseStatus @default(draft)
   topics      String[] // Giữ lại cho backward compatibility
   topicIds    String[] @db.ObjectId
   topicsList  Topic[]  @relation("CourseTopics", fields: [topicIds], references: [id])
@@ -88,13 +101,6 @@ model Course {
   progress   UserProgress[]
 
   @@map("courses")
-}
-
-enum Level {
-  beginner
-  intermediate
-  advanced
-  all
 }
 
 model Chapter {

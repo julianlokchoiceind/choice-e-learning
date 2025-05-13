@@ -10,6 +10,7 @@ import {
   ArrowLeftIcon,
   EyeIcon
 } from '@heroicons/react/24/outline';
+import { CourseStatus } from '@/shared/types/courses/course';
 
 interface Course {
   id: string;
@@ -21,6 +22,8 @@ interface Course {
   studentCount: number;
   videoUrl?: string;
   imageUrl?: string;
+  status?: CourseStatus;
+  isPublished?: boolean;
 }
 
 interface CourseFormData {
@@ -31,6 +34,7 @@ interface CourseFormData {
   topics: string;
   videoUrl: string;
   imageUrl?: string;
+  status: CourseStatus;
 }
 
 // Custom Image component with error handling
@@ -80,7 +84,8 @@ export default function CourseManager() {
     level: 'beginner',
     topics: '',
     videoUrl: '',
-    imageUrl: ''
+    imageUrl: '',
+    status: CourseStatus.DRAFT
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -198,6 +203,10 @@ export default function CourseManager() {
       errors.level = 'Level is required';
     }
     
+    if (!formData.status) {
+      errors.status = 'Status is required';
+    }
+    
     if (!formData.topics.trim()) {
       errors.topics = 'At least one topic is required';
     }
@@ -279,7 +288,8 @@ export default function CourseManager() {
       level: course.level as 'beginner' | 'intermediate' | 'advanced',
       topics: course.topics.join(', '),
       videoUrl: course.videoUrl || '',
-      imageUrl: course.imageUrl || ''
+      imageUrl: course.imageUrl || '',
+      status: course.status || CourseStatus.DRAFT
     });
     setCurrentView('edit');
   };
@@ -294,7 +304,8 @@ export default function CourseManager() {
       level: 'beginner',
       topics: '',
       videoUrl: '',
-      imageUrl: ''
+      imageUrl: '',
+      status: CourseStatus.DRAFT
     });
     setFormErrors({});
     setCurrentView('add');
@@ -305,6 +316,26 @@ export default function CourseManager() {
     setCurrentView('list');
     setSelectedCourse(null);
     setError(null);
+  };
+  
+  // Get CSS class for status badge
+  const getStatusBadgeClass = (status?: CourseStatus, isPublished?: boolean) => {
+    // Use status if available, otherwise fallback to isPublished
+    if (status === CourseStatus.PUBLISHED || (status === undefined && isPublished === true)) {
+      return 'bg-green-100 text-green-600';
+    } else {
+      return 'bg-amber-100 text-amber-600';
+    }
+  };
+  
+  // Format status for display
+  const formatStatus = (status?: CourseStatus, isPublished?: boolean): string => {
+    // Use status if available, otherwise fallback to isPublished
+    if (status === CourseStatus.PUBLISHED || (status === undefined && isPublished === true)) {
+      return 'Published';
+    } else {
+      return 'Draft';
+    }
   };
   
   // Render the CourseList view
@@ -407,6 +438,7 @@ export default function CourseManager() {
                   <th className='py-3 px-4 text-left font-medium text-indigo-600 uppercase tracking-wider w-16'>Image</th>
                   <th className='py-3 px-4 text-left font-medium text-indigo-600 uppercase tracking-wider'>Title</th>
                   <th className='py-3 px-4 text-left font-medium text-indigo-600 uppercase tracking-wider'>Level</th>
+                  <th className='py-3 px-4 text-left font-medium text-indigo-600 uppercase tracking-wider'>Status</th>
                   <th className='py-3 px-4 text-left font-medium text-indigo-600 uppercase tracking-wider'>Price</th>
                   <th className='py-3 px-4 text-left font-medium text-indigo-600 uppercase tracking-wider'>Students</th>
                   <th className='py-3 px-4 text-left font-medium text-indigo-600 uppercase tracking-wider'>Actions</th>
@@ -433,6 +465,11 @@ export default function CourseManager() {
                     <td className='py-3 px-4'>
                       <span className='px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-xs capitalize'>
                         {course.level}
+                      </span>
+                    </td>
+                    <td className='py-3 px-4'>
+                      <span className={`px-3 py-1 rounded-full text-xs ${getStatusBadgeClass(course.status, course.isPublished)}`}>
+                        {formatStatus(course.status, course.isPublished)}
                       </span>
                     </td>
                     <td className='py-3 px-4 font-medium'>${course.price.toFixed(2)}</td>
@@ -525,119 +562,142 @@ export default function CourseManager() {
                 )}
               </div>
               
-              <div>
-                <label htmlFor='level' className='block text-sm font-medium text-gray-700 mb-1'>
-                  Level *
-                </label>
-                <select
-                  id='level'
-                  name='level'
-                  value={formData.level}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${formErrors.level ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                >
-                  <option value=''>Select Level</option>
-                  <option value='beginner'>Beginner</option>
-                  <option value='intermediate'>Intermediate</option>
-                  <option value='advanced'>Advanced</option>
-                </select>
-                {formErrors.level && (
-                  <p className='mt-1 text-sm text-red-600'>{formErrors.level}</p>
-                )}
-              </div>
-            </div>
-            
-            <div>
-              <label htmlFor='description' className='block text-sm font-medium text-gray-700 mb-1'>
-                Description *
-              </label>
-              <textarea
-                id='description'
-                name='description'
-                rows={4}
-                value={formData.description}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border ${formErrors.description ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-              />
-              {formErrors.description && (
-                <p className='mt-1 text-sm text-red-600'>{formErrors.description}</p>
-              )}
-            </div>
-            
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              <div>
-                <label htmlFor='price' className='block text-sm font-medium text-gray-700 mb-1'>
-                  Price ($) *
-                </label>
-                <input
-                  id='price'
-                  name='price'
-                  type='number'
-                  step='0.01'
-                  min='0'
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${formErrors.price ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                />
-                {formErrors.price && (
-                  <p className='mt-1 text-sm text-red-600'>{formErrors.price}</p>
-                )}
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                <div>
+                  <label htmlFor='level' className='block text-sm font-medium text-gray-700 mb-1'>
+                    Level *
+                  </label>
+                  <select
+                    id='level'
+                    name='level'
+                    value={formData.level}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border ${formErrors.level ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                  >
+                    <option value=''>Select Level</option>
+                    <option value='beginner'>Beginner</option>
+                    <option value='intermediate'>Intermediate</option>
+                    <option value='advanced'>Advanced</option>
+                  </select>
+                  {formErrors.level && (
+                    <p className='mt-1 text-sm text-red-600'>{formErrors.level}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor='status' className='block text-sm font-medium text-gray-700 mb-1'>
+                    Status *
+                  </label>
+                  <select
+                    id='status'
+                    name='status'
+                    value={formData.status}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border ${formErrors.status ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                  >
+                    <option value={CourseStatus.DRAFT}>Draft</option>
+                    <option value={CourseStatus.PUBLISHED}>Published</option>
+                  </select>
+                  {formErrors.status && (
+                    <p className='mt-1 text-sm text-red-600'>{formErrors.status}</p>
+                  )}
+                </div>
               </div>
               
-              <div>
-                <label htmlFor='topics' className='block text-sm font-medium text-gray-700 mb-1'>
-                  Topics (comma-separated) *
-                </label>
-                <input
-                  id='topics'
-                  name='topics'
-                  type='text'
-                  placeholder='e.g. JavaScript, React, Web Development'
-                  value={formData.topics}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${formErrors.topics ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                />
-                {formErrors.topics && (
-                  <p className='mt-1 text-sm text-red-600'>{formErrors.topics}</p>
-                )}
-              </div>
-            </div>
-            
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              <div>
-                <label htmlFor='videoUrl' className='block text-sm font-medium text-gray-700 mb-1'>
-                  Video URL *
-                </label>
-                <input
-                  id='videoUrl'
-                  name='videoUrl'
-                  type='text'
-                  placeholder='https://youtu.be/example'
-                  value={formData.videoUrl}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${formErrors.videoUrl ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                />
-                {formErrors.videoUrl && (
-                  <p className='mt-1 text-sm text-red-600'>{formErrors.videoUrl}</p>
-                )}
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                <div>
+                  <label htmlFor='description' className='block text-sm font-medium text-gray-700 mb-1'>
+                    Description *
+                  </label>
+                  <textarea
+                    id='description'
+                    name='description'
+                    rows={4}
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border ${formErrors.description ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                  />
+                  {formErrors.description && (
+                    <p className='mt-1 text-sm text-red-600'>{formErrors.description}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor='price' className='block text-sm font-medium text-gray-700 mb-1'>
+                    Price ($) *
+                  </label>
+                  <input
+                    id='price'
+                    name='price'
+                    type='number'
+                    step='0.01'
+                    min='0'
+                    value={formData.price}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border ${formErrors.price ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                  />
+                  {formErrors.price && (
+                    <p className='mt-1 text-sm text-red-600'>{formErrors.price}</p>
+                  )}
+                </div>
               </div>
               
-              <div>
-                <label htmlFor='imageUrl' className='block text-sm font-medium text-gray-700 mb-1'>
-                  Image URL
-                </label>
-                <input
-                  id='imageUrl'
-                  name='imageUrl'
-                  type='text'
-                  placeholder='https://example.com/image.jpg'
-                  value={formData.imageUrl}
-                  onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border ${formErrors.imageUrl ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-                />
-                {formErrors.imageUrl && (
-                  <p className='mt-1 text-sm text-red-600'>{formErrors.imageUrl}</p>
-                )}
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                <div>
+                  <label htmlFor='topics' className='block text-sm font-medium text-gray-700 mb-1'>
+                    Topics (comma-separated) *
+                  </label>
+                  <input
+                    id='topics'
+                    name='topics'
+                    type='text'
+                    placeholder='e.g. JavaScript, React, Web Development'
+                    value={formData.topics}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border ${formErrors.topics ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                  />
+                  {formErrors.topics && (
+                    <p className='mt-1 text-sm text-red-600'>{formErrors.topics}</p>
+                  )}
+                </div>
+                
+                <div>
+                  <label htmlFor='videoUrl' className='block text-sm font-medium text-gray-700 mb-1'>
+                    Video URL *
+                  </label>
+                  <input
+                    id='videoUrl'
+                    name='videoUrl'
+                    type='text'
+                    placeholder='https://youtu.be/example'
+                    value={formData.videoUrl}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border ${formErrors.videoUrl ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                  />
+                  {formErrors.videoUrl && (
+                    <p className='mt-1 text-sm text-red-600'>{formErrors.videoUrl}</p>
+                  )}
+                </div>
+              </div>
+              
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                <div>
+                  <label htmlFor='imageUrl' className='block text-sm font-medium text-gray-700 mb-1'>
+                    Image URL
+                  </label>
+                  <input
+                    id='imageUrl'
+                    name='imageUrl'
+                    type='text'
+                    placeholder='https://example.com/image.jpg'
+                    value={formData.imageUrl}
+                    onChange={handleInputChange}
+                    className={`w-full px-3 py-2 border ${formErrors.imageUrl ? 'border-red-300' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                  />
+                  {formErrors.imageUrl && (
+                    <p className='mt-1 text-sm text-red-600'>{formErrors.imageUrl}</p>
+                  )}
+                </div>
               </div>
             </div>
             

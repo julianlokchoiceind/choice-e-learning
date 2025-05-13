@@ -10,6 +10,7 @@ export const courseSchema = z.object({
   imageUrl: z.string().url('Image URL must be a valid URL').optional(),
   level: z.enum(['beginner', 'intermediate', 'advanced']),
   topics: z.array(z.string()).min(1, 'At least one topic is required'),
+  status: z.enum(['draft', 'published']).optional().default('draft'),
 });
 
 export type CreateCourseInput = z.infer<typeof courseSchema>;

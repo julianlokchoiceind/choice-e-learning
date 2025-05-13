@@ -99,6 +99,9 @@ export async function getAllCourses(): Promise<CourseListItem[]> {
         // Chuẩn hóa URL hình ảnh (chỉ dùng một trường imageUrl)
         const imageUrl = processImageUrl(course.imageUrl);
         
+        // Ensure the status field is properly set
+        const status = course.status || 'published'; // Default to published for backward compatibility
+        
         return {
           id: course.id,
           title: course.title,
@@ -115,6 +118,7 @@ export async function getAllCourses(): Promise<CourseListItem[]> {
           instructorName: creator?.name || 'Administrator',
           learningPoints: Array.isArray(course.topics) ? course.topics : [],
           updatedAt: course.updatedAt, // Thêm trường updatedAt để client có thể kiểm tra thời điểm cập nhật
+          status: status // Thêm trường status để client biết trạng thái
         };
       })
     );
@@ -194,6 +198,9 @@ export async function getCourseById(courseId: string) {
     
     // Chuẩn hóa URL hình ảnh
     const imageUrl = processImageUrl(course.imageUrl);
+    
+    // Ensure the status field is properly set  
+    const status = (course as any).status || 'published'; // Default to published for backward compatibility
       
     return {
       id: course.id,
@@ -221,7 +228,8 @@ export async function getCourseById(courseId: string) {
         courses: 1, // Simplified
       },
       reviews: processedReviews,
-      updatedAt: course.updatedAt // Đảm bảo có trường này để client có thể kiểm tra
+      updatedAt: course.updatedAt, // Đảm bảo có trường này để client có thể kiểm tra
+      status: status // Status field - critical for filtering
     };
   } catch (error: unknown) {
     console.error('Error fetching course by ID:', error);

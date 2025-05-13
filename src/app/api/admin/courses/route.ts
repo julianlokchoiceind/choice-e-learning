@@ -35,7 +35,7 @@ const chapterSchema = z.object({
 // Schema for resource validation
 const resourceSchema = z.object({
   title: z.string().min(1, 'Resource title is required'),
-  url: z.string().url('Must be a valid URL'),
+  url: z.string(),
   type: z.string()
 });
 
@@ -44,24 +44,46 @@ const lessonSchema = z.object({
   title: z.string().min(1, 'Lesson title is required'),
   description: z.string().optional().default(''),
   order: z.number().int().min(1, 'Order must be a positive integer'),
-  videoUrl: z.string().url('Must be a valid URL'),
+  videoUrl: z.string().optional(),
   chapterId: z.string().optional(),
   resources: z.array(resourceSchema).optional().default([])
 });
 
-// Schema for course validation
-const courseSchema = z.object({
+// Schema for published course validation
+const publishedCourseSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
+  description: z.string().min(1, 'Description must be at least 1 characters'),
   price: z.number().min(0, 'Price must be a positive number'),
   level: z.enum(['beginner', 'intermediate', 'advanced', 'all']),
   topics: z.array(z.string()),
-  videoUrl: z.string().url('Must be a valid URL').optional(),
-  imageUrl: z.string().url('Must be a valid URL').optional(),
-  chapters: z.array(chapterSchema).optional(),
-  lessons: z.array(lessonSchema),
-  slug: z.string().optional() // Add this line to include slug property
+  status: z.literal('published'),
+  videoUrl: z.string().optional(),
+  imageUrl: z.string().optional(),
+  chapters: z.array(chapterSchema).min(1, 'At least one chapter is required'),
+  lessons: z.array(lessonSchema).min(1, 'At least one lesson is required'),
+  slug: z.string().optional()
 });
+
+// Schema for draft course validation
+const draftCourseSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  price: z.number().min(0, 'Price must be a positive number').optional(),
+  level: z.enum(['beginner', 'intermediate', 'advanced', 'all']).optional(),
+  topics: z.array(z.string()).optional(),
+  status: z.literal('draft'),
+  videoUrl: z.string().optional(),
+  imageUrl: z.string().optional(),
+  chapters: z.array(chapterSchema).optional(),
+  lessons: z.array(lessonSchema).optional(),
+  slug: z.string().optional()
+});
+
+// Combined course schema
+const courseSchema = z.discriminatedUnion('status', [
+  publishedCourseSchema,
+  draftCourseSchema
+]);
 
 // Define valid level values exactly as they are stored in the database
 const VALID_LEVEL_VALUES = ['beginner', 'intermediate', 'advanced', 'all'];
@@ -71,28 +93,48 @@ export const POST = withAdmin(async (req: Request, context) => {
   try {
     console.log('Admin user creating course:', context.user.email);
     
-    const CourseSchema = z.object({
-      title: z.string().min(1, { message: 'Title is required' }),
-      description: z.string().min(1, { message: 'Description is required' }),
-      imageUrl: z.string().url({ message: 'Please provide a valid URL for image' }).optional(),
-      price: z.number().nonnegative({ message: 'Price must be a positive number' }),
-      level: z.enum(['beginner', 'intermediate', 'advanced', 'all']),
-      topics: z.array(z.string()),
-      videoUrl: z.string().url({ message: 'Please provide a valid URL for video' }).optional(),
-      chapters: z.array(chapterSchema).optional().default([]),
-      lessons: z.array(lessonSchema).min(1, { message: 'At least one lesson is required' })
-    });
-
     // Validate body
     const body = await req.json();
     console.log('Request body:', body);
     
-    // Convert 'all' level to 'beginner' to match the database schema
+    // Determine if this is a draft or published course
+    const status = body.status || 'draft';
+    
+    // Convert 'all' level to 'beginner' to match the database schema if level is provided
     if (body.level === 'all') {
       body.level = 'beginner';
     }
     
-    const validationResult = CourseSchema.safeParse(body);
+    // Generate auto title for draft if not provided
+    if (status === 'draft' && (!body.title || body.title.trim() === '')) {
+      // Get count of existing draft courses to generate sequence number
+      const draftCount = await prisma.course.count({
+        where: {
+          title: {
+            startsWith: 'Untitled-'
+          },
+          // @ts-ignore - Prisma schema đã được cập nhật nhưng TypeScript chưa nhận diện
+          status: 'draft'
+        }
+      });
+      
+      // Format: Untitled-{sequence}-{DDMMYYYY}
+      const today = new Date();
+      const dateStr = `${today.getDate().toString().padStart(2, '0')}${
+        (today.getMonth() + 1).toString().padStart(2, '0')}${
+        today.getFullYear()}`;
+      
+      body.title = `Untitled-${draftCount + 1}-${dateStr}`;
+    }
+    
+    // Apply different validation based on status
+    let validationResult;
+    
+    if (status === 'published') {
+      validationResult = publishedCourseSchema.safeParse(body);
+    } else {
+      validationResult = draftCourseSchema.safeParse(body);
+    }
 
     if (!validationResult.success) {
       console.error('Validation errors:', validationResult.error.format());
@@ -107,21 +149,23 @@ export const POST = withAdmin(async (req: Request, context) => {
       );
     }
 
-    const { 
-      title, 
-      description, 
-      imageUrl, 
-      price, 
-      level,
-      topics,
-      videoUrl
-    } = validationResult.data;
-
+    const validatedData = validationResult.data;
+    
+    // Set default values for draft courses
+    const title = validatedData.title || body.title || '';
+    const description = validatedData.description || '';
+    const price = validatedData.price || 0;
+    const level = validatedData.level || 'beginner';
+    const topics = validatedData.topics || [];
+    const imageUrl = validatedData.imageUrl || null;
+    const videoUrl = validatedData.videoUrl || null;
+    
     // Generate a slug from the title
     const slug = title.toLowerCase().replace(/\s+/g, '-') + '-' + uuidv4().substring(0, 8);
 
     // Extract chapters and lessons from the validated data
-    const { chapters = [], lessons = [] } = validationResult.data;
+    const chapters = validatedData.chapters || [];
+    const lessons = validatedData.lessons || [];
 
     // Từ mảng tên topic, tìm (hoặc tạo) các Topic trong DB
     const topicObjects = await Promise.all(
@@ -151,18 +195,26 @@ export const POST = withAdmin(async (req: Request, context) => {
     const topicIds = topicObjects.map(topic => topic.id);
 
     // Create the course with Prisma
-    const newCourse = await prisma.course.create({
-      data: {
-        title,
-        description,
-        imageUrl: processImageUrl(imageUrl),
-        price,
-        level,
-        topics: topics, // Giữ lại để tương thích ngược
-        topicIds: topicIds, // Liên kết với các Topic thực sự
-        studentIds: [],
-      }
-    });
+    let newCourse;
+    try {
+      newCourse = await prisma.course.create({
+        data: {
+          title,
+          description,
+          imageUrl: processImageUrl(imageUrl),
+          price,
+          level,
+          // @ts-ignore - Status field exists in the database schema but TypeScript doesn't recognize it yet
+          status: status as 'draft' | 'published',
+          topics: topics, // Giữ lại để tương thích ngược
+          topicIds: topicIds, // Liên kết với các Topic thực sự
+          studentIds: [],
+        }
+      });
+    } catch (createError: any) {
+      console.error('Error creating course:', createError);
+      throw createError;
+    }
 
     // Check if course was created successfully
     if (!newCourse) {
@@ -172,108 +224,111 @@ export const POST = withAdmin(async (req: Request, context) => {
       );
     }
 
-    try {
-      // Create chapters first
-      console.log('Creating chapters:', chapters.length);
-      const createdChapters: any[] = [];
-      for (const chapter of chapters) {
-        try {
-          const newChapter = await prisma.chapter.create({
-            data: {
-              title: chapter.title,
-              description: '',  // No description as per requirements
-              order: chapter.order,
-              courseId: newCourse.id
-            }
-          });
-          console.log('Created chapter:', newChapter);
-          createdChapters.push(newChapter);
-        } catch (chapterError: unknown) {
-          console.error('Error creating chapter:', chapterError);
-          // Continue to next chapter if this one fails
-        }
-      }
-
-      // Step 2: Create lessons
-      console.log('Creating lessons:', lessons.length);
-      for (const lesson of lessons) {
-        try {
-          // Find corresponding chapter if chapterId is provided
-          let chapterId = undefined;
-          if (lesson.chapterId) {
-            console.log('Looking for chapter with ID:', lesson.chapterId);
-            
-            // Find by order for legacy code compatibility
-            const chapterOrder = parseInt(lesson.chapterId);
-            if (!isNaN(chapterOrder)) {
-              const chapterByOrder = createdChapters.find(ch => ch.order === chapterOrder);
-              if (chapterByOrder) {
-                chapterId = chapterByOrder.id;
-                console.log(`Found chapter by order ${chapterOrder}, ID: ${chapterId}`);
+    // Only create chapters and lessons if they exist (for published courses)
+    if (chapters.length > 0 || lessons.length > 0) {
+      try {
+        // Create chapters first
+        console.log('Creating chapters:', chapters.length);
+        const createdChapters: any[] = [];
+        for (const chapter of chapters) {
+          try {
+            const newChapter = await prisma.chapter.create({
+              data: {
+                title: chapter.title,
+                description: '',  // No description as per requirements
+                order: chapter.order,
+                courseId: newCourse.id
               }
-            } else {
-              // Try to find by temporary ID format from frontend
-              // Make sure we have a string to work with
-              const chapterId_str = String(lesson.chapterId);
-              const chapterMatch = createdChapters.find(ch => 
-                chapterId_str.includes(String(ch.order)));
-              if (chapterMatch) {
-                chapterId = chapterMatch.id;
-                console.log(`Found chapter by matching ID pattern, ID: ${chapterId}`);
-              }
-            }
+            });
+            console.log('Created chapter:', newChapter);
+            createdChapters.push(newChapter);
+          } catch (chapterError: unknown) {
+            console.error('Error creating chapter:', chapterError);
+            // Continue to next chapter if this one fails
           }
-
-          // Create resources array if it exists
-          const resources = lesson.resources 
-            ? lesson.resources.map(resource => ({
-                title: resource.title,
-                url: resource.url,
-                type: resource.type
-              }))
-            : [];
-
-          console.log('Creating lesson:', {
-            title: lesson.title,
-            contentPreview: lesson.description?.substring(0, 20) || 'No description',
-            videoUrl: lesson.videoUrl,
-            chapterId: chapterId,
-            resourcesCount: resources.length
-          });
-
-          // Create the lesson
-          const createdLesson = await prisma.lesson.create({
-            data: {
-              title: lesson.title,
-              content: lesson.description || '',
-              videoUrl: lesson.videoUrl,
-              order: lesson.order,
-              courseId: newCourse.id,
-              chapterId: chapterId,
-              duration: null, // Setting duration to null (not using it as per requirements)
-              // Store resources as JSON in a field called 'resourcesData'
-              resourcesData: JSON.stringify(resources)
-            }
-          });
-
-          console.log('Lesson created successfully:', createdLesson.id);
-        } catch (lessonError: unknown) {
-          console.error('Error creating lesson:', lessonError, 'Lesson data:', {
-            title: lesson.title,
-            order: lesson.order,
-            chapterId: lesson.chapterId
-          });
-          // Continue to next lesson if this one fails
         }
+
+        // Step 2: Create lessons
+        console.log('Creating lessons:', lessons.length);
+        for (const lesson of lessons) {
+          try {
+            // Find corresponding chapter if chapterId is provided
+            let chapterId = undefined;
+            if (lesson.chapterId) {
+              console.log('Looking for chapter with ID:', lesson.chapterId);
+              
+              // Find by order for legacy code compatibility
+              const chapterOrder = parseInt(lesson.chapterId);
+              if (!isNaN(chapterOrder)) {
+                const chapterByOrder = createdChapters.find(ch => ch.order === chapterOrder);
+                if (chapterByOrder) {
+                  chapterId = chapterByOrder.id;
+                  console.log(`Found chapter by order ${chapterOrder}, ID: ${chapterId}`);
+                }
+              } else {
+                // Try to find by temporary ID format from frontend
+                // Make sure we have a string to work with
+                const chapterId_str = String(lesson.chapterId);
+                const chapterMatch = createdChapters.find(ch => 
+                  chapterId_str.includes(String(ch.order)));
+                if (chapterMatch) {
+                  chapterId = chapterMatch.id;
+                  console.log(`Found chapter by matching ID pattern, ID: ${chapterId}`);
+                }
+              }
+            }
+
+            // Create resources array if it exists
+            const resources = lesson.resources 
+              ? lesson.resources.map(resource => ({
+                  title: resource.title,
+                  url: resource.url,
+                  type: resource.type
+                }))
+              : [];
+
+            console.log('Creating lesson:', {
+              title: lesson.title,
+              contentPreview: lesson.description?.substring(0, 20) || 'No description',
+              videoUrl: lesson.videoUrl,
+              chapterId: chapterId,
+              resourcesCount: resources.length
+            });
+
+            // Create the lesson
+            const createdLesson = await prisma.lesson.create({
+              data: {
+                title: lesson.title,
+                content: lesson.description || '',
+                videoUrl: lesson.videoUrl,
+                order: lesson.order,
+                courseId: newCourse.id,
+                chapterId: chapterId,
+                duration: null, // Setting duration to null (not using it as per requirements)
+                // Store resources as JSON in a field called 'resourcesData'
+                resourcesData: JSON.stringify(resources)
+              }
+            });
+
+            console.log('Lesson created successfully:', createdLesson.id);
+          } catch (lessonError: unknown) {
+            console.error('Error creating lesson:', lessonError, 'Lesson data:', {
+              title: lesson.title,
+              order: lesson.order,
+              chapterId: lesson.chapterId
+            });
+            // Continue to next lesson if this one fails
+          }
+        }
+      } catch (error: unknown) {
+        console.error('Error creating course content:', error);
+        // Consider rolling back the course creation if content creation fails
+        await prisma.course.delete({ where: { id: newCourse.id } });
+        return NextResponse.json(
+          { success: false, error: 'Failed to create course content', details: (error as Error).message },
+          { status: 500 }
+        );
       }
-    } catch (error: unknown) {
-      console.error('Error creating course content:', error);
-      // Consider rolling back the course creation if content creation fails
-      await prisma.course.delete({ where: { id: newCourse.id } });
-      return NextResponse.json(
-        { success: false, error: 'Failed to create course content', details: (error as Error).message },
-        { status: 500 }
-      );
     }
 
     // Return the created course
@@ -400,7 +455,8 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
         studentsCount: course._count?.students || 0,
         lessonsCount: course._count?.lessons || 0,
         createdAt: course.createdAt,
-        updatedAt: course.updatedAt
+        updatedAt: course.updatedAt,
+        status: course.status || 'published'
       }));
       // Nếu sortBy là 'title', sort lại ở tầng Node.js để không phân biệt hoa/thường
       if (sortBy === 'title') {
@@ -434,6 +490,10 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
     }));
 
     console.log(`Returning ${formattedCourses.length} courses to client`);
+    // Add debug log for the first course status
+    if (formattedCourses.length > 0) {
+      console.log(`First course status: ${formattedCourses[0].status}`);
+    }
     console.log(`Pagination info: page ${page}/${totalPages}, total items: ${totalItems}`);
 
     return NextResponse.json({

@@ -150,12 +150,16 @@ const getCourses = withErrorHandling(async (req: NextRequest) => {
     // Get courses from service
     const courses = await getAllCourses();
     
-    // Apply filtering based on category and topics if provided
-    let filteredCourses = courses;
+    // CRITICAL: Filter out drafts for public API - only show published courses
+    let filteredCourses = courses.filter(course => 
+      course.status === 'published' || course.status === undefined
+    );
+    
+    console.log(`Filtered out draft courses. Total published courses: ${filteredCourses.length}`);
     
     // Category filter (can be used for level or a single topic)
     if (category) {
-      filteredCourses = courses.filter(course => 
+      filteredCourses = filteredCourses.filter(course => 
         course.learningPoints?.includes(category) || 
         course.level === category
       );
@@ -309,6 +313,8 @@ export const POST = withAdmin(async (req: NextRequest, context) => {
         level: normalizedLevel,
         topics: courseData.topics,
         studentIds: [],
+        // @ts-ignore - Status field exists in the database schema but TypeScript doesn't recognize it yet
+        status: 'published'
       }
     });
     

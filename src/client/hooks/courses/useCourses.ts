@@ -1,6 +1,39 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
-import { Course, CourseListItem } from '@/shared/types/courses/course';
+import { Course, CourseListItem, CourseStatus } from '@/shared/types/courses/course';
+
+/**
+ * Ensures a course has the correct status value based on status field or isPublished
+ * @param course Course object to process
+ * @returns Course with normalized status
+ */
+function normalizeStatus(course: any) {
+  // Skip if course is null or undefined
+  if (!course) return course;
+  
+  // If the status is already a valid CourseStatus enum value, keep it as is
+  if (course.status === CourseStatus.DRAFT || course.status === CourseStatus.PUBLISHED) {
+    return course;
+  }
+  
+  // If status is a string but not a CourseStatus enum, normalize it
+  if (typeof course.status === 'string') {
+    const status = course.status.toLowerCase();
+    if (status === 'draft' || status === 'published') {
+      // Convert to enum value
+      return {
+        ...course,
+        status: status as CourseStatus
+      };
+    }
+  }
+  
+  // If no valid status, fallback to isPublished
+  return {
+    ...course,
+    status: course.isPublished ? CourseStatus.PUBLISHED : CourseStatus.DRAFT
+  };
+}
 
 interface CourseFilter {
   search?: string;
@@ -148,10 +181,16 @@ function useCourses(isAdmin = false) {
       const processedCourses = (isAdmin
         ? (coursesData as CourseListItem[])
         : (coursesData as Course[])
-      ).map(course => ({
-        ...course,
-        imageUrl: course.imageUrl ? `${course.imageUrl}?t=${Date.now()}` : '/images/placeholder-course.jpg'
-      }));
+      ).map(course => {
+        // Normalize course status first
+        const normalizedCourse = normalizeStatus(course);
+        
+        // Then add image URL with cache busting
+        return {
+          ...normalizedCourse,
+          imageUrl: normalizedCourse.imageUrl ? `${normalizedCourse.imageUrl}?t=${Date.now()}` : '/images/placeholder-course.jpg'
+        };
+      });
       
       setCourses(processedCourses);
       
@@ -237,10 +276,13 @@ function useCourses(isAdmin = false) {
         // If data is an array, take the first item (though it should be a single object)
         const courseItem = Array.isArray(courseData) ? courseData[0] : courseData;
         
+        // Normalize the course status before adding other properties
+        const normalizedCourse = normalizeStatus(courseItem);
+        
         // Thêm timestamp vào URL hình ảnh để tránh caching và xử lý ảnh rỗng
         const processedCourse = {
-          ...courseItem,
-          imageUrl: courseItem.imageUrl ? `${courseItem.imageUrl}?t=${Date.now()}` : '/images/placeholder-course.jpg'
+          ...normalizedCourse,
+          imageUrl: normalizedCourse.imageUrl ? `${normalizedCourse.imageUrl}?t=${Date.now()}` : '/images/placeholder-course.jpg'
         };
         
         setCourse(processedCourse);
@@ -331,7 +373,8 @@ function useCourses(isAdmin = false) {
       const response = await axios.post(`${baseUrl}`, data);
       
       if (response.data.success) {
-        return response.data.data;
+        // Make sure to normalize status when returning the created course
+        return normalizeStatus(response.data.data);
       } else {
         throw new Error('Failed to create course');
       }
@@ -361,7 +404,8 @@ function useCourses(isAdmin = false) {
       const response = await axios.put(`${baseUrl}/${id}`, data);
       
       if (response.data.success) {
-        return response.data.data;
+        // Make sure to normalize status when returning the updated course
+        return normalizeStatus(response.data.data);
       } else {
         throw new Error('Failed to update course');
       }

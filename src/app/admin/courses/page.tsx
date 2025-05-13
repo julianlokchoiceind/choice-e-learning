@@ -13,7 +13,7 @@ import {
   BookOpenIcon,
 } from '@heroicons/react/24/outline';
 import { useCourses } from '@/client/hooks/courses';
-import { Course } from '@/shared/types/courses/course';
+import { Course, CourseStatus } from '@/shared/types/courses/course';
 
 // Define valid level options to ensure consistency with the backend
 const LEVEL_OPTIONS = [
@@ -203,6 +203,26 @@ export default function CoursesPage() {
         return level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
     }
   };
+  
+  // Get CSS class for status badge
+  const getStatusBadgeClass = (status?: CourseStatus, isPublished?: boolean) => {
+    // Use status if available, otherwise fallback to isPublished
+    if (status === CourseStatus.PUBLISHED || (status === undefined && isPublished === true)) {
+      return 'bg-green-100 text-green-800';
+    } else {
+      return 'bg-amber-100 text-amber-800';
+    }
+  };
+  
+  // Format status for display
+  const formatStatus = (status?: CourseStatus, isPublished?: boolean): string => {
+    // Use status if available, otherwise fallback to isPublished
+    if (status === CourseStatus.PUBLISHED || (status === undefined && isPublished === true)) {
+      return 'Published';
+    } else {
+      return 'Draft';
+    }
+  };
 
   return (
     <div className='space-y-6'>
@@ -319,6 +339,9 @@ export default function CoursesPage() {
                   <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
                     Price
                   </th>
+                  <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                    Status
+                  </th>
                   <th scope='col' className='py-4 px-6 text-right font-medium text-indigo-700 capitalize tracking-wider text-base'>
                     Actions
                   </th>
@@ -358,6 +381,11 @@ export default function CoursesPage() {
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
                       ${course.price.toFixed(2)}
+                    </td>
+                    <td className='px-6 py-4 whitespace-nowrap'>
+                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(course.status, course.isPublished)}`}>
+                        {formatStatus(course.status, course.isPublished)}
+                      </span>
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium'>
                       <div className='flex space-x-2 justify-end'>

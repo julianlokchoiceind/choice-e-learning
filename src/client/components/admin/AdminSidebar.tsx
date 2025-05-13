@@ -265,7 +265,7 @@ function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false
               <div className='pl-10 space-y-1'>
                 {submenu.map((item, index) => (
                   <Link
-                    key={"index"}
+                    key={`${text}-${index}`}
                     href={item.href}
                     className='flex items-center px-3 py-2 text-sm text-blue-100 hover:text-white hover:bg-blue-500/50 rounded-md sidebar-menu-item'
                   >
