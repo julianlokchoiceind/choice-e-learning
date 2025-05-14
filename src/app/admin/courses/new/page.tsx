@@ -20,7 +20,8 @@ interface FormValues {
 export default function NewCoursePage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('basicInfo');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(new Date());
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [lessons, setLessons] = useState<any[]>([]);
@@ -68,34 +69,34 @@ export default function NewCoursePage() {
   
   // Handle form submission (publish)
   const handlePublish = async () => {
-    setIsSubmitting(true);
+    setIsPublishing(true);
     
     try {
       // Enhanced validation
       if (!values.title || !values.description) {
         alert('Please fill in required fields: title and description');
-        setIsSubmitting(false);
+        setIsPublishing(false);
         return;
       }
       
       // Validate description length
       if (values.description.length < 10) {
         alert('Description must be at least 10 characters');
-        setIsSubmitting(false);
+        setIsPublishing(false);
         return;
       }
       
       // Validate chapters and lessons for published courses
       if (chapters.length === 0) {
         alert('At least one chapter is required for publishing');
-        setIsSubmitting(false);
+        setIsPublishing(false);
         setActiveTab('curriculum');
         return;
       }
       
       if (lessons.length === 0) {
         alert('At least one lesson is required for publishing');
-        setIsSubmitting(false);
+        setIsPublishing(false);
         setActiveTab('curriculum');
         return;
       }
@@ -155,13 +156,13 @@ export default function NewCoursePage() {
       console.error('Error creating course:', error);
       alert('Error creating course: ' + (error.message || 'Unknown error'));
     } finally {
-      setIsSubmitting(false);
+      setIsPublishing(false);
     }
   };
   
   // Handle save draft
   const handleSaveDraft = async () => {
-    setIsSubmitting(true);
+    setIsSavingDraft(true);
     
     try {
       // Prepare data for API
@@ -228,7 +229,7 @@ export default function NewCoursePage() {
       console.error('Error saving draft:', error);
       alert('Error saving draft: ' + (error.message || 'Unknown error'));
     } finally {
-      setIsSubmitting(false);
+      setIsSavingDraft(false);
     }
   };
   
@@ -253,19 +254,19 @@ export default function NewCoursePage() {
             <button
               type="button"
               onClick={handleSaveDraft}
-              disabled={isSubmitting}
-              className="px-6 py-2.5 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 transition-colors"
+              disabled={isSavingDraft || isPublishing}
+              className="px-6 py-2.5 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-70"
             >
-              Save Draft
+              {isSavingDraft ? 'Saving...' : 'Save Draft'}
             </button>
             
             <button
               type="button"
               onClick={handlePublish}
-              disabled={isSubmitting}
+              disabled={isPublishing || isSavingDraft}
               className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-70"
             >
-              {isSubmitting ? 'Publishing...' : 'Publish Course'}
+              {isPublishing ? 'Publishing...' : 'Publish Course'}
             </button>
           </div>
         </div>
@@ -308,7 +309,8 @@ export default function NewCoursePage() {
               <button
                 type="button"
                 onClick={() => handleTabChange('curriculum')}
-                className="flex items-center bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-8 rounded-md transition-colors"
+                disabled={isSavingDraft || isPublishing}
+                className="flex items-center bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-8 rounded-md transition-colors disabled:opacity-70"
               >
                 Next
                 <ArrowRightIcon className="h-4 w-4 ml-1" />

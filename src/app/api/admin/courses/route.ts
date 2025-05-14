@@ -105,26 +105,50 @@ export const POST = withAdmin(async (req: Request, context) => {
       body.level = 'beginner';
     }
     
-    // Generate auto title for draft if not provided
-    if (status === 'draft' && (!body.title || body.title.trim() === '')) {
-      // Get count of existing draft courses to generate sequence number
-      const draftCount = await prisma.course.count({
-        where: {
-          title: {
-            startsWith: 'Untitled-'
-          },
-          // @ts-ignore - Prisma schema đã được cập nhật nhưng TypeScript chưa nhận diện
-          status: 'draft'
-        }
-      });
+    // Generate auto title for draft if not provided or is default title
+    if (status === 'draft' && 
+        (!body.title || body.title.trim() === '' || body.title === 'Untitled Course')) {
       
-      // Format: Untitled-{sequence}-{DDMMYYYY}
+      // Format ngày hiện tại
       const today = new Date();
       const dateStr = `${today.getDate().toString().padStart(2, '0')}${
         (today.getMonth() + 1).toString().padStart(2, '0')}${
         today.getFullYear()}`;
       
-      body.title = `Untitled-${draftCount + 1}-${dateStr}`;
+      try {
+        // Tìm khóa học nháp trong ngày
+        const todayDrafts = await prisma.course.findMany({
+          where: {
+            title: { contains: `-${dateStr}` },
+            status: 'draft'
+          }
+        });
+        
+        // Filter format chuẩn và tìm số lớn nhất
+        const untitledPattern = new RegExp(`^Untitled-(\\d+)-${dateStr}$`);
+        let maxSequence = 0;
+        
+        todayDrafts.forEach(draft => {
+          const match = draft.title.match(untitledPattern);
+          if (match && match[1]) {
+            const sequence = parseInt(match[1]);
+            if (sequence > maxSequence) {
+              maxSequence = sequence;
+            }
+          }
+        });
+        
+        // Tạo tiêu đề mới
+        body.title = `Untitled-${maxSequence + 1}-${dateStr}`;
+        
+        console.log(`Created new draft course with title: ${body.title}`);
+        
+      } catch (error) {
+        console.error('Error finding draft courses:', error);
+        // Fallback với timestamp
+        const timestamp = Date.now();
+        body.title = `Untitled-1-${dateStr}-${timestamp}`;
+      }
     }
     
     // Apply different validation based on status
@@ -355,6 +379,7 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
     const url = new URL(req.url);
     const search = url.searchParams.get('search') || '';
     const levelParam = url.searchParams.get('level') || '';
+    const statusParam = url.searchParams.get('status') || '';
     const sortBy = url.searchParams.get('sortBy') || 'createdAt';
     const sortOrder = url.searchParams.get('order') || url.searchParams.get('sortOrder');
     const orderDirection = sortOrder?.toLowerCase() === 'asc' ? 'asc' : 'desc';
@@ -362,7 +387,7 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
     const limit = parseInt(url.searchParams.get('limit') || '10');
     
     console.log(`======= ADMIN COURSES API CALL (${new Date().toISOString()}) =======`);
-    console.log('Request params:', { search, level: levelParam, sortBy, sortOrder, orderDirection, page, limit });
+    console.log('Request params:', { search, level: levelParam, status: statusParam, sortBy, sortOrder, orderDirection, page, limit });
     
     // Build where condition for Prisma
     const where: any = {};
@@ -376,6 +401,11 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
     
     if (levelParam && levelParam !== 'all') {
       where.level = { equals: levelParam.toLowerCase() };
+    }
+    
+    // Filter by status if provided
+    if (statusParam && statusParam !== 'all') {
+      where.status = { equals: statusParam };
     }
 
     // Build orderBy condition for Prisma

@@ -13,6 +13,7 @@ import {
   CurrencyDollarIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
+import { formatCourseTitle } from '@/shared/utils/courses';
 
 interface Course {
   id: string;
@@ -115,7 +116,7 @@ export default function CourseDetailPage() {
           <ArrowLeftIcon className='h-4 w-4 mr-1' />
           Back to Courses
         </Link>
-        <h1 className='text-2xl font-bold text-gray-800 mt-2'>{course.title}</h1>
+        <h1 className='text-2xl font-bold text-gray-800 mt-2'>{formatCourseTitle(course.title)}</h1>
       </div>
       
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
@@ -125,7 +126,7 @@ export default function CourseDetailPage() {
             {course.imageUrl && (
               <div className='h-48 overflow-hidden'>
                 <Image src={course.imageUrl} 
-                  alt={course.title}
+                  alt={formatCourseTitle(course.title)}
                   className='w-full h-full object-cover'
                   width={500} height={300} />
               </div>

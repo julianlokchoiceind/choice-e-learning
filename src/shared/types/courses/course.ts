@@ -138,6 +138,7 @@ export interface CourseListItem {
   updatedAt?: Date; // Added to match what's returned by the service
   status?: CourseStatus; // Added to show course publication status
   isPublished?: boolean; // Added as fallback for status
+  displayTitle?: string; // Formatted title for UI display
 }
 
 /**

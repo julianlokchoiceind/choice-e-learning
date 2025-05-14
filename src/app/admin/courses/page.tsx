@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useCourses } from '@/client/hooks/courses';
 import { Course, CourseStatus } from '@/shared/types/courses/course';
+import { formatCourseTitle } from '@/shared/utils/courses';
 
 // Define valid level options to ensure consistency with the backend
 const LEVEL_OPTIONS = [
@@ -21,6 +22,13 @@ const LEVEL_OPTIONS = [
   { value: 'beginner', label: 'Beginner' },
   { value: 'intermediate', label: 'Intermediate' },
   { value: 'advanced', label: 'Advanced' }
+];
+
+// Define valid status options - phải khớp với enum CourseStatus
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'All Statuses' },
+  { value: CourseStatus.PUBLISHED, label: 'Published' },
+  { value: CourseStatus.DRAFT, label: 'Draft' }
 ];
 
 export default function CoursesPage() {
@@ -39,6 +47,7 @@ export default function CoursesPage() {
   // Initialize state with default values
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
   const [sortOption, setSortOption] = useState('newest');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   
@@ -58,6 +67,7 @@ export default function CoursesPage() {
       fetchCourses({
         search: debouncedSearchQuery || undefined,
         level: selectedLevel === 'all' ? undefined : selectedLevel,
+        status: selectedStatus === 'all' ? undefined : selectedStatus,
         page: pagination.page,
         limit: pagination.pageSize,
         ...getSortParams(sortOption)
@@ -137,12 +147,14 @@ export default function CoursesPage() {
       console.log('[CoursesPage] Fetching courses with filters:', {
         search: debouncedSearchQuery,
         level: selectedLevel,
+        status: selectedStatus,
         sortOption
       });
       
       fetchCourses({
         search: debouncedSearchQuery || undefined,
         level: selectedLevel === 'all' ? undefined : selectedLevel,
+        status: selectedStatus === 'all' ? undefined : selectedStatus,
         page: 1,
         limit: 10,
         ...getSortParams(sortOption)
@@ -154,7 +166,7 @@ export default function CoursesPage() {
       console.error('[CoursesPage] Exception in courses fetch effect:', error);
       // Continue rendering with empty data
     }
-  }, [debouncedSearchQuery, selectedLevel, sortOption, fetchCourses]);
+  }, [debouncedSearchQuery, selectedLevel, selectedStatus, sortOption, fetchCourses]);
 
   // Get CSS class for level badge - using case-insensitive matching
   const getLevelBadgeClass = (level?: string) => {
@@ -292,6 +304,44 @@ export default function CoursesPage() {
               ))}
             </select>
             
+            {/* Status dropdown */}
+            <select 
+              id='status-filter'
+              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm'
+              value={selectedStatus}
+              onChange={(e: any) => {
+                let newStatus = e.target.value.trim();
+                console.log(`Status dropdown changed to: '${newStatus}'`);
+                
+                // Bảo vệ trường hợp giá trị rỗng
+                if (!newStatus) {
+                  newStatus = 'all';
+                  console.log('Empty status value, defaulting to all');
+                }
+                
+                // Chuẩn hóa lowercase (chỉ áp dụng cho các giá trị khác 'all', không áp dụng cho CourseStatus enum)
+                if (newStatus !== 'all') {
+                  // Giữ nguyên giá trị từ enum CourseStatus
+                  console.log(`Status value preserved: '${newStatus}'`);
+                }
+                
+                // Kiểm tra giá trị hợp lệ
+                if (!['all', CourseStatus.PUBLISHED, CourseStatus.DRAFT].includes(newStatus)) {
+                  console.error(`Invalid status value: '${newStatus}', resetting to 'all'`);
+                  newStatus = 'all';
+                }
+                
+                // Cập nhật state
+                setSelectedStatus(newStatus);
+              }}
+            >
+              {STATUS_OPTIONS.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            
             {/* Sort dropdown */}
             <select 
               id='sort-filter'
@@ -366,7 +416,7 @@ export default function CoursesPage() {
                           />
                         </div>
                         <div className='ml-4'>
-                          <div className='text-sm font-medium text-gray-900'>{course.title}</div>
+                          <div className='text-sm font-medium text-gray-900'>{formatCourseTitle(course.title)}</div>
                           <div className='text-sm text-gray-500'>ID: {course.id}</div>
                         </div>
                       </div>
@@ -442,6 +492,7 @@ export default function CoursesPage() {
                       fetchCourses({
                         search: debouncedSearchQuery || undefined,
                         level: selectedLevel === 'all' ? undefined : selectedLevel,
+                        status: selectedStatus === 'all' ? undefined : selectedStatus,
                         page: Math.max(1, pagination.page - 1),
                         limit: pagination.pageSize,
                         ...getSortParams(sortOption)
@@ -467,6 +518,7 @@ export default function CoursesPage() {
                         fetchCourses({
                           search: debouncedSearchQuery || undefined,
                           level: selectedLevel === 'all' ? undefined : selectedLevel,
+                          status: selectedStatus === 'all' ? undefined : selectedStatus,
                           page: page,
                           limit: pagination.pageSize,
                           ...getSortParams(sortOption)
@@ -494,6 +546,7 @@ export default function CoursesPage() {
                       fetchCourses({
                         search: debouncedSearchQuery || undefined,
                         level: selectedLevel === 'all' ? undefined : selectedLevel,
+                        status: selectedStatus === 'all' ? undefined : selectedStatus,
                         page: Math.min(pagination.totalPages, pagination.page + 1),
                         limit: pagination.pageSize,
                         ...getSortParams(sortOption)

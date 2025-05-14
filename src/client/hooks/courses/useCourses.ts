@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { Course, CourseListItem, CourseStatus } from '@/shared/types/courses/course';
+import { formatCourseTitle } from '@/shared/utils/courses';
 
 /**
  * Ensures a course has the correct status value based on status field or isPublished
@@ -40,6 +41,7 @@ interface CourseFilter {
   category?: string;
   topics?: string[]; // Thêm support cho nhiều topics
   level?: string;
+  status?: string; // Thêm filter theo status
   page?: number;
   limit?: number;
   sortBy?: string;
@@ -117,6 +119,12 @@ function useCourses(isAdmin = false) {
         console.log('Using level filter:', filters.level.toLowerCase());
       }
       
+      // Handle status filter if provided and not 'all'
+      if (filters.status && filters.status !== 'all') {
+        params.append('status', filters.status);
+        console.log('Using status filter:', filters.status);
+      }
+      
       // Handle multiple topics if provided
       if (filters.topics && Array.isArray(filters.topics) && filters.topics.length > 0) {
         filters.topics.forEach(topic => {
@@ -185,9 +193,10 @@ function useCourses(isAdmin = false) {
         // Normalize course status first
         const normalizedCourse = normalizeStatus(course);
         
-        // Then add image URL with cache busting
+        // Add displayTitle and image with cache busting
         return {
           ...normalizedCourse,
+          displayTitle: formatCourseTitle(normalizedCourse.title || ''),
           imageUrl: normalizedCourse.imageUrl ? `${normalizedCourse.imageUrl}?t=${Date.now()}` : '/images/placeholder-course.jpg'
         };
       });
