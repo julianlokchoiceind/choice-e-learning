@@ -87,7 +87,7 @@ export default function TopicSelector({ selectedTopics, onChange }: TopicSelecto
                     id={`topic-${topic.id}`}
                     checked={selectedTopics.includes(topic.name)}
                     onChange={() => toggleTopic(topic.name)}
-                    className='w-4 h-4 text-blue-600 rounded focus:ring-blue-500'
+                    className='w-4 h-4 text-blue-600 rounded focus:ring-[var(--color-focus-ring)]'
                   />
                   <label 
                     htmlFor={`topic-${topic.id}`} 
@@ -105,4 +105,4 @@ export default function TopicSelector({ selectedTopics, onChange }: TopicSelecto
       </div>
     </div>
   );
-}
+} 

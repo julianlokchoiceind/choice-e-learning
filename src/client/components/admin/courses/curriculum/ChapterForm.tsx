@@ -91,7 +91,7 @@ const ChapterForm: React.FC<ChapterFormProps> = ({
           value={formData.title}
           onChange={handleChange}
           placeholder="Enter chapter name"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus"
         />
         {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
       </div>
@@ -107,7 +107,7 @@ const ChapterForm: React.FC<ChapterFormProps> = ({
           onChange={handleChange}
           placeholder="Brief description of this chapter"
           rows={2}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus"
         />
       </div>
       

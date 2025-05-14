@@ -42,7 +42,7 @@ export default function TopicsFilter({ selectedTopics, onChange }: TopicsFilterP
       </label>
       <div className='relative'>
         <details className='w-full'>
-          <summary className='px-3 py-2 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 flex justify-between items-center'>
+          <summary className='px-3 py-2 border border-gray-300 rounded-md cursor-pointer input-focus text-gray-700 flex justify-between items-center'>
             <span>
               {selectedTopics.length > 0 
                 ? selectedTopics.length > 1 
@@ -68,7 +68,7 @@ export default function TopicsFilter({ selectedTopics, onChange }: TopicsFilterP
                         id={`topic-${topicName}`}
                         checked={selectedTopics.includes(topicName)}
                         onChange={() => handleTopicChange(topicName)}
-                        className='mr-2'
+                        className='mr-2 focus:ring-[var(--color-focus-ring)]'
                       />
                       <label htmlFor={`topic-${topicName}`} className='cursor-pointer text-gray-900 flex-grow'>
                         {topicName}

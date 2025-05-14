@@ -1,7 +1,7 @@
 'use client';
 
 import FileUpload from '@/client/components/ui/file/FileUpload';
-import { TopicSelector } from '@/client/components/admin/courses';
+import { TopicSelector } from '.';
 
 interface BasicInfoTabProps {
   values: {
@@ -40,7 +40,7 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
             value={values.title}
             onChange={handleChange}
             placeholder="e.g., Introduction to Web Development"
-            className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-3 border border-gray-300 rounded-md input-focus"
           />
         </div>
         
@@ -55,7 +55,7 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
             onChange={handleChange}
             placeholder="Write a short overview of what this course covers..."
             rows={4}
-            className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-3 border border-gray-300 rounded-md input-focus"
           />
         </div>
         
@@ -88,7 +88,7 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
                   min="0"
                   step="0.01"
                   placeholder="0.00"
-                  className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-3 border border-gray-300 rounded-md input-focus"
                 />
               </div>
               
@@ -101,7 +101,7 @@ const BasicInfoTab: React.FC<BasicInfoTabProps> = ({
                   name="level"
                   value={values.level}
                   onChange={handleChange}
-                  className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-3 border border-gray-300 rounded-md input-focus"
                 >
                   <option value="beginner">Beginner</option>
                   <option value="intermediate">Intermediate</option>
