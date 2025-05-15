@@ -51,7 +51,7 @@ function CourseImage({ src, alt }: { src: string, alt: string }) {
   
   // Xử lý URL không hợp lệ
   if (!src) {
-    src = '/images/course-default.jpg';
+    src = '/images/courses/course-placeholder.jpg';
   }
   
   // Sử dụng regular img tag để tránh vấn đề với domain configuration
@@ -118,7 +118,7 @@ export default function CourseManager() {
             return {
               ...course,
               // Ensure imageUrl exists (fallback to default if not)
-              imageUrl: course.imageUrl || '/images/course-default.jpg'
+              imageUrl: course.imageUrl || '/images/courses/course-placeholder.jpg'
             };
           });
           setCourses(processedCourses);
@@ -129,7 +129,7 @@ export default function CourseManager() {
             return {
               ...course,
               // Ensure imageUrl exists (fallback to default if not)
-              imageUrl: course.imageUrl || '/images/course-default.jpg'
+              imageUrl: course.imageUrl || '/images/courses/course-placeholder.jpg'
             };
           });
           setCourses(processedCourses);

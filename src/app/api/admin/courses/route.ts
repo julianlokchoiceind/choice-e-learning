@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 function processImageUrl(originalUrl?: string | null): string {
   // No URL, return default URL
   if (!originalUrl) {
-    return '/images/placeholder-course.jpg';
+    return '/images/courses/course-placeholder.jpg';
   }
   
   // URL is already absolute, keep it as is

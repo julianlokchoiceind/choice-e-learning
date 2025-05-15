@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
         id: courseId,
         title: course.title,
         description: course.description,
-        imageUrl: course.imageUrl || '/images/course-placeholder.jpg',
+        imageUrl: course.imageUrl || '/images/courses/course-placeholder.jpg',
         level: course.level,
         progress: progressPercentage,
         lastAccessed: lastAccessed,

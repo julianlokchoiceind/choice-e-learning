@@ -7,3 +7,4 @@ export * from './students';
 export * from './topics';
 export * from './user';
 export * from './auth';
+export * from './common';

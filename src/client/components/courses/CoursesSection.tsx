@@ -128,7 +128,7 @@ export default function CoursesSection() {
   };
 
   // Placeholder image for courses without an image
-  const placeholderImage = '/placeholder-course.jpg';
+  const placeholderImage = '/images/courses/course-placeholder.jpg';
 
   return (
     <div className='container mx-auto px-4 py-8'>

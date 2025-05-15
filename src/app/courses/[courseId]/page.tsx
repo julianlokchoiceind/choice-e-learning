@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { CheckCircleIcon, UserCircleIcon, ClockIcon, BookOpenIcon, StarIcon } from '@heroicons/react/24/solid';
 import { CalendarIcon, PuzzlePieceIcon } from '@heroicons/react/24/outline';
 import { UserIcon, AcademicCapIcon, DevicePhoneMobileIcon, DocumentTextIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { useCoursePlaceholder } from '@/client/hooks/courses';
 
 interface Instructor {
   id: string;
@@ -54,6 +55,9 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [enrollmentError, setEnrollmentError] = useState<string | null>(null);
   const [unenrolling, setUnenrolling] = useState(false);
+  
+  // Use the image placeholder hook
+  const { imageUrl, handleImageError } = useCoursePlaceholder(course?.imageUrl);
   
   // Fetch course data
   useEffect(() => {
@@ -217,25 +221,41 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
       {/* Course Hero Section */}
       <section className='pt-24 pb-12 bg-gradient-to-br from-[#000428] to-[#004e92]'>
         <div className='max-w-[980px] mx-auto px-6 md:px-4'>
-          <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
-            {course.title}
-          </h1>
-          <p className='text-xl text-white/80 max-w-2xl mb-8'>
-            {course.description}
-          </p>
-          <div className='flex flex-wrap gap-4 text-white/70'>
-            <span className='flex items-center'>
-              <UserIcon className='h-5 w-5 mr-2' />
-              {course.instructor.name}
-            </span>
-            <span className='flex items-center'>
-              <ClockIcon className='h-5 w-5 mr-2' />
-              {course.totalHours || 0} hours
-            </span>
-            <span className='flex items-center'>
-              <AcademicCapIcon className='h-5 w-5 mr-2' />
-              {course.level}
-            </span>
+          <div className='grid md:grid-cols-3 gap-8'>
+            <div className='md:col-span-2'>
+              <h1 className='text-4xl md:text-5xl font-bold text-white mb-4'>
+                {course.title}
+              </h1>
+              <p className='text-xl text-white/80 max-w-2xl mb-8'>
+                {course.description}
+              </p>
+              <div className='flex flex-wrap gap-4 text-white/70'>
+                <span className='flex items-center'>
+                  <UserIcon className='h-5 w-5 mr-2' />
+                  {course.instructor.name}
+                </span>
+                <span className='flex items-center'>
+                  <ClockIcon className='h-5 w-5 mr-2' />
+                  {course.totalHours || 0} hours
+                </span>
+                <span className='flex items-center'>
+                  <AcademicCapIcon className='h-5 w-5 mr-2' />
+                  {course.level}
+                </span>
+              </div>
+            </div>
+            <div className='hidden md:block'>
+              <div className='relative h-64 w-full rounded-lg overflow-hidden shadow-lg'>
+                <Image 
+                  src={imageUrl} 
+                  alt={course.title || 'Course image'}
+                  className='h-full w-full object-cover'
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  onError={handleImageError}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -259,7 +279,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
               <h2 className='text-2xl font-bold mb-6'>Requirements</h2>
               <ul className='list-disc list-inside space-y-2 text-[#1d1d1f]'>
                 {course.prerequisites && course.prerequisites.map((prereq: string, index: number) => (
-                  <li key={"index"}>{prereq}</li>
+                  <li key={index}>{prereq}</li>
                 ))}
               </ul>
             </div>

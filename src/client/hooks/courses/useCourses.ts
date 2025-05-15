@@ -197,7 +197,7 @@ function useCourses(isAdmin = false) {
         return {
           ...normalizedCourse,
           displayTitle: formatCourseTitle(normalizedCourse.title || ''),
-          imageUrl: normalizedCourse.imageUrl ? `${normalizedCourse.imageUrl}?t=${Date.now()}` : '/images/placeholder-course.jpg'
+          imageUrl: normalizedCourse.imageUrl ? `${normalizedCourse.imageUrl}?t=${Date.now()}` : '/images/courses/course-placeholder.jpg'
         };
       });
       
@@ -291,7 +291,7 @@ function useCourses(isAdmin = false) {
         // Thêm timestamp vào URL hình ảnh để tránh caching và xử lý ảnh rỗng
         const processedCourse = {
           ...normalizedCourse,
-          imageUrl: normalizedCourse.imageUrl ? `${normalizedCourse.imageUrl}?t=${Date.now()}` : '/images/placeholder-course.jpg'
+          imageUrl: normalizedCourse.imageUrl ? `${normalizedCourse.imageUrl}?t=${Date.now()}` : '/images/courses/course-placeholder.jpg'
         };
         
         setCourse(processedCourse);

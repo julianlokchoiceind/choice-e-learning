@@ -123,14 +123,17 @@ export default function CourseDetailPage() {
         {/* Main Content */}
         <div className='lg:col-span-2 space-y-6'>
           <div className='bg-white rounded-lg shadow overflow-hidden'>
-            {course.imageUrl && (
-              <div className='h-48 overflow-hidden'>
-                <Image src={course.imageUrl} 
-                  alt={formatCourseTitle(course.title)}
-                  className='w-full h-full object-cover'
-                  width={500} height={300} />
-              </div>
-            )}
+            <div className='h-48 overflow-hidden bg-gray-200'>
+              <Image 
+                src={course.imageUrl || '/images/courses/course-placeholder.jpg'} 
+                alt={formatCourseTitle(course.title)}
+                className='w-full h-full object-cover'
+                width={500} height={300}
+                onError={(e: any) => {
+                  (e.target as HTMLImageElement).src = '/images/courses/course-placeholder.jpg';
+                }}
+              />
+            </div>
             
             <div className='p-6'>
               <h2 className='text-xl font-semibold mb-4'>Description</h2>

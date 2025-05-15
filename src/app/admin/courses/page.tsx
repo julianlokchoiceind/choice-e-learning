@@ -15,6 +15,7 @@ import {
 import { useCourses } from '@/client/hooks/courses';
 import { Course, CourseStatus } from '@/shared/types/courses/course';
 import { formatCourseTitle } from '@/shared/utils/courses';
+import { useCoursePlaceholder } from '@/client/hooks/courses';
 
 // Define valid level options to ensure consistency with the backend
 const LEVEL_OPTIONS = [
@@ -406,14 +407,7 @@ export default function CoursesPage() {
                     <td className='px-6 py-4 whitespace-nowrap'>
                       <div className='flex items-center'>
                         <div className='flex-shrink-0 h-10 w-10 rounded-md bg-gray-200 overflow-hidden'>
-                          <Image src={course.imageUrl || '/images/placeholder-course.jpg'} 
-                            alt={course.title || 'Course image'}
-                            className='h-full w-full object-cover'
-                            width={500} height={300}
-                            onError={(e: any) => {
-                              (e.target as HTMLImageElement).src = '/images/placeholder-course.jpg';
-                            }}
-                          />
+                          <CourseImage course={course} />
                         </div>
                         <div className='ml-4'>
                           <div className='text-sm font-medium text-gray-900'>{formatCourseTitle(course.title)}</div>
@@ -571,3 +565,19 @@ export default function CoursesPage() {
     </div>
   );
 }
+
+// Course image component that uses the useCoursePlaceholder hook
+const CourseImage = ({ course }: { course: Course | { imageUrl?: string, title?: string } }) => {
+  const { imageUrl, handleImageError } = useCoursePlaceholder(course.imageUrl);
+  
+  return (
+    <Image 
+      src={imageUrl} 
+      alt={course.title || 'Course image'}
+      className='h-full w-full object-cover'
+      width={500} 
+      height={300}
+      onError={handleImageError}
+    />
+  );
+};

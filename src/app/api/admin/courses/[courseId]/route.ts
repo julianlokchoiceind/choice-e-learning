@@ -165,7 +165,7 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
     
     // Process image URL
     if (body.imageUrl === '' || body.imageUrl === null) {
-      body.imageUrl = '/images/placeholder-course.jpg';
+      body.imageUrl = '/images/courses/course-placeholder.jpg';
     }
     
     // Process video URL - make empty string instead of null for consistency

@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       return {
         id: course.id,
         title: course.title,
-        imageUrl: course.imageUrl || '/images/placeholder-course.jpg',
+        imageUrl: course.imageUrl || '/images/courses/course-placeholder.jpg',
         progress: progressPercentage,
         completedLessons,
         totalLessons

@@ -1,44 +1,51 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ADMIN_COURSE_DEFAULTS } from '@/shared/constants/courses/admin-course-defaults';
+import { useApiRequest } from '@/client/hooks/common';
 
 export default function NewCoursePage() {
   const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
-  const hasCalledApi = useRef(false);
+  
+  // Use our new API request hook
+  const apiRequest = useApiRequest({
+    trackRequestInSession: true,
+    sessionKey: 'create_course_request',
+    idempotencyTimeout: 5000, // 5 seconds
+    onError: (error) => {
+      console.error('Error creating course draft:', error);
+      alert('Error creating course: ' + error.message);
+      router.push('/admin/courses');
+    }
+  });
   
   // Automatically create draft on page load
   useEffect(() => {
     const createDraft = async () => {
-      // Check if API has already been called using ref
-      if (hasCalledApi.current) return;
+      // Skip if already loading or if we already have data
+      if (apiRequest.loading || apiRequest.data) return;
       
-      // Mark API as called immediately to prevent double calls
-      hasCalledApi.current = true;
       setIsCreating(true);
       
       try {
-        const apiClient = (await import('@/client/utils/http/api-client')).default;
-        const response = await apiClient.post('/api/admin/courses', ADMIN_COURSE_DEFAULTS);
+        const response = await apiRequest.post('/api/admin/courses', ADMIN_COURSE_DEFAULTS);
         
-        if (response.data.success) {
+        if (response?.data?.success) {
           const courseId = response.data.data.id;
           // Redirect to edit page
           router.push(`/admin/courses/${courseId}/edit`);
         } else {
-          throw new Error(response.data.error || 'Failed to create course draft');
+          throw new Error(response?.data?.error || 'Failed to create course draft');
         }
       } catch (error: any) {
-        console.error('Error creating course draft:', error);
-        alert('Error creating course: ' + (error.message || 'Unknown error'));
-        router.push('/admin/courses');
+        // Error is already handled by the hook's onError callback
       }
     };
     
     createDraft();
-  }, [router]); // Remove isCreating from dependencies
+  }, [router, apiRequest]); 
   
   // Simple loading UI
   return (

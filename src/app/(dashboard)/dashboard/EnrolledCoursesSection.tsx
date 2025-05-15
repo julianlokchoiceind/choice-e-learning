@@ -63,10 +63,15 @@ export default function EnrolledCoursesSection({ courses: initialCourses }: Enro
               <div key={course.id} className='p-4 transition hover:bg-gray-50'>
                 <div className='flex flex-col sm:flex-row items-start'>
                   <div className='flex-shrink-0 w-full sm:w-32 h-24 mb-4 sm:mb-0 sm:mr-4'>
-                    <Image src={course.imageUrl} 
-                      alt={course.title}
+                    <Image 
+                      src={course.imageUrl || '/images/courses/course-placeholder.jpg'} 
+                      alt={course.title || 'Course image'}
                       className='w-full h-full object-cover rounded-md'
-                      width={500} height={300} />
+                      width={500} height={300}
+                      onError={(e: any) => {
+                        (e.target as HTMLImageElement).src = '/images/courses/course-placeholder.jpg';
+                      }}
+                    />
                   </div>
                   <div className='flex-1'>
                     <h3 className='font-medium mb-1'>{course.title}</h3>
