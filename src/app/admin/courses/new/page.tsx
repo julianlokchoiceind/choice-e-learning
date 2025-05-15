@@ -1,43 +1,27 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { ADMIN_COURSE_DEFAULTS } from '@/shared/constants/courses/admin-course-defaults';
 
 export default function NewCoursePage() {
   const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
+  const hasCalledApi = useRef(false);
   
   // Automatically create draft on page load
   useEffect(() => {
     const createDraft = async () => {
-      // Don't do anything if we're already creating
-      if (isCreating) return;
+      // Check if API has already been called using ref
+      if (hasCalledApi.current) return;
       
+      // Mark API as called immediately to prevent double calls
+      hasCalledApi.current = true;
       setIsCreating(true);
       
       try {
-        // Default course data for draft
-        const courseData = {
-          title: 'Untitled Course',
-          description: 'Course description...',
-          price: 0,
-          level: 'beginner',
-          topics: [],
-          imageUrl: '/images/placeholder-course.jpg',
-          status: 'draft',
-          chapters: [],
-          lessons: [{
-            title: 'Introduction',
-            order: 1,
-            videoUrl: '',
-            description: '',
-            resources: []
-          }]
-        };
-        
-        // Send data to API
         const apiClient = (await import('@/client/utils/http/api-client')).default;
-        const response = await apiClient.post('/api/admin/courses', courseData);
+        const response = await apiClient.post('/api/admin/courses', ADMIN_COURSE_DEFAULTS);
         
         if (response.data.success) {
           const courseId = response.data.data.id;
@@ -54,7 +38,7 @@ export default function NewCoursePage() {
     };
     
     createDraft();
-  }, [router, isCreating]);
+  }, [router]); // Remove isCreating from dependencies
   
   // Simple loading UI
   return (

@@ -106,9 +106,7 @@ export const POST = withAdmin(async (req: Request, context) => {
     }
     
     // Generate auto title for draft if not provided or is default title
-    if (status === 'draft' && 
-        (!body.title || body.title.trim() === '' || body.title === 'Untitled Course')) {
-      
+    if (!body.title || body.title.trim() === '') {
       // Format ngày hiện tại
       const today = new Date();
       const dateStr = `${today.getDate().toString().padStart(2, '0')}${

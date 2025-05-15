@@ -137,53 +137,25 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
       );
     }
     
+    // Kiểm tra course tồn tại TRƯỚC khi xử lý bất kỳ logic nào
+    const existingCourse = await prisma.course.findUnique({
+      where: { id: courseId }
+    });
+
+    if (!existingCourse) {
+      console.error(`Course not found with ID: ${courseId}`);
+      return NextResponse.json(
+        { success: false, error: 'Course not found' },
+        { status: 404 }
+      );
+    }
+    
     // Parse request body
     const body = await req.json();
     
-    // Check if status is draft and handle empty or default title
-    if (body.status === 'draft' && 
-        (!body.title || body.title.trim() === '')) {
-      
-      // Format current date
-      const today = new Date();
-      const dateStr = `${today.getDate().toString().padStart(2, '0')}${
-        (today.getMonth() + 1).toString().padStart(2, '0')}${
-        today.getFullYear()}`;
-      
-      try {
-        // Find today's draft courses
-        const todayDrafts = await prisma.course.findMany({
-          where: {
-            title: { contains: `-${dateStr}` },
-            status: 'draft'
-          }
-        });
-        
-        // Filter standard format and find max sequence
-        const untitledPattern = new RegExp(`^Untitled-(\\d+)-${dateStr}$`);
-        let maxSequence = 0;
-        
-        todayDrafts.forEach(draft => {
-          const match = draft.title.match(untitledPattern);
-          if (match && match[1]) {
-            const sequence = parseInt(match[1]);
-            if (sequence > maxSequence) {
-              maxSequence = sequence;
-            }
-          }
-        });
-        
-        // Create new title
-        body.title = `Untitled-${maxSequence + 1}-${dateStr}`;
-        
-        console.log(`Updated draft course with generated title: ${body.title}`);
-        
-      } catch (error) {
-        console.error('Error finding draft courses:', error);
-        // Fallback with timestamp
-        const timestamp = Date.now();
-        body.title = `Untitled-1-${dateStr}-${timestamp}`;
-      }
+    // Handle empty title
+    if (!body.title || body.title.trim() === '') {
+      body.title = existingCourse.title;
     }
     
     // Handle empty description for draft courses
