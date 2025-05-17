@@ -35,6 +35,25 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
     imageUrl: ''
   });
   
+  // Add CSS for consistent button styling with other admin pages
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .admin-button {
+        transform: none !important;
+      }
+      .admin-button:hover {
+        transform: none !important;
+        box-shadow: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+  
   // Fetch course data on component mount
   useEffect(() => {
     const fetchCourse = async () => {
@@ -241,88 +260,85 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-lg font-medium text-gray-700">Loading course data...</p>
-        </div>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <p className="ml-4 text-gray-600">Loading course data...</p>
       </div>
     );
   }
   
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center space-x-3">
-            <h1 className="text-2xl font-bold text-gray-900">Edit Course</h1>
-            <DraftStatusBadge />
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center space-x-3">
+          <h1 className="text-2xl font-bold text-gray-900">Edit Course</h1>
+          <DraftStatusBadge />
+        </div>
+        
+        <div className="flex space-x-4">
+          <button
+            type="button"
+            onClick={handleUpdateDraft}
+            disabled={isUpdating || isPublishing}
+            className="px-6 py-2.5 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-70 admin-button"
+          >
+            {isUpdating ? 'Updating...' : 'Update Draft'}
+          </button>
+          
+          <button
+            type="button"
+            onClick={handlePublish}
+            disabled={isPublishing || isUpdating}
+            className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-70 admin-button"
+          >
+            {isPublishing ? 'Publishing...' : 'Publish Course'}
+          </button>
+        </div>
+      </div>
+      
+      {/* Tabs Navigation */}
+      <div className="mb-6">
+        <CourseFormTabs activeTab={activeTab} onTabChange={handleTabChange} />
+      </div>
+      
+      {/* Tab Content */}
+      <div>
+        {activeTab === 'basicInfo' && (
+          <BasicInfoTab 
+            values={values} 
+            handleChange={handleChange} 
+            handleImageUpload={handleImageUpload} 
+            handleTopicsChange={handleTopicsChange} 
+          />
+        )}
+        {activeTab === 'curriculum' && renderCurriculumTab()}
+        
+        {/* Navigation Buttons */}
+        <div className="flex justify-between items-center mt-6">
+          <div>
+            {lastSaved && (
+              <span className="text-sm text-gray-500">
+                Last saved: {lastSaved.toLocaleString()}
+              </span>
+            )}
           </div>
           
           <div className="flex space-x-4">
-            <button
-              type="button"
-              onClick={handleUpdateDraft}
-              disabled={isUpdating || isPublishing}
-              className="px-6 py-2.5 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-70"
+            <Link
+              href="/admin/courses"
+              className="flex items-center text-gray-600 hover:text-gray-800 py-2.5 px-6 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors admin-button"
             >
-              {isUpdating ? 'Updating...' : 'Update Draft'}
-            </button>
-            
-            <button
-              type="button"
-              onClick={handlePublish}
-              disabled={isPublishing || isUpdating}
-              className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-70"
-            >
-              {isPublishing ? 'Publishing...' : 'Publish Course'}
-            </button>
-          </div>
-        </div>
-        
-        {/* Tabs Navigation */}
-        <div className="mb-6">
-          <CourseFormTabs activeTab={activeTab} onTabChange={handleTabChange} />
-        </div>
-        
-        {/* Tab Content */}
-        <div>
-          {activeTab === 'basicInfo' && (
-            <BasicInfoTab 
-              values={values} 
-              handleChange={handleChange} 
-              handleImageUpload={handleImageUpload} 
-              handleTopicsChange={handleTopicsChange} 
-            />
-          )}
-          {activeTab === 'curriculum' && renderCurriculumTab()}
-          
-          {/* Navigation Buttons */}
-          <div className="flex justify-between items-center mt-6">
-            <div>
-              {lastSaved && (
-                <span className="text-sm text-gray-500">
-                  Last saved: {lastSaved.toLocaleString()}
-                </span>
-              )}
-            </div>
-            
-            <div className="flex space-x-4">
-              <Link
-                href="/admin/courses"
-                className="flex items-center text-gray-600 hover:text-gray-800 py-2.5 px-6 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              Back
+            </Link>
+            {activeTab === 'basicInfo' && (
+              <button
+                type="button"
+                onClick={() => handleTabChange('curriculum')}
+                className="flex items-center bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-8 rounded-md transition-colors admin-button"
               >
-                Back
-              </Link>
-              {activeTab === 'basicInfo' && (
-                <button
-                  type="button"
-                  onClick={() => handleTabChange('curriculum')}
-                  className="flex items-center bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-8 rounded-md transition-colors"
-                >
-                  Next
-                </button>
-              )}
-            </div>
+                Next
+              </button>
+            )}
           </div>
         </div>
       </div>
