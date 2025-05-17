@@ -35,16 +35,22 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
     imageUrl: ''
   });
   
-  // Add CSS for consistent button styling with other admin pages
+  // Add CSS for consistent button styling with other admin pages but avoid pointer issues
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
       .admin-button {
-        transform: none !important;
+        transition: background-color 0.2s ease-in-out !important;
+        position: relative;
+        z-index: 5;
       }
       .admin-button:hover {
-        transform: none !important;
         box-shadow: none !important;
+        background-color: var(--hover-color, inherit);
+      }
+      /* Fix for cursor flickering */
+      .tab-container button {
+        cursor: pointer !important;
       }
     `;
     document.head.appendChild(style);
@@ -297,7 +303,7 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
       </div>
       
       {/* Tabs Navigation */}
-      <div className="mb-6">
+      <div className="mb-6 tab-container">
         <CourseFormTabs activeTab={activeTab} onTabChange={handleTabChange} />
       </div>
       

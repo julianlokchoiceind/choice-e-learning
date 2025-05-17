@@ -17,16 +17,17 @@ const CourseFormTabs: FC<CourseFormTabsProps> = ({ activeTab, onTabChange }) => 
   ];
 
   return (
-    <div className="flex rounded-lg bg-white border border-gray-200 overflow-hidden">
+    <div className="flex rounded-lg bg-white border border-gray-200 overflow-hidden relative z-0">
       {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
-          className={`py-4 px-6 text-center flex-1 transition-colors ${
+          className={`py-4 px-6 text-center flex-1 relative z-10 cursor-pointer ${
             activeTab === tab.id
               ? 'bg-blue-50 text-blue-500 font-medium border-b-2 border-blue-500'
               : 'text-gray-500 hover:bg-gray-50'
           }`}
+          style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           {tab.label}
         </button>
