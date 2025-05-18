@@ -279,6 +279,11 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
         <div className="flex items-center space-x-3">
           <h1 className="text-2xl font-bold text-gray-900">Edit Course</h1>
           <DraftStatusBadge />
+          {lastSaved && (
+            <span className="text-xs px-2 py-1 bg-gray-100 rounded text-gray-500">
+              Last saved: {`${lastSaved.getDate().toString().padStart(2, '0')}/${(lastSaved.getMonth() + 1).toString().padStart(2, '0')}/${lastSaved.getFullYear()} ${lastSaved.getHours().toString().padStart(2, '0')}:${lastSaved.getMinutes().toString().padStart(2, '0')}`}
+            </span>
+          )}
         </div>
         
         <div className="flex space-x-4">
@@ -320,14 +325,7 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
         {activeTab === 'curriculum' && renderCurriculumTab()}
         
         {/* Navigation Buttons */}
-        <div className="flex justify-between items-center mt-6">
-          <div>
-            {lastSaved && (
-              <span className="text-sm text-gray-500">
-                Last saved: {lastSaved.toLocaleString()}
-              </span>
-            )}
-          </div>
+        <div className="flex justify-end items-center mt-6">
           
           <div className="flex space-x-4">
             <Link

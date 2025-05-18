@@ -10,14 +10,8 @@ export function formatCourseTitle(title: string): string {
   const match = title.match(/^Untitled-(\d+)-(\d{8})$/);
   
   if (match) {
-    const sequence = match[1];
-    const dateStr = match[2];
-    
-    const day = dateStr.substring(0, 2);
-    const month = dateStr.substring(2, 4);
-    const year = dateStr.substring(4, 8);
-    
-    return `Draft Course #${sequence} (${day}/${month}/${year})`;
+    // Trả về đúng định dạng backend
+    return title;
   }
   
   return title;
