@@ -1,0 +1,51 @@
+# Task ID: 18
+# Title: Update Domain Hook Exports in Index Files
+# Status: pending
+# Dependencies: 11, 12, 13, 14, 15, 16, 17
+# Priority: medium
+# Description: Update the index.ts files for each domain to properly export the newly created React Query hooks according to the guidelines in PRD section 4.5.
+# Details:
+This task involves updating the export statements in seven different index.ts files to ensure all the newly created React Query hooks are properly exported from their respective domains. The developer should:
+
+1. Review PRD section 4.5 for specific export requirements and patterns.
+2. Update the following files with proper export statements:
+   - src/client/hooks/courses/index.ts: Export useCoursesQuery hook
+   - src/client/hooks/topics/index.ts: Export useTopicsQuery hook
+   - src/client/hooks/faq/index.ts: Export useFAQsQuery hook
+   - src/client/hooks/learn/index.ts: Export useLessonsQuery hook
+   - src/client/hooks/students/index.ts: Export useStudentsQuery hook
+   - src/client/hooks/auth/index.ts: Export useAuthQuery hook
+   - src/client/hooks/user/index.ts: Export useUserQuery hook
+
+3. Ensure each index.ts file follows the same export pattern for consistency.
+4. Use named exports (e.g., `export { useCoursesQuery } from './useCoursesQuery'`).
+5. If any hooks have additional utility functions that should be exposed, include those exports as well.
+6. Add appropriate JSDoc comments above each export statement to document the purpose of each hook.
+7. Verify that the exports work correctly by importing them from the client code.
+
+This task depends on the completion of Tasks 11-17, as all the hooks being exported must already exist and be properly implemented.
+
+# Test Strategy:
+To verify this task has been completed successfully:
+
+1. Code Review:
+   - Examine each index.ts file to confirm it contains the correct export statements for the corresponding hooks.
+   - Verify that the export syntax is consistent across all files.
+   - Check that any JSDoc comments are present and correctly describe the exported hooks.
+
+2. Import Testing:
+   - Create a test file that imports each hook directly from its domain path (e.g., `import { useCoursesQuery } from 'src/client/hooks/courses'`).
+   - Verify that all imports resolve without errors.
+
+3. Integration Testing:
+   - Create a simple React component that uses each imported hook.
+   - Verify that the component can be rendered without any import or usage errors.
+   - Confirm that the hooks function as expected when used through these imports.
+
+4. Build Verification:
+   - Run the project build process to ensure there are no compilation errors related to the exports.
+   - Check for any unused export warnings that might indicate improper export configuration.
+
+5. Documentation Check:
+   - Verify that the exports match the requirements specified in PRD section 4.5.
+   - Ensure any special export patterns or requirements mentioned in the PRD are followed.

@@ -1,0 +1,47 @@
+# Task ID: 10
+# Title: Update Common Hooks Exports in index.ts
+# Status: pending
+# Dependencies: 6, 8
+# Priority: medium
+# Description: Update the src/client/hooks/common/index.ts file to export the newly created hooks (useToast and useQueryUtils) according to the guidelines in section 3.9 of the PRD.
+# Details:
+This task involves updating the barrel file (index.ts) in the common hooks directory to properly export the newly created hooks. The developer should:
+
+1. Open the file at src/client/hooks/common/index.ts
+2. Add export statements for the following hooks:
+   - useToast from './useToast'
+   - useQueryUtils from './useQueryUtils'
+3. Ensure the export syntax follows the project's conventions (either named exports or default exports as specified in the PRD section 3.9)
+4. Verify that the file paths are correct and that the hooks are properly imported
+5. Check for any additional hooks mentioned in PRD section 3.9 that should also be exported
+6. Maintain alphabetical ordering of exports if that's the project convention
+7. Add appropriate comments if required by the project's documentation standards
+8. Ensure no duplicate exports exist
+
+This task is dependent on Task #6 (Create useToast Hook) and Task #8 (Create useQueryUtils Helper) being completed first, as those tasks create the actual hook files that need to be exported.
+
+# Test Strategy:
+To verify this task has been completed correctly:
+
+1. Code Review:
+   - Check that src/client/hooks/common/index.ts has been updated with the correct export statements
+   - Verify the export syntax matches project conventions specified in PRD section 3.9
+   - Ensure all required hooks from the PRD are included
+
+2. Import Testing:
+   - Create a simple test file that imports the hooks from the common hooks directory
+   - Example: `import { useToast, useQueryUtils } from '@/client/hooks/common'`
+   - Verify that the imports resolve without any errors
+
+3. Build Verification:
+   - Run the project build process to ensure there are no compilation errors
+   - Check for any TypeScript errors related to the exports
+
+4. Integration Testing:
+   - Create a simple component that uses the imported hooks
+   - Verify that the component can successfully use the hooks without any import or usage errors
+   - Test that the hooks function as expected when imported through the barrel file
+
+5. Documentation:
+   - Verify that any required documentation has been updated to reflect the new exports
+   - Check that JSDoc comments are included if required by project standards

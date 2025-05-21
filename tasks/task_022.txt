@@ -1,0 +1,151 @@
+# Task ID: 22
+# Title: Update Components and Pages to Use React Query Hooks
+# Status: pending
+# Dependencies: 11, 12, 13, 14, 15, 16, 17, 18
+# Priority: high
+# Description: Refactor existing components and pages across the application to use the newly created React Query hooks for data fetching, state management, and CRUD operations.
+# Details:
+This task involves updating multiple components and pages throughout the application to use the React Query hooks created in previous tasks. The implementation should follow these guidelines:
+
+1. Layout Components:
+   - Update `src/client/components/layout/Header.tsx` to use `useAuthQuery` for authentication state
+   - Update `src/client/components/layout/Sidebar.tsx` to use `useAuthQuery` for authentication state and `useUserQuery` for user profile data
+
+2. Learn Components:
+   - Update `src/client/components/learn/LessonPlayer.tsx` to use `useLessonsQuery` for fetching lesson data
+
+3. Dashboard Components:
+   - Update `src/client/components/dashboard/UserLoginStreak.tsx` to use `useUserQuery` for user streak data
+
+4. Other Components:
+   - Update `src/client/components/topics/TopicsFilter.tsx` to use `useTopicsQuery` for topic filtering
+   - Update `src/client/components/faq/FAQSection.tsx` to use `useFAQsQuery` for FAQ data
+   - Update `src/client/components/ui/file/FileUpload.tsx` to use appropriate React Query hooks for file operations
+   - Update `src/client/components/auth/ProtectedRoute.tsx` to use `useAuthQuery` for authentication checks
+
+5. Admin Pages:
+   - Update all pages in `src/app/admin/` to use the corresponding React Query hooks based on their functionality
+
+6. Public Pages:
+   - Update `src/app/courses/page.tsx` to use `useCoursesQuery` and `useTopicsQuery`
+   - Update `src/app/courses/[courseId]/page.tsx` to use `useCoursesQuery` and `useLessonsQuery`
+   - Update `src/app/(dashboard)/dashboard/page.tsx` to use `useCoursesQuery` and `useUserQuery`
+   - Update `src/app/(dashboard)/my-courses/page.tsx` to use `useCoursesQuery`
+   - Update `src/app/(auth)/login/page.tsx` and `signup/page.tsx` to use `useAuthQuery`
+   - Update `src/app/(marketing)/faq/page.tsx` to use `useFAQsQuery`
+   - Update `src/app/(marketing)/reviews/page.tsx` to use appropriate React Query hooks
+   - Update `src/app/(marketing)/roadmap/page.tsx` to use appropriate React Query hooks
+
+Implementation Notes:
+- Replace direct API calls with the appropriate React Query hooks
+- Ensure proper error handling and loading states are implemented
+- Maintain component functionality while transitioning to React Query
+- Leverage React Query's caching capabilities for improved performance
+- Use the appropriate query parameters and mutation functions from the hooks
+- Ensure proper TypeScript typing throughout the implementation
+- Follow the project's coding standards and patterns
+
+# Test Strategy:
+To verify the successful implementation of this task, the following testing approach should be used:
+
+1. Code Review:
+   - Verify that all specified components and pages have been updated to use React Query hooks
+   - Check that direct API calls have been replaced with the appropriate hooks
+   - Ensure proper error handling and loading states are implemented
+   - Confirm TypeScript types are correctly used
+
+2. Unit Tests:
+   - Update or create unit tests for each modified component to verify they correctly use the React Query hooks
+   - Mock the React Query hooks to test different states (loading, error, success)
+   - Verify that components render correctly in each state
+
+3. Integration Tests:
+   - Test the interaction between components and the React Query hooks
+   - Verify that data is properly shared between components using the same queries
+   - Test that mutations correctly update the UI and trigger refetches
+
+4. End-to-End Tests:
+   - Create or update E2E tests to verify the full user flow works correctly
+   - Test authentication flows in Header, Sidebar, and ProtectedRoute
+   - Verify course listing, filtering, and detail pages work as expected
+   - Test dashboard functionality with the updated components
+
+5. Performance Testing:
+   - Compare application performance before and after the React Query implementation
+   - Verify that caching is working correctly by monitoring network requests
+   - Test that duplicate requests are properly deduplicated
+
+6. Manual Testing:
+   - Perform manual testing of all updated components and pages
+   - Verify visual consistency and user experience
+   - Test edge cases such as slow network connections and error states
+
+7. Regression Testing:
+   - Ensure that all existing functionality continues to work as expected
+   - Verify that no new bugs have been introduced during the refactoring
+
+Document all test results and any issues found during testing for review.
+
+# Subtasks:
+## 1. Update Layout Components [pending]
+### Dependencies: None
+### Description: Refactor Header and Sidebar components to use React Query hooks
+### Details:
+Update src/client/components/layout/Header.tsx and src/client/components/layout/Sidebar.tsx to use useAuthQuery for authentication state. Additionally, update Sidebar.tsx to use useUserQuery for user profile data.
+
+## 2. Refactor Learn and Dashboard Components [pending]
+### Dependencies: 22.1
+### Description: Update LessonPlayer and UserLoginStreak components to use appropriate React Query hooks
+### Details:
+Modify src/client/components/learn/LessonPlayer.tsx to use useLessonsQuery for fetching lesson data. Update src/client/components/dashboard/UserLoginStreak.tsx to use useUserQuery for user streak data.
+
+## 3. Update Other UI Components [pending]
+### Dependencies: 22.2
+### Description: Refactor TopicsFilter, FAQSection, FileUpload, and ProtectedRoute components to use React Query hooks
+### Details:
+Update src/client/components/topics/TopicsFilter.tsx to use useTopicsQuery, src/client/components/faq/FAQSection.tsx to use useFAQsQuery, src/client/components/ui/file/FileUpload.tsx to use appropriate React Query hooks for file operations, and src/client/components/auth/ProtectedRoute.tsx to use useAuthQuery for authentication checks.
+
+## 4. Refactor Admin Pages [pending]
+### Dependencies: 22.3
+### Description: Update all pages in the admin section to use corresponding React Query hooks
+### Details:
+Modify the following admin pages to use the appropriate React Query hooks based on their functionality:
+- src/app/admin/dashboard/page.tsx
+- src/app/admin/users/page.tsx
+- src/app/admin/users/[userId]/page.tsx
+- src/app/admin/courses/page.tsx
+- src/app/admin/courses/create/page.tsx
+- src/app/admin/courses/[courseId]/page.tsx
+- src/app/admin/courses/[courseId]/edit/page.tsx
+- src/app/admin/lessons/page.tsx
+- src/app/admin/lessons/create/page.tsx
+- src/app/admin/lessons/[lessonId]/page.tsx
+- src/app/admin/lessons/[lessonId]/edit/page.tsx
+- src/app/admin/topics/page.tsx
+- src/app/admin/topics/create/page.tsx
+- src/app/admin/topics/[topicId]/page.tsx
+- src/app/admin/topics/[topicId]/edit/page.tsx
+- src/app/admin/faqs/page.tsx
+- src/app/admin/faqs/create/page.tsx
+- src/app/admin/faqs/[faqId]/page.tsx
+- src/app/admin/faqs/[faqId]/edit/page.tsx
+
+Ensure proper error handling, loading states, and TypeScript typing throughout the implementation.
+
+## 5. Update Public Pages [pending]
+### Dependencies: 22.4
+### Description: Refactor public-facing pages to use React Query hooks for data fetching and state management
+### Details:
+Update the following public pages to use the appropriate React Query hooks:
+- src/app/courses/page.tsx (use useCoursesQuery and useTopicsQuery)
+- src/app/courses/[courseId]/page.tsx (use useCoursesQuery and useLessonsQuery)
+- src/app/(dashboard)/dashboard/page.tsx (use useCoursesQuery and useUserQuery)
+- src/app/(dashboard)/my-courses/page.tsx (use useCoursesQuery)
+- src/app/(auth)/login/page.tsx (use useAuthQuery)
+- src/app/(auth)/signup/page.tsx (use useAuthQuery)
+- src/app/(marketing)/faq/page.tsx (use useFAQsQuery)
+- src/app/(marketing)/reviews/page.tsx (use appropriate React Query hooks)
+- src/app/(marketing)/roadmap/page.tsx (use appropriate React Query hooks)
+
+Implement proper error handling, loading states, and leverage React Query's caching capabilities for improved performance.
+

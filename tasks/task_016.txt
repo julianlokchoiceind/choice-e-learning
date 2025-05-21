@@ -1,0 +1,81 @@
+# Task ID: 16
+# Title: Create useUserQuery Hook for User Profile Data and Operations
+# Status: pending
+# Dependencies: 4, 6, 8
+# Priority: medium
+# Description: Create a new hook in src/client/hooks/user/useUserQuery.ts that provides access to user profile data and operations such as updating user information and managing user preferences.
+# Details:
+The useUserQuery hook should be implemented in the file src/client/hooks/user/useUserQuery.ts and provide the following functionality:
+
+1. **User Profile Data Fetching**:
+   - Implement a query to fetch the current user's profile data
+   - Use React Query's useQuery hook for data fetching and caching
+   - Handle loading, error, and success states appropriately
+
+2. **User Profile Update Operations**:
+   - Implement a mutation for updating user profile information
+   - Use React Query's useMutation hook
+   - Include proper error handling using the useQueryUtils hook (from Task #8)
+   - Show success/error notifications using the useToast hook (from Task #6)
+
+3. **User Preferences Management**:
+   - Implement functions to get and update user preferences
+   - Create mutations for saving preference changes
+   - Ensure preferences are properly cached and invalidated when updated
+
+4. **Hook Interface**:
+   The hook should return an object with:
+   - `user`: The current user data (with loading/error states)
+   - `isLoading`: Boolean indicating if user data is loading
+   - `updateUserProfile`: Function to update user profile information
+   - `updateUserPreferences`: Function to update user preferences
+   - Other relevant user-related operations
+
+5. **Dependencies**:
+   - Use the ReactQueryProvider (from Task #4) for query context
+   - Utilize useToast hook (from Task #6) for notifications
+   - Implement error handling with useQueryUtils (from Task #8)
+
+6. **TypeScript Implementation**:
+   - Define proper TypeScript interfaces for user data and operations
+   - Ensure type safety throughout the implementation
+   - Export the hook with appropriate TypeScript typing
+
+# Test Strategy:
+To verify the successful implementation of the useUserQuery hook, follow these testing steps:
+
+1. **Unit Testing**:
+   - Create unit tests in `__tests__/hooks/user/useUserQuery.test.ts`
+   - Mock API responses for user data and operations
+   - Test the hook's behavior for different scenarios (loading, success, error)
+   - Verify that the hook correctly handles user profile updates
+   - Test user preferences management functionality
+   - Ensure proper error handling is implemented
+
+2. **Integration Testing**:
+   - Create a test component that uses the useUserQuery hook
+   - Verify that the hook integrates correctly with ReactQueryProvider
+   - Test that user data is properly fetched and displayed
+   - Verify that user profile updates trigger appropriate API calls
+   - Test that preference changes are correctly saved and reflected in the UI
+
+3. **Manual Testing**:
+   - Implement the hook in a user profile page component
+   - Verify that user data loads correctly
+   - Test updating user information and verify changes persist
+   - Test changing user preferences and verify they are saved
+   - Verify error handling by simulating API failures
+   - Check that appropriate toast notifications appear for success/error cases
+
+4. **Edge Case Testing**:
+   - Test behavior when user data is not available
+   - Verify handling of network errors
+   - Test with various user permission levels
+   - Verify proper cache invalidation after updates
+
+5. **Performance Testing**:
+   - Verify that the hook efficiently caches user data
+   - Check that unnecessary re-fetches are avoided
+   - Ensure the hook doesn't cause performance issues in the application
+
+The implementation is considered complete when all tests pass, the hook provides all required functionality, and it integrates properly with the dependencies from Tasks #4, #6, and #8.

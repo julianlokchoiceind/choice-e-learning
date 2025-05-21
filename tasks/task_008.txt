@@ -1,0 +1,55 @@
+# Task ID: 8
+# Title: Create useQueryUtils Helper for React Query Error Handling
+# Status: pending
+# Dependencies: 4, 6
+# Priority: medium
+# Description: Create a new utility hook in src/client/hooks/common/useQueryUtils.ts that provides helper functions for React Query error handling, including onError function and showErrorToast functionality as specified in PRD section 3.7.
+# Details:
+This task involves creating a new TypeScript file at src/client/hooks/common/useQueryUtils.ts that will provide utility functions for React Query error handling.
+
+The implementation should:
+1. Import the useToast hook from src/client/hooks/common/useToast.ts (created in Task #6)
+2. Create and export a useQueryUtils hook that returns:
+   - An onError function that handles React Query errors consistently
+   - A showErrorToast function that displays error messages using the toast notification system
+3. The onError function should:
+   - Accept an error parameter (from React Query)
+   - Log the error to the console for debugging
+   - Call the showErrorToast function with an appropriate error message
+4. The showErrorToast function should:
+   - Use the useToast hook to display error notifications
+   - Handle different error types (network errors, API errors, etc.)
+   - Extract and display meaningful error messages from error objects
+   - Provide fallback generic error messages when specific error details aren't available
+5. Ensure the hook is properly typed with TypeScript
+6. Add appropriate JSDoc comments to document the hook's functionality and parameters
+
+The implementation should follow the guidelines in PRD section 3.7 and integrate with the existing React Query setup from Task #4 (ReactQueryProvider).
+
+# Test Strategy:
+To verify the successful implementation of the useQueryUtils helper:
+
+1. Unit Tests:
+   - Create a test file at src/client/hooks/common/__tests__/useQueryUtils.test.ts
+   - Test that the hook returns the expected functions (onError and showErrorToast)
+   - Test the onError function with various error types to ensure it calls showErrorToast correctly
+   - Mock the useToast hook to verify it's called with the right parameters
+   - Test error handling for different error scenarios (network errors, API errors, validation errors)
+
+2. Integration Tests:
+   - Create a test component that uses React Query with the useQueryUtils hook
+   - Simulate API calls that result in errors
+   - Verify that errors are properly displayed as toast notifications
+   - Check that console errors are logged appropriately
+
+3. Manual Testing:
+   - Integrate the hook into an existing component that uses React Query
+   - Intentionally cause API errors (e.g., by disconnecting from the network)
+   - Verify that error toasts appear with the correct messages
+   - Check the browser console to ensure errors are properly logged
+
+4. Code Review:
+   - Ensure the implementation follows TypeScript best practices
+   - Verify that the hook is properly documented with JSDoc comments
+   - Check that the implementation aligns with the specifications in PRD section 3.7
+   - Confirm that the hook integrates correctly with the ReactQueryProvider from Task #4

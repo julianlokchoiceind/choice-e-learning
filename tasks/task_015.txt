@@ -1,0 +1,79 @@
+# Task ID: 15
+# Title: Create useAuthQuery Hook for Authentication Operations
+# Status: pending
+# Dependencies: 4, 6, 8
+# Priority: high
+# Description: Create a new useAuthQuery hook in src/client/hooks/auth/useAuthQuery.ts that provides authentication operations including login, registration, logout, and session management according to project requirements.
+# Details:
+The implementation should include the following:
+
+1. Create the file structure:
+   - Create directory: src/client/hooks/auth/ (if it doesn't exist)
+   - Create file: src/client/hooks/auth/useAuthQuery.ts
+
+2. Import dependencies:
+   - React Query hooks (useQuery, useMutation, useQueryClient)
+   - API client functions for authentication endpoints
+   - useToast hook for displaying success/error notifications
+   - useQueryUtils for error handling
+
+3. Implement the following authentication operations:
+   - Login: Create a useMutation hook that handles user login, stores tokens, and updates the authentication state
+   - Registration: Create a useMutation hook for user registration with appropriate success/error handling
+   - Logout: Create a mutation that clears authentication tokens and resets the auth state
+   - Session management: Implement functionality to check current auth status, refresh tokens, and handle session expiration
+
+4. Each operation should:
+   - Use the appropriate React Query hooks
+   - Implement proper error handling using useQueryUtils
+   - Display appropriate toast notifications on success/failure
+   - Update the global authentication state as needed
+   - Handle loading states
+
+5. The hook should return an object containing:
+   - All authentication mutation functions (login, register, logout)
+   - Current authentication state (isAuthenticated, user data)
+   - Loading states for each operation
+   - Any utility functions needed for auth management
+
+6. Ensure the hook integrates with the existing ReactQueryProvider for proper caching and state management.
+
+7. Add appropriate TypeScript types for all parameters, return values, and state objects.
+
+8. Include documentation comments explaining the purpose and usage of each function within the hook.
+
+# Test Strategy:
+Testing should verify that the useAuthQuery hook functions correctly:
+
+1. Unit Tests:
+   - Create a test file: src/client/hooks/auth/useAuthQuery.test.ts
+   - Test each authentication operation (login, register, logout) in isolation
+   - Mock API responses for success and error scenarios
+   - Verify that the correct mutations are called with the expected parameters
+   - Ensure proper error handling is implemented for each operation
+   - Test that toast notifications are displayed appropriately
+
+2. Integration Tests:
+   - Create a test component that uses the useAuthQuery hook
+   - Test the full authentication flow: registration → login → session management → logout
+   - Verify that the authentication state is properly updated after each operation
+   - Test token storage and retrieval functionality
+   - Ensure the hook properly integrates with ReactQueryProvider
+
+3. Edge Cases:
+   - Test behavior when the server returns unexpected errors
+   - Test token refresh logic when tokens expire
+   - Verify proper handling of network failures
+   - Test concurrent authentication operations
+
+4. Manual Testing:
+   - Implement the hook in a test page with UI elements for each operation
+   - Verify that all operations work as expected in the browser
+   - Test with the actual backend API endpoints
+   - Verify that authentication persists across page refreshes
+   - Check that protected routes are properly accessible/inaccessible based on auth state
+
+5. Documentation Verification:
+   - Ensure the hook has proper JSDoc comments
+   - Verify that TypeScript types are correctly defined
+   - Check that the implementation follows the project's coding standards

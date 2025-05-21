@@ -1,0 +1,648 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Install Required Packages: @tanstack/react-query, @tanstack/react-query-devtools, and react-hot-toast",
+      "description": "Install and configure the required npm packages (@tanstack/react-query, @tanstack/react-query-devtools, and react-hot-toast) as specified in section 2.2.1 of the PRD.",
+      "details": "1. Use npm or yarn to install the following packages:\n   - @tanstack/react-query: For efficient data fetching, caching, and state management\n   - @tanstack/react-query-devtools: For debugging and monitoring React Query operations\n   - react-hot-toast: For displaying toast notifications in the application\n\n2. After installation, set up the React Query provider in the application's main component:\n   - Import QueryClient and QueryClientProvider from @tanstack/react-query\n   - Create a new QueryClient instance\n   - Wrap the application with QueryClientProvider\n\n3. Configure the React Query DevTools:\n   - Import ReactQueryDevtools from @tanstack/react-query-devtools\n   - Add the DevTools component inside the QueryClientProvider (only in development environment)\n\n4. Set up the Toaster component from react-hot-toast:\n   - Import Toaster from react-hot-toast\n   - Add the Toaster component to the application's main component\n\n5. Document any specific configuration requirements mentioned in section 2.2.1 of the PRD.\n\n6. Update the project's package.json and ensure the dependencies are properly listed.",
+      "testStrategy": "1. Verify package installation:\n   - Check package.json to confirm the packages are listed with correct versions\n   - Ensure node_modules contains the installed packages\n   - Run `npm list @tanstack/react-query @tanstack/react-query-devtools react-hot-toast` to verify installations\n\n2. Verify React Query setup:\n   - Confirm QueryClientProvider is properly implemented in the application\n   - Check that a QueryClient instance is created correctly\n   - Verify the application can run without React Query related errors\n\n3. Verify React Query DevTools:\n   - Run the application in development mode\n   - Open the browser and confirm the React Query DevTools panel is accessible\n   - Perform a query operation and verify it appears in the DevTools\n\n4. Verify react-hot-toast:\n   - Confirm the Toaster component is added to the application\n   - Create a test toast notification and verify it displays correctly\n   - Test different toast types (success, error, etc.) if applicable\n\n5. Cross-reference with PRD:\n   - Review section 2.2.1 of the PRD to ensure all specific requirements have been met\n   - Document any deviations or additional configurations made",
+      "status": "done",
+      "dependencies": [],
+      "priority": "high",
+      "subtasks": []
+    },
+    {
+      "id": 2,
+      "title": "Update LoadingState Component with Multiple Variants",
+      "description": "Completely replace the existing LoadingState component with a new version that supports multiple variants: default, page, table, section, and button according to the PRD section 3.1 specifications.",
+      "details": "The developer should:\n\n1. Locate the existing LoadingState component at src/client/components/common/LoadingState.tsx\n2. Create a backup of the current implementation before making changes\n3. Implement a new version with the following variants:\n   - default: Standard loading indicator for general use\n   - page: Full-page loading state for initial page loads\n   - table: Specialized loading state for table components\n   - section: Loading state for specific sections of the UI\n   - button: Inline loading state for buttons during async operations\n\n4. The component should accept a 'variant' prop to determine which style to render\n5. Implement appropriate styling for each variant according to the PRD section 3.1\n6. Ensure the component is fully typed with TypeScript\n7. Add appropriate default props\n8. Document the component API with JSDoc comments\n9. Ensure the component is exported properly for use throughout the application\n10. Update any existing imports of the LoadingState component if the API has changed\n\nThe implementation should strictly follow the code examples and specifications provided in section 3.1 of the PRD.",
+      "testStrategy": "To verify the task completion:\n\n1. **Visual Inspection**:\n   - Verify that the component renders correctly for each variant\n   - Compare the implementation against the PRD specifications in section 3.1\n   - Ensure the styling matches the design requirements\n\n2. **Code Review**:\n   - Check that TypeScript types are properly defined\n   - Verify that the component API is documented with JSDoc\n   - Ensure the component is properly exported\n\n3. **Unit Tests**:\n   - Write tests for each variant to ensure they render correctly\n   - Test that the component accepts and responds to the 'variant' prop\n   - Test any additional props defined in the PRD\n\n4. **Integration Testing**:\n   - Test the component in various contexts where it might be used\n   - Verify that existing usages of the LoadingState component still work\n   - Test edge cases like rapid mounting/unmounting\n\n5. **Browser Testing**:\n   - Test the component in different browsers to ensure consistent appearance\n   - Verify that animations work as expected across browsers\n\n6. **Accessibility Testing**:\n   - Ensure the loading states are accessible (proper aria attributes)\n   - Test with screen readers to verify accessibility",
+      "status": "done",
+      "dependencies": [],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Implement LoadingState base component",
+          "description": "Create the base structure for the LoadingState component with props for variant selection",
+          "dependencies": [],
+          "details": "Set up the component file, define props interface, and create a basic render function that switches between variants",
+          "status": "done"
+        },
+        {
+          "id": 2,
+          "title": "Develop individual LoadingState variants",
+          "description": "Implement each LoadingState variant (e.g., spinner, progress bar, skeleton) as separate subcomponents",
+          "dependencies": [
+            1
+          ],
+          "details": "Create subcomponents for each variant, implement their specific logic and placeholder content",
+          "status": "done"
+        },
+        {
+          "id": 3,
+          "title": "Style LoadingState variants",
+          "description": "Apply appropriate styling to each LoadingState variant and ensure responsive design",
+          "dependencies": [
+            2
+          ],
+          "details": "Create CSS modules or styled-components for each variant, implement animations, and ensure consistent theming",
+          "status": "done"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Add CSS Variable for Spinner Color",
+      "description": "Update the globals.css file to add a new CSS variable --spinner-color that uses the existing primary color as specified in PRD section 3.2.",
+      "details": "1. Open the file src/app/globals.css\n2. Locate the CSS variables section (usually at the top of the file)\n3. Add a new CSS variable named --spinner-color\n4. Set the value of --spinner-color to use the existing primary color variable (likely --color-primary or similar)\n5. Ensure the variable is defined in the :root selector to make it globally available\n6. Follow the exact naming convention and implementation details as specified in PRD section 3.2\n7. The spinner color should be consistent with the application's design system\n8. Make sure not to modify any existing CSS variables unless specifically instructed in the PRD\n9. Verify that the variable is properly scoped and accessible throughout the application\n\nThis task is part of the styling improvements for the LoadingState component, following Task #2 which updated the component structure. The new CSS variable will allow for consistent and themeable spinner colors across the application.",
+      "testStrategy": "1. Visual Verification:\n   - Open the application in a browser\n   - Navigate to pages where spinners are displayed\n   - Verify that all spinners use the correct color as defined by the new CSS variable\n\n2. Code Review:\n   - Confirm that the --spinner-color variable is correctly added to globals.css\n   - Verify that it references the primary color as specified in the PRD\n   - Check that the variable is defined in the correct scope (:root)\n\n3. Browser DevTools Testing:\n   - Open browser DevTools and inspect a spinner element\n   - Confirm that the computed color matches the expected primary color\n   - Temporarily modify the --spinner-color value in DevTools to ensure it affects the spinner appearance\n\n4. Cross-browser Testing:\n   - Test in Chrome, Firefox, and Safari to ensure CSS variable support works correctly\n   - Verify the spinner color is consistent across all browsers\n\n5. Documentation Check:\n   - Ensure the implementation matches the specifications in PRD section 3.2",
+      "status": "done",
+      "dependencies": [],
+      "priority": "medium",
+      "subtasks": []
+    },
+    {
+      "id": 4,
+      "title": "Create ReactQueryProvider Component",
+      "description": "Create a new ReactQueryProvider component in src/client/providers/ReactQueryProvider.tsx that configures and provides React Query context to the application according to PRD section 3.3.",
+      "details": "1. Create a new directory structure if it doesn't exist: src/client/providers/\n2. Create a new file ReactQueryProvider.tsx in this directory\n3. Import necessary dependencies from @tanstack/react-query and @tanstack/react-query-devtools\n4. Create a ReactQueryProvider component that:\n   - Initializes a new QueryClient with default configurations as specified in PRD section 3.3\n   - Sets up default error handling for queries using toast notifications\n   - Configures default staleTime, cacheTime, and retry options as per PRD\n   - Wraps children components with QueryClientProvider\n   - Includes ReactQueryDevtools in development mode only\n5. Export the ReactQueryProvider as both a named and default export\n6. Add proper TypeScript types for all props and components\n7. Ensure the provider is set up to handle global error states and display appropriate toast notifications when queries fail\n8. Document the component with JSDoc comments explaining its purpose and configuration options",
+      "testStrategy": "1. Verify the file structure is correct: src/client/providers/ReactQueryProvider.tsx exists\n2. Check that the component correctly imports and uses @tanstack/react-query and react-hot-toast packages installed in Task #1\n3. Manually test the component by:\n   - Importing and using it in the main application component\n   - Verifying that React Query DevTools appear in development mode\n   - Creating a test query that intentionally fails to verify error handling works\n   - Checking that toast notifications appear when queries fail\n4. Write unit tests to verify:\n   - The component renders without errors\n   - QueryClient is properly configured with the default options from PRD section 3.3\n   - Error handling middleware correctly triggers toast notifications\n5. Verify integration with the rest of the application by:\n   - Ensuring all query hooks have access to the QueryClient\n   - Confirming that the DevTools are only visible in development mode\n   - Testing that the provider doesn't cause any performance issues",
+      "status": "done",
+      "dependencies": [
+        1
+      ],
+      "priority": "high",
+      "subtasks": []
+    },
+    {
+      "id": 5,
+      "title": "Create ToastProvider Component for Toast Notifications",
+      "description": "Create a new ToastProvider component in src/client/providers/ToastProvider.tsx that implements react-hot-toast with default configurations as specified in section 3.4 of the PRD.",
+      "details": "The implementation should include the following steps:\n\n1. Create a new directory structure if it doesn't exist: src/client/providers/\n2. Create the ToastProvider.tsx file with the following components:\n   - Import the necessary dependencies from react and react-hot-toast\n   - Create a ToastProvider component that wraps the Toaster component from react-hot-toast\n   - Configure the Toaster with default settings as specified in PRD section 3.4, which likely includes:\n     - Position (e.g., top-right)\n     - Duration\n     - Style configurations\n     - Any custom toast options\n3. Export the ToastProvider as both a named and default export\n4. Ensure the provider is designed to wrap around the application components that need access to toast notifications\n5. Document the component with appropriate JSDoc comments explaining its purpose and usage\n6. Follow the project's coding standards and TypeScript typing conventions\n7. Ensure the implementation is consistent with other providers in the application\n\nThis task builds upon Task #1, which installed the react-hot-toast package that will be used in this implementation.",
+      "testStrategy": "To verify the successful implementation of the ToastProvider:\n\n1. **Code Review**:\n   - Ensure the file is created at the correct path: src/client/providers/ToastProvider.tsx\n   - Verify that react-hot-toast is properly imported\n   - Check that the configuration matches the specifications in PRD section 3.4\n   - Confirm proper TypeScript typing is applied\n\n2. **Manual Testing**:\n   - Import and use the ToastProvider in a test component\n   - Trigger different types of toasts (success, error, info, etc.)\n   - Verify that toasts appear with the correct styling and behavior\n   - Test that multiple toasts stack correctly\n   - Check that toasts dismiss properly (both automatically and manually)\n\n3. **Integration Testing**:\n   - Integrate the ToastProvider into the application's main provider hierarchy\n   - Verify that components can access and use toast functions throughout the application\n   - Test toast notifications in different application states and routes\n\n4. **Accessibility Testing**:\n   - Ensure toast notifications are accessible (proper contrast, readable text)\n   - Verify that screen readers can properly announce toast messages\n   - Check that toasts don't interfere with keyboard navigation\n\n5. **Documentation**:\n   - Verify that usage examples are documented for the development team",
+      "status": "done",
+      "dependencies": [
+        1
+      ],
+      "priority": "high",
+      "subtasks": []
+    },
+    {
+      "id": 6,
+      "title": "Create useToast Hook for Toast Notifications",
+      "description": "Create a new useToast hook in src/client/hooks/common/useToast.ts that provides a convenient interface for using toast notifications throughout the application as specified in section 3.5 of the PRD.",
+      "details": "The developer should:\n\n1. Create a new file at src/client/hooks/common/useToast.ts\n2. Implement a custom React hook that leverages the ToastProvider component created in Task #5\n3. The hook should expose the following functionality:\n   - `success(message: string, options?: ToastOptions)`: Display a success toast\n   - `error(message: string, options?: ToastOptions)`: Display an error toast\n   - `warning(message: string, options?: ToastOptions)`: Display a warning toast\n   - `info(message: string, options?: ToastOptions)`: Display an info toast\n   - `loading(message: string, options?: ToastOptions)`: Display a loading toast\n   - `dismiss(toastId?: string)`: Dismiss a specific toast or all toasts\n   - `custom(message: string, options?: ToastOptions)`: Display a custom toast\n\n4. Each method should properly integrate with react-hot-toast's API\n5. The hook should handle proper type definitions for all parameters and return values\n6. Include appropriate JSDoc comments for each function\n7. Ensure the hook can be used within any component that is a child of the ToastProvider\n8. Handle edge cases such as:\n   - Components trying to use the hook outside of ToastProvider context\n   - Invalid parameters passed to toast functions\n   - Proper cleanup when components unmount\n\nThe implementation should follow the project's coding standards and be consistent with the existing codebase.",
+      "testStrategy": "To verify the successful implementation of the useToast hook:\n\n1. **Unit Testing**:\n   - Create unit tests using Jest and React Testing Library\n   - Test each toast function (success, error, warning, info, loading, dismiss, custom)\n   - Mock the react-hot-toast library to verify correct integration\n   - Test error handling and edge cases\n\n2. **Integration Testing**:\n   - Create a test component that uses the useToast hook\n   - Verify that toasts appear correctly when triggered from the test component\n   - Test that the hook properly interacts with the ToastProvider component\n   - Verify toast appearance, positioning, and animations match the PRD specifications\n\n3. **Manual Testing**:\n   - Create a simple demo page that demonstrates all toast types\n   - Verify visual appearance matches design specifications\n   - Test responsiveness on different screen sizes\n   - Verify accessibility requirements are met (keyboard navigation, screen reader support)\n   - Test with different message lengths to ensure proper handling\n\n4. **Documentation Verification**:\n   - Ensure JSDoc comments are complete and accurate\n   - Verify TypeScript types are correctly defined\n   - Check that the implementation matches the requirements in PRD section 3.5\n\n5. **Code Review**:\n   - Have another developer review the implementation\n   - Verify the hook follows project coding standards\n   - Ensure the hook properly integrates with the ToastProvider from Task #5",
+      "status": "pending",
+      "dependencies": [
+        5
+      ],
+      "priority": "high",
+      "subtasks": []
+    },
+    {
+      "id": 7,
+      "title": "Update Root Layout with ReactQueryProvider and ToastProvider",
+      "description": "Update the src/app/layout.tsx file to incorporate the newly created ReactQueryProvider and ToastProvider components according to section 3.6 of the PRD.",
+      "details": "This task involves modifying the root layout file to properly wrap the application with the required providers:\n\n1. Open the src/app/layout.tsx file\n2. Import the ReactQueryProvider from src/client/providers/ReactQueryProvider.tsx\n3. Import the ToastProvider from src/client/providers/ToastProvider.tsx\n4. Wrap the application's root component with both providers in the correct order:\n   - ReactQueryProvider should be the outer provider\n   - ToastProvider should be nested inside ReactQueryProvider\n5. Ensure that the existing layout structure and any other providers remain intact\n6. The updated layout should maintain all existing props and functionality\n7. Follow any specific implementation details mentioned in section 3.6 of the PRD\n8. Ensure proper TypeScript typing for all components and props\n9. Verify that the providers are correctly nested and that the application structure is maintained\n\nExample implementation structure:\n```tsx\nimport { ReactQueryProvider } from '@/client/providers/ReactQueryProvider';\nimport { ToastProvider } from '@/client/providers/ToastProvider';\n\nexport default function RootLayout({ children }: { children: React.ReactNode }) {\n  return (\n    <html lang=\"en\">\n      <body>\n        <ReactQueryProvider>\n          <ToastProvider>\n            {/* Existing layout structure */}\n            {children}\n          </ToastProvider>\n        </ReactQueryProvider>\n      </body>\n    </html>\n  );\n}\n```",
+      "testStrategy": "To verify that the Root Layout has been correctly updated:\n\n1. **Code Review**:\n   - Verify that ReactQueryProvider and ToastProvider are properly imported\n   - Confirm that the providers are wrapped in the correct order as specified in the PRD\n   - Check that all existing functionality in the layout file is preserved\n   - Ensure proper TypeScript typing throughout the file\n\n2. **Manual Testing**:\n   - Start the development server with `npm run dev` or equivalent command\n   - Verify that the application loads without any console errors related to the providers\n   - Test React Query functionality by navigating to a page that uses data fetching\n   - Test Toast notifications by triggering an action that should display a toast\n   - Verify that both providers are functioning correctly in different parts of the application\n\n3. **Integration Testing**:\n   - Create or update tests that verify the providers are correctly initialized\n   - Test that components nested within the layout can access the context provided by both providers\n   - Verify that React Query hooks work properly throughout the application\n   - Confirm that toast notifications can be triggered from any component\n\n4. **Browser Compatibility**:\n   - Test the updated layout in multiple browsers to ensure consistent behavior\n   - Verify that the providers work correctly in different environments (development, production)\n\n5. **Performance Check**:\n   - Ensure that adding these providers doesn't negatively impact the application's initial load time\n   - Verify that the providers are properly configured for optimal performance",
+      "status": "pending",
+      "dependencies": [
+        4,
+        5
+      ],
+      "priority": "high",
+      "subtasks": []
+    },
+    {
+      "id": 8,
+      "title": "Create useQueryUtils Helper for React Query Error Handling",
+      "description": "Create a new utility hook in src/client/hooks/common/useQueryUtils.ts that provides helper functions for React Query error handling, including onError function and showErrorToast functionality as specified in PRD section 3.7.",
+      "details": "This task involves creating a new TypeScript file at src/client/hooks/common/useQueryUtils.ts that will provide utility functions for React Query error handling.\n\nThe implementation should:\n1. Import the useToast hook from src/client/hooks/common/useToast.ts (created in Task #6)\n2. Create and export a useQueryUtils hook that returns:\n   - An onError function that handles React Query errors consistently\n   - A showErrorToast function that displays error messages using the toast notification system\n3. The onError function should:\n   - Accept an error parameter (from React Query)\n   - Log the error to the console for debugging\n   - Call the showErrorToast function with an appropriate error message\n4. The showErrorToast function should:\n   - Use the useToast hook to display error notifications\n   - Handle different error types (network errors, API errors, etc.)\n   - Extract and display meaningful error messages from error objects\n   - Provide fallback generic error messages when specific error details aren't available\n5. Ensure the hook is properly typed with TypeScript\n6. Add appropriate JSDoc comments to document the hook's functionality and parameters\n\nThe implementation should follow the guidelines in PRD section 3.7 and integrate with the existing React Query setup from Task #4 (ReactQueryProvider).",
+      "testStrategy": "To verify the successful implementation of the useQueryUtils helper:\n\n1. Unit Tests:\n   - Create a test file at src/client/hooks/common/__tests__/useQueryUtils.test.ts\n   - Test that the hook returns the expected functions (onError and showErrorToast)\n   - Test the onError function with various error types to ensure it calls showErrorToast correctly\n   - Mock the useToast hook to verify it's called with the right parameters\n   - Test error handling for different error scenarios (network errors, API errors, validation errors)\n\n2. Integration Tests:\n   - Create a test component that uses React Query with the useQueryUtils hook\n   - Simulate API calls that result in errors\n   - Verify that errors are properly displayed as toast notifications\n   - Check that console errors are logged appropriately\n\n3. Manual Testing:\n   - Integrate the hook into an existing component that uses React Query\n   - Intentionally cause API errors (e.g., by disconnecting from the network)\n   - Verify that error toasts appear with the correct messages\n   - Check the browser console to ensure errors are properly logged\n\n4. Code Review:\n   - Ensure the implementation follows TypeScript best practices\n   - Verify that the hook is properly documented with JSDoc comments\n   - Check that the implementation aligns with the specifications in PRD section 3.7\n   - Confirm that the hook integrates correctly with the ReactQueryProvider from Task #4",
+      "status": "pending",
+      "dependencies": [
+        4,
+        6
+      ],
+      "priority": "medium",
+      "subtasks": []
+    },
+    {
+      "id": 9,
+      "title": "Update Provider Exports in index.ts File",
+      "description": "Update the src/client/providers/index.ts file to export the newly created provider components according to section 3.8 of the PRD.",
+      "details": "This task involves updating the central export file for providers to ensure all newly created provider components are properly exported and available throughout the application.\n\nSteps to complete:\n1. Open the file at src/client/providers/index.ts\n2. Review section 3.8 of the PRD for specific export requirements\n3. Add export statements for the newly created provider components, including:\n   - ReactQueryProvider (from Task #4)\n   - ToastProvider (from Task #5)\n   - Any other providers mentioned in section 3.8 of the PRD\n4. Ensure the export syntax follows the project's conventions (e.g., named exports vs. default exports)\n5. Maintain alphabetical ordering of exports if that's the project standard\n6. Add appropriate comments if required by the project's documentation standards\n7. Verify there are no duplicate exports or naming conflicts\n\nNote that this task depends on the completion of Task #4 (ReactQueryProvider) and Task #5 (ToastProvider), as these components need to exist before they can be exported.",
+      "testStrategy": "To verify this task has been completed correctly:\n\n1. Code Review:\n   - Ensure all providers mentioned in PRD section 3.8 are properly exported\n   - Verify export syntax is correct and follows project conventions\n   - Check that the file imports all necessary components before exporting them\n\n2. Import Testing:\n   - Create a simple test file that imports all providers from the index file:\n     ```javascript\n     import { ReactQueryProvider, ToastProvider, /* other providers */ } from '../src/client/providers';\n     ```\n   - Verify the import statement resolves without errors\n\n3. Build Verification:\n   - Run the project build process to ensure there are no compilation errors related to the exports\n   - Check for any TypeScript errors if the project uses TypeScript\n\n4. Integration Testing:\n   - Verify that components using these providers can import them correctly from the central export file\n   - Test that the application can initialize with the updated provider exports\n\n5. Documentation Check:\n   - Ensure any documentation that references provider imports is updated to reflect the new export structure",
+      "status": "pending",
+      "dependencies": [
+        4,
+        5
+      ],
+      "priority": "medium",
+      "subtasks": []
+    },
+    {
+      "id": 10,
+      "title": "Update Common Hooks Exports in index.ts",
+      "description": "Update the src/client/hooks/common/index.ts file to export the newly created hooks (useToast and useQueryUtils) according to the guidelines in section 3.9 of the PRD.",
+      "details": "This task involves updating the barrel file (index.ts) in the common hooks directory to properly export the newly created hooks. The developer should:\n\n1. Open the file at src/client/hooks/common/index.ts\n2. Add export statements for the following hooks:\n   - useToast from './useToast'\n   - useQueryUtils from './useQueryUtils'\n3. Ensure the export syntax follows the project's conventions (either named exports or default exports as specified in the PRD section 3.9)\n4. Verify that the file paths are correct and that the hooks are properly imported\n5. Check for any additional hooks mentioned in PRD section 3.9 that should also be exported\n6. Maintain alphabetical ordering of exports if that's the project convention\n7. Add appropriate comments if required by the project's documentation standards\n8. Ensure no duplicate exports exist\n\nThis task is dependent on Task #6 (Create useToast Hook) and Task #8 (Create useQueryUtils Helper) being completed first, as those tasks create the actual hook files that need to be exported.",
+      "testStrategy": "To verify this task has been completed correctly:\n\n1. Code Review:\n   - Check that src/client/hooks/common/index.ts has been updated with the correct export statements\n   - Verify the export syntax matches project conventions specified in PRD section 3.9\n   - Ensure all required hooks from the PRD are included\n\n2. Import Testing:\n   - Create a simple test file that imports the hooks from the common hooks directory\n   - Example: `import { useToast, useQueryUtils } from '@/client/hooks/common'`\n   - Verify that the imports resolve without any errors\n\n3. Build Verification:\n   - Run the project build process to ensure there are no compilation errors\n   - Check for any TypeScript errors related to the exports\n\n4. Integration Testing:\n   - Create a simple component that uses the imported hooks\n   - Verify that the component can successfully use the hooks without any import or usage errors\n   - Test that the hooks function as expected when imported through the barrel file\n\n5. Documentation:\n   - Verify that any required documentation has been updated to reflect the new exports\n   - Check that JSDoc comments are included if required by project standards",
+      "status": "pending",
+      "dependencies": [
+        6,
+        8
+      ],
+      "priority": "medium",
+      "subtasks": []
+    },
+    {
+      "id": 11,
+      "title": "Create useCoursesQuery Hook for Course Data CRUD Operations",
+      "description": "Implement a custom React Query hook in src/client/hooks/courses/useCoursesQuery.ts that provides CRUD operations for course data according to PRD sections 3.7 and 4.1.",
+      "details": "The useCoursesQuery hook should be implemented in a new file at src/client/hooks/courses/useCoursesQuery.ts. This hook will serve as the primary interface for all course-related data operations.\n\nImplementation requirements:\n1. Import necessary dependencies:\n   - React Query hooks (useQuery, useMutation, useQueryClient)\n   - API service functions for course operations\n   - useQueryUtils hook for error handling\n   - useToast hook for success notifications\n\n2. Implement the following query functions:\n   - useGetCourses(): Fetches a list of all courses\n   - useGetCourseById(id): Fetches a specific course by ID\n   - useCreateCourse(): Creates a new course\n   - useUpdateCourse(): Updates an existing course\n   - useDeleteCourse(): Deletes a course\n\n3. Each function should:\n   - Properly handle loading, error, and success states\n   - Utilize the useQueryUtils hook for standardized error handling\n   - Show appropriate toast notifications on success/failure\n   - Implement proper cache invalidation and updates\n   - Return relevant data and state information\n\n4. Follow the patterns and guidelines specified in PRD sections 3.7 and 4.1, ensuring consistency with the application's data management approach.\n\n5. Implement proper TypeScript typing for all parameters, return values, and internal variables.\n\n6. Add comprehensive JSDoc comments for the hook and all its functions.\n\nThis hook depends on the previously completed ReactQueryProvider, useToast, and useQueryUtils implementations.",
+      "testStrategy": "Testing for the useCoursesQuery hook should be comprehensive and verify both functionality and integration:\n\n1. Unit Tests:\n   - Create a test file at src/client/hooks/courses/__tests__/useCoursesQuery.test.ts\n   - Mock all external dependencies (API calls, React Query functions)\n   - Test each CRUD operation function separately\n   - Verify proper handling of success, loading, and error states\n   - Ensure correct parameters are passed to API functions\n   - Validate that proper cache invalidation occurs after mutations\n\n2. Integration Tests:\n   - Create a test component that uses the hook in a realistic scenario\n   - Test the full flow of fetching, creating, updating, and deleting courses\n   - Verify that toast notifications appear correctly\n   - Ensure error handling works as expected with the useQueryUtils hook\n\n3. Manual Testing:\n   - Implement the hook in a development environment\n   - Verify all CRUD operations work with actual API endpoints\n   - Check that loading states, error handling, and success notifications work as expected\n   - Test edge cases like network failures, validation errors, etc.\n\n4. Code Review Checklist:\n   - Proper TypeScript typing throughout the implementation\n   - Adherence to project coding standards\n   - Comprehensive JSDoc documentation\n   - Efficient use of React Query features (caching, refetching, etc.)\n   - Proper integration with useQueryUtils and useToast hooks\n   - Alignment with PRD specifications in sections 3.7 and 4.1",
+      "status": "pending",
+      "dependencies": [
+        4,
+        6,
+        8
+      ],
+      "priority": "high",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Implement course fetching logic",
+          "description": "Create the main query function to fetch courses from the API",
+          "dependencies": [],
+          "details": "Utilize the API client to create a function that fetches courses. Handle pagination and any necessary query parameters. Implement error handling and loading states.",
+          "status": "pending"
+        },
+        {
+          "id": 2,
+          "title": "Develop course mutation functions",
+          "description": "Create functions for adding, updating, and deleting courses",
+          "dependencies": [
+            1
+          ],
+          "details": "Implement separate functions for adding a new course, updating an existing course, and deleting a course. Ensure proper error handling and optimistic updates where applicable.",
+          "status": "pending"
+        },
+        {
+          "id": 3,
+          "title": "Implement data normalization",
+          "description": "Create utility functions to normalize and denormalize course data",
+          "dependencies": [
+            1,
+            2
+          ],
+          "details": "Develop functions to convert API response data into a normalized format for efficient state management. Create corresponding denormalization functions for data presentation.",
+          "status": "pending"
+        },
+        {
+          "id": 4,
+          "title": "Integrate and test the useCoursesQuery hook",
+          "description": "Combine all components into the final hook and perform thorough testing",
+          "dependencies": [
+            1,
+            2,
+            3
+          ],
+          "details": "Assemble the fetching, mutation, and normalization functions into the useCoursesQuery hook. Write comprehensive unit tests and integration tests to ensure proper functionality and error handling.",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "Create useTopicsQuery Hook for CRUD Operations",
+      "description": "Create a new hook in src/client/hooks/topics/useTopicsQuery.ts that provides CRUD operations for topic data according to PRD section 4.2.",
+      "details": "The implementation should include:\n\n1. Create the file structure:\n   - Create directory: src/client/hooks/topics/ (if it doesn't exist)\n   - Create file: src/client/hooks/topics/useTopicsQuery.ts\n\n2. Import necessary dependencies:\n   - React Query hooks (useQuery, useMutation, useQueryClient)\n   - Error handling utilities from useQueryUtils\n   - Toast notification functions from useToast\n   - API client or axios for HTTP requests\n\n3. Implement the following CRUD operations as specified in PRD section 4.2:\n   - useGetTopics(): Fetch all topics\n   - useGetTopicById(id): Fetch a specific topic by ID\n   - useCreateTopic(): Create a new topic\n   - useUpdateTopic(): Update an existing topic\n   - useDeleteTopic(): Delete a topic\n\n4. Each function should:\n   - Properly handle loading states\n   - Implement error handling using the useQueryUtils hook\n   - Show appropriate toast notifications on success/failure\n   - Invalidate queries to refresh data after mutations\n   - Follow React Query best practices for caching and data synchronization\n\n5. Ensure the hook is properly typed with TypeScript:\n   - Define Topic interface with appropriate properties\n   - Type all function parameters and return values\n   - Use proper error typing\n\n6. Add JSDoc comments for all exported functions to document usage.\n\n7. Ensure the implementation aligns with the existing ReactQueryProvider configuration.\n\n8. Consider implementing optimistic updates for better UX where appropriate.",
+      "testStrategy": "Testing should include:\n\n1. Unit tests:\n   - Create a test file: src/client/hooks/topics/__tests__/useTopicsQuery.test.ts\n   - Mock the API responses for all CRUD operations\n   - Test each function for successful API calls\n   - Test error handling scenarios\n   - Verify toast notifications are triggered appropriately\n   - Ensure query invalidation works correctly\n\n2. Integration tests:\n   - Create a test component that uses the hook\n   - Test the component with React Testing Library\n   - Verify data fetching, loading states, and error states\n   - Test all CRUD operations in an integrated environment\n\n3. Manual testing:\n   - Implement the hook in a component\n   - Verify all CRUD operations work as expected\n   - Check loading indicators appear correctly\n   - Confirm error messages display properly\n   - Test edge cases like network failures\n   - Verify toast notifications appear with correct messages\n\n4. Documentation verification:\n   - Ensure JSDoc comments are complete and accurate\n   - Verify TypeScript types are correctly implemented\n   - Check that the implementation follows PRD section 4.2 requirements\n\n5. Performance testing:\n   - Verify caching works as expected\n   - Check that unnecessary re-renders are avoided\n   - Test with large datasets to ensure performance",
+      "status": "pending",
+      "dependencies": [
+        4,
+        6,
+        8
+      ],
+      "priority": "high",
+      "subtasks": []
+    },
+    {
+      "id": 13,
+      "title": "Create useFAQsQuery Hook for FAQ Data Operations",
+      "description": "Create a new hook in src/client/hooks/faq/useFAQsQuery.ts that provides CRUD operations for FAQ data according to PRD section 4.3.",
+      "details": "This task involves creating a new custom React Query hook for managing FAQ data operations:\n\n1. Create a new file at `src/client/hooks/faq/useFAQsQuery.ts`\n2. Implement the hook to provide the following CRUD operations:\n   - `getFAQs()`: Fetch all FAQs\n   - `getFAQ(id)`: Fetch a specific FAQ by ID\n   - `createFAQ(data)`: Create a new FAQ\n   - `updateFAQ(id, data)`: Update an existing FAQ\n   - `deleteFAQ(id)`: Delete an FAQ\n\n3. Utilize the ReactQueryProvider context from Task #4 for query caching and state management\n4. Implement proper error handling using the useQueryUtils hook from Task #8\n5. Display appropriate toast notifications using the useToast hook from Task #6\n6. Follow the API specifications defined in PRD section 4.3\n7. Ensure proper TypeScript typing for all parameters and return values\n8. Implement query invalidation to refresh data after mutations\n9. Add appropriate comments and documentation for the hook functions\n\nThe hook should be designed to be easily imported and used by any component that needs to interact with FAQ data.",
+      "testStrategy": "To verify the successful implementation of the useFAQsQuery hook:\n\n1. Unit Testing:\n   - Write Jest tests for each CRUD operation in the hook\n   - Mock API responses to test success and error scenarios\n   - Verify that the hook correctly handles loading, error, and success states\n   - Test that query invalidation works correctly after mutations\n\n2. Integration Testing:\n   - Create a test component that uses the hook to perform each CRUD operation\n   - Verify that the component correctly displays loading states during operations\n   - Confirm that error handling works as expected when API calls fail\n   - Check that toast notifications appear appropriately for success/error cases\n\n3. Manual Testing:\n   - Import and use the hook in a test component\n   - Perform each CRUD operation and verify the results in the UI\n   - Check the React Query DevTools to ensure queries are being cached correctly\n   - Verify that error messages are displayed correctly when operations fail\n   - Test edge cases such as attempting to update or delete non-existent FAQs\n\n4. Code Review:\n   - Ensure the hook follows the project's coding standards\n   - Verify that TypeScript types are correctly implemented\n   - Check that the hook properly integrates with the dependencies from Tasks #4, #6, and #8\n   - Confirm that the implementation matches the specifications in PRD section 4.3",
+      "status": "pending",
+      "dependencies": [
+        4,
+        6,
+        8
+      ],
+      "priority": "medium",
+      "subtasks": []
+    },
+    {
+      "id": 14,
+      "title": "Create useLessonsQuery Hook for CRUD Operations",
+      "description": "Create a new hook in src/client/hooks/learn/useLessonsQuery.ts that provides CRUD operations for lesson data according to PRD section 4.4.",
+      "details": "This task involves creating a custom React Query hook that will handle all CRUD operations for lesson data:\n\n1. Create a new file at `src/client/hooks/learn/useLessonsQuery.ts`\n2. Implement the following functionality in the hook:\n   - `useGetLessons()`: Query to fetch all lessons\n   - `useGetLesson(id)`: Query to fetch a specific lesson by ID\n   - `useCreateLesson()`: Mutation to create a new lesson\n   - `useUpdateLesson()`: Mutation to update an existing lesson\n   - `useDeleteLesson()`: Mutation to delete a lesson\n\nThe hook should:\n- Utilize the ReactQueryProvider context for caching and state management\n- Implement proper error handling using the useQueryUtils hook\n- Display appropriate toast notifications on success/error using useToast\n- Include TypeScript interfaces for lesson data structure\n- Follow the API endpoints and data structures specified in PRD section 4.4\n- Implement query invalidation to ensure data consistency after mutations\n- Include proper loading states and error handling\n- Add JSDoc comments for all exported functions\n\nThe implementation should follow React Query best practices, including:\n- Using appropriate query keys for caching\n- Implementing optimistic updates where applicable\n- Handling pagination if required by the PRD\n- Providing retry logic for failed requests",
+      "testStrategy": "To verify the correct implementation of the useLessonsQuery hook:\n\n1. Unit Tests:\n   - Create unit tests for each CRUD operation in the hook\n   - Mock API responses to test success and error scenarios\n   - Verify that proper error handling is implemented\n   - Test that query invalidation works correctly after mutations\n\n2. Integration Tests:\n   - Create a test component that uses the hook to perform CRUD operations\n   - Verify that data is correctly fetched, created, updated, and deleted\n   - Test that loading states are correctly managed\n   - Ensure toast notifications appear correctly on success/error\n\n3. Manual Testing:\n   - Implement the hook in a development environment\n   - Test each CRUD operation against the actual API\n   - Verify that the UI updates correctly after mutations\n   - Check that error messages are displayed appropriately\n   - Test edge cases like network failures or server errors\n\n4. Code Review:\n   - Ensure the hook follows the structure specified in the PRD\n   - Verify TypeScript types are correctly implemented\n   - Check that the hook integrates properly with ReactQueryProvider\n   - Confirm that the hook uses useQueryUtils for error handling\n   - Validate that the hook uses useToast for notifications",
+      "status": "pending",
+      "dependencies": [
+        4,
+        6,
+        8
+      ],
+      "priority": "high",
+      "subtasks": []
+    },
+    {
+      "id": 15,
+      "title": "Create useAuthQuery Hook for Authentication Operations",
+      "description": "Create a new useAuthQuery hook in src/client/hooks/auth/useAuthQuery.ts that provides authentication operations including login, registration, logout, and session management according to project requirements.",
+      "details": "The implementation should include the following:\n\n1. Create the file structure:\n   - Create directory: src/client/hooks/auth/ (if it doesn't exist)\n   - Create file: src/client/hooks/auth/useAuthQuery.ts\n\n2. Import dependencies:\n   - React Query hooks (useQuery, useMutation, useQueryClient)\n   - API client functions for authentication endpoints\n   - useToast hook for displaying success/error notifications\n   - useQueryUtils for error handling\n\n3. Implement the following authentication operations:\n   - Login: Create a useMutation hook that handles user login, stores tokens, and updates the authentication state\n   - Registration: Create a useMutation hook for user registration with appropriate success/error handling\n   - Logout: Create a mutation that clears authentication tokens and resets the auth state\n   - Session management: Implement functionality to check current auth status, refresh tokens, and handle session expiration\n\n4. Each operation should:\n   - Use the appropriate React Query hooks\n   - Implement proper error handling using useQueryUtils\n   - Display appropriate toast notifications on success/failure\n   - Update the global authentication state as needed\n   - Handle loading states\n\n5. The hook should return an object containing:\n   - All authentication mutation functions (login, register, logout)\n   - Current authentication state (isAuthenticated, user data)\n   - Loading states for each operation\n   - Any utility functions needed for auth management\n\n6. Ensure the hook integrates with the existing ReactQueryProvider for proper caching and state management.\n\n7. Add appropriate TypeScript types for all parameters, return values, and state objects.\n\n8. Include documentation comments explaining the purpose and usage of each function within the hook.",
+      "testStrategy": "Testing should verify that the useAuthQuery hook functions correctly:\n\n1. Unit Tests:\n   - Create a test file: src/client/hooks/auth/useAuthQuery.test.ts\n   - Test each authentication operation (login, register, logout) in isolation\n   - Mock API responses for success and error scenarios\n   - Verify that the correct mutations are called with the expected parameters\n   - Ensure proper error handling is implemented for each operation\n   - Test that toast notifications are displayed appropriately\n\n2. Integration Tests:\n   - Create a test component that uses the useAuthQuery hook\n   - Test the full authentication flow: registration → login → session management → logout\n   - Verify that the authentication state is properly updated after each operation\n   - Test token storage and retrieval functionality\n   - Ensure the hook properly integrates with ReactQueryProvider\n\n3. Edge Cases:\n   - Test behavior when the server returns unexpected errors\n   - Test token refresh logic when tokens expire\n   - Verify proper handling of network failures\n   - Test concurrent authentication operations\n\n4. Manual Testing:\n   - Implement the hook in a test page with UI elements for each operation\n   - Verify that all operations work as expected in the browser\n   - Test with the actual backend API endpoints\n   - Verify that authentication persists across page refreshes\n   - Check that protected routes are properly accessible/inaccessible based on auth state\n\n5. Documentation Verification:\n   - Ensure the hook has proper JSDoc comments\n   - Verify that TypeScript types are correctly defined\n   - Check that the implementation follows the project's coding standards",
+      "status": "pending",
+      "dependencies": [
+        4,
+        6,
+        8
+      ],
+      "priority": "high",
+      "subtasks": []
+    },
+    {
+      "id": 16,
+      "title": "Create useUserQuery Hook for User Profile Data and Operations",
+      "description": "Create a new hook in src/client/hooks/user/useUserQuery.ts that provides access to user profile data and operations such as updating user information and managing user preferences.",
+      "details": "The useUserQuery hook should be implemented in the file src/client/hooks/user/useUserQuery.ts and provide the following functionality:\n\n1. **User Profile Data Fetching**:\n   - Implement a query to fetch the current user's profile data\n   - Use React Query's useQuery hook for data fetching and caching\n   - Handle loading, error, and success states appropriately\n\n2. **User Profile Update Operations**:\n   - Implement a mutation for updating user profile information\n   - Use React Query's useMutation hook\n   - Include proper error handling using the useQueryUtils hook (from Task #8)\n   - Show success/error notifications using the useToast hook (from Task #6)\n\n3. **User Preferences Management**:\n   - Implement functions to get and update user preferences\n   - Create mutations for saving preference changes\n   - Ensure preferences are properly cached and invalidated when updated\n\n4. **Hook Interface**:\n   The hook should return an object with:\n   - `user`: The current user data (with loading/error states)\n   - `isLoading`: Boolean indicating if user data is loading\n   - `updateUserProfile`: Function to update user profile information\n   - `updateUserPreferences`: Function to update user preferences\n   - Other relevant user-related operations\n\n5. **Dependencies**:\n   - Use the ReactQueryProvider (from Task #4) for query context\n   - Utilize useToast hook (from Task #6) for notifications\n   - Implement error handling with useQueryUtils (from Task #8)\n\n6. **TypeScript Implementation**:\n   - Define proper TypeScript interfaces for user data and operations\n   - Ensure type safety throughout the implementation\n   - Export the hook with appropriate TypeScript typing",
+      "testStrategy": "To verify the successful implementation of the useUserQuery hook, follow these testing steps:\n\n1. **Unit Testing**:\n   - Create unit tests in `__tests__/hooks/user/useUserQuery.test.ts`\n   - Mock API responses for user data and operations\n   - Test the hook's behavior for different scenarios (loading, success, error)\n   - Verify that the hook correctly handles user profile updates\n   - Test user preferences management functionality\n   - Ensure proper error handling is implemented\n\n2. **Integration Testing**:\n   - Create a test component that uses the useUserQuery hook\n   - Verify that the hook integrates correctly with ReactQueryProvider\n   - Test that user data is properly fetched and displayed\n   - Verify that user profile updates trigger appropriate API calls\n   - Test that preference changes are correctly saved and reflected in the UI\n\n3. **Manual Testing**:\n   - Implement the hook in a user profile page component\n   - Verify that user data loads correctly\n   - Test updating user information and verify changes persist\n   - Test changing user preferences and verify they are saved\n   - Verify error handling by simulating API failures\n   - Check that appropriate toast notifications appear for success/error cases\n\n4. **Edge Case Testing**:\n   - Test behavior when user data is not available\n   - Verify handling of network errors\n   - Test with various user permission levels\n   - Verify proper cache invalidation after updates\n\n5. **Performance Testing**:\n   - Verify that the hook efficiently caches user data\n   - Check that unnecessary re-fetches are avoided\n   - Ensure the hook doesn't cause performance issues in the application\n\nThe implementation is considered complete when all tests pass, the hook provides all required functionality, and it integrates properly with the dependencies from Tasks #4, #6, and #8.",
+      "status": "pending",
+      "dependencies": [
+        4,
+        6,
+        8
+      ],
+      "priority": "medium",
+      "subtasks": []
+    },
+    {
+      "id": 17,
+      "title": "Create useStudentsQuery Hook for Student Data Management",
+      "description": "Create a new hook in src/client/hooks/students/useStudentsQuery.ts that provides functionality for fetching student data and performing CRUD operations related to students.",
+      "details": "The implementation should include:\n\n1. Create the file structure:\n   - Create directory: src/client/hooks/students/ (if it doesn't exist)\n   - Create file: src/client/hooks/students/useStudentsQuery.ts\n\n2. Import necessary dependencies:\n   - React Query hooks (useQuery, useMutation, useQueryClient)\n   - API client functions for student data operations\n   - Error handling utilities from useQueryUtils\n   - Toast notification functions from useToast\n\n3. Implement the following functionalities within the hook:\n   - fetchStudents: Query function to get all students with pagination, sorting, and filtering options\n   - fetchStudentById: Query function to get a specific student by ID\n   - createStudent: Mutation function to add a new student\n   - updateStudent: Mutation function to modify an existing student\n   - deleteStudent: Mutation function to remove a student\n\n4. Implement proper error handling using the useQueryUtils hook:\n   - Apply onError handlers to all queries and mutations\n   - Show appropriate toast messages on success/failure\n\n5. Implement cache invalidation and updates:\n   - Update the React Query cache after successful mutations\n   - Implement optimistic updates where appropriate\n\n6. Add TypeScript interfaces for all parameters and return types:\n   - Define Student interface\n   - Define query parameter interfaces (pagination, filters, etc.)\n   - Define return type interfaces for all hook functions\n\n7. Add JSDoc comments to document the hook's usage and parameters.",
+      "testStrategy": "To verify the implementation of the useStudentsQuery hook:\n\n1. Unit Tests:\n   - Create a test file: src/client/hooks/students/__tests__/useStudentsQuery.test.ts\n   - Mock the API client functions that interact with the backend\n   - Test each function within the hook (fetchStudents, fetchStudentById, createStudent, updateStudent, deleteStudent)\n   - Verify that proper parameters are passed to API functions\n   - Test error handling scenarios and confirm error callbacks are triggered\n   - Verify cache invalidation and updates work as expected\n\n2. Integration Tests:\n   - Create a test component that uses the hook\n   - Test the component with React Testing Library\n   - Verify that loading states, success states, and error states are handled correctly\n   - Test that UI updates properly when data changes\n\n3. Manual Testing:\n   - Implement the hook in a student management component\n   - Verify that student data loads correctly\n   - Test creating a new student and confirm it appears in the list\n   - Test updating a student and confirm changes are reflected\n   - Test deleting a student and confirm removal from the list\n   - Verify error scenarios by temporarily disabling the API endpoint\n   - Check that appropriate toast notifications appear for success/error cases\n\n4. Code Review:\n   - Ensure the hook follows project coding standards\n   - Verify proper TypeScript typing throughout the implementation\n   - Check that the hook properly integrates with ReactQueryProvider\n   - Confirm that the implementation meets all requirements specified in the task description",
+      "status": "pending",
+      "dependencies": [
+        4,
+        6,
+        8
+      ],
+      "priority": "medium",
+      "subtasks": []
+    },
+    {
+      "id": 18,
+      "title": "Update Domain Hook Exports in Index Files",
+      "description": "Update the index.ts files for each domain to properly export the newly created React Query hooks according to the guidelines in PRD section 4.5.",
+      "details": "This task involves updating the export statements in seven different index.ts files to ensure all the newly created React Query hooks are properly exported from their respective domains. The developer should:\n\n1. Review PRD section 4.5 for specific export requirements and patterns.\n2. Update the following files with proper export statements:\n   - src/client/hooks/courses/index.ts: Export useCoursesQuery hook\n   - src/client/hooks/topics/index.ts: Export useTopicsQuery hook\n   - src/client/hooks/faq/index.ts: Export useFAQsQuery hook\n   - src/client/hooks/learn/index.ts: Export useLessonsQuery hook\n   - src/client/hooks/students/index.ts: Export useStudentsQuery hook\n   - src/client/hooks/auth/index.ts: Export useAuthQuery hook\n   - src/client/hooks/user/index.ts: Export useUserQuery hook\n\n3. Ensure each index.ts file follows the same export pattern for consistency.\n4. Use named exports (e.g., `export { useCoursesQuery } from './useCoursesQuery'`).\n5. If any hooks have additional utility functions that should be exposed, include those exports as well.\n6. Add appropriate JSDoc comments above each export statement to document the purpose of each hook.\n7. Verify that the exports work correctly by importing them from the client code.\n\nThis task depends on the completion of Tasks 11-17, as all the hooks being exported must already exist and be properly implemented.",
+      "testStrategy": "To verify this task has been completed successfully:\n\n1. Code Review:\n   - Examine each index.ts file to confirm it contains the correct export statements for the corresponding hooks.\n   - Verify that the export syntax is consistent across all files.\n   - Check that any JSDoc comments are present and correctly describe the exported hooks.\n\n2. Import Testing:\n   - Create a test file that imports each hook directly from its domain path (e.g., `import { useCoursesQuery } from 'src/client/hooks/courses'`).\n   - Verify that all imports resolve without errors.\n\n3. Integration Testing:\n   - Create a simple React component that uses each imported hook.\n   - Verify that the component can be rendered without any import or usage errors.\n   - Confirm that the hooks function as expected when used through these imports.\n\n4. Build Verification:\n   - Run the project build process to ensure there are no compilation errors related to the exports.\n   - Check for any unused export warnings that might indicate improper export configuration.\n\n5. Documentation Check:\n   - Verify that the exports match the requirements specified in PRD section 4.5.\n   - Ensure any special export patterns or requirements mentioned in the PRD are followed.",
+      "status": "pending",
+      "dependencies": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "priority": "medium",
+      "subtasks": []
+    },
+    {
+      "id": 19,
+      "title": "Task #19: Update Components to Use New LoadingState Variants",
+      "description": "Update all specified components and pages to use the new LoadingState variants, replacing existing loading indicators according to PRD section 4.1.4.",
+      "status": "pending",
+      "dependencies": [
+        2,
+        3
+      ],
+      "priority": "high",
+      "details": "This task involves updating 20 different components across the application to use the new LoadingState variants that were implemented in Task #2. The developer should:\n\n1. Analyze each component to identify existing loading indicators or spinner implementations\n2. Determine the most appropriate LoadingState variant for each use case:\n   - Use 'page' variant for full page loading states\n   - Use 'table' variant for data table loading states\n   - Use 'section' variant for component or section loading states\n   - Use 'button' variant for button loading states\n   - Use 'default' variant for general purpose loading indicators\n\n3. Replace the existing loading indicators with the appropriate LoadingState component\n\nComponents to update include:\n\nAdmin Components (8 files):\n- src/client/components/admin/students/StudentList.tsx\n- src/client/components/admin/students/StudentForm.tsx\n- src/client/components/admin/students/StudentDetail.tsx\n- src/client/components/admin/topics/TopicList.tsx\n- src/client/components/admin/topics/TopicForm.tsx\n- src/client/components/admin/lessons/LessonList.tsx\n- src/client/components/admin/lessons/LessonForm.tsx\n- src/client/components/admin/CourseManager.tsx\n\nCourse Components (4 files):\n- src/client/components/courses/CourseCard.tsx\n- src/client/components/courses/CourseDetail.tsx\n- src/client/components/courses/CoursesSection.tsx\n- src/client/components/courses/EnrollButton.tsx\n\nLayout Components (2 files):\n- src/client/components/layout/Header.tsx\n- src/client/components/layout/Footer.tsx\n\nLearn Components (1 file):\n- src/client/components/learn/LessonPlayer.tsx\n\nDashboard Components (1 file):\n- src/client/components/dashboard/UserLoginStreak.tsx\n\nOther Components (4 files):\n- src/client/components/topics/TopicsFilter.tsx\n- src/client/components/faq/FAQSection.tsx\n- src/client/components/ui/file/FileUpload.tsx\n- src/client/components/auth/ProtectedRoute.tsx\n\nFor each component:\n1. Import the LoadingState component\n2. Replace existing loading indicators with <LoadingState variant=\"appropriate-variant\" />\n3. Ensure the loading state is properly triggered based on the component's existing loading logic\n4. Remove any now-redundant CSS or styling related to the old loading indicators\n5. Test that the loading state appears correctly in all scenarios\n\nThis task depends on Task #2 (Update LoadingState Component with Multiple Variants) and Task #3 (Add CSS Variable for Spinner Color) being completed first.",
+      "testStrategy": "To verify this task has been completed successfully:\n\n1. Manual Testing:\n   - For each updated component, manually test all scenarios that would trigger a loading state\n   - Verify the correct LoadingState variant is used in each component\n   - Check that the loading indicator appears in the expected position\n   - Confirm the spinner color uses the --spinner-color CSS variable\n   - Ensure no old loading indicators or spinners remain visible\n\n2. Code Review:\n   - Review all 20 files to confirm the LoadingState component is properly imported\n   - Verify old loading indicators have been completely removed\n   - Check that appropriate variants are used for each context\n   - Ensure loading state logic is preserved from the original implementation\n\n3. Responsive Testing:\n   - Test each component on different screen sizes to ensure the loading states are responsive\n   - Verify that loading indicators are appropriately sized and positioned on mobile devices\n\n4. Edge Cases:\n   - Test rapid loading state changes (quickly toggling between loading and loaded states)\n   - Test components with multiple loading states to ensure they work independently\n   - Verify loading states work correctly when network is slow or disconnected\n\n5. Accessibility Testing:\n   - Verify that loading states are properly announced to screen readers\n   - Check that loading indicators have appropriate ARIA attributes\n\n6. Integration Testing:\n   - Verify that the updated components work correctly within the larger application flow\n   - Test that loading states don't interfere with other component functionality\n\nDocument any issues found and create follow-up tasks if necessary.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Update Admin Components",
+          "description": "Replace existing loading indicators with appropriate LoadingState variants in 8 Admin components",
+          "dependencies": [],
+          "details": "Update the following components:\n- src/client/components/admin/students/StudentList.tsx\n- src/client/components/admin/students/StudentForm.tsx\n- src/client/components/admin/students/StudentDetail.tsx\n- src/client/components/admin/topics/TopicList.tsx\n- src/client/components/admin/topics/TopicForm.tsx\n- src/client/components/admin/lessons/LessonList.tsx\n- src/client/components/admin/lessons/LessonForm.tsx\n- src/client/components/admin/CourseManager.tsx\n\nImport LoadingState, replace existing indicators, ensure proper triggering, remove redundant CSS, and test thoroughly.",
+          "status": "pending",
+          "testStrategy": "Verify each component's loading state appears correctly in all scenarios, including edge cases."
+        },
+        {
+          "id": 2,
+          "title": "Update Course Components",
+          "description": "Implement new LoadingState variants in 4 Course-related components",
+          "dependencies": [],
+          "details": "Modify the following components:\n- src/client/components/courses/CourseCard.tsx\n- src/client/components/courses/CourseDetail.tsx\n- src/client/components/courses/CoursesSection.tsx\n- src/client/components/courses/EnrollButton.tsx\n\nImport LoadingState, replace existing indicators with appropriate variants, ensure loading logic is maintained, remove old styling, and test extensively.",
+          "status": "pending",
+          "testStrategy": "Test each component individually and in combination to ensure loading states are displayed correctly and responsively."
+        },
+        {
+          "id": 3,
+          "title": "Update Layout and Learn Components",
+          "description": "Integrate LoadingState variants into Layout components and LessonPlayer",
+          "dependencies": [],
+          "details": "Update the following components:\n- src/client/components/layout/Header.tsx\n- src/client/components/layout/Footer.tsx\n- src/client/components/learn/LessonPlayer.tsx\n\nImport LoadingState, implement appropriate variants, adjust loading logic if necessary, remove old loading indicators, and perform thorough testing.",
+          "status": "pending",
+          "testStrategy": "Ensure loading states in layout components do not interfere with overall UI structure and that LessonPlayer loading is smooth and intuitive."
+        },
+        {
+          "id": 4,
+          "title": "Update Dashboard and Other Components",
+          "description": "Implement LoadingState variants in UserLoginStreak and 4 other miscellaneous components",
+          "dependencies": [],
+          "details": "Modify the following components:\n- src/client/components/dashboard/UserLoginStreak.tsx\n- src/client/components/topics/TopicsFilter.tsx\n- src/client/components/faq/FAQSection.tsx\n- src/client/components/ui/file/FileUpload.tsx\n- src/client/components/auth/ProtectedRoute.tsx\n\nImport LoadingState, replace existing loading indicators, ensure proper triggering, remove redundant styling, and conduct comprehensive testing.",
+          "status": "pending",
+          "testStrategy": "Test each component in isolation and within the context of the dashboard to verify correct loading state behavior."
+        },
+        {
+          "id": 5,
+          "title": "Final Review and Documentation",
+          "description": "Conduct a final review of all updated components and update documentation",
+          "dependencies": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "details": "Review all 20 updated components to ensure consistency in LoadingState implementation. Update component documentation to reflect changes in loading state handling. Create a summary report of changes made and any potential impact on performance or user experience.",
+          "status": "pending",
+          "testStrategy": "Perform end-to-end testing of the application, focusing on loading state transitions and consistency across different sections and user flows."
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "Task #20: Implement LoadingState Component Across Admin and Public Pages",
+      "description": "Update all specified admin and public pages to implement the new LoadingState component with appropriate variants based on the context of each page as defined in PRD section 4.1.4.",
+      "status": "pending",
+      "dependencies": [
+        2,
+        3
+      ],
+      "priority": "high",
+      "details": "This task involves implementing the newly created LoadingState component across all specified admin and public pages. The implementation should follow these guidelines:\n\n1. For each page listed in the requirements, identify the appropriate loading state variant (default, page, table, section, or button) based on the page's context and content.\n\n2. Admin Pages Implementation:\n   - Replace existing loading indicators in all 20 admin pages with the new LoadingState component\n   - Use the 'page' variant for full page loading states\n   - Use the 'table' variant for data table loading states (especially in list views)\n   - Use the 'section' variant for partial page content loading\n   - Use the 'button' variant for action button loading states\n\n3. Public Pages Implementation:\n   - Replace existing loading indicators in all 12 public pages with the new LoadingState component\n   - Apply appropriate variants based on the page context\n   - Ensure consistent user experience across marketing, auth, dashboard, and course pages\n\n4. Implementation Considerations:\n   - Ensure the LoadingState component is imported correctly from its location\n   - Pass the appropriate variant prop to each LoadingState instance\n   - Maintain existing conditional logic that determines when loading states should be shown\n   - Ensure the spinner color uses the --spinner-color CSS variable defined in Task #3\n\n5. Code Structure:\n   - Follow the existing pattern for loading state implementation\n   - Ensure loading states are properly integrated with data fetching logic\n   - Maintain accessibility standards when implementing loading indicators\n\nThis task depends on the completion of Task #2 (Update LoadingState Component) and Task #3 (Add CSS Variable for Spinner Color).",
+      "testStrategy": "To verify the successful implementation of this task, follow these testing steps:\n\n1. Manual Visual Inspection:\n   - Navigate to each of the 32 pages listed in the requirements\n   - Verify that the appropriate LoadingState component is visible during loading\n   - Confirm that the correct variant is used based on the context of each page\n   - Check that the spinner color matches the --spinner-color CSS variable\n\n2. Functionality Testing:\n   - Test each page under various network conditions (throttled network, etc.)\n   - Verify that loading states appear and disappear at appropriate times\n   - Ensure that loading states don't interfere with user interactions once content is loaded\n\n3. Code Review:\n   - Verify that all 32 files have been updated to use the new LoadingState component\n   - Confirm that appropriate variant props are passed to each LoadingState instance\n   - Check that imports are correct and no console errors are present\n\n4. Cross-browser Testing:\n   - Test the loading states in Chrome, Firefox, Safari, and Edge\n   - Verify consistent appearance and behavior across browsers\n\n5. Responsive Testing:\n   - Test loading states on mobile, tablet, and desktop viewports\n   - Ensure loading indicators are appropriately sized and positioned on all devices\n\n6. Accessibility Testing:\n   - Verify that loading states are announced properly to screen readers\n   - Check that loading indicators meet contrast requirements\n   - Ensure that loading states don't cause layout shifts that would impact user experience\n\nDocument any issues found during testing with screenshots and detailed descriptions.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Analyze and Plan LoadingState Implementation",
+          "description": "Review all specified admin and public pages, identify appropriate LoadingState variants, and create a detailed implementation plan.",
+          "dependencies": [],
+          "details": "Review PRD section 4.1.4, document each page's required LoadingState variant (default, page, table, section, or button), create a spreadsheet mapping pages to variants, and outline implementation steps for each page type.",
+          "status": "pending",
+          "testStrategy": "Verify completeness of the implementation plan by cross-referencing with PRD and existing page structures."
+        },
+        {
+          "id": 2,
+          "title": "Implement LoadingState in Admin Pages",
+          "description": "Replace existing loading indicators with the new LoadingState component across all 20 admin pages.",
+          "dependencies": [
+            1
+          ],
+          "details": "Replace existing loading indicators with the LoadingState component in the following admin pages:\n\n1. src/app/admin/page.tsx\n2. src/app/admin/courses/page.tsx\n3. src/app/admin/courses/[courseId]/edit/page.tsx\n4. src/app/admin/courses/new/page.tsx\n5. src/app/admin/courses/[courseId]/page.tsx\n6. src/app/admin/topics/page.tsx\n7. src/app/admin/topics/[topicId]/page.tsx\n8. src/app/admin/topics/[topicId]/edit/page.tsx\n9. src/app/admin/topics/new/page.tsx\n10. src/app/admin/faqs/page.tsx\n11. src/app/admin/faqs/[faqId]/edit/page.tsx\n12. src/app/admin/faqs/new/page.tsx\n13. src/app/admin/students/page.tsx\n14. src/app/admin/students/[studentId]/page.tsx\n15. src/app/admin/students/[studentId]/edit/page.tsx\n16. src/app/admin/students/new/page.tsx\n17. src/app/admin/lessons/page.tsx\n18. src/app/admin/lessons/[lessonId]/page.tsx\n19. src/app/admin/lessons/[lessonId]/edit/page.tsx\n20. src/app/admin/lessons/new/[courseId]/page.tsx\n\nFor each page: import LoadingState component, replace existing indicators, apply appropriate variant prop (page, table, section, or button), integrate with existing conditional logic, and ensure correct use of --spinner-color CSS variable.",
+          "status": "pending",
+          "testStrategy": "Create unit tests for each page to verify correct LoadingState implementation and behavior."
+        },
+        {
+          "id": 3,
+          "title": "Implement LoadingState in Public Pages",
+          "description": "Replace existing loading indicators with the new LoadingState component across all 12 public pages.",
+          "dependencies": [
+            1
+          ],
+          "details": "Replace existing loading indicators with the LoadingState component in the following public pages:\n\n1. src/app/courses/page.tsx\n2. src/app/courses/[courseId]/page.tsx\n3. src/app/courses/[courseId]/learn/page.tsx\n4. src/app/(dashboard)/dashboard/page.tsx\n5. src/app/(dashboard)/my-courses/page.tsx\n6. src/app/(dashboard)/learn/[courseId]/page.tsx\n7. src/app/(auth)/login/page.tsx\n8. src/app/(auth)/signup/page.tsx\n9. src/app/challenges/page.tsx\n10. src/app/(marketing)/faq/page.tsx\n11. src/app/(marketing)/reviews/page.tsx\n12. src/app/(marketing)/roadmap/page.tsx\n\nFor each page: import LoadingState component, replace existing indicators, apply appropriate variant based on page context, ensure consistent UX across marketing, auth, dashboard, and course pages, integrate with existing logic, and use --spinner-color CSS variable.",
+          "status": "pending",
+          "testStrategy": "Develop integration tests to verify LoadingState behavior in various public page scenarios."
+        },
+        {
+          "id": 4,
+          "title": "Refactor and Optimize LoadingState Integration",
+          "description": "Review implemented LoadingState components, refactor for consistency, and optimize code structure.",
+          "dependencies": [
+            2,
+            3
+          ],
+          "details": "Analyze LoadingState usage patterns, create reusable hooks or utilities if needed, ensure consistent implementation across pages, optimize imports, and verify proper integration with data fetching logic.",
+          "status": "pending",
+          "testStrategy": "Conduct code reviews and performance testing to ensure optimized implementation."
+        },
+        {
+          "id": 5,
+          "title": "Test and Validate LoadingState Implementation",
+          "description": "Perform comprehensive testing of LoadingState implementation across all admin and public pages.",
+          "dependencies": [
+            4
+          ],
+          "details": "Execute unit tests, integration tests, and manual testing for all pages. Verify correct variant usage, spinner color, accessibility compliance, and proper behavior under various network conditions. Document any issues found and create bug tickets if necessary.",
+          "status": "pending",
+          "testStrategy": "Use automated testing tools, conduct accessibility audits, and perform cross-browser compatibility checks."
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "title": "Task #21: Update Components to Use New React Query Hooks",
+      "description": "Refactor multiple components across the admin and course sections to replace existing data fetching methods with the newly created React Query hooks.",
+      "status": "pending",
+      "dependencies": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "priority": "high",
+      "details": "This task involves updating various components to use the React Query hooks that were created in previous tasks. The components are divided into two main categories: Admin Components and Course Components.\n\nFor Admin Components:\n1. Update `src/client/components/admin/students/StudentList.tsx`, `src/client/components/admin/students/StudentForm.tsx`, and `src/client/components/admin/students/StudentDetail.tsx` to use the `useStudentsQuery` hook for fetching and manipulating student data.\n2. Update `src/client/components/admin/topics/TopicList.tsx` and `src/client/components/admin/topics/TopicForm.tsx` to use the `useTopicsQuery` hook for topic-related operations.\n3. Update `src/client/components/admin/lessons/LessonList.tsx` and `src/client/components/admin/lessons/LessonForm.tsx` to use the `useLessonsQuery` hook for lesson data management.\n4. Update `src/client/components/admin/CourseManager.tsx` to use the `useCoursesQuery` hook for course management operations.\n\nFor Course Components:\n1. Update `src/client/components/courses/CourseCard.tsx`, `src/client/components/courses/CourseDetail.tsx`, and `src/client/components/courses/CoursesSection.tsx` to use the `useCoursesQuery` hook.\n2. Additionally, update `src/client/components/courses/CoursesSection.tsx` to also use the `useTopicsQuery` hook for topic filtering functionality.\n3. Update `src/client/components/courses/EnrollButton.tsx` to use both `useCoursesQuery` and `useAuthQuery` hooks for enrollment functionality.\n\nImplementation Guidelines:\n- Remove any existing data fetching logic (like useState, useEffect combinations or Redux-based approaches).\n- Replace with appropriate React Query hook calls.\n- Update component logic to handle loading, error, and data states provided by React Query.\n- Ensure proper TypeScript typing throughout the refactoring.\n- Maintain existing component functionality while improving performance and code organization.\n- Use React Query's built-in caching and invalidation features where appropriate.\n- Update any related tests to account for the new data fetching approach.\n\nThis task depends on the successful completion of Tasks #11-18, which created the React Query hooks that will be used in this refactoring.",
+      "testStrategy": "To verify the successful completion of this task, the following testing approach should be implemented:\n\n1. Code Review:\n   - Verify that all specified components have been updated to use the appropriate React Query hooks.\n   - Ensure that all previous data fetching logic has been removed.\n   - Check that proper error handling and loading states are implemented.\n   - Confirm TypeScript types are correctly applied.\n\n2. Unit Tests:\n   - Update existing unit tests for each component to mock the React Query hooks.\n   - Test loading, error, and success states for each component.\n   - Verify that components correctly handle data from the hooks.\n\n3. Integration Tests:\n   - Create or update integration tests that verify the components work correctly with the actual hooks.\n   - Test data fetching, mutations, and error scenarios.\n\n4. Manual Testing:\n   - Test each component in the development environment to ensure they render correctly.\n   - Verify that admin components can perform CRUD operations using the new hooks.\n   - Test course components to ensure they display correct course information.\n   - Test the EnrollButton component to ensure enrollment functionality works with the new hooks.\n   - Verify that filtering in CoursesSection works correctly with the useTopicsQuery hook.\n\n5. Performance Testing:\n   - Compare the performance before and after the refactoring.\n   - Verify that React Query's caching improves the user experience.\n   - Test network request patterns to ensure unnecessary requests are not being made.\n\n6. Cross-browser Testing:\n   - Verify the updated components work correctly across different browsers.\n\n7. Documentation:\n   - Update component documentation to reflect the new data fetching approach.\n   - Document any changes to component props or behavior.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Refactor Admin Student Components",
+          "description": "Update StudentList, StudentForm, and StudentDetail components to use the useStudentsQuery hook.",
+          "dependencies": [],
+          "details": "Replace existing data fetching methods in `src/client/components/admin/students/StudentList.tsx`, `src/client/components/admin/students/StudentForm.tsx`, and `src/client/components/admin/students/StudentDetail.tsx` with the useStudentsQuery hook. Remove useState and useEffect combinations or Redux-based approaches. Handle loading, error, and data states provided by React Query. Ensure proper TypeScript typing and maintain existing functionality.",
+          "status": "pending",
+          "testStrategy": "Create unit tests to verify that the components correctly use the useStudentsQuery hook and handle all possible states (loading, error, success)."
+        },
+        {
+          "id": 2,
+          "title": "Refactor Admin Topic and Lesson Components",
+          "description": "Update TopicList, TopicForm, LessonList, and LessonForm components to use useTopicsQuery and useLessonsQuery hooks.",
+          "dependencies": [],
+          "details": "Refactor `src/client/components/admin/topics/TopicList.tsx`, `src/client/components/admin/topics/TopicForm.tsx`, and `src/client/components/admin/lessons/LessonList.tsx`, `src/client/components/admin/lessons/LessonForm.tsx` to use the appropriate React Query hooks. Implement caching and invalidation features where applicable. Update component logic to handle new data fetching approach.",
+          "status": "pending",
+          "testStrategy": "Develop integration tests to ensure proper interaction between these components and their respective hooks, including cache invalidation scenarios."
+        },
+        {
+          "id": 3,
+          "title": "Update CourseManager Component",
+          "description": "Refactor the CourseManager component to use the useCoursesQuery hook for course management operations.",
+          "dependencies": [],
+          "details": "Modify `src/client/components/admin/CourseManager.tsx` to utilize the useCoursesQuery hook. Remove existing data fetching logic and implement React Query's loading, error, and data state handling. Ensure all course management operations are updated to use the new hook.",
+          "status": "pending",
+          "testStrategy": "Create comprehensive unit tests for the CourseManager component, covering all possible scenarios of course management using the new hook."
+        },
+        {
+          "id": 4,
+          "title": "Refactor Course List Components",
+          "description": "Update CourseCard, CourseDetail, and CoursesSection components to use useCoursesQuery and useTopicsQuery hooks.",
+          "dependencies": [
+            3
+          ],
+          "details": "Refactor `src/client/components/courses/CourseCard.tsx`, `src/client/components/courses/CourseDetail.tsx`, and `src/client/components/courses/CoursesSection.tsx` to use the useCoursesQuery hook. Additionally, update `src/client/components/courses/CoursesSection.tsx` to use the useTopicsQuery hook for topic filtering functionality. Ensure proper handling of loading states and error conditions.",
+          "status": "pending",
+          "testStrategy": "Develop unit and integration tests to verify the correct implementation of hooks in these components, including tests for the topic filtering functionality in CoursesSection."
+        },
+        {
+          "id": 5,
+          "title": "Update EnrollButton Component",
+          "description": "Refactor the EnrollButton component to use both useCoursesQuery and useAuthQuery hooks.",
+          "dependencies": [
+            4
+          ],
+          "details": "Modify `src/client/components/courses/EnrollButton.tsx` to implement useCoursesQuery and useAuthQuery hooks for enrollment functionality. Remove any existing data fetching or state management logic. Ensure the component correctly handles authentication states and course enrollment operations using the new hooks.",
+          "status": "pending",
+          "testStrategy": "Create unit tests for the EnrollButton component, mocking both useCoursesQuery and useAuthQuery hooks to test various scenarios of user authentication and course enrollment states."
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "title": "Update Components and Pages to Use React Query Hooks",
+      "description": "Refactor existing components and pages across the application to use the newly created React Query hooks for data fetching, state management, and CRUD operations.",
+      "status": "pending",
+      "dependencies": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "priority": "high",
+      "details": "This task involves updating multiple components and pages throughout the application to use the React Query hooks created in previous tasks. The implementation should follow these guidelines:\n\n1. Layout Components:\n   - Update `src/client/components/layout/Header.tsx` to use `useAuthQuery` for authentication state\n   - Update `src/client/components/layout/Sidebar.tsx` to use `useAuthQuery` for authentication state and `useUserQuery` for user profile data\n\n2. Learn Components:\n   - Update `src/client/components/learn/LessonPlayer.tsx` to use `useLessonsQuery` for fetching lesson data\n\n3. Dashboard Components:\n   - Update `src/client/components/dashboard/UserLoginStreak.tsx` to use `useUserQuery` for user streak data\n\n4. Other Components:\n   - Update `src/client/components/topics/TopicsFilter.tsx` to use `useTopicsQuery` for topic filtering\n   - Update `src/client/components/faq/FAQSection.tsx` to use `useFAQsQuery` for FAQ data\n   - Update `src/client/components/ui/file/FileUpload.tsx` to use appropriate React Query hooks for file operations\n   - Update `src/client/components/auth/ProtectedRoute.tsx` to use `useAuthQuery` for authentication checks\n\n5. Admin Pages:\n   - Update all pages in `src/app/admin/` to use the corresponding React Query hooks based on their functionality\n\n6. Public Pages:\n   - Update `src/app/courses/page.tsx` to use `useCoursesQuery` and `useTopicsQuery`\n   - Update `src/app/courses/[courseId]/page.tsx` to use `useCoursesQuery` and `useLessonsQuery`\n   - Update `src/app/(dashboard)/dashboard/page.tsx` to use `useCoursesQuery` and `useUserQuery`\n   - Update `src/app/(dashboard)/my-courses/page.tsx` to use `useCoursesQuery`\n   - Update `src/app/(auth)/login/page.tsx` and `signup/page.tsx` to use `useAuthQuery`\n   - Update `src/app/(marketing)/faq/page.tsx` to use `useFAQsQuery`\n   - Update `src/app/(marketing)/reviews/page.tsx` to use appropriate React Query hooks\n   - Update `src/app/(marketing)/roadmap/page.tsx` to use appropriate React Query hooks\n\nImplementation Notes:\n- Replace direct API calls with the appropriate React Query hooks\n- Ensure proper error handling and loading states are implemented\n- Maintain component functionality while transitioning to React Query\n- Leverage React Query's caching capabilities for improved performance\n- Use the appropriate query parameters and mutation functions from the hooks\n- Ensure proper TypeScript typing throughout the implementation\n- Follow the project's coding standards and patterns",
+      "testStrategy": "To verify the successful implementation of this task, the following testing approach should be used:\n\n1. Code Review:\n   - Verify that all specified components and pages have been updated to use React Query hooks\n   - Check that direct API calls have been replaced with the appropriate hooks\n   - Ensure proper error handling and loading states are implemented\n   - Confirm TypeScript types are correctly used\n\n2. Unit Tests:\n   - Update or create unit tests for each modified component to verify they correctly use the React Query hooks\n   - Mock the React Query hooks to test different states (loading, error, success)\n   - Verify that components render correctly in each state\n\n3. Integration Tests:\n   - Test the interaction between components and the React Query hooks\n   - Verify that data is properly shared between components using the same queries\n   - Test that mutations correctly update the UI and trigger refetches\n\n4. End-to-End Tests:\n   - Create or update E2E tests to verify the full user flow works correctly\n   - Test authentication flows in Header, Sidebar, and ProtectedRoute\n   - Verify course listing, filtering, and detail pages work as expected\n   - Test dashboard functionality with the updated components\n\n5. Performance Testing:\n   - Compare application performance before and after the React Query implementation\n   - Verify that caching is working correctly by monitoring network requests\n   - Test that duplicate requests are properly deduplicated\n\n6. Manual Testing:\n   - Perform manual testing of all updated components and pages\n   - Verify visual consistency and user experience\n   - Test edge cases such as slow network connections and error states\n\n7. Regression Testing:\n   - Ensure that all existing functionality continues to work as expected\n   - Verify that no new bugs have been introduced during the refactoring\n\nDocument all test results and any issues found during testing for review.",
+      "subtasks": [
+        {
+          "id": 1,
+          "title": "Update Layout Components",
+          "description": "Refactor Header and Sidebar components to use React Query hooks",
+          "dependencies": [],
+          "details": "Update src/client/components/layout/Header.tsx and src/client/components/layout/Sidebar.tsx to use useAuthQuery for authentication state. Additionally, update Sidebar.tsx to use useUserQuery for user profile data.",
+          "status": "pending",
+          "testStrategy": "Verify that the Header and Sidebar components correctly display authentication state and user profile information using React Query hooks."
+        },
+        {
+          "id": 2,
+          "title": "Refactor Learn and Dashboard Components",
+          "description": "Update LessonPlayer and UserLoginStreak components to use appropriate React Query hooks",
+          "dependencies": [
+            1
+          ],
+          "details": "Modify src/client/components/learn/LessonPlayer.tsx to use useLessonsQuery for fetching lesson data. Update src/client/components/dashboard/UserLoginStreak.tsx to use useUserQuery for user streak data.",
+          "status": "pending",
+          "testStrategy": "Ensure that LessonPlayer displays correct lesson data and UserLoginStreak shows accurate user streak information using React Query hooks."
+        },
+        {
+          "id": 3,
+          "title": "Update Other UI Components",
+          "description": "Refactor TopicsFilter, FAQSection, FileUpload, and ProtectedRoute components to use React Query hooks",
+          "dependencies": [
+            2
+          ],
+          "details": "Update src/client/components/topics/TopicsFilter.tsx to use useTopicsQuery, src/client/components/faq/FAQSection.tsx to use useFAQsQuery, src/client/components/ui/file/FileUpload.tsx to use appropriate React Query hooks for file operations, and src/client/components/auth/ProtectedRoute.tsx to use useAuthQuery for authentication checks.",
+          "status": "pending",
+          "testStrategy": "Verify that all updated components function correctly with React Query hooks, including proper error handling and loading states."
+        },
+        {
+          "id": 4,
+          "title": "Refactor Admin Pages",
+          "description": "Update all pages in the admin section to use corresponding React Query hooks",
+          "dependencies": [
+            3
+          ],
+          "details": "Modify the following admin pages to use the appropriate React Query hooks based on their functionality:\n- src/app/admin/dashboard/page.tsx\n- src/app/admin/users/page.tsx\n- src/app/admin/users/[userId]/page.tsx\n- src/app/admin/courses/page.tsx\n- src/app/admin/courses/create/page.tsx\n- src/app/admin/courses/[courseId]/page.tsx\n- src/app/admin/courses/[courseId]/edit/page.tsx\n- src/app/admin/lessons/page.tsx\n- src/app/admin/lessons/create/page.tsx\n- src/app/admin/lessons/[lessonId]/page.tsx\n- src/app/admin/lessons/[lessonId]/edit/page.tsx\n- src/app/admin/topics/page.tsx\n- src/app/admin/topics/create/page.tsx\n- src/app/admin/topics/[topicId]/page.tsx\n- src/app/admin/topics/[topicId]/edit/page.tsx\n- src/app/admin/faqs/page.tsx\n- src/app/admin/faqs/create/page.tsx\n- src/app/admin/faqs/[faqId]/page.tsx\n- src/app/admin/faqs/[faqId]/edit/page.tsx\n\nEnsure proper error handling, loading states, and TypeScript typing throughout the implementation.",
+          "status": "pending",
+          "testStrategy": "Test each admin page to confirm that data fetching, state management, and CRUD operations are correctly handled using React Query hooks."
+        },
+        {
+          "id": 5,
+          "title": "Update Public Pages",
+          "description": "Refactor public-facing pages to use React Query hooks for data fetching and state management",
+          "dependencies": [
+            4
+          ],
+          "details": "Update the following public pages to use the appropriate React Query hooks:\n- src/app/courses/page.tsx (use useCoursesQuery and useTopicsQuery)\n- src/app/courses/[courseId]/page.tsx (use useCoursesQuery and useLessonsQuery)\n- src/app/(dashboard)/dashboard/page.tsx (use useCoursesQuery and useUserQuery)\n- src/app/(dashboard)/my-courses/page.tsx (use useCoursesQuery)\n- src/app/(auth)/login/page.tsx (use useAuthQuery)\n- src/app/(auth)/signup/page.tsx (use useAuthQuery)\n- src/app/(marketing)/faq/page.tsx (use useFAQsQuery)\n- src/app/(marketing)/reviews/page.tsx (use appropriate React Query hooks)\n- src/app/(marketing)/roadmap/page.tsx (use appropriate React Query hooks)\n\nImplement proper error handling, loading states, and leverage React Query's caching capabilities for improved performance.",
+          "status": "pending",
+          "testStrategy": "Conduct thorough testing of all public pages to ensure they function correctly with React Query hooks, maintaining all existing functionality while improving performance through caching."
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "title": "Implement React Query DevTools for Development Environment",
+      "description": "Install and configure React Query DevTools in the development environment to support debugging and optimization of queries as specified in PRD section 5.3.",
+      "details": "This task involves implementing React Query DevTools to enhance the development experience by providing visual tools for query debugging and optimization.\n\nSteps to complete:\n1. Install the required package: `@tanstack/react-query-devtools`\n2. Modify the existing ReactQueryProvider component (created in Task #4) to conditionally include the DevTools component in development mode only\n3. Configure the DevTools with appropriate settings as specified in PRD section 5.3\n4. Ensure the DevTools panel is accessible in the UI during development\n5. Implement proper environment detection to prevent DevTools from being included in production builds\n6. Add documentation in the codebase explaining how to use the DevTools for debugging queries\n7. Update the ReactQueryProvider component to expose any necessary configuration options for the DevTools\n\nThe implementation should follow best practices for React Query DevTools integration, ensuring it doesn't affect production performance while providing comprehensive debugging capabilities during development.",
+      "testStrategy": "Testing strategy for this task:\n\n1. Manual verification:\n   - Run the application in development mode and confirm the React Query DevTools panel appears in the UI\n   - Verify that all query states, cache information, and debugging tools are properly displayed\n   - Test the DevTools functionality by interacting with various queries in the application\n   - Confirm that the DevTools UI matches the specifications in PRD section 5.3\n\n2. Automated testing:\n   - Write unit tests for the ReactQueryProvider component to verify it correctly includes DevTools in development mode\n   - Create tests that verify DevTools are not included in production builds\n   - Test that the DevTools configuration matches the requirements\n\n3. Integration testing:\n   - Verify that the DevTools integration doesn't interfere with normal application functionality\n   - Test that query debugging information is accurately displayed for various query states (loading, error, success)\n\n4. Code review checklist:\n   - Confirm proper conditional rendering based on environment\n   - Verify that DevTools are not included in production bundles\n   - Check that the implementation follows the React Query documentation guidelines\n   - Ensure the code is optimized to minimize impact on development performance",
+      "status": "pending",
+      "dependencies": [
+        4
+      ],
+      "priority": "low",
+      "subtasks": []
+    },
+    {
+      "id": 24,
+      "title": "Task #24: Comprehensive Testing and Documentation for New Components and Hooks",
+      "description": "Create comprehensive test suites for all newly implemented components and React Query hooks, and update documentation to reflect the architectural changes as specified in PRD section 5.4.",
+      "details": "This task involves creating thorough test coverage for all components and hooks implemented in Tasks #19-22, particularly focusing on the LoadingState component variants and React Query hooks. The developer should:\n\n1. Create unit tests for the LoadingState component and all its variants (skeleton, spinner, etc.) to verify proper rendering and behavior in different states.\n2. Develop integration tests for components that use the LoadingState variants to ensure they correctly handle loading, error, and success states.\n3. Write comprehensive unit tests for all new React Query hooks, covering:\n   - Successful data fetching\n   - Error handling\n   - Loading states\n   - Cache invalidation\n   - Mutation operations\n4. Create mock services to simulate API responses for testing purposes.\n5. Update the application documentation to reflect the architectural changes, including:\n   - Component API documentation with props, examples, and usage guidelines\n   - Hook documentation with parameters, return values, and usage examples\n   - Updated architecture diagrams showing data flow with React Query\n   - Guidelines for implementing loading states across the application\n6. Ensure all tests follow the project's testing standards and maintain consistency with existing test patterns.\n7. Document any edge cases or known limitations discovered during testing.\n\nThe documentation should be organized according to PRD section 5.4, with clear separation between component documentation and hook documentation.",
+      "testStrategy": "The completion of this task should be verified through the following approach:\n\n1. Code Review:\n   - Verify test files exist for all new components and hooks\n   - Ensure tests cover all main functionality, edge cases, and error scenarios\n   - Check that tests follow project standards and best practices\n   - Confirm documentation updates are comprehensive and accurate\n\n2. Test Coverage Analysis:\n   - Run test coverage reports to ensure at least 80% coverage for new components and hooks\n   - Identify and address any gaps in test coverage\n   - Verify that critical paths have close to 100% coverage\n\n3. Documentation Review:\n   - Ensure documentation is up-to-date with the latest implementation\n   - Verify that all props, parameters, and return values are accurately documented\n   - Check that usage examples are provided and are correct\n   - Confirm architecture diagrams accurately reflect the new data flow\n\n4. Functional Testing:\n   - Run the full test suite to ensure no regressions\n   - Verify that tests accurately simulate real-world usage scenarios\n   - Check that edge cases and error states are properly tested\n\n5. Peer Review:\n   - Have another developer review the tests and documentation\n   - Ensure the documentation is clear and helpful to other team members\n   - Verify that the documentation follows the structure outlined in PRD section 5.4\n\nAll tests should pass consistently in the CI/CD pipeline before this task is considered complete.",
+      "status": "pending",
+      "dependencies": [
+        19,
+        20,
+        21,
+        22
+      ],
+      "priority": "medium",
+      "subtasks": []
+    },
+    {
+      "id": 25,
+      "title": "Task #25: Optimize React Query Configuration and Data Fetching Strategies",
+      "description": "Optimize React Query configuration and data fetching strategies to minimize unnecessary re-renders and improve application performance according to PRD section 5.5.",
+      "details": "This task involves a comprehensive review and optimization of the React Query implementation across the application:\n\n1. Review current React Query configuration:\n   - Analyze the existing queryClient configuration\n   - Identify default settings that can be optimized (staleTime, cacheTime, refetchOnWindowFocus, etc.)\n   - Review query key structure for proper cache management\n\n2. Implement performance optimizations:\n   - Configure optimal staleTime and cacheTime values based on data volatility\n   - Implement selective query invalidation strategies to prevent cascade re-fetching\n   - Use query deduplication for identical requests\n   - Implement proper error boundaries and retry logic\n   - Optimize dependent queries with enabled option\n\n3. Reduce unnecessary re-renders:\n   - Implement data transformation in select functions to prevent re-renders from unrelated data changes\n   - Use structural sharing options to minimize new object creation\n   - Apply React.memo and useMemo where appropriate with React Query results\n   - Implement pagination and infinite queries for large data sets\n\n4. Implement advanced caching strategies:\n   - Configure prefetching for anticipated user actions\n   - Implement optimistic updates for better UX during mutations\n   - Use placeholderData or initialData where appropriate\n   - Configure proper query key factories for consistent cache management\n\n5. Documentation and knowledge sharing:\n   - Document all optimization strategies implemented\n   - Create performance benchmarks before and after optimizations\n   - Update team guidelines for React Query usage\n\nThis task builds upon the React Query hooks implementation from Tasks #21 and #22, focusing specifically on performance optimization rather than basic implementation.",
+      "testStrategy": "The optimization efforts should be verified through a multi-faceted testing approach:\n\n1. Performance metrics measurement:\n   - Use React DevTools Profiler to measure and compare render counts before and after optimizations\n   - Implement and run Lighthouse performance tests in CI pipeline\n   - Use React Query DevTools to verify proper caching behavior and identify unnecessary refetches\n   - Measure and document Time to Interactive (TTI) improvements\n\n2. Automated testing:\n   - Create unit tests for optimized query hooks to verify caching behavior\n   - Implement integration tests that verify data consistency with optimized fetching\n   - Create performance regression tests to prevent future performance degradation\n\n3. Load testing:\n   - Simulate high-load scenarios to verify application stability under stress\n   - Test with throttled network conditions to verify optimized loading states\n   - Measure memory usage patterns before and after optimizations\n\n4. User experience validation:\n   - Conduct A/B testing with optimized vs. non-optimized versions\n   - Measure and compare key UX metrics (page load time, time to first meaningful paint)\n   - Document perceived performance improvements\n\n5. Code review:\n   - Conduct thorough code reviews focusing on React Query best practices\n   - Verify proper implementation of memoization techniques\n   - Ensure consistent query key strategies across the application\n\nAll test results should be documented with before/after comparisons to quantify the performance improvements achieved.",
+      "status": "pending",
+      "dependencies": [
+        21,
+        22
+      ],
+      "priority": "medium",
+      "subtasks": []
+    }
+  ]
+}

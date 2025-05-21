@@ -47,6 +47,7 @@ input:focus {
   --color-text-secondary: #86868b;
   --color-highlight: #f5f5f7;
   --color-focus-ring: var(--color-primary); /* For consistent focus styling */
+  --spinner-color: var(--color-primary); /* Color for loading spinners */
   
   /* Animation durations */
   --duration-fast: 150ms;

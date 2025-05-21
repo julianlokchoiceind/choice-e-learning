@@ -1,0 +1,41 @@
+# Task ID: 3
+# Title: Add CSS Variable for Spinner Color
+# Status: done
+# Dependencies: None
+# Priority: medium
+# Description: Update the globals.css file to add a new CSS variable --spinner-color that uses the existing primary color as specified in PRD section 3.2.
+# Details:
+1. Open the file src/app/globals.css
+2. Locate the CSS variables section (usually at the top of the file)
+3. Add a new CSS variable named --spinner-color
+4. Set the value of --spinner-color to use the existing primary color variable (likely --color-primary or similar)
+5. Ensure the variable is defined in the :root selector to make it globally available
+6. Follow the exact naming convention and implementation details as specified in PRD section 3.2
+7. The spinner color should be consistent with the application's design system
+8. Make sure not to modify any existing CSS variables unless specifically instructed in the PRD
+9. Verify that the variable is properly scoped and accessible throughout the application
+
+This task is part of the styling improvements for the LoadingState component, following Task #2 which updated the component structure. The new CSS variable will allow for consistent and themeable spinner colors across the application.
+
+# Test Strategy:
+1. Visual Verification:
+   - Open the application in a browser
+   - Navigate to pages where spinners are displayed
+   - Verify that all spinners use the correct color as defined by the new CSS variable
+
+2. Code Review:
+   - Confirm that the --spinner-color variable is correctly added to globals.css
+   - Verify that it references the primary color as specified in the PRD
+   - Check that the variable is defined in the correct scope (:root)
+
+3. Browser DevTools Testing:
+   - Open browser DevTools and inspect a spinner element
+   - Confirm that the computed color matches the expected primary color
+   - Temporarily modify the --spinner-color value in DevTools to ensure it affects the spinner appearance
+
+4. Cross-browser Testing:
+   - Test in Chrome, Firefox, and Safari to ensure CSS variable support works correctly
+   - Verify the spinner color is consistent across all browsers
+
+5. Documentation Check:
+   - Ensure the implementation matches the specifications in PRD section 3.2

@@ -1,0 +1,37 @@
+# Task ID: 4
+# Title: Create ReactQueryProvider Component
+# Status: done
+# Dependencies: 1
+# Priority: high
+# Description: Create a new ReactQueryProvider component in src/client/providers/ReactQueryProvider.tsx that configures and provides React Query context to the application according to PRD section 3.3.
+# Details:
+1. Create a new directory structure if it doesn't exist: src/client/providers/
+2. Create a new file ReactQueryProvider.tsx in this directory
+3. Import necessary dependencies from @tanstack/react-query and @tanstack/react-query-devtools
+4. Create a ReactQueryProvider component that:
+   - Initializes a new QueryClient with default configurations as specified in PRD section 3.3
+   - Sets up default error handling for queries using toast notifications
+   - Configures default staleTime, cacheTime, and retry options as per PRD
+   - Wraps children components with QueryClientProvider
+   - Includes ReactQueryDevtools in development mode only
+5. Export the ReactQueryProvider as both a named and default export
+6. Add proper TypeScript types for all props and components
+7. Ensure the provider is set up to handle global error states and display appropriate toast notifications when queries fail
+8. Document the component with JSDoc comments explaining its purpose and configuration options
+
+# Test Strategy:
+1. Verify the file structure is correct: src/client/providers/ReactQueryProvider.tsx exists
+2. Check that the component correctly imports and uses @tanstack/react-query and react-hot-toast packages installed in Task #1
+3. Manually test the component by:
+   - Importing and using it in the main application component
+   - Verifying that React Query DevTools appear in development mode
+   - Creating a test query that intentionally fails to verify error handling works
+   - Checking that toast notifications appear when queries fail
+4. Write unit tests to verify:
+   - The component renders without errors
+   - QueryClient is properly configured with the default options from PRD section 3.3
+   - Error handling middleware correctly triggers toast notifications
+5. Verify integration with the rest of the application by:
+   - Ensuring all query hooks have access to the QueryClient
+   - Confirming that the DevTools are only visible in development mode
+   - Testing that the provider doesn't cause any performance issues

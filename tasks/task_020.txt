@@ -1,0 +1,139 @@
+# Task ID: 20
+# Title: Task #20: Implement LoadingState Component Across Admin and Public Pages
+# Status: pending
+# Dependencies: 2, 3
+# Priority: high
+# Description: Update all specified admin and public pages to implement the new LoadingState component with appropriate variants based on the context of each page as defined in PRD section 4.1.4.
+# Details:
+This task involves implementing the newly created LoadingState component across all specified admin and public pages. The implementation should follow these guidelines:
+
+1. For each page listed in the requirements, identify the appropriate loading state variant (default, page, table, section, or button) based on the page's context and content.
+
+2. Admin Pages Implementation:
+   - Replace existing loading indicators in all 20 admin pages with the new LoadingState component
+   - Use the 'page' variant for full page loading states
+   - Use the 'table' variant for data table loading states (especially in list views)
+   - Use the 'section' variant for partial page content loading
+   - Use the 'button' variant for action button loading states
+
+3. Public Pages Implementation:
+   - Replace existing loading indicators in all 12 public pages with the new LoadingState component
+   - Apply appropriate variants based on the page context
+   - Ensure consistent user experience across marketing, auth, dashboard, and course pages
+
+4. Implementation Considerations:
+   - Ensure the LoadingState component is imported correctly from its location
+   - Pass the appropriate variant prop to each LoadingState instance
+   - Maintain existing conditional logic that determines when loading states should be shown
+   - Ensure the spinner color uses the --spinner-color CSS variable defined in Task #3
+
+5. Code Structure:
+   - Follow the existing pattern for loading state implementation
+   - Ensure loading states are properly integrated with data fetching logic
+   - Maintain accessibility standards when implementing loading indicators
+
+This task depends on the completion of Task #2 (Update LoadingState Component) and Task #3 (Add CSS Variable for Spinner Color).
+
+# Test Strategy:
+To verify the successful implementation of this task, follow these testing steps:
+
+1. Manual Visual Inspection:
+   - Navigate to each of the 32 pages listed in the requirements
+   - Verify that the appropriate LoadingState component is visible during loading
+   - Confirm that the correct variant is used based on the context of each page
+   - Check that the spinner color matches the --spinner-color CSS variable
+
+2. Functionality Testing:
+   - Test each page under various network conditions (throttled network, etc.)
+   - Verify that loading states appear and disappear at appropriate times
+   - Ensure that loading states don't interfere with user interactions once content is loaded
+
+3. Code Review:
+   - Verify that all 32 files have been updated to use the new LoadingState component
+   - Confirm that appropriate variant props are passed to each LoadingState instance
+   - Check that imports are correct and no console errors are present
+
+4. Cross-browser Testing:
+   - Test the loading states in Chrome, Firefox, Safari, and Edge
+   - Verify consistent appearance and behavior across browsers
+
+5. Responsive Testing:
+   - Test loading states on mobile, tablet, and desktop viewports
+   - Ensure loading indicators are appropriately sized and positioned on all devices
+
+6. Accessibility Testing:
+   - Verify that loading states are announced properly to screen readers
+   - Check that loading indicators meet contrast requirements
+   - Ensure that loading states don't cause layout shifts that would impact user experience
+
+Document any issues found during testing with screenshots and detailed descriptions.
+
+# Subtasks:
+## 1. Analyze and Plan LoadingState Implementation [pending]
+### Dependencies: None
+### Description: Review all specified admin and public pages, identify appropriate LoadingState variants, and create a detailed implementation plan.
+### Details:
+Review PRD section 4.1.4, document each page's required LoadingState variant (default, page, table, section, or button), create a spreadsheet mapping pages to variants, and outline implementation steps for each page type.
+
+## 2. Implement LoadingState in Admin Pages [pending]
+### Dependencies: 20.1
+### Description: Replace existing loading indicators with the new LoadingState component across all 20 admin pages.
+### Details:
+Replace existing loading indicators with the LoadingState component in the following admin pages:
+
+1. src/app/admin/page.tsx
+2. src/app/admin/courses/page.tsx
+3. src/app/admin/courses/[courseId]/edit/page.tsx
+4. src/app/admin/courses/new/page.tsx
+5. src/app/admin/courses/[courseId]/page.tsx
+6. src/app/admin/topics/page.tsx
+7. src/app/admin/topics/[topicId]/page.tsx
+8. src/app/admin/topics/[topicId]/edit/page.tsx
+9. src/app/admin/topics/new/page.tsx
+10. src/app/admin/faqs/page.tsx
+11. src/app/admin/faqs/[faqId]/edit/page.tsx
+12. src/app/admin/faqs/new/page.tsx
+13. src/app/admin/students/page.tsx
+14. src/app/admin/students/[studentId]/page.tsx
+15. src/app/admin/students/[studentId]/edit/page.tsx
+16. src/app/admin/students/new/page.tsx
+17. src/app/admin/lessons/page.tsx
+18. src/app/admin/lessons/[lessonId]/page.tsx
+19. src/app/admin/lessons/[lessonId]/edit/page.tsx
+20. src/app/admin/lessons/new/[courseId]/page.tsx
+
+For each page: import LoadingState component, replace existing indicators, apply appropriate variant prop (page, table, section, or button), integrate with existing conditional logic, and ensure correct use of --spinner-color CSS variable.
+
+## 3. Implement LoadingState in Public Pages [pending]
+### Dependencies: 20.1
+### Description: Replace existing loading indicators with the new LoadingState component across all 12 public pages.
+### Details:
+Replace existing loading indicators with the LoadingState component in the following public pages:
+
+1. src/app/courses/page.tsx
+2. src/app/courses/[courseId]/page.tsx
+3. src/app/courses/[courseId]/learn/page.tsx
+4. src/app/(dashboard)/dashboard/page.tsx
+5. src/app/(dashboard)/my-courses/page.tsx
+6. src/app/(dashboard)/learn/[courseId]/page.tsx
+7. src/app/(auth)/login/page.tsx
+8. src/app/(auth)/signup/page.tsx
+9. src/app/challenges/page.tsx
+10. src/app/(marketing)/faq/page.tsx
+11. src/app/(marketing)/reviews/page.tsx
+12. src/app/(marketing)/roadmap/page.tsx
+
+For each page: import LoadingState component, replace existing indicators, apply appropriate variant based on page context, ensure consistent UX across marketing, auth, dashboard, and course pages, integrate with existing logic, and use --spinner-color CSS variable.
+
+## 4. Refactor and Optimize LoadingState Integration [pending]
+### Dependencies: 20.2, 20.3
+### Description: Review implemented LoadingState components, refactor for consistency, and optimize code structure.
+### Details:
+Analyze LoadingState usage patterns, create reusable hooks or utilities if needed, ensure consistent implementation across pages, optimize imports, and verify proper integration with data fetching logic.
+
+## 5. Test and Validate LoadingState Implementation [pending]
+### Dependencies: 20.4
+### Description: Perform comprehensive testing of LoadingState implementation across all admin and public pages.
+### Details:
+Execute unit tests, integration tests, and manual testing for all pages. Verify correct variant usage, spinner color, accessibility compliance, and proper behavior under various network conditions. Document any issues found and create bug tickets if necessary.
+

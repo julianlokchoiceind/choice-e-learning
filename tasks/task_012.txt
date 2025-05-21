@@ -1,0 +1,78 @@
+# Task ID: 12
+# Title: Create useTopicsQuery Hook for CRUD Operations
+# Status: pending
+# Dependencies: 4, 6, 8
+# Priority: high
+# Description: Create a new hook in src/client/hooks/topics/useTopicsQuery.ts that provides CRUD operations for topic data according to PRD section 4.2.
+# Details:
+The implementation should include:
+
+1. Create the file structure:
+   - Create directory: src/client/hooks/topics/ (if it doesn't exist)
+   - Create file: src/client/hooks/topics/useTopicsQuery.ts
+
+2. Import necessary dependencies:
+   - React Query hooks (useQuery, useMutation, useQueryClient)
+   - Error handling utilities from useQueryUtils
+   - Toast notification functions from useToast
+   - API client or axios for HTTP requests
+
+3. Implement the following CRUD operations as specified in PRD section 4.2:
+   - useGetTopics(): Fetch all topics
+   - useGetTopicById(id): Fetch a specific topic by ID
+   - useCreateTopic(): Create a new topic
+   - useUpdateTopic(): Update an existing topic
+   - useDeleteTopic(): Delete a topic
+
+4. Each function should:
+   - Properly handle loading states
+   - Implement error handling using the useQueryUtils hook
+   - Show appropriate toast notifications on success/failure
+   - Invalidate queries to refresh data after mutations
+   - Follow React Query best practices for caching and data synchronization
+
+5. Ensure the hook is properly typed with TypeScript:
+   - Define Topic interface with appropriate properties
+   - Type all function parameters and return values
+   - Use proper error typing
+
+6. Add JSDoc comments for all exported functions to document usage.
+
+7. Ensure the implementation aligns with the existing ReactQueryProvider configuration.
+
+8. Consider implementing optimistic updates for better UX where appropriate.
+
+# Test Strategy:
+Testing should include:
+
+1. Unit tests:
+   - Create a test file: src/client/hooks/topics/__tests__/useTopicsQuery.test.ts
+   - Mock the API responses for all CRUD operations
+   - Test each function for successful API calls
+   - Test error handling scenarios
+   - Verify toast notifications are triggered appropriately
+   - Ensure query invalidation works correctly
+
+2. Integration tests:
+   - Create a test component that uses the hook
+   - Test the component with React Testing Library
+   - Verify data fetching, loading states, and error states
+   - Test all CRUD operations in an integrated environment
+
+3. Manual testing:
+   - Implement the hook in a component
+   - Verify all CRUD operations work as expected
+   - Check loading indicators appear correctly
+   - Confirm error messages display properly
+   - Test edge cases like network failures
+   - Verify toast notifications appear with correct messages
+
+4. Documentation verification:
+   - Ensure JSDoc comments are complete and accurate
+   - Verify TypeScript types are correctly implemented
+   - Check that the implementation follows PRD section 4.2 requirements
+
+5. Performance testing:
+   - Verify caching works as expected
+   - Check that unnecessary re-renders are avoided
+   - Test with large datasets to ensure performance

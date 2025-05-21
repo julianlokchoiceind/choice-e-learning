@@ -1,0 +1,99 @@
+# Task ID: 21
+# Title: Task #21: Update Components to Use New React Query Hooks
+# Status: pending
+# Dependencies: 11, 12, 13, 14, 15, 16, 17, 18
+# Priority: high
+# Description: Refactor multiple components across the admin and course sections to replace existing data fetching methods with the newly created React Query hooks.
+# Details:
+This task involves updating various components to use the React Query hooks that were created in previous tasks. The components are divided into two main categories: Admin Components and Course Components.
+
+For Admin Components:
+1. Update `src/client/components/admin/students/StudentList.tsx`, `src/client/components/admin/students/StudentForm.tsx`, and `src/client/components/admin/students/StudentDetail.tsx` to use the `useStudentsQuery` hook for fetching and manipulating student data.
+2. Update `src/client/components/admin/topics/TopicList.tsx` and `src/client/components/admin/topics/TopicForm.tsx` to use the `useTopicsQuery` hook for topic-related operations.
+3. Update `src/client/components/admin/lessons/LessonList.tsx` and `src/client/components/admin/lessons/LessonForm.tsx` to use the `useLessonsQuery` hook for lesson data management.
+4. Update `src/client/components/admin/CourseManager.tsx` to use the `useCoursesQuery` hook for course management operations.
+
+For Course Components:
+1. Update `src/client/components/courses/CourseCard.tsx`, `src/client/components/courses/CourseDetail.tsx`, and `src/client/components/courses/CoursesSection.tsx` to use the `useCoursesQuery` hook.
+2. Additionally, update `src/client/components/courses/CoursesSection.tsx` to also use the `useTopicsQuery` hook for topic filtering functionality.
+3. Update `src/client/components/courses/EnrollButton.tsx` to use both `useCoursesQuery` and `useAuthQuery` hooks for enrollment functionality.
+
+Implementation Guidelines:
+- Remove any existing data fetching logic (like useState, useEffect combinations or Redux-based approaches).
+- Replace with appropriate React Query hook calls.
+- Update component logic to handle loading, error, and data states provided by React Query.
+- Ensure proper TypeScript typing throughout the refactoring.
+- Maintain existing component functionality while improving performance and code organization.
+- Use React Query's built-in caching and invalidation features where appropriate.
+- Update any related tests to account for the new data fetching approach.
+
+This task depends on the successful completion of Tasks #11-18, which created the React Query hooks that will be used in this refactoring.
+
+# Test Strategy:
+To verify the successful completion of this task, the following testing approach should be implemented:
+
+1. Code Review:
+   - Verify that all specified components have been updated to use the appropriate React Query hooks.
+   - Ensure that all previous data fetching logic has been removed.
+   - Check that proper error handling and loading states are implemented.
+   - Confirm TypeScript types are correctly applied.
+
+2. Unit Tests:
+   - Update existing unit tests for each component to mock the React Query hooks.
+   - Test loading, error, and success states for each component.
+   - Verify that components correctly handle data from the hooks.
+
+3. Integration Tests:
+   - Create or update integration tests that verify the components work correctly with the actual hooks.
+   - Test data fetching, mutations, and error scenarios.
+
+4. Manual Testing:
+   - Test each component in the development environment to ensure they render correctly.
+   - Verify that admin components can perform CRUD operations using the new hooks.
+   - Test course components to ensure they display correct course information.
+   - Test the EnrollButton component to ensure enrollment functionality works with the new hooks.
+   - Verify that filtering in CoursesSection works correctly with the useTopicsQuery hook.
+
+5. Performance Testing:
+   - Compare the performance before and after the refactoring.
+   - Verify that React Query's caching improves the user experience.
+   - Test network request patterns to ensure unnecessary requests are not being made.
+
+6. Cross-browser Testing:
+   - Verify the updated components work correctly across different browsers.
+
+7. Documentation:
+   - Update component documentation to reflect the new data fetching approach.
+   - Document any changes to component props or behavior.
+
+# Subtasks:
+## 1. Refactor Admin Student Components [pending]
+### Dependencies: None
+### Description: Update StudentList, StudentForm, and StudentDetail components to use the useStudentsQuery hook.
+### Details:
+Replace existing data fetching methods in `src/client/components/admin/students/StudentList.tsx`, `src/client/components/admin/students/StudentForm.tsx`, and `src/client/components/admin/students/StudentDetail.tsx` with the useStudentsQuery hook. Remove useState and useEffect combinations or Redux-based approaches. Handle loading, error, and data states provided by React Query. Ensure proper TypeScript typing and maintain existing functionality.
+
+## 2. Refactor Admin Topic and Lesson Components [pending]
+### Dependencies: None
+### Description: Update TopicList, TopicForm, LessonList, and LessonForm components to use useTopicsQuery and useLessonsQuery hooks.
+### Details:
+Refactor `src/client/components/admin/topics/TopicList.tsx`, `src/client/components/admin/topics/TopicForm.tsx`, and `src/client/components/admin/lessons/LessonList.tsx`, `src/client/components/admin/lessons/LessonForm.tsx` to use the appropriate React Query hooks. Implement caching and invalidation features where applicable. Update component logic to handle new data fetching approach.
+
+## 3. Update CourseManager Component [pending]
+### Dependencies: None
+### Description: Refactor the CourseManager component to use the useCoursesQuery hook for course management operations.
+### Details:
+Modify `src/client/components/admin/CourseManager.tsx` to utilize the useCoursesQuery hook. Remove existing data fetching logic and implement React Query's loading, error, and data state handling. Ensure all course management operations are updated to use the new hook.
+
+## 4. Refactor Course List Components [pending]
+### Dependencies: 21.3
+### Description: Update CourseCard, CourseDetail, and CoursesSection components to use useCoursesQuery and useTopicsQuery hooks.
+### Details:
+Refactor `src/client/components/courses/CourseCard.tsx`, `src/client/components/courses/CourseDetail.tsx`, and `src/client/components/courses/CoursesSection.tsx` to use the useCoursesQuery hook. Additionally, update `src/client/components/courses/CoursesSection.tsx` to use the useTopicsQuery hook for topic filtering functionality. Ensure proper handling of loading states and error conditions.
+
+## 5. Update EnrollButton Component [pending]
+### Dependencies: 21.4
+### Description: Refactor the EnrollButton component to use both useCoursesQuery and useAuthQuery hooks.
+### Details:
+Modify `src/client/components/courses/EnrollButton.tsx` to implement useCoursesQuery and useAuthQuery hooks for enrollment functionality. Remove any existing data fetching or state management logic. Ensure the component correctly handles authentication states and course enrollment operations using the new hooks.
+

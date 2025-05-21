@@ -1,0 +1,61 @@
+# Task ID: 14
+# Title: Create useLessonsQuery Hook for CRUD Operations
+# Status: pending
+# Dependencies: 4, 6, 8
+# Priority: high
+# Description: Create a new hook in src/client/hooks/learn/useLessonsQuery.ts that provides CRUD operations for lesson data according to PRD section 4.4.
+# Details:
+This task involves creating a custom React Query hook that will handle all CRUD operations for lesson data:
+
+1. Create a new file at `src/client/hooks/learn/useLessonsQuery.ts`
+2. Implement the following functionality in the hook:
+   - `useGetLessons()`: Query to fetch all lessons
+   - `useGetLesson(id)`: Query to fetch a specific lesson by ID
+   - `useCreateLesson()`: Mutation to create a new lesson
+   - `useUpdateLesson()`: Mutation to update an existing lesson
+   - `useDeleteLesson()`: Mutation to delete a lesson
+
+The hook should:
+- Utilize the ReactQueryProvider context for caching and state management
+- Implement proper error handling using the useQueryUtils hook
+- Display appropriate toast notifications on success/error using useToast
+- Include TypeScript interfaces for lesson data structure
+- Follow the API endpoints and data structures specified in PRD section 4.4
+- Implement query invalidation to ensure data consistency after mutations
+- Include proper loading states and error handling
+- Add JSDoc comments for all exported functions
+
+The implementation should follow React Query best practices, including:
+- Using appropriate query keys for caching
+- Implementing optimistic updates where applicable
+- Handling pagination if required by the PRD
+- Providing retry logic for failed requests
+
+# Test Strategy:
+To verify the correct implementation of the useLessonsQuery hook:
+
+1. Unit Tests:
+   - Create unit tests for each CRUD operation in the hook
+   - Mock API responses to test success and error scenarios
+   - Verify that proper error handling is implemented
+   - Test that query invalidation works correctly after mutations
+
+2. Integration Tests:
+   - Create a test component that uses the hook to perform CRUD operations
+   - Verify that data is correctly fetched, created, updated, and deleted
+   - Test that loading states are correctly managed
+   - Ensure toast notifications appear correctly on success/error
+
+3. Manual Testing:
+   - Implement the hook in a development environment
+   - Test each CRUD operation against the actual API
+   - Verify that the UI updates correctly after mutations
+   - Check that error messages are displayed appropriately
+   - Test edge cases like network failures or server errors
+
+4. Code Review:
+   - Ensure the hook follows the structure specified in the PRD
+   - Verify TypeScript types are correctly implemented
+   - Check that the hook integrates properly with ReactQueryProvider
+   - Confirm that the hook uses useQueryUtils for error handling
+   - Validate that the hook uses useToast for notifications
