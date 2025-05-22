@@ -14,16 +14,21 @@ interface AppProviderProps {
 /**
  * Combined provider that includes all app providers
  * This simplifies the root layout by combining all providers in one component
+ * 
+ * Providers are ordered according to PRD section 3.6:
+ * - QueryProvider (ReactQueryProvider) as the outermost provider
+ * - ToastProvider nested inside QueryProvider
+ * - SessionProvider for authentication state
  */
 const AppProvider = ({ children, session }: AppProviderProps) => {
   return (
-    <SessionProvider session={session}>
-      <QueryProvider>
-        <ToastProvider>
+    <QueryProvider>
+      <ToastProvider>
+        <SessionProvider session={session}>
           {children}
-        </ToastProvider>
-      </QueryProvider>
-    </SessionProvider>
+        </SessionProvider>
+      </ToastProvider>
+    </QueryProvider>
   );
 };
 

@@ -1,6 +1,6 @@
 # Task ID: 6
 # Title: Create useToast Hook for Toast Notifications
-# Status: pending
+# Status: done
 # Dependencies: 5
 # Priority: high
 # Description: Create a new useToast hook in src/client/hooks/common/useToast.ts that provides a convenient interface for using toast notifications throughout the application as specified in section 3.5 of the PRD.

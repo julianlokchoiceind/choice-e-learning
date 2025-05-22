@@ -1,6 +1,6 @@
 # Task ID: 10
 # Title: Update Common Hooks Exports in index.ts
-# Status: pending
+# Status: done
 # Dependencies: 6, 8
 # Priority: medium
 # Description: Update the src/client/hooks/common/index.ts file to export the newly created hooks (useToast and useQueryUtils) according to the guidelines in section 3.9 of the PRD.

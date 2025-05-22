@@ -1,6 +1,6 @@
 # Task ID: 8
 # Title: Create useQueryUtils Helper for React Query Error Handling
-# Status: pending
+# Status: done
 # Dependencies: 4, 6
 # Priority: medium
 # Description: Create a new utility hook in src/client/hooks/common/useQueryUtils.ts that provides helper functions for React Query error handling, including onError function and showErrorToast functionality as specified in PRD section 3.7.

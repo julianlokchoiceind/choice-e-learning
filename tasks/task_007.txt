@@ -1,6 +1,6 @@
 # Task ID: 7
 # Title: Update Root Layout with ReactQueryProvider and ToastProvider
-# Status: pending
+# Status: done
 # Dependencies: 4, 5
 # Priority: high
 # Description: Update the src/app/layout.tsx file to incorporate the newly created ReactQueryProvider and ToastProvider components according to section 3.6 of the PRD.
