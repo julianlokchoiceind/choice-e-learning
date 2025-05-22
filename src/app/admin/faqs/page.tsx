@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useFAQs } from '@/client/hooks/faq/useFAQs';
+import { useFAQsQuery } from '@/client/hooks/faq';
 import { 
   PlusIcon, 
   MagnifyingGlassIcon, 
@@ -11,23 +11,54 @@ import {
   QuestionMarkCircleIcon 
 } from '@heroicons/react/24/outline';
 import { LoadingState } from '@/client/components/common';
+import { FAQItem, FAQFilter } from '@/shared/types/faq';
 
 export default function FAQsAdminPage() {
   const {
-    loading,
-    error,
-    faqs,
-    pagination,
-    categories,
-    fetchFAQs,
-    fetchCategories,
-    deleteFAQ,
-  } = useFAQs(true);
+    useGetFAQs,
+    useDeleteFAQ,
+  } = useFAQsQuery();
 
+  // State for filters and pagination
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+  // Create filter parameters
+  const filter: FAQFilter = {
+    search: search || undefined,
+    category: selectedCategory || undefined,
+    page: currentPage,
+    limit: 10,
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+  };
+
+  // Fetch FAQs with React Query
+  const {
+    data,
+    isLoading,
+    error,
+    refetch
+  } = useGetFAQs(filter);
+
+  // Setup delete mutation
+  const deleteFAQ = useDeleteFAQ();
+
+  // Extract data safely
+  const faqs = data?.data || [];
+  const pagination = data?.meta || {
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 0
+  };
+
+  // Get unique categories from FAQs
+  const categories = Array.from(
+    new Set(faqs.map((faq) => faq.category))
+  );
 
   // Add CSS for buttons with no transform on hover - matching sidebar behavior
   useEffect(() => {
@@ -61,62 +92,27 @@ export default function FAQsAdminPage() {
     };
   }, []);
 
-  useEffect(() => {
-    // Fetch FAQs on initial load
-    fetchFAQs({
-      page: currentPage,
-      limit: 10,
-      sortBy: 'createdAt',
-      sortOrder: 'desc',
-    });
-    
-    // Fetch categories
-    fetchCategories();
-  }, [fetchFAQs, fetchCategories, currentPage]);
-
   const handleSearch = () => {
-    fetchFAQs({
-      search,
-      category: selectedCategory || undefined,
-      page: 1,
-      limit: 10,
-    });
     setCurrentPage(1);
+    refetch();
   };
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
-    fetchFAQs({
-      search,
-      category: category || undefined,
-      page: 1,
-      limit: 10,
-    });
     setCurrentPage(1);
+    refetch();
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    fetchFAQs({
-      search,
-      category: selectedCategory || undefined,
-      page,
-      limit: 10,
-    });
+    refetch();
   };
 
   const handleDeleteConfirm = async (id: string) => {
     try {
-      await deleteFAQ(id);
-      // Refresh the list after deletion
-      fetchFAQs({
-        search,
-        category: selectedCategory || undefined,
-        page: currentPage,
-        limit: 10,
-      });
+      await deleteFAQ.mutateAsync(id);
       setConfirmDelete(null);
-    } catch (err: unknown) {
+    } catch (err) {
       console.error('Error deleting FAQ:', err);
     }
   };
@@ -177,7 +173,7 @@ export default function FAQsAdminPage() {
         {/* Error message */}
         {error && (
           <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 mx-4 mt-4'>
-            {error}
+            {error instanceof Error ? error.message : 'Failed to fetch FAQs'}
           </div>
         )}
 
@@ -193,7 +189,7 @@ export default function FAQsAdminPage() {
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
-              {loading ? (
+              {isLoading ? (
                 <tr>
                   <td colSpan={4} className='text-center py-10'>
                     <LoadingState variant="table" message="Loading FAQs..." />
@@ -237,12 +233,14 @@ export default function FAQsAdminPage() {
                             <button
                               onClick={() => handleDeleteConfirm(faq.id)}
                               className='text-red-600 hover:text-red-800 font-medium bg-red-50 px-2 py-1 rounded admin-button'
+                              disabled={deleteFAQ.isPending}
                             >
-                              Confirm
+                              {deleteFAQ.isPending ? 'Deleting...' : 'Confirm'}
                             </button>
                             <button
                               onClick={() => setConfirmDelete(null)}
                               className='text-gray-600 hover:text-gray-800 bg-gray-50 px-2 py-1 rounded admin-button'
+                              disabled={deleteFAQ.isPending}
                             >
                               Cancel
                             </button>
@@ -250,7 +248,7 @@ export default function FAQsAdminPage() {
                         ) : (
                           <button
                             onClick={() => setConfirmDelete(faq.id)}
-                            className='text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 rounded-md p-1.5 transition-colors duration-150 admin-button'
+                            className='text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 rounded-md p-1.5 transition-colors duration-150 admin-button'
                             title='Delete'
                           >
                             <TrashIcon className='h-5 w-5' />
@@ -266,43 +264,49 @@ export default function FAQsAdminPage() {
         </div>
         
         {/* Pagination */}
-        {pagination && (
-          <div className='flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200'>
-            <div className='text-sm text-gray-600'>
-              Showing {faqs.length} of {pagination.total || faqs.length} FAQs
-            </div>
-            <div className='flex space-x-1'>
-              <button 
+        {!isLoading && pagination && pagination.totalPages > 1 && (
+          <div className='px-6 py-4 flex justify-center'>
+            <div className='flex space-x-2'>
+              <button
                 onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
-                className={`p-2 ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'} admin-button`}
+                className={`px-3 py-1 rounded-md ${
+                  currentPage === 1
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                } admin-button`}
               >
-                <svg className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M15 19l-7-7 7-7' />
-                </svg>
+                Previous
               </button>
-              {/* Page numbers */}
-              {Array.from({length: pagination.totalPages}, (_, i) => i + 1).map(page => (
-                <button
-                  key={page}
-                  onClick={() => handlePageChange(page)}
-                  className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                    currentPage === page 
-                      ? 'bg-indigo-600 text-white' 
-                      : 'text-gray-700 hover:bg-gray-100'
-                  } admin-button`}
-                >
-                  {page}
-                </button>
-              ))}
-              <button 
-                onClick={() => handlePageChange(Math.min(pagination.totalPages, currentPage + 1))}
+              
+              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`px-3 py-1 rounded-md admin-button ${
+                      currentPage === page
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                )
+              )}
+              
+              <button
+                onClick={() =>
+                  handlePageChange(Math.min(pagination.totalPages, currentPage + 1))
+                }
                 disabled={currentPage === pagination.totalPages}
-                className={`p-2 ${currentPage === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'} admin-button`}
+                className={`px-3 py-1 rounded-md ${
+                  currentPage === pagination.totalPages
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                } admin-button`}
               >
-                <svg className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5l7 7-7 7' />
-                </svg>
+                Next
               </button>
             </div>
           </div>

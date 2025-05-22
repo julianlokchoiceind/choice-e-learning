@@ -3,6 +3,8 @@
 // src/client/components/learn/LessonPlayer.tsx
 import { useState, useEffect } from 'react';
 import { Lesson } from '@/shared/types/lessons/lesson';
+import { useLessonsQuery } from '@/client/hooks/learn';
+import { LoadingState } from '@/client/components/common';
 
 interface LessonPlayerProps {
   lesson: Lesson;
@@ -21,8 +23,11 @@ export const LessonPlayer = ({
 }: LessonPlayerProps) => {
   const [progress, setProgress] = useState(0);
   const [completed, setCompleted] = useState(isCompleted);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Sử dụng React Query để đánh dấu hoàn thành bài học
+  const { useMarkLessonComplete } = useLessonsQuery();
+  const markLessonComplete = useMarkLessonComplete();
 
   // Đặt lại trạng thái khi lesson thay đổi
   useEffect(() => {
@@ -49,18 +54,20 @@ export const LessonPlayer = ({
   };
 
   const markAsCompleted = async () => {
-    setLoading(true);
     try {
       if (onComplete) {
+        // Gọi onComplete callback trước (cho backwards compatibility)
         await onComplete(lesson.id);
+        
+        // Đánh dấu hoàn thành bài học với React Query
+        await markLessonComplete.mutateAsync(lesson.id);
+        
         setCompleted(true);
         setProgress(100);
       }
     } catch (err: unknown) {
       setError('Không thể đánh dấu hoàn thành. Vui lòng thử lại sau.');
       console.error('Error marking lesson as completed:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -114,7 +121,7 @@ export const LessonPlayer = ({
             <button
               onClick={() => handleProgress(Math.min(progress + 25, 100))}
               className='px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded transition'
-              disabled={loading}
+              disabled={markLessonComplete.isPending}
             >
               +25%
             </button>
@@ -132,9 +139,9 @@ export const LessonPlayer = ({
           <button
             onClick={markAsCompleted}
             className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition'
-            disabled={loading}
+            disabled={markLessonComplete.isPending}
           >
-            {loading ? 'Đang xử lý...' : 'Đánh dấu hoàn thành'}
+            {markLessonComplete.isPending ? 'Đang xử lý...' : 'Đánh dấu hoàn thành'}
           </button>
         )}
       </div>

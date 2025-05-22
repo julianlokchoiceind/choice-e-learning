@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTopics } from '@/client/hooks/topics';
+import { useTopicsQuery } from '@/client/hooks/topics';
 import { FunnelIcon } from '@heroicons/react/24/outline';
 import { LoadingState } from '@/client/components/common';
 
@@ -11,22 +11,17 @@ interface TopicsFilterProps {
 }
 
 export default function TopicsFilter({ selectedTopics, onChange }: TopicsFilterProps) {
-  const { loading, error, topics, fetchTopics } = useTopics(false); // false = public view
-  const [topicNames, setTopicNames] = useState<string[]>([]);
-
-  useEffect(() => {
-    // Fetch topics on mount
-    fetchTopics({ isActive: true })
-      .catch(err => console.error('Error fetching topics:', err));
-  }, [fetchTopics]);
-
+  const { useGetTopics } = useTopicsQuery();
+  
+  // Use React Query to fetch active topics
+  const { 
+    data: topics = [], 
+    isLoading, 
+    error 
+  } = useGetTopics({ isActive: true });
+  
   // Extract topic names from topic objects
-  useEffect(() => {
-    if (topics && topics.length > 0) {
-      const names = topics.map(topic => topic.name);
-      setTopicNames(names);
-    }
-  }, [topics]);
+  const topicNames = topics.map(topic => topic.name);
   
   const handleTopicChange = (topicName: string) => {
     const updatedTopics = selectedTopics.includes(topicName)
@@ -54,7 +49,7 @@ export default function TopicsFilter({ selectedTopics, onChange }: TopicsFilterP
             <FunnelIcon className='h-4 w-4 text-gray-500' />
           </summary>
           <div className='absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg'>
-            {loading && topicNames.length === 0 ? (
+            {isLoading ? (
               <div className='p-4 text-center'>
                 <LoadingState variant="button" message="Loading topics..." />
               </div>
@@ -77,7 +72,7 @@ export default function TopicsFilter({ selectedTopics, onChange }: TopicsFilterP
                   ))
                 ) : (
                   <div className='p-4 text-center text-gray-500'>
-                    {error ? `Error: ${error}` : 'No topics available'}
+                    {error instanceof Error ? error.message : 'No topics available'}
                   </div>
                 )}
               </div>

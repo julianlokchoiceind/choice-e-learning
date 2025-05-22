@@ -1,10 +1,12 @@
 'use client';
 
-import { useAuth } from '@/client/hooks/auth/useAuth';
+import { useAuthQuery } from '@/client/hooks/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { UserRole } from '@/shared/types/auth/roles';
 import { hasRole } from '@/server/auth/roles';
+import { LoadingState } from '@/client/components/common';
+import { User } from '@/shared/types/user';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,8 +18,18 @@ interface ProtectedRouteProps {
  * Protects routes that require authentication and specific roles
  */
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { useGetCurrentUser } = useAuthQuery();
   const router = useRouter();
+  
+  // Get current user with React Query
+  const { 
+    data: user, 
+    isLoading,
+    error 
+  } = useGetCurrentUser();
+  
+  // Determine if user is authenticated
+  const isAuthenticated = !!user && !error;
 
   useEffect(() => {
     // Skip checks while loading
@@ -30,7 +42,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     }
     
     // If a specific role is required, check if the user has the role
-    if (requiredRole && !hasRole(user, requiredRole)) {
+    if (requiredRole && user && !hasRole(user as any, requiredRole)) {
       // Redirect to unauthorized page
       router.push('/unauthorized');
     }
@@ -40,10 +52,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   if (isLoading) {
     return (
       <div className='flex h-screen items-center justify-center'>
-        <div className='text-center'>
-          <div className='h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-indigo-500'></div>
-          <p className='mt-2 text-gray-600'>Loading...</p>
-        </div>
+        <LoadingState variant="page" message="Checking authentication..." />
       </div>
     );
   }
@@ -54,7 +63,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   }
   
   // If a role is required and the user doesn't have it, don't render children
-  if (requiredRole && !hasRole(user, requiredRole)) {
+  if (requiredRole && user && !hasRole(user as any, requiredRole)) {
     return null;
   }
 

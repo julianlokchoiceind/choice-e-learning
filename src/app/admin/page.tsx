@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 import { 
   UsersIcon, 
   BookOpenIcon, 
@@ -60,21 +61,111 @@ interface OverviewTabProps {
   isActive?: boolean;
 }
 
+// Interface cho dữ liệu dashboard
+interface DashboardData {
+  stats: {
+    students: string;
+    events: string;
+    courses: string;
+    revenue: string;
+  };
+  studentsList: {
+    name: string;
+    className: string;
+    image: string;
+  }[];
+  messages: {
+    name: string;
+    time: string;
+    message: string;
+    image: string;
+  }[];
+}
+
 export default function AdminDashboardPage() {
-  const [loading, setLoading] = useState(true);
+  // Sử dụng React Query thay vì loading state thủ công
+  const { data, isLoading, error } = useQuery<DashboardData>({
+    queryKey: ['admin-dashboard'],
+    queryFn: async () => {
+      // Mô phỏng API call - trong thực tế sẽ fetch từ API
+      return new Promise<DashboardData>((resolve) => {
+        setTimeout(() => {
+          resolve({
+            stats: {
+              students: '932',
+              events: '40',
+              courses: '32',
+              revenue: '$12,430'
+            },
+            studentsList: [
+              {
+                name: 'Brandon Wilson',
+                className: 'React Fundamentals',
+                image: '/images/avatars/avatar-1.jpg'
+              },
+              {
+                name: 'Sarah Miller',
+                className: 'Advanced JavaScript',
+                image: '/images/avatars/avatar-2.jpg'
+              },
+              {
+                name: 'Michael Chen',
+                className: 'Node.js Basics',
+                image: '/images/avatars/avatar-3.jpg'
+              },
+              {
+                name: 'Emma Rodriguez',
+                className: 'TypeScript Master',
+                image: '/images/avatars/avatar-4.jpg'
+              }
+            ],
+            messages: [
+              {
+                name: 'James Smith',
+                time: '10:42 AM',
+                message: 'When will the React course be updated with hooks content?',
+                image: '/images/avatars/avatar-5.jpg'
+              },
+              {
+                name: 'Lisa Johnson',
+                time: 'Yesterday',
+                message: 'Thank you for the quick response to my previous query.',
+                image: '/images/avatars/avatar-6.jpg'
+              },
+              {
+                name: 'Robert Davis',
+                time: 'Yesterday',
+                message: 'Is there any discount available for the annual subscription?',
+                image: '/images/avatars/avatar-7.jpg'
+              }
+            ]
+          });
+        }, 1000);
+      });
+    }
+  });
   
-  // Simulate data loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  if (loading) {
+  if (isLoading) {
     return <LoadingState variant="page" message="Loading dashboard..." />;
   }
+  
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 max-w-md">
+          <p className="font-bold">Error</p>
+          <p>{error instanceof Error ? error.message : 'Failed to load dashboard'}</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Destructure data with default values
+  const { stats, studentsList, messages } = data || {
+    stats: { students: '0', events: '0', courses: '0', revenue: '$0' },
+    studentsList: [],
+    messages: []
+  };
   
   return (
     <>
@@ -82,25 +173,25 @@ export default function AdminDashboardPage() {
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
         <StatsCard 
           title='Students' 
-          count='932' 
+          count={stats.students} 
           bgColor='bg-gradient-to-r from-blue-500 to-blue-600' 
           icon={<AcademicCapIcon className='h-6 w-6 text-white' />} 
         />
         <StatsCard 
           title='Events' 
-          count='40' 
+          count={stats.events} 
           bgColor='bg-gradient-to-r from-yellow-500 to-yellow-600' 
           icon={<ClockIcon className='h-6 w-6 text-white' />} 
         />
         <StatsCard 
           title='Courses' 
-          count='32' 
+          count={stats.courses} 
           bgColor='bg-gradient-to-r from-blue-500 to-blue-600' 
           icon={<BookOpenIcon className='h-6 w-6 text-white' />} 
         />
         <StatsCard 
           title='Revenue' 
-          count='$12,430' 
+          count={stats.revenue} 
           bgColor='bg-gradient-to-r from-green-500 to-green-600' 
           icon={<BanknotesIcon className='h-6 w-6 text-white' />} 
         />

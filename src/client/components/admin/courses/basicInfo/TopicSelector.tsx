@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTopics } from '@/client/hooks/topics';
+import { useTopicsQuery } from '@/client/hooks/topics';
 import { XCircleIcon } from '@heroicons/react/24/outline';
+import { LoadingState } from '@/client/components/common';
 
 interface TopicSelectorProps {
   selectedTopics: string[];
@@ -10,21 +11,14 @@ interface TopicSelectorProps {
 }
 
 export default function TopicSelector({ selectedTopics, onChange }: TopicSelectorProps) {
-  const { topics, loading, error, fetchTopics } = useTopics(true); // true = admin view
-  const [topicOptions, setTopicOptions] = useState<{id: string, name: string}[]>([]);
-
-  // Fetch topics on component mount
-  useEffect(() => {
-    fetchTopics({ isActive: true })
-      .catch(err => console.error('Failed to fetch topics:', err));
-  }, [fetchTopics]);
-
-  // Update topic options when topics change
-  useEffect(() => {
-    if (topics && Array.isArray(topics)) {
-      setTopicOptions(topics);
-    }
-  }, [topics]);
+  const { useGetTopics } = useTopicsQuery();
+  
+  // Fetch topics with React Query
+  const { 
+    data: topicOptions = [], 
+    isLoading, 
+    error 
+  } = useGetTopics({ isActive: true });
   
   // Toggle topic selection
   const toggleTopic = (topicName: string) => {
@@ -68,17 +62,16 @@ export default function TopicSelector({ selectedTopics, onChange }: TopicSelecto
       
       {/* Topic selection area */}
       <div className='border border-gray-200 rounded-md p-3'>
-        {loading ? (
+        {isLoading ? (
           <div className='flex items-center justify-center py-3'>
-            <svg className='animate-spin h-5 w-5 text-blue-500' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'>
-              <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
-              <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
-            </svg>
+            <LoadingState variant="button" message="Loading topics..." />
           </div>
         ) : (
           <div className='flex flex-wrap gap-y-2'>
             {error ? (
-              <p className='text-red-500 text-sm'>Error loading topics: {error}</p>
+              <p className='text-red-500 text-sm'>
+                {error instanceof Error ? error.message : 'Error loading topics'}
+              </p>
             ) : topicOptions.length > 0 ? (
               topicOptions.map(topic => (
                 <div key={topic.id} className='flex items-center mr-4 mb-2'>

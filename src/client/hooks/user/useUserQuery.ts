@@ -20,6 +20,7 @@ const API = {
   ME: '/api/dashboard/user/me',
   PREFERENCES: '/api/dashboard/user/preferences',
   USER_PREFERENCES: (id: string) => `/api/dashboard/user/preferences/${id}`,
+  LOGIN_STREAK: '/api/dashboard/user/login-streak',
 };
 
 /**
@@ -101,6 +102,25 @@ export const useUserQuery = () => {
       queryFn: async (): Promise<UserPreferences> => {
         const response = await apiClient.get(API.PREFERENCES);
         return response.data.data;
+      },
+      ...options
+    });
+  };
+
+  /**
+   * Fetch user login streak
+   * 
+   * @param options - Additional React Query options
+   * @returns Query result with user login streak (number), loading state, and error
+   */
+  const useGetUserLoginStreak = (
+    options?: UseQueryOptions<number, Error, number, string[]>
+  ) => {
+    return useQuery({
+      queryKey: ['user', 'login-streak'],
+      queryFn: async (): Promise<number> => {
+        const response = await apiClient.get(API.LOGIN_STREAK);
+        return response.data.streak || 0;
       },
       ...options
     });
@@ -196,6 +216,7 @@ export const useUserQuery = () => {
     useGetUserProfile,
     useGetCurrentUser,
     useGetUserPreferences,
+    useGetUserLoginStreak,
     useUpdateUserProfile,
     useUpdateUserPreferences,
     useUser

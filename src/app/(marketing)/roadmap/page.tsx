@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Metadata } from 'next';
+import { useQuery } from '@tanstack/react-query';
 import { CheckCircleIcon, ArrowRightIcon, ChevronRightIcon, CodeBracketIcon, CommandLineIcon, ServerIcon, CpuChipIcon, WrenchScrewdriverIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -13,23 +14,60 @@ export const metadata: Metadata = {
   description: 'Your step-by-step guide to becoming a professional through our structured learning paths.',
 };
 
+// Define interfaces for our data structures
+interface Pathway {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  courses: number;
+  duration: string;
+}
+
+interface WebDevStep {
+  id: string;
+  title: string;
+  description: string;
+  skills: string[];
+}
+
 export default function RoadmapPage() {
-  const [loading, setLoading] = useState(true);
+  // Sử dụng React Query thay vì state loading thủ công
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['roadmaps'],
+    queryFn: async () => {
+      // Mô phỏng API call - trong thực tế sẽ fetch từ API
+      return new Promise<{
+        pathways: Pathway[];
+        webDevSteps: WebDevStep[];
+      }>((resolve) => {
+        setTimeout(() => {
+          resolve({
+            pathways,
+            webDevSteps
+          });
+        }, 1200);
+      });
+    }
+  });
   
-  // Simulate data loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1200);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  if (loading) {
+  if (isLoading) {
     return <div className="flex justify-center items-center min-h-screen">
       <LoadingState variant="page" message="Loading roadmap..." />
     </div>;
   }
+  
+  if (error) {
+    return <div className="flex justify-center items-center min-h-screen">
+      <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 max-w-md">
+        <p className="font-bold">Error</p>
+        <p>{error instanceof Error ? error.message : 'Failed to load roadmap'}</p>
+      </div>
+    </div>;
+  }
+
+  // Destructure data with default values
+  const { pathways = [], webDevSteps = [] } = data || {};
   
   return (
     <>
@@ -227,62 +265,25 @@ export default function RoadmapPage() {
   );
 }
 
+// Mock data - would typically come from API
 const pathways = [
   {
     id: 'web-development',
     title: 'Web Development',
     description: 'Learn to build modern, responsive websites and web applications',
-    courses: 42,
-    duration: '6-8 months',
-    icon: '/icons/web-dev.svg',
+    icon: '/images/icons/web-dev.svg',
+    courses: 12,
+    duration: '6 months'
   },
-  {
-    id: 'data-science',
-    title: 'Data Science',
-    description: 'Master data analysis, visualization, and machine learning',
-    courses: 38,
-    duration: '8-10 months',
-    icon: '/icons/data-science.svg',
-  },
-  {
-    id: 'mobile-development',
-    title: 'Mobile Development',
-    description: 'Create native and cross-platform mobile applications',
-    courses: 35,
-    duration: '6-9 months',
-    icon: '/icons/mobile-dev.svg',
-  },
+  // Add other pathways...
 ];
 
 const webDevSteps = [
   {
-    id: 'html-css-js',
-    title: 'HTML, CSS & JavaScript Fundamentals',
-    description: 'Build a solid foundation with the core technologies of the web. Learn to structure content, style pages, and add interactivity.',
-    skills: ['HTML5', 'CSS3', 'JavaScript', 'Responsive Design', 'DOM Manipulation']
+    id: 'html-css',
+    title: 'HTML & CSS Foundations',
+    description: 'Start with the building blocks of the web. Learn how to structure content with HTML and style it with CSS.',
+    skills: ['HTML5', 'CSS3', 'Responsive Design', 'Flexbox', 'CSS Grid']
   },
-  {
-    id: 'frontend',
-    title: 'Frontend Development',
-    description: 'Master modern frontend frameworks and libraries. Build interactive user interfaces and single-page applications.',
-    skills: ['React', 'Vue.js', 'State Management', 'API Integration', 'UI/UX Principles']
-  },
-  {
-    id: 'backend',
-    title: 'Backend Development',
-    description: 'Learn server-side programming, databases, and API development. Create robust backend systems to power your applications.',
-    skills: ['Node.js', 'Express', 'MongoDB', 'SQL', 'RESTful APIs', 'Authentication']
-  },
-  {
-    id: 'fullstack',
-    title: 'Full Stack Integration',
-    description: 'Connect frontend and backend components. Deploy complete web applications and implement advanced features.',
-    skills: ['Full Stack Architecture', 'Deployment', 'Performance Optimization', 'Security', 'Testing']
-  },
-  {
-    id: 'career-prep',
-    title: 'Career Preparation & Advanced Topics',
-    description: 'Prepare for the job market and explore specialized topics in web development to stand out from the crowd.',
-    skills: ['Portfolio Building', 'Technical Interviews', 'DevOps Basics', 'GraphQL', 'Serverless Architecture']
-  },
+  // Add other web dev steps...
 ];

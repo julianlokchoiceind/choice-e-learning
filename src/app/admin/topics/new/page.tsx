@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useTopics } from '@/client/hooks/topics';
+import { useTopicsQuery } from '@/client/hooks/topics';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 export default function NewTopicPage() {
   const router = useRouter();
-  const { createTopic, loading, error } = useTopics(true);
+  const { useCreateTopic } = useTopicsQuery();
+  const createTopic = useCreateTopic();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -83,8 +84,6 @@ export default function NewTopicPage() {
     }
     
     try {
-      console.log('Submitting topic form with data:', formData);
-      
       // Prepare the data to send to API
       const topicData = {
         name: formData.name.trim(),
@@ -92,41 +91,19 @@ export default function NewTopicPage() {
         isActive: formData.isActive
       };
       
-      console.log('Calling createTopic with:', topicData);
+      // Create topic using React Query mutation
+      await createTopic.mutateAsync(topicData);
       
-      // createTopic function from useTopics will handle setting loading state
-      const newTopic = await createTopic(topicData);
-      
-      if (newTopic) {
-        console.log('Topic created successfully:', newTopic);
-        // Thêm delay ngắn trước khi chuyển trang
-        setTimeout(() => {
-          router.push('/admin/topics');
-        }, 500);
-      } else {
-        console.error('Failed to create topic: returned null');
-        setServerError('Failed to create topic. Please try again.');
-      }
-    } catch (err: unknown) {
+      // Navigate to topics list after successful creation
+      router.push('/admin/topics');
+    } catch (err) {
       console.error('Error creating topic:', err);
       
-      // Show detailed error information
-      const errorResponse = typeof err === 'object' && err !== null && 'response' in err && 
-        typeof err.response === 'object' && err.response !== null && 'data' in err.response ? 
-        err.response.data : null;
-      console.error('Error response:', errorResponse);
-      
-      // Extract error message from response or use a default
+      // Extract error message
       let errorMessage = 'Failed to create topic. Please try again.';
       
-      if (errorResponse && typeof errorResponse === 'object' && 'error' in errorResponse) {
-        errorMessage = String(errorResponse.error);
-      } else if (typeof err === 'object' && err !== null && 'message' in err && typeof err.message === 'string') {
-        // Only use error.message if it's helpful (not generic)
-        if (err.message !== 'Request failed with status code 500' &&
-            !err.message.includes('Network Error')) {
-          errorMessage = err.message;
-        }
+      if (err instanceof Error) {
+        errorMessage = err.message;
       }
       
       setServerError(errorMessage);
@@ -167,7 +144,7 @@ export default function NewTopicPage() {
               className={`w-full px-3 py-2 border ${
                 formErrors.name ? 'border-red-500' : 'border-gray-300'
               } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-              disabled={loading}
+              disabled={createTopic.isPending}
             />
             {formErrors.name && (
               <p className='mt-1 text-sm text-red-600'>{formErrors.name}</p>
@@ -187,7 +164,7 @@ export default function NewTopicPage() {
               className={`w-full px-3 py-2 border ${
                 formErrors.description ? 'border-red-500' : 'border-gray-300'
               } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-              disabled={loading}
+              disabled={createTopic.isPending}
             ></textarea>
             {formErrors.description && (
               <p className='mt-1 text-sm text-red-600'>{formErrors.description}</p>
@@ -204,7 +181,7 @@ export default function NewTopicPage() {
                 setFormData(prev => ({ ...prev, isActive: e.target.checked }))
               }
               className='h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500'
-              disabled={loading}
+              disabled={createTopic.isPending}
             />
             <label htmlFor='isActive' className='ml-2 block text-sm text-gray-700'>
               Active
@@ -220,10 +197,10 @@ export default function NewTopicPage() {
             </Link>
             <button
               type='submit'
-              disabled={loading}
+              disabled={createTopic.isPending}
               className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed'
             >
-              {loading ? 'Creating...' : 'Create Topic'}
+              {createTopic.isPending ? 'Creating...' : 'Create Topic'}
             </button>
           </div>
         </form>

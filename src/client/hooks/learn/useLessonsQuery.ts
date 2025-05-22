@@ -196,12 +196,36 @@ export const useLessonsQuery = () => {
     });
   };
 
+  /**
+   * Mark a lesson as completed
+   * 
+   * @returns Mutation function and state for marking a lesson as completed
+   */
+  const useMarkLessonComplete = () => {
+    return useMutation({
+      mutationFn: async (lessonId: string): Promise<void> => {
+        await apiClient.post(`/api/lessons/${lessonId}/complete`);
+      },
+      onSuccess: (_data, lessonId) => {
+        // Invalidate the lesson and user progress
+        queryClient.invalidateQueries({ queryKey: ['lessons', lessonId] });
+        queryClient.invalidateQueries({ queryKey: ['userProgress'] });
+        success('Bài học đã được đánh dấu hoàn thành');
+      },
+      onError: (err: AxiosError) => {
+        showErrorToast(err, 'Không thể đánh dấu hoàn thành bài học');
+        throw err;
+      },
+    });
+  };
+
   return {
     useGetLessons,
     useGetLesson,
     useCreateLesson,
     useUpdateLesson,
     useDeleteLesson,
+    useMarkLessonComplete
   };
 };
 

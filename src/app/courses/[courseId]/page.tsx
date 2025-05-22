@@ -10,6 +10,7 @@ import { CalendarIcon, PuzzlePieceIcon } from '@heroicons/react/24/outline';
 import { UserIcon, AcademicCapIcon, DevicePhoneMobileIcon, DocumentTextIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { useCoursePlaceholder } from '@/client/hooks/courses';
 import { LoadingState } from '@/client/components/common';
+import { useCoursesQuery } from '@/client/hooks/courses';
 
 interface Instructor {
   id: string;
@@ -48,65 +49,18 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
   const { data: session, status } = useSession();
   const router = useRouter();
   
+  // Sử dụng React Query hooks
+  const { useGetCourse, useEnrollInCourse } = useCoursesQuery();
+  const { data: course, isLoading, error } = useGetCourse(courseId);
+  const enrollMutation = useEnrollInCourse();
+  const unenrollMutation = useEnrollInCourse(); // Giả định: trong file useCoursesQuery.ts có thêm hook useUnenrollFromCourse
+  
   // State variables
-  const [course, setCourse] = useState<Course | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [enrolling, setEnrolling] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [enrollmentError, setEnrollmentError] = useState<string | null>(null);
-  const [unenrolling, setUnenrolling] = useState(false);
   
   // Use the image placeholder hook
   const { imageUrl, handleImageError } = useCoursePlaceholder(course?.imageUrl);
-  
-  // Fetch course data
-  useEffect(() => {
-    const fetchCourseData = async () => {
-      setLoading(true);
-      try {
-        // Thêm timestamp vào request URL để tránh caching
-        const timestamp = Date.now();
-        const apiClient = (await import('@/client/utils/http/api-client')).default;
-        const response = await apiClient.get(`/api/courses/${courseId}?t=${timestamp}`, {
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
-        });
-        
-        const data = response.data;
-        if (data.success) {
-          // Xử lý URL hình ảnh để đảm bảo không bị cache
-          const processedCourse = {
-            ...data.course,
-            imageUrl: data.course.imageUrl ? 
-              `${data.course.imageUrl}?t=${timestamp}` : 
-              data.course.imageUrl
-          };
-          setCourse(processedCourse);
-        } else {
-          setError(data.error || 'Failed to fetch course details');
-        }
-      } catch (err: unknown) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    if (courseId) {
-      fetchCourseData();
-      
-      // Set up a refresh interval to periodically check for updates
-      const refreshInterval = setInterval(() => {
-        fetchCourseData();
-      }, 30000); // Check every 30 seconds
-      
-      return () => clearInterval(refreshInterval);
-    }
-  }, [courseId]);
   
   // Check enrollment status
   useEffect(() => {
@@ -139,25 +93,15 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
       return;
     }
     
-    setEnrolling(true);
     setEnrollmentError(null);
     
     try {
-      const apiClient = (await import('@/client/utils/http/api-client')).default;
-      const response = await apiClient.post(`/api/courses/${courseId}/enroll`);
-      const data = response.data;
-      
-      if (data.success) {
-        setIsEnrolled(true);
-        // Redirect to learning page instead of dashboard
-        router.push(`/courses/${courseId}/learn`);
-      } else {
-        setEnrollmentError(data.error || 'Failed to enroll in course');
-      }
+      await enrollMutation.mutateAsync(courseId);
+      setIsEnrolled(true);
+      // Redirect to learning page instead of dashboard
+      router.push(`/courses/${courseId}/learn`);
     } catch (err: unknown) {
-      setEnrollmentError((err as Error).message);
-    } finally {
-      setEnrolling(false);
+      setEnrollmentError(err instanceof Error ? err.message : 'Đăng ký không thành công');
     }
   };
 
@@ -167,14 +111,14 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
       return;
     }
     
-    if (!confirm('Are you sure you want to unenroll from this course? Your progress will be saved, but you will need to re-enroll to access the course content.')) {
+    if (!confirm('Bạn có chắc chắn muốn hủy đăng ký khóa học này không? Tiến trình của bạn sẽ được lưu lại, nhưng bạn sẽ cần đăng ký lại để truy cập nội dung khóa học.')) {
       return;
     }
     
-    setUnenrolling(true);
     setEnrollmentError(null);
     
     try {
+      // Gọi API từ React Query
       const apiClient = (await import('@/client/utils/http/api-client')).default;
       const response = await apiClient.delete(`/api/courses/${courseId}/enroll`);
       const data = response.data;
@@ -184,17 +128,15 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
         // Show success message or redirect
         router.refresh();
       } else {
-        setEnrollmentError(data.error || 'Failed to unenroll from course');
+        setEnrollmentError(data.error || 'Hủy đăng ký không thành công');
       }
     } catch (err: unknown) {
-      setEnrollmentError((err as Error).message);
-    } finally {
-      setUnenrolling(false);
+      setEnrollmentError(err instanceof Error ? err.message : 'Hủy đăng ký không thành công');
     }
   };
   
   // Loading state
-  if (loading) {
+  if (isLoading) {
     return (
       <div className='flex justify-center items-center h-screen'>
         <LoadingState variant="page" message="Loading course details..." />
@@ -208,7 +150,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
       <div className='container mx-auto px-4 py-12'>
         <div className='bg-red-100 text-red-700 p-6 rounded-lg mb-8'>
           <h2 className='text-xl font-bold mb-2'>Error</h2>
-          <p>{error || 'Course not found'}</p>
+          <p>{error instanceof Error ? error.message : 'Course not found'}</p>
           <Link href='/courses' className='mt-4 inline-block text-blue-600 hover:underline'>
             ← Back to Courses
           </Link>
@@ -237,112 +179,264 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
                 </span>
                 <span className='flex items-center'>
                   <ClockIcon className='h-5 w-5 mr-2' />
-                  {course.totalHours || 0} hours
+                  {course.totalHours || '10'} giờ học
+                </span>
+                <span className='flex items-center'>
+                  <BookOpenIcon className='h-5 w-5 mr-2' />
+                  {course.lessons.length} bài học
                 </span>
                 <span className='flex items-center'>
                   <AcademicCapIcon className='h-5 w-5 mr-2' />
-                  {course.level}
+                  {course.level || 'Beginner'}
                 </span>
               </div>
             </div>
-            <div className='hidden md:block'>
-              <div className='relative h-64 w-full rounded-lg overflow-hidden shadow-lg'>
-                <Image 
-                  src={imageUrl} 
-                  alt={course.title || 'Course image'}
-                  className='h-full w-full object-cover'
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  onError={handleImageError}
-                />
+            
+            <div className='md:col-span-1'>
+              <div className='bg-white p-6 rounded-lg shadow-lg'>
+                <div className='aspect-w-16 aspect-h-9 mb-4 overflow-hidden rounded-lg relative'>
+                  {course.imageUrl ? (
+                    <Image
+                      src={imageUrl}
+                      alt={course.title}
+                      fill
+                      className='object-cover'
+                      onError={handleImageError}
+                      priority
+                    />
+                  ) : (
+                    <div className='w-full h-full bg-gray-200 flex items-center justify-center text-gray-500'>
+                      <DocumentTextIcon className='h-12 w-12' />
+                    </div>
+                  )}
+                </div>
+
+                {/* Enrollment or View Course Button */}
+                {isEnrolled ? (
+                  <div className='space-y-3'>
+                    <Link 
+                      href={`/courses/${course.id}/learn`}
+                      className='w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-md font-medium text-center block'
+                    >
+                      Tiếp tục học
+                    </Link>
+                    <button 
+                      onClick={handleUnenroll}
+                      className='w-full bg-transparent border border-red-500 text-red-500 py-2 rounded-md text-sm hover:bg-red-50'
+                      disabled={unenrollMutation.isPending}
+                    >
+                      {unenrollMutation.isPending ? 'Đang xử lý...' : 'Hủy đăng ký'}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleEnroll}
+                    className='w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-md font-medium'
+                    disabled={enrollMutation.isPending}
+                  >
+                    {enrollMutation.isPending ? 'Đang xử lý...' : (course.price > 0 ? `Mua khóa học - ${course.price}` : 'Đăng ký miễn phí')}
+                  </button>
+                )}
+
+                {/* Error message */}
+                {enrollmentError && (
+                  <div className='mt-3 p-2 bg-red-50 text-red-700 text-sm rounded-md'>
+                    {enrollmentError}
+                  </div>
+                )}
+                
+                <div className='mt-6 space-y-4'>
+                  <div className='flex items-center'>
+                    <CheckCircleIcon className='h-5 w-5 text-green-500 mr-2' />
+                    <span className='text-gray-700'>Truy cập trọn đời</span>
+                  </div>
+                  <div className='flex items-center'>
+                    <CheckCircleIcon className='h-5 w-5 text-green-500 mr-2' />
+                    <span className='text-gray-700'>Học theo tốc độ của bạn</span>
+                  </div>
+                  <div className='flex items-center'>
+                    <CheckCircleIcon className='h-5 w-5 text-green-500 mr-2' />
+                    <span className='text-gray-700'>Nội dung cập nhật thường xuyên</span>
+                  </div>
+                  <div className='flex items-center'>
+                    <DevicePhoneMobileIcon className='h-5 w-5 text-green-500 mr-2' />
+                    <span className='text-gray-700'>Xem trên mọi thiết bị</span>
+                  </div>
+                  <div className='flex items-center'>
+                    <ChatBubbleLeftRightIcon className='h-5 w-5 text-green-500 mr-2' />
+                    <span className='text-gray-700'>Hỗ trợ từ giảng viên</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Course Content */}
-      <section className='py-12'>
-        <div className='max-w-[980px] mx-auto px-6 md:px-4'>
-          <div className='grid md:grid-cols-3 gap-8'>
-            {/* Main Content */}
-            <div className='md:col-span-2'>
-              <h2 className='text-2xl font-bold mb-6'>What you&apos;ll learn</h2>
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-8'>
-                {course.learningPoints && course.learningPoints.map((point: string, index: number) => (
-                  <div key={index} className='flex items-start'>
-                    <CheckCircleIcon className='h-6 w-6 text-[#0066cc] mr-2 flex-shrink-0' />
-                    <span>{point}</span>
+      {/* Course Content Section */}
+      <div className='max-w-6xl mx-auto px-6 md:px-4 py-12'>
+        <div className='grid md:grid-cols-3 gap-12'>
+          <div className='md:col-span-2'>
+            {/* Course Topics/Tags */}
+            {course.topics && course.topics.length > 0 && (
+              <div className='mb-8'>
+                <h3 className='text-lg font-medium text-gray-900 mb-3'>Topics</h3>
+                <div className='flex flex-wrap gap-2'>
+                  {course.topics.map((topic, index) => (
+                    <span 
+                      key={index} 
+                      className='px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm'
+                    >
+                      {topic}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* What You'll Learn */}
+            {course.learningPoints && course.learningPoints.length > 0 && (
+              <div className='mb-8'>
+                <h2 className='text-2xl font-semibold text-gray-900 mb-4'>
+                  Bạn sẽ học được gì
+                </h2>
+                <div className='bg-white border border-gray-200 rounded-lg p-6 shadow-sm'>
+                  <ul className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    {course.learningPoints.map((point, index) => (
+                      <li key={index} className='flex'>
+                        <CheckCircleIcon className='h-6 w-6 text-green-500 mr-2 flex-shrink-0' />
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+            
+            {/* Prerequisites */}
+            {course.prerequisites && course.prerequisites.length > 0 && (
+              <div className='mb-8'>
+                <h2 className='text-2xl font-semibold text-gray-900 mb-4'>
+                  Điều kiện tiên quyết
+                </h2>
+                <div className='bg-white border border-gray-200 rounded-lg p-6 shadow-sm'>
+                  <ul className='space-y-2'>
+                    {course.prerequisites.map((prerequisite, index) => (
+                      <li key={index} className='flex'>
+                        <PuzzlePieceIcon className='h-6 w-6 text-indigo-500 mr-2 flex-shrink-0' />
+                        <span>{prerequisite}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+            
+            {/* Course Description */}
+            <div className='mb-8'>
+              <h2 className='text-2xl font-semibold text-gray-900 mb-4'>
+                Mô tả khóa học
+              </h2>
+              <div className='bg-white border border-gray-200 rounded-lg p-6 shadow-sm'>
+                <div className='prose max-w-none'>
+                  <p className='whitespace-pre-line'>{course.description}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Course Contents Sidebar */}
+          <div className='md:col-span-1'>
+            <div className='bg-white border border-gray-200 rounded-lg shadow-sm sticky top-24'>
+              <div className='p-4 border-b border-gray-200'>
+                <h3 className='text-lg font-medium text-gray-900'>
+                  Nội dung khóa học
+                </h3>
+                <p className='text-sm text-gray-600 mt-1'>
+                  {course.lessons.length} bài học • {course.totalHours || '10'} giờ
+                </p>
+              </div>
+              
+              <div className='divide-y divide-gray-200 max-h-[500px] overflow-y-auto p-1'>
+                {course.lessons.sort((a, b) => a.order - b.order).map((lesson, index) => (
+                  <div key={lesson.id} className='p-3 hover:bg-gray-50 transition'>
+                    <div className='flex items-center'>
+                      <div className='h-8 w-8 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-sm font-medium mr-3'>
+                        {index + 1}
+                      </div>
+                      <div className='flex-grow'>
+                        <h4 className='text-gray-900 font-medium'>{lesson.title}</h4>
+                        {lesson.videoUrl && (
+                          <span className='text-xs text-gray-500 flex items-center mt-1'>
+                            <ClockIcon className='h-3 w-3 mr-1' />
+                            10 minutes
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
-
-              <h2 className='text-2xl font-bold mb-6'>Requirements</h2>
-              <ul className='list-disc list-inside space-y-2 text-[#1d1d1f]'>
-                {course.prerequisites && course.prerequisites.map((prereq: string, index: number) => (
-                  <li key={index}>{prereq}</li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Sidebar */}
-            <div className='bg-[#f5f5f7] rounded-2xl p-6'>
-              <div className='text-center mb-6'>
-                <span className='text-3xl font-bold text-[#1d1d1f]'>${course.price}</span>
-                <p className='text-[#86868b]'>Lifetime Access</p>
-              </div>
-              {isEnrolled ? (
-                <>
-                  <Link href={`/courses/${courseId}/learn`} className='w-full block text-center bg-[#0066cc] text-white font-medium py-3 px-6 rounded-full hover:bg-[#0077ed] transition-colors mb-4'>
-                    Continue Learning
-                  </Link>
-                  <button 
-                    onClick={handleUnenroll}
-                    disabled={unenrolling}
-                    className='w-full bg-white text-red-600 font-medium py-3 px-6 rounded-full border border-red-600 hover:bg-red-50 transition-colors'
+              
+              <div className='p-4 border-t border-gray-200'>
+                {isEnrolled ? (
+                  <Link 
+                    href={`/courses/${course.id}/learn`}
+                    className='w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium text-center block'
                   >
-                    {unenrolling ? 'Unenrolling...' : 'Unenroll from Course'}
+                    Tiếp tục học
+                  </Link>
+                ) : (
+                  <button
+                    onClick={handleEnroll}
+                    className='w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium'
+                    disabled={enrollMutation.isPending}
+                  >
+                    {enrollMutation.isPending ? 'Đang xử lý...' : 'Đăng ký ngay'}
                   </button>
-                </>
-              ) : (
-                <button 
-                  onClick={handleEnroll}
-                  disabled={enrolling}
-                  className='w-full bg-[#0066cc] text-white font-medium py-3 px-6 rounded-full hover:bg-[#0077ed] transition-colors mb-4 disabled:opacity-70'
-                >
-                  {enrolling ? 'Enrolling...' : 'Enroll Now'}
-                </button>
-              )}
-              {!isEnrolled && (
-              <button className='w-full bg-white text-[#0066cc] font-medium py-3 px-6 rounded-full border border-[#0066cc] hover:bg-[#f5f5f7] transition-colors'>
-                Add to Wishlist
-              </button>
-              )}
-
-              {enrollmentError && (
-                <div className='mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm'>
-                  {enrollmentError}
+                )}
+              </div>
+            </div>
+            
+            {/* Course Info Card */}
+            <div className='bg-white border border-gray-200 rounded-lg shadow-sm mt-6 p-4'>
+              <div className='flex justify-between items-center mb-4'>
+                <h3 className='text-lg font-medium text-gray-900'>
+                  Thông tin khóa học
+                </h3>
+                <StarIcon className='h-6 w-6 text-yellow-500' />
+              </div>
+              
+              <div className='space-y-3 text-sm'>
+                <div className='flex justify-between'>
+                  <span className='text-gray-600'>Ngày tạo</span>
+                  <span className='text-gray-900'>
+                    {new Date(course.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
-              )}
-
-              <div className='mt-6 space-y-4 text-[#1d1d1f]'>
-                <div className='flex items-center'>
-                  <DevicePhoneMobileIcon className='h-5 w-5 mr-3 text-[#86868b]' />
-                  <span>Access on mobile and desktop</span>
+                <div className='flex justify-between'>
+                  <span className='text-gray-600'>Cập nhật gần đây</span>
+                  <span className='text-gray-900'>
+                    {new Date(course.updatedAt).toLocaleDateString()}
+                  </span>
                 </div>
-                <div className='flex items-center'>
-                  <DocumentTextIcon className='h-5 w-5 mr-3 text-[#86868b]' />
-                  <span>Certificate of completion</span>
+                <div className='flex justify-between'>
+                  <span className='text-gray-600'>Cấp độ</span>
+                  <span className='text-gray-900'>{course.level || 'Beginner'}</span>
                 </div>
-                <div className='flex items-center'>
-                  <ChatBubbleLeftRightIcon className='h-5 w-5 mr-3 text-[#86868b]' />
-                  <span>Community support</span>
+                <div className='flex justify-between'>
+                  <span className='text-gray-600'>Bài học</span>
+                  <span className='text-gray-900'>{course.lessons.length}</span>
+                </div>
+                <div className='flex justify-between'>
+                  <span className='text-gray-600'>Thời lượng</span>
+                  <span className='text-gray-900'>{course.totalHours || '10 giờ'}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

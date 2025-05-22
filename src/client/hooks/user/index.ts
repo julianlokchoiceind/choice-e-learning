@@ -3,11 +3,6 @@
  */
 
 /**
- * Exports the useUserState hook for managing user state
- */
-export * from './useUserState';
-
-/**
  * Exports the useUserQuery hook for React Query operations on users
  */
 export * from './useUserQuery';

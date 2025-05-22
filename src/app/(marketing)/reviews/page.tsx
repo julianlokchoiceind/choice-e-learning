@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 import { StarIcon } from '@heroicons/react/24/solid';
 import { ChatBubbleLeftEllipsisIcon, UserIcon, AcademicCapIcon, CheckBadgeIcon } from '@heroicons/react/24/outline';
 import { LoadingState } from '@/client/components/common';
@@ -69,23 +70,67 @@ const CounterScript = () => {
   );
 };
 
+// Định nghĩa các interfaces cho dữ liệu
+interface Review {
+  id: string;
+  name: string;
+  title: string;
+  avatar: string;
+  rating: number;
+  date: string;
+  courseId: string;
+  courseName: string;
+  text: string;
+  response?: string;
+}
+
+interface CourseReview {
+  id: string;
+  name: string;
+  image: string;
+  rating: number;
+  reviewsCount: number;
+}
+
 export default function ReviewsPage() {
-  const [loading, setLoading] = useState(true);
+  // Sử dụng React Query thay vì loading state thủ công
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['reviews'],
+    queryFn: async () => {
+      // Mô phỏng API call - trong thực tế sẽ fetch từ API
+      return new Promise<{
+        featuredReviews: Review[];
+        recentReviews: Review[];
+        courseReviews: CourseReview[];
+      }>((resolve) => {
+        setTimeout(() => {
+          resolve({
+            featuredReviews,
+            recentReviews,
+            courseReviews
+          });
+        }, 1000);
+      });
+    }
+  });
   
-  // Simulate data loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  if (loading) {
+  if (isLoading) {
     return <div className="flex justify-center items-center min-h-screen">
       <LoadingState variant="page" message="Loading reviews..." />
     </div>;
   }
+  
+  if (error) {
+    return <div className="flex justify-center items-center min-h-screen">
+      <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 max-w-md">
+        <p className="font-bold">Error</p>
+        <p>{error instanceof Error ? error.message : 'Failed to load reviews'}</p>
+      </div>
+    </div>;
+  }
+  
+  // Destructure data with default values in case data is undefined
+  const { featuredReviews = [], recentReviews = [], courseReviews = [] } = data || {};
   
   return (
     <>

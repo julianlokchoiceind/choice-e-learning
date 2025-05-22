@@ -10,112 +10,95 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import { Lesson } from '@/shared/types/lessons/lesson';
+import { useLessonsQuery } from '@/client/hooks/learn';
+import { useCoursesQuery } from '@/client/hooks/courses';
+import { LoadingState } from '@/client/components/common';
+
+// Define the type for course item
+interface Course {
+  id: string;
+  title: string;
+}
+
+// Define the type for response data
+interface LessonsResponse {
+  data: Lesson[];
+  meta?: {
+    page: number;
+    totalPages: number;
+  };
+}
 
 export const LessonList = () => {
-  const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [selectedCourse, setSelectedCourse] = useState<string>('');
-  const [courses, setCourses] = useState<any[]>([]);
 
-  const fetchLessons = async (page = 1, courseId?: string) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      let url = `/api/admin/lessons?page=${page}&limit=10`;
-      if (courseId) {
-        url += `&courseId=${courseId}`;
-      }
-      
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch lessons');
-      }
-      
-      const data = await response.json();
-      
-      setLessons(data.data);
-      setTotalPages(data.meta?.totalPages || 1);
-      setCurrentPage(data.meta?.page || 1);
-    } catch (err: unknown) {
-      console.error('Error fetching lessons:', err);
-      setError((err as Error).message || 'Something went wrong');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCourses = async () => {
-    try {
-      const response = await fetch('/api/admin/courses');
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to fetch courses');
-      }
-      
-      const data = await response.json();
-      setCourses(data.data || []);
-    } catch (err: unknown) {
-      console.error('Error fetching courses:', err);
-    }
-  };
-
-  useEffect(() => {
-    fetchCourses();
-    fetchLessons(1, selectedCourse || undefined);
-  }, []);
+  // Sử dụng React Query thay vì quản lý state thủ công
+  const { useGetLessons, useDeleteLesson } = useLessonsQuery();
+  const { useGetCourses } = useCoursesQuery(true);
+  
+  // Lấy dữ liệu khóa học từ React Query
+  const { 
+    data: coursesData, 
+    isLoading: coursesLoading 
+  } = useGetCourses();
+  
+  // Lấy dữ liệu bài học từ React Query
+  const { 
+    data: lessonsData, 
+    isLoading: lessonsLoading, 
+    error: lessonsError 
+  } = useGetLessons(selectedCourse || undefined);
+  
+  // Sử dụng mutation từ React Query cho xóa bài học
+  const deleteLessonMutation = useDeleteLesson();
 
   const handleCourseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const courseId = e.target.value;
     setSelectedCourse(courseId);
-    fetchLessons(1, courseId || undefined);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
-    fetchLessons(page, selectedCourse || undefined);
+    setCurrentPage(page);
   };
 
   const handleDeleteLesson = async (lessonId: string) => {
-    if (!window.confirm('Are you sure you want to delete this lesson?')) {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa bài học này?')) {
       return;
     }
     
     try {
-      const response = await fetch(`/api/admin/lessons/${lessonId}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete lesson');
-      }
-      
-      // Refresh the list
-      fetchLessons(currentPage, selectedCourse || undefined);
+      await deleteLessonMutation.mutateAsync({ id: lessonId, courseId: selectedCourse });
     } catch (err: unknown) {
       console.error('Error deleting lesson:', err);
-      alert((err as Error).message || 'Failed to delete lesson');
+      alert((err instanceof Error) ? err.message : 'Không thể xóa bài học');
     }
   };
+
+  // Giả định lessonsData có cấu trúc như LessonsResponse
+  const responseLessons = lessonsData as unknown as LessonsResponse | undefined;
+  
+  // Lấy dữ liệu từ React Query hook
+  const lessons = responseLessons?.data || [];
+  const totalPages = responseLessons?.meta?.totalPages || 1;
+  const courses = (coursesData?.data || []) as Course[];
+  const isLoading = lessonsLoading || coursesLoading;
+  const error = lessonsError;
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-xl font-semibold">Lessons</h1>
+        <h1 className="text-xl font-semibold">Bài học</h1>
         <div className="flex items-center space-x-4">
           <div>
             <select
               value={selectedCourse}
               onChange={handleCourseChange}
               className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              disabled={coursesLoading}
             >
-              <option value="">All Courses</option>
+              <option value="">Tất cả khóa học</option>
               {courses.map(course => (
                 <option key={course.id} value={course.id}>
                   {course.title}
@@ -129,28 +112,28 @@ export const LessonList = () => {
             className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
           >
             <PlusIcon className="h-4 w-4 mr-1" />
-            Add Lesson
+            Thêm bài học
           </Link>
         </div>
       </div>
 
       {error && (
         <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
+          {error instanceof Error ? error.message : 'Có lỗi xảy ra khi tải dữ liệu'}
         </div>
       )}
 
-      {loading ? (
+      {isLoading ? (
         <div className="flex justify-center items-center h-40">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+          <LoadingState variant="section" message="Đang tải bài học..." />
         </div>
       ) : lessons.length === 0 ? (
         <div className="bg-gray-50 p-6 text-center rounded-md">
-          <p className="text-gray-500">No lessons found</p>
+          <p className="text-gray-500">Không tìm thấy bài học nào</p>
           <p className="text-sm text-gray-400 mt-1">
             {selectedCourse 
-              ? 'Try selecting a different course or create a new lesson for this course'
-              : 'Create a new lesson to get started'}
+              ? 'Hãy chọn khóa học khác hoặc tạo bài học mới cho khóa học này'
+              : 'Tạo bài học mới để bắt đầu'}
           </p>
         </div>
       ) : (
@@ -159,19 +142,19 @@ export const LessonList = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Title
+                  Tiêu đề
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Course
+                  Khóa học
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order
+                  Thứ tự
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created At
+                  Ngày tạo
                 </th>
                 <th scope="col" className="relative px-6 py-3">
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">Hành động</span>
                 </th>
               </tr>
             </thead>
@@ -183,7 +166,7 @@ export const LessonList = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">
-                      {courses.find(c => c.id === lesson.courseId)?.title || 'Unknown Course'}
+                      {courses.find(c => c.id === lesson.courseId)?.title || 'Khóa học không xác định'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -203,6 +186,7 @@ export const LessonList = () => {
                       <button
                         onClick={() => handleDeleteLesson(lesson.id)}
                         className="text-red-600 hover:text-red-900"
+                        disabled={deleteLessonMutation.isPending}
                       >
                         <TrashIcon className="h-5 w-5" />
                       </button>
@@ -215,64 +199,47 @@ export const LessonList = () => {
           
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 sm:px-6 flex items-center justify-between">
-              <div className="flex-1 flex justify-between sm:hidden">
-                <button
-                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  Next
-                </button>
-              </div>
+            <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
               <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm text-gray-700">
-                    Showing <span className="font-medium">{(currentPage - 1) * 10 + 1}</span> to{' '}
-                    <span className="font-medium">
-                      {Math.min(currentPage * 10, (totalPages * 10))}
-                    </span>{' '}
-                    of <span className="font-medium">{totalPages * 10}</span> results
+                    Hiển thị <span className="font-medium">{lessons.length}</span> bài học
                   </p>
                 </div>
                 <div>
                   <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                     <button
-                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
-                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1 || isLoading}
+                      className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+                        currentPage === 1 ? 'text-gray-300' : 'text-gray-500 hover:bg-gray-50'
+                      }`}
                     >
-                      <span className="sr-only">Previous</span>
+                      <span className="sr-only">Trang trước</span>
                       <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
                     </button>
-                    
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    {Array.from({ length: totalPages }).map((_, i) => (
                       <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
+                        key={i}
+                        onClick={() => handlePageChange(i + 1)}
+                        disabled={isLoading}
                         className={`relative inline-flex items-center px-4 py-2 border ${
-                          page === currentPage
-                            ? 'border-indigo-500 bg-indigo-50 text-indigo-600'
-                            : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-50'
+                          currentPage === i + 1
+                            ? 'bg-indigo-50 border-indigo-500 text-indigo-600'
+                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                         } text-sm font-medium`}
                       >
-                        {page}
+                        {i + 1}
                       </button>
                     ))}
-                    
                     <button
-                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage === totalPages}
-                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages || isLoading}
+                      className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+                        currentPage === totalPages ? 'text-gray-300' : 'text-gray-500 hover:bg-gray-50'
+                      }`}
                     >
-                      <span className="sr-only">Next</span>
+                      <span className="sr-only">Trang sau</span>
                       <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
                     </button>
                   </nav>

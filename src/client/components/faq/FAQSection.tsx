@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useFAQs } from '@/client/hooks/faq/useFAQs';
-import { FAQ } from '@prisma/client';
+import { useFAQsQuery } from '@/client/hooks/faq';
+import { FAQItem } from '@/shared/types/faq';
 import { LoadingState } from '@/client/components/common';
 import { 
   ChevronDownIcon, 
@@ -11,67 +11,64 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function FAQSection() {
-  const {
-    loading,
-    error,
-    faqs,
-    categories,
-    pagination,
-    fetchFAQs,
-    fetchCategories,
-  } = useFAQs(false); // false = public view
-
+  const { useGetFAQs } = useFAQsQuery();
+  
+  // Filters state
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedFAQs, setExpandedFAQs] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    // Fetch FAQs on initial load
-    fetchFAQs({
-      page: currentPage,
-      limit: 10,
-      sortBy: 'createdAt',
-      sortOrder: 'desc',
-    });
-    
-    // Fetch categories
-    fetchCategories();
-  }, [fetchFAQs, fetchCategories, currentPage]);
+  // Create filter parameters
+  const filter = {
+    search: search || undefined,
+    category: selectedCategory || undefined,
+    page: currentPage,
+    limit: 10,
+    sortBy: 'createdAt',
+    sortOrder: 'desc' as const,
+  };
+
+  // Fetch FAQs using React Query
+  const {
+    data,
+    isLoading,
+    error,
+    refetch
+  } = useGetFAQs(filter);
+
+  // Extract data safely
+  const faqs = data?.data || [];
+  const pagination = data?.meta || {
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 0
+  };
+
+  // Get unique categories from FAQs
+  const categories = Array.from(
+    new Set(faqs.map((faq) => faq.category))
+  );
 
   const handleSearch = () => {
-    fetchFAQs({
-      search,
-      category: selectedCategory || undefined,
-      page: 1,
-      limit: 10,
-    });
     setCurrentPage(1);
+    refetch();
     // Reset expanded state
     setExpandedFAQs({});
   };
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
-    fetchFAQs({
-      search,
-      category: category || undefined,
-      page: 1,
-      limit: 10,
-    });
     setCurrentPage(1);
+    refetch();
     // Reset expanded state
     setExpandedFAQs({});
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    fetchFAQs({
-      search,
-      category: selectedCategory || undefined,
-      page,
-      limit: 10,
-    });
+    refetch();
     // Reset expanded state
     setExpandedFAQs({});
   };
@@ -83,10 +80,10 @@ export default function FAQSection() {
     }));
   };
 
-  const groupFAQsByCategory = (faqs: FAQ[]) => {
-    const grouped: Record<string, FAQ[]> = {};
+  const groupFAQsByCategory = (faqs: FAQItem[]) => {
+    const grouped: Record<string, FAQItem[]> = {};
     
-    faqs.forEach((faq: any) => {
+    faqs.forEach((faq) => {
       if (!grouped[faq.category]) {
         grouped[faq.category] = [];
       }
@@ -122,7 +119,7 @@ export default function FAQSection() {
             >
               <option value=''>All Categories</option>
               {categories.map((category) => (
-                <option key={"category"} value={"category"}>
+                <option key={category} value={category}>
                   {category}
                 </option>
               ))}
@@ -139,7 +136,7 @@ export default function FAQSection() {
       </div>
 
       {/* Loading state */}
-      {loading && (
+      {isLoading && (
         <div className='text-center py-12'>
           <LoadingState variant="section" message="Loading FAQs..." />
         </div>
@@ -148,12 +145,12 @@ export default function FAQSection() {
       {/* Error message */}
       {error && (
         <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-8'>
-          {error}
+          {error instanceof Error ? error.message : 'Failed to fetch FAQs'}
         </div>
       )}
 
       {/* FAQs list */}
-      {!loading && faqs.length === 0 ? (
+      {!isLoading && faqs.length === 0 ? (
         <div className='text-center py-12 bg-gray-50 rounded-lg'>
           <p className='text-gray-500 text-lg'>
             No FAQs found matching your search criteria.
@@ -162,8 +159,8 @@ export default function FAQSection() {
             onClick={() => {
               setSearch('');
               setSelectedCategory('');
-              fetchFAQs({ page: 1, limit: 10 });
               setCurrentPage(1);
+              refetch();
             }}
             className='mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors'
           >
@@ -248,56 +245,31 @@ export default function FAQSection() {
               )}
             </div>
           )}
-        </>
-      )}
 
-      {/* Pagination */}
-      {pagination.totalPages > 1 && (
-        <div className='flex justify-center mt-10'>
-          <nav className='flex items-center space-x-2'>
-            <button
-              onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className={`px-3 py-1 rounded-md ${
-                currentPage === 1
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              Previous
-            </button>
-            
-            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
-              (page) => (
-                <button
-                  key={"page"}
-                  onClick={() => handlePageChange(page)}
-                  className={`px-3 py-1 rounded-md ${
-                    currentPage === page
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  {page}
-                </button>
-              )
-            )}
-            
-            <button
-              onClick={() =>
-                handlePageChange(Math.min(pagination.totalPages, currentPage + 1))
-              }
-              disabled={currentPage === pagination.totalPages}
-              className={`px-3 py-1 rounded-md ${
-                currentPage === pagination.totalPages
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              Next
-            </button>
-          </nav>
-        </div>
+          {/* Pagination */}
+          {pagination.totalPages > 1 && (
+            <div className='mt-8 flex justify-center'>
+              <div className='flex space-x-2'>
+                {[...Array(pagination.totalPages)].map((_, idx) => {
+                  const page = idx + 1;
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-4 py-2 rounded-md ${
+                        currentPage === page
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

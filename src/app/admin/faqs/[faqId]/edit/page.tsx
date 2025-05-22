@@ -3,8 +3,9 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useFAQs } from '@/client/hooks/faq/useFAQs';
+import { useFAQsQuery } from '@/client/hooks/faq';
 import { ArrowLeftIcon, DocumentCheckIcon as SaveIcon } from '@heroicons/react/24/outline';
+import { LoadingState } from '@/client/components/common';
 
 interface EditFAQPageProps {
   params: {
@@ -16,15 +17,34 @@ export default function EditFAQPage({ params }: EditFAQPageProps) {
   const router = useRouter();
   const { faqId } = params;
   
+  // Sử dụng React Query thay vì hook cũ
   const {
-    fetchFAQById,
-    updateFAQ,
-    fetchCategories,
-    categories,
-    loading,
-    error,
-    faq,
-  } = useFAQs(true);
+    useGetFAQ,
+    useGetFAQs,
+    useUpdateFAQ
+  } = useFAQsQuery();
+
+  // Lấy dữ liệu FAQ
+  const {
+    data: faq,
+    isLoading: isFAQLoading,
+    error: faqError
+  } = useGetFAQ(faqId);
+
+  // Lấy danh sách categories từ kết quả của useGetFAQs
+  const {
+    data: faqsData,
+    isLoading: isFAQsLoading,
+    error: faqsError
+  } = useGetFAQs();
+  
+  // Extract categories từ danh sách FAQs sử dụng Array.from thay vì spread operator
+  const categories = faqsData?.data 
+    ? Array.from(new Set(faqsData.data.map(faq => faq.category)))
+    : [];
+
+  // Mutation cho việc cập nhật FAQ
+  const updateFAQMutation = useUpdateFAQ();
 
   const [formData, setFormData] = useState({
     question: '',
@@ -35,37 +55,19 @@ export default function EditFAQPage({ params }: EditFAQPageProps) {
 
   const [useNewCategory, setUseNewCategory] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [initialLoading, setInitialLoading] = useState(true);
 
+  // Cập nhật form data khi có dữ liệu FAQ
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        // Fetch FAQ and categories in parallel
-        const [faqData] = await Promise.all([
-          fetchFAQById(faqId),
-          fetchCategories(),
-        ]);
-        
-        if (faqData) {
-          setFormData({
-            question: faqData.question,
-            answer: faqData.answer,
-            category: faqData.category,
-            newCategory: '',
-          });
-        }
-      } catch (err: unknown) {
-        console.error('Error loading FAQ data:', err);
-        setSubmitError('Failed to load FAQ data');
-      } finally {
-        setInitialLoading(false);
-      }
-    };
-    
-    loadData();
-  }, [faqId, fetchFAQById, fetchCategories]);
+    if (faq) {
+      setFormData({
+        question: faq.question,
+        answer: faq.answer,
+        category: faq.category,
+        newCategory: '',
+      });
+    }
+  }, [faq]);
 
   const validate = () => {
     const errors: Record<string, string> = {};
@@ -97,17 +99,19 @@ export default function EditFAQPage({ params }: EditFAQPageProps) {
       return;
     }
     
-    setSubmitting(true);
     setSubmitError(null);
     
     try {
       // Use either existing category or new category
       const categoryToUse = useNewCategory ? formData.newCategory : formData.category;
       
-      await updateFAQ(faqId, {
-        question: formData.question,
-        answer: formData.answer,
-        category: categoryToUse,
+      await updateFAQMutation.mutateAsync({
+        id: faqId,
+        data: {
+          question: formData.question,
+          answer: formData.answer,
+          category: categoryToUse,
+        }
       });
       
       // Redirect to FAQ list page on success
@@ -117,8 +121,6 @@ export default function EditFAQPage({ params }: EditFAQPageProps) {
       setSubmitError(
         'Failed to update FAQ. Please check your inputs and try again.'
       );
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -134,13 +136,26 @@ export default function EditFAQPage({ params }: EditFAQPageProps) {
     }
   };
 
-  if (initialLoading) {
+  // Hiển thị trạng thái loading
+  const isLoading = isFAQLoading || isFAQsLoading;
+  if (isLoading) {
     return (
       <div className='flex justify-center items-center min-h-screen'>
-        <div className='text-center'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mx-auto'></div>
-          <p className='mt-3 text-gray-600'>Loading FAQ data...</p>
-        </div>
+        <LoadingState variant="page" message="Loading FAQ data..." />
+      </div>
+    );
+  }
+
+  // Hiển thị lỗi nếu có
+  const error = faqError || faqsError;
+  if (error) {
+    return (
+      <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4'>
+        <p className='font-bold'>Error</p>
+        <p>{error instanceof Error ? error.message : 'Failed to load FAQ data'}</p>
+        <Link href="/admin/faqs" className="text-red-700 underline mt-2 inline-block">
+          Back to FAQs
+        </Link>
       </div>
     );
   }
@@ -203,7 +218,7 @@ export default function EditFAQPage({ params }: EditFAQPageProps) {
                 formErrors.answer ? 'border-red-500' : 'border-gray-300'
               }`}
               placeholder='Enter the answer'
-            ></textarea>
+            />
             {formErrors.answer && (
               <p className='mt-1 text-sm text-red-500'>{formErrors.answer}</p>
             )}
@@ -211,20 +226,17 @@ export default function EditFAQPage({ params }: EditFAQPageProps) {
 
           {/* Category selection */}
           <div>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
-              Category <span className='text-red-500'>*</span>
-            </label>
-            <div className='flex items-center mb-3'>
-              <input
-                type='checkbox'
-                id='useNewCategory'
-                checked={useNewCategory}
-                onChange={() => setUseNewCategory(!useNewCategory)}
-                className='mr-2'
-              />
-              <label htmlFor='useNewCategory' className='text-sm text-gray-600'>
-                Create new category
+            <div className='flex items-center justify-between mb-1'>
+              <label htmlFor='category' className='block text-sm font-medium text-gray-700'>
+                Category <span className='text-red-500'>*</span>
               </label>
+              <button
+                type='button'
+                onClick={() => setUseNewCategory(!useNewCategory)}
+                className='text-sm text-blue-600 hover:text-blue-800'
+              >
+                {useNewCategory ? 'Select Existing Category' : 'Add New Category'}
+              </button>
             </div>
 
             {useNewCategory ? (
@@ -256,7 +268,7 @@ export default function EditFAQPage({ params }: EditFAQPageProps) {
                   }`}
                 >
                   <option value=''>Select a category</option>
-                  {categories.map((category) => (
+                  {categories.map((category: string) => (
                     <option key={category} value={category}>
                       {category}
                     </option>
@@ -270,31 +282,27 @@ export default function EditFAQPage({ params }: EditFAQPageProps) {
           </div>
         </div>
 
-        {/* Form buttons */}
-        <div className='flex justify-end space-x-3 pt-4'>
+        {/* Form actions */}
+        <div className='flex justify-end space-x-3'>
           <Link
             href='/admin/faqs'
-            className='px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50'
+            className='px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50'
           >
             Cancel
           </Link>
           <button
             type='submit'
-            disabled={submitting}
-            className={`px-4 py-2 rounded-lg flex items-center ${
-              submitting
-                ? 'bg-blue-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700'
-            } text-white`}
+            className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center'
+            disabled={updateFAQMutation.isPending}
           >
-            {submitting ? (
+            {updateFAQMutation.isPending ? (
               <>
-                <span className='animate-spin inline-block h-4 w-4 border-t-2 border-b-2 border-white rounded-full mr-2'></span>
+                <span className='inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2'></span>
                 Saving...
               </>
             ) : (
               <>
-                <SaveIcon className='w-5 h-5 mr-2' />
+                <SaveIcon className='h-5 w-5 mr-2' />
                 Save Changes
               </>
             )}

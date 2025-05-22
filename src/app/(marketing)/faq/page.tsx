@@ -2,8 +2,6 @@
 
 import { Metadata } from 'next';
 import { FAQSection } from '@/client/components/faq';
-import { useState, useEffect } from 'react';
-import { LoadingState } from '@/client/components/common';
 
 export const metadata: Metadata = {
   title: 'FAQ | Choice E-Learning',
@@ -11,23 +9,6 @@ export const metadata: Metadata = {
 };
 
 export default function FAQPage() {
-  const [loading, setLoading] = useState(true);
-  
-  // Simulate data loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
-  
-  if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">
-      <LoadingState variant="page" message="Loading FAQ..." />
-    </div>;
-  }
-  
   return (
     <>
       {/* Hero Section with Gradient Background */}

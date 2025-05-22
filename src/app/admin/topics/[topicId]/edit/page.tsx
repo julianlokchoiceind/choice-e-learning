@@ -3,12 +3,23 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useTopics } from '@/client/hooks/topics';
+import { useTopicsQuery } from '@/client/hooks/topics';
 import { ArrowLeftIcon, ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { LoadingState } from '@/client/components/common';
 
 export default function EditTopicPage({ params }: { params: { topicId: string } }) {
   const router = useRouter();
-  const { fetchTopicById, updateTopic, loading, error } = useTopics(true);
+  const { useGetTopic, useUpdateTopic } = useTopicsQuery();
+  
+  // Fetch topic using React Query
+  const {
+    data: topic,
+    isLoading,
+    error: fetchError
+  } = useGetTopic(params.topicId);
+  
+  // Setup update mutation
+  const updateTopic = useUpdateTopic();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -20,40 +31,24 @@ export default function EditTopicPage({ params }: { params: { topicId: string } 
     description?: string;
   }>({});
   const [serverError, setServerError] = useState<string | null>(null);
-  const [courseCount, setCourseCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   
+  // Update form data when topic is loaded
   useEffect(() => {
-    const loadTopic = async () => {
-      try {
-        const topic = await fetchTopicById(params.topicId);
-        if (topic) {
-          setFormData({
-            name: topic.name || '',
-            description: topic.description || '',
-            isActive: topic.isActive ?? true
-          });
-          
-          // Check if topic has associated courses count
-          if (topic._count && typeof topic._count.courses === 'number') {
-            setCourseCount(topic._count.courses);
-          } else if (topic.courseIds && Array.isArray(topic.courseIds)) {
-            // Fallback to courseIds length if _count is not available
-            setCourseCount(topic.courseIds.length);
-          } else {
-            setCourseCount(0);
-          }
-        }
-      } catch (err: unknown) {
-        console.error('Error loading topic:', err);
-        setServerError('Failed to load topic details');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadTopic();
-  }, [params.topicId, fetchTopicById]);
+    if (topic) {
+      setFormData({
+        name: topic.name || '',
+        description: topic.description || '',
+        isActive: topic.isActive ?? true
+      });
+    }
+  }, [topic]);
+  
+  // Set server error if fetch fails
+  useEffect(() => {
+    if (fetchError) {
+      setServerError(fetchError instanceof Error ? fetchError.message : 'Failed to load topic');
+    }
+  }, [fetchError]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -107,30 +102,46 @@ export default function EditTopicPage({ params }: { params: { topicId: string } 
     }
     
     try {
-      const updatedTopic = await updateTopic(params.topicId, {
-        name: formData.name.trim(),
-        description: formData.description.trim() || undefined,
-        isActive: formData.isActive
+      await updateTopic.mutateAsync({
+        id: params.topicId,
+        data: {
+          name: formData.name.trim(),
+          description: formData.description.trim() || undefined,
+          isActive: formData.isActive
+        }
       });
       
-      if (updatedTopic) {
-        router.push('/admin/topics');
-      }
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      console.error('Error updating topic:', errorMessage);
-      setServerError(errorMessage);
+      router.push('/admin/topics');
+    } catch (err) {
+      console.error('Error updating topic:', err);
+      setServerError(err instanceof Error ? err.message : 'Failed to update topic');
     }
   };
   
   if (isLoading) {
     return (
       <div className='flex justify-center items-center h-64'>
-        <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500'></div>
-        <p className='ml-4 text-gray-600'>Loading topic...</p>
+        <LoadingState variant="section" message="Loading topic..." />
       </div>
     );
   }
+  
+  if (!topic && !isLoading) {
+    return (
+      <div className='text-center py-10'>
+        <h1 className='text-2xl font-bold text-red-600 mb-4'>Topic Not Found</h1>
+        <p className='text-gray-600 mb-6'>The requested topic could not be found.</p>
+        <Link 
+          href='/admin/topics' 
+          className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700'
+        >
+          Back to Topics
+        </Link>
+      </div>
+    );
+  }
+  
+  const courseCount = topic?._count?.courses || 0;
   
   return (
     <div className='space-y-6'>
@@ -177,7 +188,7 @@ export default function EditTopicPage({ params }: { params: { topicId: string } 
               className={`w-full px-3 py-2 border ${
                 formErrors.name ? 'border-red-500' : 'border-gray-300'
               } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-              disabled={loading}
+              disabled={updateTopic.isPending}
             />
             {formErrors.name && (
               <p className='mt-1 text-sm text-red-600'>{formErrors.name}</p>
@@ -197,7 +208,7 @@ export default function EditTopicPage({ params }: { params: { topicId: string } 
               className={`w-full px-3 py-2 border ${
                 formErrors.description ? 'border-red-500' : 'border-gray-300'
               } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-              disabled={loading}
+              disabled={updateTopic.isPending}
             ></textarea>
             {formErrors.description && (
               <p className='mt-1 text-sm text-red-600'>{formErrors.description}</p>
@@ -214,7 +225,7 @@ export default function EditTopicPage({ params }: { params: { topicId: string } 
                 setFormData(prev => ({ ...prev, isActive: e.target.checked }))
               }
               className='h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500'
-              disabled={loading}
+              disabled={updateTopic.isPending}
             />
             <label htmlFor='isActive' className='ml-2 block text-sm text-gray-700'>
               Active
@@ -230,10 +241,10 @@ export default function EditTopicPage({ params }: { params: { topicId: string } 
             </Link>
             <button
               type='submit'
-              disabled={loading}
+              disabled={updateTopic.isPending}
               className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed'
             >
-              {loading ? 'Saving...' : 'Save Changes'}
+              {updateTopic.isPending ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>

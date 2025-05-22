@@ -15,7 +15,6 @@ import {
 import { UserCourseStats } from '@/shared/types/courses/course';
 import { UserAchievement } from '@/shared/types/achievement';
 import { UserLoginStreak } from '@/client/components/dashboard/UserLoginStreak';
-import { useUserState } from '@/client/hooks/user/useUserState';
 import { LoadingState } from '@/client/components/common';
 import { useUserQuery } from '@/client/hooks/user';
 import { useDashboardQuery } from '@/client/hooks/dashboard';
@@ -37,10 +36,8 @@ const mockUpcomingDeadlines = [
 ];
 
 export default function Dashboard() {
-  const { loginStreak } = useUserState();
-  
   // Use React Query hooks
-  const { useGetCurrentUser } = useUserQuery();
+  const { useGetCurrentUser, useGetUserLoginStreak } = useUserQuery();
   const { useGetUserStats, useGetEnrolledCourses, useGetUserAchievements } = useDashboardQuery();
   
   // Get current user
@@ -49,6 +46,12 @@ export default function Dashboard() {
     isLoading: isLoadingUser,
     error: userError
   } = useGetCurrentUser();
+
+  // Get user login streak directly from React Query
+  const {
+    data: userLoginStreak = 0,
+    isLoading: isLoadingStreak
+  } = useGetUserLoginStreak();
   
   // Get user stats
   const {
@@ -62,22 +65,28 @@ export default function Dashboard() {
     error: statsError
   } = useGetUserStats();
   
-  // Get enrolled courses
+  // Get enrolled courses with proper typing
   const {
-    data: enrolledCourses = [],
+    data: enrolledCoursesData,
     isLoading: isLoadingCourses,
     error: coursesError
   } = useGetEnrolledCourses();
   
-  // Get achievements
+  // Type safe enrolled courses
+  const enrolledCourses = (enrolledCoursesData || []) as EnrolledCourse[];
+  
+  // Get achievements with proper typing
   const {
-    data: achievements = [],
+    data: achievementsData,
     isLoading: isLoadingAchievements,
     error: achievementsError
   } = useGetUserAchievements();
   
+  // Type safe achievements
+  const achievements = (achievementsData || []) as UserAchievement[];
+  
   // Combine loading states
-  const isLoading = isLoadingUser || isLoadingStats || isLoadingCourses || isLoadingAchievements;
+  const isLoading = isLoadingUser || isLoadingStats || isLoadingCourses || isLoadingAchievements || isLoadingStreak;
   
   // Handle errors
   const hasError = userError || statsError || coursesError || achievementsError;
@@ -105,12 +114,18 @@ export default function Dashboard() {
   }
 
   if (hasError) {
+    // Extract error messages properly with type checking
+    const errorMessage = 
+      (userError instanceof Error ? userError.message : '') ||
+      (statsError instanceof Error ? statsError.message : '') ||
+      (coursesError instanceof Error ? coursesError.message : '') ||
+      (achievementsError instanceof Error ? achievementsError.message : '') ||
+      'An error occurred loading your dashboard';
+      
     return (
       <div className='min-h-screen flex flex-col items-center justify-center'>
         <h1 className='text-2xl font-bold mb-4'>Something went wrong</h1>
-        <p className='text-red-500 mb-4'>
-          {userError?.message || statsError?.message || coursesError?.message || achievementsError?.message || 'An error occurred loading your dashboard'}
-        </p>
+        <p className='text-red-500 mb-4'>{errorMessage}</p>
         <Link 
           href='/' 
           className='bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition'
@@ -214,7 +229,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className='text-sm text-gray-500 font-medium'>Current Streak</p>
-                <p className='text-2xl font-bold'>{loginStreak || stats.currentStreak} days</p>
+                <p className='text-2xl font-bold'>{userLoginStreak || stats.currentStreak} days</p>
               </div>
             </div>
           </div>
@@ -288,7 +303,7 @@ export default function Dashboard() {
           {/* Right column - Achievements and deadlines */}
           <div className='space-y-8'>
             {/* Login Streak */}
-            <UserLoginStreak />
+            <UserLoginStreak loginStreak={userLoginStreak} />
             
             {/* Achievements section */}
             <div>
