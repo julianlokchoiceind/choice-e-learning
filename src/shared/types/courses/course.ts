@@ -315,3 +315,18 @@ export interface HowItWorksStep {
   title: string;
   description: string;
 }
+
+/**
+ * Course filter interface for searching and filtering courses
+ */
+export interface CourseFilter {
+  search?: string;
+  level?: string;
+  topics?: string[];
+  status?: string;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  isPublished?: boolean;
+}

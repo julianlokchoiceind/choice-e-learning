@@ -1,2 +1,14 @@
-// Auto-generated index file
+/**
+ * Export all hooks from the user domain
+ */
+
+/**
+ * Exports the useUserState hook for managing user state
+ */
 export * from './useUserState';
+
+/**
+ * Exports the useUserQuery hook for React Query operations on users
+ */
+export * from './useUserQuery';
+export { default as useUserQuery } from './useUserQuery';

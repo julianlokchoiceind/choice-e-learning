@@ -1,6 +1,6 @@
 # Task ID: 14
 # Title: Create useLessonsQuery Hook for CRUD Operations
-# Status: pending
+# Status: done
 # Dependencies: 4, 6, 8
 # Priority: high
 # Description: Create a new hook in src/client/hooks/learn/useLessonsQuery.ts that provides CRUD operations for lesson data according to PRD section 4.4.

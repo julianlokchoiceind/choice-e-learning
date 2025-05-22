@@ -1,6 +1,6 @@
 # Task ID: 22
 # Title: Update Components and Pages to Use React Query Hooks
-# Status: pending
+# Status: done
 # Dependencies: 11, 12, 13, 14, 15, 16, 17, 18
 # Priority: high
 # Description: Refactor existing components and pages across the application to use the newly created React Query hooks for data fetching, state management, and CRUD operations.
@@ -87,25 +87,25 @@ To verify the successful implementation of this task, the following testing appr
 Document all test results and any issues found during testing for review.
 
 # Subtasks:
-## 1. Update Layout Components [pending]
+## 1. Update Layout Components [done]
 ### Dependencies: None
 ### Description: Refactor Header and Sidebar components to use React Query hooks
 ### Details:
 Update src/client/components/layout/Header.tsx and src/client/components/layout/Sidebar.tsx to use useAuthQuery for authentication state. Additionally, update Sidebar.tsx to use useUserQuery for user profile data.
 
-## 2. Refactor Learn and Dashboard Components [pending]
+## 2. Refactor Learn and Dashboard Components [done]
 ### Dependencies: 22.1
 ### Description: Update LessonPlayer and UserLoginStreak components to use appropriate React Query hooks
 ### Details:
 Modify src/client/components/learn/LessonPlayer.tsx to use useLessonsQuery for fetching lesson data. Update src/client/components/dashboard/UserLoginStreak.tsx to use useUserQuery for user streak data.
 
-## 3. Update Other UI Components [pending]
+## 3. Update Other UI Components [done]
 ### Dependencies: 22.2
 ### Description: Refactor TopicsFilter, FAQSection, FileUpload, and ProtectedRoute components to use React Query hooks
 ### Details:
 Update src/client/components/topics/TopicsFilter.tsx to use useTopicsQuery, src/client/components/faq/FAQSection.tsx to use useFAQsQuery, src/client/components/ui/file/FileUpload.tsx to use appropriate React Query hooks for file operations, and src/client/components/auth/ProtectedRoute.tsx to use useAuthQuery for authentication checks.
 
-## 4. Refactor Admin Pages [pending]
+## 4. Refactor Admin Pages [done]
 ### Dependencies: 22.3
 ### Description: Update all pages in the admin section to use corresponding React Query hooks
 ### Details:
@@ -132,7 +132,7 @@ Modify the following admin pages to use the appropriate React Query hooks based 
 
 Ensure proper error handling, loading states, and TypeScript typing throughout the implementation.
 
-## 5. Update Public Pages [pending]
+## 5. Update Public Pages [done]
 ### Dependencies: 22.4
 ### Description: Refactor public-facing pages to use React Query hooks for data fetching and state management
 ### Details:

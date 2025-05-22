@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -8,43 +10,35 @@ import {
   XCircleIcon,
   ExclamationCircleIcon
 } from '@heroicons/react/24/outline';
-import { useTopics } from '@/client/hooks/topics';
-
-interface Topic {
-  id: string;
-  name: string;
-  description?: string;
-  isActive: boolean;
-  _count?: {
-    courses: number;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
+import { useTopicsQuery } from '@/client/hooks/topics';
+import { LoadingState } from '@/client/components/common';
+import { Topic } from '@/shared/types/topics/topics';
 
 interface TopicListProps {
   topics: Topic[];
-  onDelete: (id: string) => Promise<void>;
-  isLoading?: boolean;
+  onRefetch: () => void;
 }
 
-export const TopicList = ({ topics, onDelete, isLoading = false }: TopicListProps) => {
+export const TopicList = ({ topics, onRefetch }: TopicListProps) => {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const { useDeleteTopic } = useTopicsQuery();
+  const deleteTopicMutation = useDeleteTopic();
 
   const handleDeleteConfirm = async (id: string) => {
     try {
-      await onDelete(id);
+      await deleteTopicMutation.mutateAsync(id);
       setConfirmDelete(null);
+      onRefetch();
     } catch (err: unknown) {
       console.error('Error deleting topic:', err);
+      // Error handling is done by the mutation
     }
   };
 
-  if (isLoading) {
+  if (deleteTopicMutation.isPending) {
     return (
       <div className='text-center py-10'>
-        <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto'></div>
-        <p className='mt-2 text-gray-500'>Loading topics...</p>
+        <LoadingState variant="section" message="Deleting topic..." />
       </div>
     );
   }

@@ -1,6 +1,6 @@
 # Task ID: 13
 # Title: Create useFAQsQuery Hook for FAQ Data Operations
-# Status: pending
+# Status: done
 # Dependencies: 4, 6, 8
 # Priority: medium
 # Description: Create a new hook in src/client/hooks/faq/useFAQsQuery.ts that provides CRUD operations for FAQ data according to PRD section 4.3.

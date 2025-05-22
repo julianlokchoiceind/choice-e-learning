@@ -10,4 +10,7 @@ export * from './useApiRequest';
 export * from './useToast';
 
 // React Query utility hooks
-export * from './useQueryUtils'; 
+export * from './useQueryUtils';
+export * from './useQueryOptimizer';
+
+export { default as useQueryOptimizer } from './useQueryOptimizer'; 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTopics } from '@/client/hooks/topics';
 import { FunnelIcon } from '@heroicons/react/24/outline';
+import { LoadingState } from '@/client/components/common';
 
 interface TopicsFilterProps {
   selectedTopics: string[];
@@ -55,8 +56,7 @@ export default function TopicsFilter({ selectedTopics, onChange }: TopicsFilterP
           <div className='absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg'>
             {loading && topicNames.length === 0 ? (
               <div className='p-4 text-center'>
-                <div className='animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500 mx-auto'></div>
-                <p className='mt-2 text-sm text-gray-600'>Loading topics...</p>
+                <LoadingState variant="button" message="Loading topics..." />
               </div>
             ) : (
               <div className='p-2 max-h-60 overflow-y-auto'>

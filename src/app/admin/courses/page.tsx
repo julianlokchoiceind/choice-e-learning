@@ -1,89 +1,131 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
-import {
+import { useCoursesQuery } from '@/client/hooks/courses';
+import { 
   PlusIcon, 
   PencilSquareIcon, 
   TrashIcon, 
   MagnifyingGlassIcon,
+  FunnelIcon,
   ChevronLeftIcon,
-  ChevronRightIcon,
-  BookOpenIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline';
-import { useCourses } from '@/client/hooks/courses';
-import { Course, CourseStatus } from '@/shared/types/courses/course';
-import { formatCourseTitle } from '@/shared/utils/courses';
-import { useCoursePlaceholder } from '@/client/hooks/courses';
+import { LoadingState } from '@/client/components/common';
+import { CourseImage } from '@/client/components/courses';
 
-// Define valid level options to ensure consistency with the backend
-const LEVEL_OPTIONS = [
-  { value: 'all', label: 'All Levels' },
-  { value: 'beginner', label: 'Beginner' },
-  { value: 'intermediate', label: 'Intermediate' },
-  { value: 'advanced', label: 'Advanced' }
-];
+// Helper functions
+const formatCourseTitle = (title: string): string => {
+  if (!title) return '';
+  return title.length > 40 ? `${title.substring(0, 40)}...` : title;
+};
 
-// Define valid status options - phải khớp với enum CourseStatus
-const STATUS_OPTIONS = [
-  { value: 'all', label: 'All Statuses' },
-  { value: CourseStatus.PUBLISHED, label: 'Published' },
-  { value: CourseStatus.DRAFT, label: 'Draft' }
-];
+const formatLevel = (level: string): string => {
+  if (!level) return 'All Levels';
+  return level.charAt(0).toUpperCase() + level.slice(1);
+};
+
+const formatStatus = (status: string, isPublished: boolean): string => {
+  if (isPublished === false) return 'Draft';
+  return status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Published';
+};
+
+const getLevelBadgeClass = (level: string): string => {
+  switch (level?.toLowerCase()) {
+    case 'beginner':
+      return 'bg-green-100 text-green-800';
+    case 'intermediate':
+      return 'bg-blue-100 text-blue-800';
+    case 'advanced':
+      return 'bg-purple-100 text-purple-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
+const getStatusBadgeClass = (status: string, isPublished: boolean): string => {
+  if (isPublished === false) return 'bg-gray-100 text-gray-800';
+  
+  switch (status?.toLowerCase()) {
+    case 'published':
+      return 'bg-green-100 text-green-800';
+    case 'private':
+      return 'bg-yellow-100 text-yellow-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
+const getSortParams = (sortOption: string): { sortBy: string; sortOrder: 'asc' | 'desc' } => {
+  switch (sortOption) {
+    case 'title-asc':
+      return { sortBy: 'title', sortOrder: 'asc' };
+    case 'title-desc':
+      return { sortBy: 'title', sortOrder: 'desc' };
+    case 'price-asc':
+      return { sortBy: 'price', sortOrder: 'asc' };
+    case 'price-desc':
+      return { sortBy: 'price', sortOrder: 'desc' };
+    case 'students':
+      return { sortBy: 'students', sortOrder: 'desc' };
+    case 'oldest':
+      return { sortBy: 'createdAt', sortOrder: 'asc' };
+    case 'newest':
+    default:
+      return { sortBy: 'createdAt', sortOrder: 'desc' };
+  }
+};
 
 export default function CoursesPage() {
-  // Use the useCourses hook with isAdmin=true
-  const {
-    loading: isLoading,
-    courses,
-    deleteCourse,
-    fetchCourses,
-    pagination
-  } = useCourses(true);
-
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  // Use the useCoursesQuery hook with isAdmin=true
+  const coursesQuery = useCoursesQuery(true);
+  const { useGetCourses, useDeleteCourse } = coursesQuery;
   
-  // Initialize state with default values
+  // State for filters and pagination
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [sortOption, setSortOption] = useState('newest');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   
-  // Handle delete confirmation
-  const handleDeleteConfirm = async (courseId: string) => {
-    try {
-      // Hide confirmation buttons first
-      setConfirmDelete(null);
-      
-      // Show loading state
-      setIsDeleting(true);
-      
-      // Use the deleteCourse function from the hook
-      await deleteCourse(courseId);
-      
-      // Refresh the courses list
-      fetchCourses({
-        search: debouncedSearchQuery || undefined,
-        level: selectedLevel === 'all' ? undefined : selectedLevel,
-        status: selectedStatus === 'all' ? undefined : selectedStatus,
-        page: pagination.page,
-        limit: pagination.pageSize,
-        ...getSortParams(sortOption)
-      });
-      
-    } catch (error: unknown) {
-      console.error('Error deleting course:', error);
-      // Silent error handling, no UI feedback
-    } finally {
-      setConfirmDelete(null);
-      setIsDeleting(false);
-    }
+  // Create filter object from state
+  const courseFilter = useMemo(() => ({
+    search: searchQuery || undefined,
+    level: selectedLevel === 'all' ? undefined : selectedLevel,
+    status: selectedStatus === 'all' ? undefined : selectedStatus,
+    page: currentPage,
+    limit: 10,
+    ...getSortParams(sortOption)
+  }), [searchQuery, selectedLevel, selectedStatus, currentPage, sortOption]);
+  
+  // Use React Query for fetching courses
+  const { 
+    data,
+    isLoading,
+    error: queryError,
+    refetch
+  } = useGetCourses(courseFilter);
+  
+  // Extract courses and pagination from response
+  const courses = Array.isArray(data) ? data : (data as any)?.data || [];
+  const pagination = {
+    page: currentPage,
+    pageSize: 10,
+    totalItems: Array.isArray(data) ? data.length : ((data as any)?.meta?.totalItems || 0),
+    totalPages: Array.isArray(data) ? 1 : ((data as any)?.meta?.totalPages || 1),
   };
   
-  // Add basic styles for consistent appearance
+  // Use React Query for delete mutation
+  const deleteCourse = useDeleteCourse();
+  
+  // Format error message
+  const error = queryError ? 
+    (queryError instanceof Error ? queryError.message : 'Failed to fetch courses') : 
+    null;
+  
+  // Add CSS for buttons with no transform on hover
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -115,137 +157,37 @@ export default function CoursesPage() {
     };
   }, []);
   
-  // Debounce search query to avoid too many API calls
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  // Convert sort option to API parameters
-  const getSortParams = (option: string): { sortBy: string, sortOrder: 'asc' | 'desc' } => {
-    switch (option) {
-      case 'newest':
-        return { sortBy: 'createdAt', sortOrder: 'desc' };
-      case 'oldest':
-        return { sortBy: 'createdAt', sortOrder: 'asc' };
-      case 'priceAsc':
-        return { sortBy: 'price', sortOrder: 'asc' };
-      case 'priceDesc':
-        return { sortBy: 'price', sortOrder: 'desc' };
-      case 'title':
-        return { sortBy: 'title', sortOrder: 'asc' };
-      default:
-        return { sortBy: 'createdAt', sortOrder: 'desc' };
-    }
+  // Handle search
+  const handleSearch = () => {
+    setCurrentPage(1);
+    refetch();
   };
-
-  // Fetch courses when filters change
-  useEffect(() => {
+  
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  
+  // Handle delete confirmation
+  const handleDeleteConfirm = async (courseId: string) => {
     try {
-      console.log('[CoursesPage] Fetching courses with filters:', {
-        search: debouncedSearchQuery,
-        level: selectedLevel,
-        status: selectedStatus,
-        sortOption
-      });
-      
-      fetchCourses({
-        search: debouncedSearchQuery || undefined,
-        level: selectedLevel === 'all' ? undefined : selectedLevel,
-        status: selectedStatus === 'all' ? undefined : selectedStatus,
-        page: 1,
-        limit: 10,
-        ...getSortParams(sortOption)
-      }).catch(err => {
-        console.error('[CoursesPage] Error in effect when fetching courses:', err);
-        // Error is already handled in the hook, so we don't need to do anything here
-      });
+      await deleteCourse.mutateAsync(courseId);
+      setConfirmDelete(null);
     } catch (error: unknown) {
-      console.error('[CoursesPage] Exception in courses fetch effect:', error);
-      // Continue rendering with empty data
-    }
-  }, [debouncedSearchQuery, selectedLevel, selectedStatus, sortOption, fetchCourses]);
-
-  // Get CSS class for level badge - using case-insensitive matching
-  const getLevelBadgeClass = (level?: string) => {
-    // Handle null/undefined case
-    if (!level) return 'bg-purple-100 text-purple-800';
-    
-    // Normalize to lowercase for consistent matching
-    const normalizedLevel = level.toLowerCase();
-    
-    // Match against known values
-    switch(normalizedLevel) {
-      case 'beginner':
-        return 'bg-green-100 text-green-800';
-      case 'intermediate':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'advanced':
-        return 'bg-blue-100 text-blue-800';
-      case 'all':
-        return 'bg-purple-100 text-purple-800';
-      default:
-        // Log unknown levels for debugging
-        console.log(`Unknown level value encountered: ${level}`);
-        return 'bg-purple-100 text-purple-800';
-    }
-  };
-  
-  // Format level for display
-  const formatLevel = (level?: string): string => {
-    if (!level) return 'Unknown';
-    
-    // Normalize to lowercase first
-    const normalizedLevel = level.toLowerCase();
-    
-    // Map to display value
-    switch (normalizedLevel) {
-      case 'beginner':
-        return 'Beginner';
-      case 'intermediate':
-        return 'Intermediate';
-      case 'advanced':
-        return 'Advanced';
-      case 'all':
-        return 'All Levels';
-      default:
-        // Default fallback with capitalization
-        return level.charAt(0).toUpperCase() + level.slice(1).toLowerCase();
-    }
-  };
-  
-  // Get CSS class for status badge
-  const getStatusBadgeClass = (status?: CourseStatus, isPublished?: boolean) => {
-    // Use status if available, otherwise fallback to isPublished
-    if (status === CourseStatus.PUBLISHED || (status === undefined && isPublished === true)) {
-      return 'bg-green-100 text-green-800';
-    } else {
-      return 'bg-amber-100 text-amber-800';
-    }
-  };
-  
-  // Format status for display
-  const formatStatus = (status?: CourseStatus, isPublished?: boolean): string => {
-    // Use status if available, otherwise fallback to isPublished
-    if (status === CourseStatus.PUBLISHED || (status === undefined && isPublished === true)) {
-      return 'Published';
-    } else {
-      return 'Draft';
+      console.error('Error deleting course:', error);
+      // Error is handled by the mutation
     }
   };
 
   return (
     <div className='space-y-6'>
-      <div className='flex justify-between items-center mb-6'>
-        <div className='flex items-center'>
-          <BookOpenIcon className='h-7 w-7 text-indigo-600 mr-3' />
-          <h1 className='text-2xl font-bold text-gray-800'>Course Management</h1>
+      <div className='flex justify-between items-center'>
+        <div className='flex items-center mb-6'>
+          <h1 className='text-2xl font-bold text-gray-800'>Courses Management</h1>
         </div>
-        <Link 
-          href='/admin/courses/new' 
+        <Link
+          href='/admin/courses/new'
           className='px-4 py-2 rounded-md flex items-center admin-button add-course-btn'
         >
           <PlusIcon className='h-5 w-5 mr-1' />
@@ -253,123 +195,100 @@ export default function CoursesPage() {
         </Link>
       </div>
 
+      {/* Filter and search controls */}
       <div className='bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden'>
-        <div className='p-4 border-b border-gray-200 flex justify-between items-center flex-wrap gap-4'>
-          <div className='relative'>
-            <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-              <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
+        <div className='p-4 border-b border-gray-200 flex flex-wrap gap-4 justify-between items-center'>
+          <div className='flex flex-wrap gap-4 items-center'>
+            <div className='relative'>
+              <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
+              </div>
+              <input 
+                type='text' 
+                placeholder='Search courses...' 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className='py-2 pl-10 pr-4 block w-full sm:w-80 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)] outline-none'
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch();
+                  }
+                }}
+              />
             </div>
-            <input 
-              type='text' 
-              placeholder='Search courses...' 
-              className='py-2 pl-10 pr-4 block w-full sm:w-80 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)] outline-none'
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className='flex items-center space-x-2'>
-            {/* Level dropdown - using predefined options */}
+            
             <select 
-              id='level-filter'
-              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm'
               value={selectedLevel}
-              onChange={(e: any) => {
-                // Lấy giá trị và gọi thông báo debug
-                let newLevel = e.target.value.trim();
-                console.log(`Level dropdown changed to: '${newLevel}'`);
-                
-                // Bảo vệ trường hợp giá trị rỗng
-                if (!newLevel) {
-                  newLevel = 'all';
-                  console.log('Empty level value, defaulting to all');
-                }
-                
-                // Chuẩn hóa lowercase
-                newLevel = newLevel.toLowerCase();
-                console.log(`Normalized level: '${newLevel}'`);
-                
-                // Kiểm tra giá trị hợp lệ
-                if (!['all', 'beginner', 'intermediate', 'advanced'].includes(newLevel)) {
-                  console.error(`Invalid level value: '${newLevel}', resetting to 'all'`);
-                  newLevel = 'all';
-                }
-                
-                // Cập nhật state
-                setSelectedLevel(newLevel);
+              onChange={(e) => {
+                setSelectedLevel(e.target.value);
+                setCurrentPage(1);
               }}
+              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
             >
-              {LEVEL_OPTIONS.map(option => (
-                <option key={option.value} value={option.value.toLowerCase()}>
-                  {option.label}
-                </option>
-              ))}
+              <option value='all'>All Levels</option>
+              <option value='beginner'>Beginner</option>
+              <option value='intermediate'>Intermediate</option>
+              <option value='advanced'>Advanced</option>
             </select>
             
-            {/* Status dropdown */}
             <select 
-              id='status-filter'
-              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm'
               value={selectedStatus}
-              onChange={(e: any) => {
-                let newStatus = e.target.value.trim();
-                console.log(`Status dropdown changed to: '${newStatus}'`);
-                
-                // Bảo vệ trường hợp giá trị rỗng
-                if (!newStatus) {
-                  newStatus = 'all';
-                  console.log('Empty status value, defaulting to all');
-                }
-                
-                // Chuẩn hóa lowercase (chỉ áp dụng cho các giá trị khác 'all', không áp dụng cho CourseStatus enum)
-                if (newStatus !== 'all') {
-                  // Giữ nguyên giá trị từ enum CourseStatus
-                  console.log(`Status value preserved: '${newStatus}'`);
-                }
-                
-                // Kiểm tra giá trị hợp lệ
-                if (!['all', CourseStatus.PUBLISHED, CourseStatus.DRAFT].includes(newStatus)) {
-                  console.error(`Invalid status value: '${newStatus}', resetting to 'all'`);
-                  newStatus = 'all';
-                }
-                
-                // Cập nhật state
-                setSelectedStatus(newStatus);
+              onChange={(e) => {
+                setSelectedStatus(e.target.value);
+                setCurrentPage(1);
               }}
+              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
             >
-              {STATUS_OPTIONS.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
+              <option value='all'>All Status</option>
+              <option value='published'>Published</option>
+              <option value='draft'>Draft</option>
             </select>
             
-            {/* Sort dropdown */}
-            <select 
-              id='sort-filter'
-              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm'
-              value={sortOption}
-              onChange={(e: any) => {
-                setSortOption(e.target.value);
-              }}
+            <button
+              onClick={handleSearch}
+              className='py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md admin-button'
             >
-              <option value='newest'>Sort By: Newest</option>
-              <option value='oldest'>Sort By: Oldest</option>
-              <option value='priceAsc'>Sort By: Price (Low-High)</option>
-              <option value='priceDesc'>Sort By: Price (High-Low)</option>
-              <option value='title'>Sort By: Title (A-Z)</option>
+              Filter
+            </button>
+          </div>
+          
+          <div>
+            <select 
+              value={sortOption}
+              onChange={(e) => {
+                setSortOption(e.target.value);
+                setCurrentPage(1);
+              }}
+              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+            >
+              <option value='newest'>Newest First</option>
+              <option value='oldest'>Oldest First</option>
+              <option value='title-asc'>Title (A-Z)</option>
+              <option value='title-desc'>Title (Z-A)</option>
+              <option value='price-asc'>Price (Low to High)</option>
+              <option value='price-desc'>Price (High to Low)</option>
+              <option value='students'>Most Students</option>
             </select>
           </div>
         </div>
-        
+
+        {/* Error message */}
+        {error && (
+          <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 mx-4 mt-4'>
+            {error}
+          </div>
+        )}
+
+        {/* Courses list */}
         <div className='overflow-x-auto'>
-          {isLoading || isDeleting ? (
+          {isLoading || deleteCourse.isPending ? (
             <div className='py-10 text-center'>
-              <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto mb-4'></div>
-              <p className='text-gray-500'>{isDeleting ? 'Deleting course...' : 'Loading courses...'}</p>
+              <LoadingState variant="table" message={deleteCourse.isPending ? 'Deleting course...' : 'Loading courses...'} />
             </div>
           ) : courses.length === 0 ? (
             <div className='py-10 text-center'>
-              <p className='text-gray-500'>No any course now...</p>
+              <p className='text-gray-500'>No courses found.</p>
+              <p className='text-sm mt-1'>Create a new course or try with a different search term.</p>
             </div>
           ) : (
             <table className='min-w-full divide-y divide-gray-200'>
@@ -446,17 +365,19 @@ export default function CoursesPage() {
                             <button
                               onClick={() => handleDeleteConfirm(course.id.toString())}
                               className='text-red-600 hover:text-red-800 font-medium bg-red-50 px-2 py-1 rounded admin-button'
+                              disabled={deleteCourse.isPending}
                             >
-                              Confirm
+                              {deleteCourse.isPending ? 'Deleting...' : 'Confirm'}
                             </button>
                             <button
                               onClick={() => setConfirmDelete(null)}
                               className='text-gray-600 hover:text-gray-800 bg-gray-50 px-2 py-1 rounded admin-button'
+                              disabled={deleteCourse.isPending}
                             >
                               Cancel
                             </button>
                           </div>
-                        ) : (
+                        ) :
                           <button 
                             onClick={() => setConfirmDelete(course.id.toString())}
                             className='text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 rounded-md p-1.5 transition-colors duration-150 admin-button'
@@ -464,7 +385,7 @@ export default function CoursesPage() {
                           >
                             <TrashIcon className='h-5 w-5' />
                           </button>
-                        )}
+                        }
                       </div>
                     </td>
                   </tr>
@@ -481,25 +402,9 @@ export default function CoursesPage() {
               </div>
               <div className='flex space-x-1'>
                 <button 
-                  onClick={() => {
-                    try {
-                      fetchCourses({
-                        search: debouncedSearchQuery || undefined,
-                        level: selectedLevel === 'all' ? undefined : selectedLevel,
-                        status: selectedStatus === 'all' ? undefined : selectedStatus,
-                        page: Math.max(1, pagination.page - 1),
-                        limit: pagination.pageSize,
-                        ...getSortParams(sortOption)
-                      }).catch(err => {
-                        console.error('[CoursesPage] Error when fetching previous page:', err);
-                        // Error is already handled in the hook
-                      });
-                    } catch (error: unknown) {
-                      console.error('[CoursesPage] Exception in prev page handler:', error);
-                    }
-                  }}
-                  disabled={pagination.page === 1}
-                  className={`p-2 ${pagination.page === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'} admin-button`}
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className={`p-2 ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'} admin-button`}
                 >
                   <ChevronLeftIcon className='h-5 w-5' />
                 </button>
@@ -507,25 +412,9 @@ export default function CoursesPage() {
                 {Array.from({length: pagination.totalPages}, (_, i) => i + 1).map(page => (
                   <button
                     key={page}
-                    onClick={() => {
-                      try {
-                        fetchCourses({
-                          search: debouncedSearchQuery || undefined,
-                          level: selectedLevel === 'all' ? undefined : selectedLevel,
-                          status: selectedStatus === 'all' ? undefined : selectedStatus,
-                          page: page,
-                          limit: pagination.pageSize,
-                          ...getSortParams(sortOption)
-                        }).catch(err => {
-                          console.error(`[CoursesPage] Error when fetching page ${page}:`, err);
-                          // Error is already handled in the hook
-                        });
-                      } catch (error: unknown) {
-                        console.error(`[CoursesPage] Exception in page ${page} handler:`, error);
-                      }
-                    }}
+                    onClick={() => handlePageChange(page)}
                     className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                      pagination.page === page 
+                      currentPage === page 
                         ? 'bg-indigo-600 text-white' 
                         : 'text-gray-700 hover:bg-gray-100'
                     } admin-button`}
@@ -535,25 +424,9 @@ export default function CoursesPage() {
                 ))}
                 
                 <button 
-                  onClick={() => {
-                    try {
-                      fetchCourses({
-                        search: debouncedSearchQuery || undefined,
-                        level: selectedLevel === 'all' ? undefined : selectedLevel,
-                        status: selectedStatus === 'all' ? undefined : selectedStatus,
-                        page: Math.min(pagination.totalPages, pagination.page + 1),
-                        limit: pagination.pageSize,
-                        ...getSortParams(sortOption)
-                      }).catch(err => {
-                        console.error('[CoursesPage] Error when fetching next page:', err);
-                        // Error is already handled in the hook
-                      });
-                    } catch (error: unknown) {
-                      console.error('[CoursesPage] Exception in next page handler:', error);
-                    }
-                  }}
-                  disabled={pagination.page === pagination.totalPages}
-                  className={`p-2 ${pagination.page === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'} admin-button`}
+                  onClick={() => handlePageChange(Math.min(pagination.totalPages, currentPage + 1))}
+                  disabled={currentPage === pagination.totalPages}
+                  className={`p-2 ${currentPage === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'} admin-button`}
                 >
                   <ChevronRightIcon className='h-5 w-5' />
                 </button>
@@ -565,19 +438,3 @@ export default function CoursesPage() {
     </div>
   );
 }
-
-// Course image component that uses the useCoursePlaceholder hook
-const CourseImage = ({ course }: { course: Course | { imageUrl?: string, title?: string } }) => {
-  const { imageUrl, handleImageError } = useCoursePlaceholder(course.imageUrl);
-  
-  return (
-    <Image 
-      src={imageUrl} 
-      alt={course.title || 'Course image'}
-      className='h-full w-full object-cover'
-      width={500} 
-      height={300}
-      onError={handleImageError}
-    />
-  );
-};

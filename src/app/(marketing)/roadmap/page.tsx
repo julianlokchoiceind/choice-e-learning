@@ -1,9 +1,12 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import { Metadata } from 'next';
 import { CheckCircleIcon, ArrowRightIcon, ChevronRightIcon, CodeBracketIcon, CommandLineIcon, ServerIcon, CpuChipIcon, WrenchScrewdriverIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AcademicCapIcon } from '@heroicons/react/24/outline';
+import { LoadingState } from '@/client/components/common';
 
 export const metadata: Metadata = {
   title: 'Learning Roadmap | Choice E-Learning',
@@ -11,6 +14,23 @@ export const metadata: Metadata = {
 };
 
 export default function RoadmapPage() {
+  const [loading, setLoading] = useState(true);
+  
+  // Simulate data loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1200);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen">
+      <LoadingState variant="page" message="Loading roadmap..." />
+    </div>;
+  }
+  
   return (
     <>
       {/* Enhanced Hero Section with Background Image and Overlay */}

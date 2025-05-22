@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTopics } from '@/client/hooks/topics';
+import { useTopicsQuery } from '@/client/hooks/topics';
 import Link from 'next/link';
 import { 
   PlusIcon, 
@@ -12,21 +12,69 @@ import {
   XCircleIcon,
   FolderIcon
 } from '@heroicons/react/24/outline';
+import { LoadingState } from '@/client/components/common';
+import { TopicFilter, Topic, TopicPagination } from '@/shared/types/topics/topics';
+
+// Define API response structure
+interface TopicsResponse {
+  data: Topic[];
+  meta: {
+    page: number;
+    totalPages: number;
+    totalItems: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+}
 
 export default function TopicsPage() {
+  // Get hooks from useTopicsQuery
   const { 
-    topics, 
-    loading, 
-    error, 
-    pagination, 
-    fetchTopics, 
-    deleteTopic 
-  } = useTopics(true);
-
+    useGetTopics,
+    useDeleteTopic
+  } = useTopicsQuery();
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [showActive, setShowActive] = useState<boolean | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  
+  // Create filter object
+  const topicFilter: TopicFilter = {
+    page: currentPage,
+    limit: 10,
+    sortBy: 'name',
+    sortOrder: 'asc',
+    isActive: showActive,
+    search: searchQuery || undefined
+  };
+  
+  // Use React Query for fetching topics with type assertion for the response
+  const { 
+    data,
+    isLoading,
+    error: queryError,
+    refetch
+  } = useGetTopics(topicFilter);
+  
+  // Use React Query for delete mutation
+  const deleteTopicMutation = useDeleteTopic();
+  
+  // Extract topics and pagination from response
+  // Since our API might return different formats, we need to handle both possibilities
+  const topics: Topic[] = Array.isArray(data) ? data : (data as any)?.data || [];
+  const pagination = {
+    page: currentPage,
+    totalPages: Array.isArray(data) ? 1 : ((data as any)?.meta?.totalPages || 1),
+    totalItems: Array.isArray(data) ? data.length : ((data as any)?.meta?.totalItems || 0),
+    hasNextPage: Array.isArray(data) ? false : ((data as any)?.meta?.hasNextPage || false),
+    hasPreviousPage: Array.isArray(data) ? false : ((data as any)?.meta?.hasPreviousPage || false)
+  };
+  
+  // Format error message
+  const error = queryError ? 
+    (queryError instanceof Error ? queryError.message : 'Failed to fetch topics') : 
+    null;
 
   // Add CSS for buttons with no transform on hover - matching FAQ page behavior
   useEffect(() => {
@@ -60,45 +108,11 @@ export default function TopicsPage() {
     };
   }, []);
 
-  useEffect(() => {
-    // Fetch topics on initial load with error handling
-    try {
-      console.log('[TopicsPage] Fetching topics with params:', {
-        page: currentPage,
-        isActive: showActive
-      });
-      
-      fetchTopics({
-        page: currentPage,
-        limit: 10,
-        sortBy: 'name',
-        sortOrder: 'asc',
-        isActive: showActive
-      }).catch(err => {
-        console.error('[TopicsPage] Error fetching topics in effect:', err);
-        // Error is already handled in the hook, so we don't need to do anything here
-      });
-    } catch (error: unknown) {
-      console.error('[TopicsPage] Exception in topics fetch effect:', error);
-      // Continue rendering with empty data
-    }
-  }, [fetchTopics, currentPage, showActive]);
-
   const handleSearch = () => {
     try {
       console.log('[TopicsPage] Searching topics with query:', searchQuery);
-      
-      fetchTopics({
-        search: searchQuery,
-        isActive: showActive,
-        page: 1,
-        limit: 10,
-      }).catch(err => {
-        console.error('[TopicsPage] Error during search:', err);
-        // Error is already handled in the hook
-      });
-      
       setCurrentPage(1);
+      refetch();
     } catch (error: unknown) {
       console.error('[TopicsPage] Exception in search handler:', error);
       // Continue with UI
@@ -106,85 +120,32 @@ export default function TopicsPage() {
   };
 
   const handleStatusChange = (status: string) => {
-    try {
-      let isActiveFilter: boolean | undefined;
-      
-      if (status === 'all') {
-        isActiveFilter = undefined;
-      } else if (status === 'active') {
-        isActiveFilter = true;
-      } else if (status === 'inactive') {
-        isActiveFilter = false;
-      }
-      
-      console.log(`[TopicsPage] Changing status filter to: ${status} (${isActiveFilter})`);
-      
-      setShowActive(isActiveFilter);
-      setCurrentPage(1);
-      
-      // Immediately fetch topics with the new filter
-      fetchTopics({
-        search: searchQuery,
-        isActive: isActiveFilter,
-        page: 1,
-        limit: 10,
-      }).catch(err => {
-        console.error('[TopicsPage] Error during status change:', err);
-        // Error is already handled in the hook
-      });
-    } catch (error: unknown) {
-      console.error('[TopicsPage] Exception in status change handler:', error);
-      // Continue with UI
+    let activeStatus: boolean | undefined;
+    
+    if (status === 'active') {
+      activeStatus = true;
+    } else if (status === 'inactive') {
+      activeStatus = false;
+    } else {
+      activeStatus = undefined;
     }
+    
+    setShowActive(activeStatus);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
-    try {
-      console.log(`[TopicsPage] Changing to page ${page}`);
-      
-      setCurrentPage(page);
-      fetchTopics({
-        search: searchQuery,
-        isActive: showActive,
-        page,
-        limit: 10,
-      }).catch(err => {
-        console.error(`[TopicsPage] Error when fetching page ${page}:`, err);
-        // Error is already handled in the hook
-      });
-    } catch (error: unknown) {
-      console.error(`[TopicsPage] Exception in page change handler:`, error);
-      // Continue with UI
-    }
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDeleteConfirm = async (id: string) => {
     try {
-      console.log(`[TopicsPage] Attempting to delete topic: ${id}`);
-      
-      try {
-        await deleteTopic(id);
-        console.log(`[TopicsPage] Topic deleted successfully: ${id}`);
-        
-        // Refresh the list after deletion
-        fetchTopics({
-          search: searchQuery,
-          isActive: showActive,
-          page: currentPage,
-          limit: 10,
-        }).catch(err => {
-          console.error('[TopicsPage] Error refreshing after delete:', err);
-          // Error is already handled in the hook
-        });
-      } catch (deleteError: unknown) {
-        console.error(`[TopicsPage] Error when trying to delete topic ${id}:`, deleteError);
-        // Continue with UI
-      }
-      
+      await deleteTopicMutation.mutateAsync(id);
       setConfirmDelete(null);
-    } catch (err: unknown) {
-      console.error('[TopicsPage] Exception in delete handler:', err);
-      setConfirmDelete(null); // Reset the confirmation state
+    } catch (error: unknown) {
+      console.error('[TopicsPage] Error confirming delete:', error);
+      // Error is handled by the mutation
     }
   };
 
@@ -255,50 +216,43 @@ export default function TopicsPage() {
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
               <tr>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>#</th>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>Name</th>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>Description</th>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>Status</th>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>Courses</th>
-                <th className='py-4 px-6 text-right font-medium text-indigo-700 capitalize tracking-wider text-base'>Actions</th>
+                <th className='py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm'>Name</th>
+                <th className='py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm'>Description</th>
+                <th className='py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm'>Status</th>
+                <th className='py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm'>Courses</th>
+                <th className='py-4 px-6 text-right font-medium text-indigo-700 uppercase tracking-wider text-sm'>Actions</th>
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
-              {loading ? (
+              {isLoading ? (
                 <tr>
-                  <td colSpan={6} className='text-center py-10'>
-                    <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto'></div>
-                    <p className='mt-2 text-gray-500'>Loading topics...</p>
+                  <td colSpan={5} className='text-center py-10'>
+                    <LoadingState variant="table" message="Loading topics..." />
                   </td>
                 </tr>
               ) : topics.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className='text-center py-10 text-gray-500'>
-                    <p>No topics found</p>
-                    <p className='text-sm mt-1'>Try with a different search term or add a new topic.</p>
+                  <td colSpan={5} className='text-center py-10 text-gray-500'>
+                    <p>No topics found.</p>
+                    <p className='text-sm mt-1'>Try adjusting your search criteria or add a new topic.</p>
                   </td>
                 </tr>
               ) : (
                 topics.map((topic, index) => (
                   <tr key={topic.id} className='hover:bg-gray-50 transition-colors duration-150'>
-                    <td className='py-4 px-6 whitespace-nowrap text-sm font-medium text-gray-900'>
-                      {index + 1}
-                    </td>
-                    <td className='py-4 px-6 text-gray-800'>
-                      <div className='font-medium truncate max-w-sm'>
-                        {topic.name}
-                      </div>
+                    <td className='py-4 px-6 text-gray-800 font-medium'>
+                      {topic.name}
                     </td>
                     <td className='py-4 px-6 text-gray-600 max-w-xs truncate'>
                       {topic.description || '-'}
                     </td>
-                    <td className='py-4 px-6 whitespace-nowrap'>
+                    <td className='py-4 px-6'>
                       {topic.isActive ? (
-                        <span className='px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs'>
+                        <span className='px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800'>
                           Active
                         </span>
                       ) : (
-                        <span className='px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs'>
+                        <span className='px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800'>
                           Inactive
                         </span>
                       )}
@@ -321,13 +275,14 @@ export default function TopicsPage() {
                             <button
                               onClick={() => handleDeleteConfirm(topic.id)}
                               className='text-red-600 hover:text-red-800 font-medium bg-red-50 px-2 py-1 rounded admin-button'
-                              disabled={Boolean(topic?._count?.courses && topic._count.courses > 0)}
+                              disabled={Boolean(topic?._count?.courses && topic._count.courses > 0) || deleteTopicMutation.isPending}
                             >
-                              Confirm
+                              {deleteTopicMutation.isPending ? 'Deleting...' : 'Confirm'}
                             </button>
                             <button
                               onClick={() => setConfirmDelete(null)}
                               className='text-gray-600 hover:text-gray-800 bg-gray-50 px-2 py-1 rounded admin-button'
+                              disabled={deleteTopicMutation.isPending}
                             >
                               Cancel
                             </button>
@@ -354,7 +309,7 @@ export default function TopicsPage() {
         </div>
         
         {/* Pagination */}
-        {pagination && (
+        {!isLoading && pagination && pagination.totalPages > 0 && (
           <div className='flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200'>
             <div className='text-sm text-gray-600'>
               Showing {topics.length} of {pagination.totalItems} topics
@@ -372,7 +327,7 @@ export default function TopicsPage() {
               {/* Page numbers */}
               {Array.from({length: pagination.totalPages}, (_, i) => i + 1).map(page => (
                 <button
-                  key={"page"}
+                  key={page}
                   onClick={() => handlePageChange(page)}
                   className={`w-8 h-8 flex items-center justify-center rounded-md ${
                     currentPage === page 
@@ -383,6 +338,7 @@ export default function TopicsPage() {
                   {page}
                 </button>
               ))}
+              
               <button 
                 onClick={() => handlePageChange(Math.min(pagination.totalPages, currentPage + 1))}
                 disabled={currentPage === pagination.totalPages}

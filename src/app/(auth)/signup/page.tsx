@@ -4,14 +4,26 @@ import React, { useState, FormEvent, useEffect } from 'react';
 import Link from 'next/link';
 import { FaGoogle, FaGithub, FaFacebook } from 'react-icons/fa';
 import { FaMicrosoft } from 'react-icons/fa6';
-import { useAuth, RegisterCredentials } from '@/client/hooks/auth';
 import { useRouter } from 'next/navigation';
 import { signIn, getProviders } from 'next-auth/react';
 import Notification from '@/client/components/ui/Notification';
+import { LoadingState } from '@/client/components/common';
+import { useAuthQuery } from '@/client/hooks/auth';
+
+// Interface for RegisterCredentials
+interface RegisterCredentials {
+  name: string;
+  email: string;
+  password: string;
+}
 
 export default function SignUpPage() {
   const router = useRouter();
-  const { register, isLoading, error } = useAuth();
+  
+  // Use React Query hooks for authentication
+  const { useRegister } = useAuthQuery();
+  const register = useRegister();
+  
   const [formData, setFormData] = useState<RegisterCredentials & { confirmPassword: string }>({
     name: '',
     email: '',
@@ -146,21 +158,22 @@ export default function SignUpPage() {
     }
     
     try {
-      // Call register function with only the required fields
+      // Call register mutation with only the required fields
       const { confirmPassword, ...credentials } = formData;
-      const result = await register(credentials);
+      await register.mutateAsync(credentials);
       
-      if (result) {
-        // Show success notification
-        setNotification({
-          show: true,
-          type: 'success',
-          message: 'Your account was created successfully!',
-          details: 'Redirecting to dashboard...'
-        });
-        
-        // The register function in useAuth now handles the redirect to dashboard
-      }
+      // Show success notification
+      setNotification({
+        show: true,
+        type: 'success',
+        message: 'Your account was created successfully!',
+        details: 'Redirecting to dashboard...'
+      });
+      
+      // Delay redirect to ensure notification is visible
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1500);
     } catch (err: unknown) {
       console.error('Registration error:', err);
       setNotification({
@@ -173,14 +186,14 @@ export default function SignUpPage() {
   
   // Show error notification when there's an auth error
   React.useEffect(() => {
-    if (error) {
+    if (register.error) {
       setNotification({
         show: true,
         type: 'error',
-        message: error.message
+        message: (register.error as Error).message || 'Registration failed. Please try again.'
       });
     }
-  }, [error]);
+  }, [register.error]);
 
   // Add a useEffect to check available providers on component mount
   useEffect(() => {
@@ -413,10 +426,10 @@ export default function SignUpPage() {
           <div>
             <button
               type='submit'
-              disabled={isLoading}
+              disabled={register.isPending}
               className='group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
             >
-              {isLoading ? 'Creating account...' : 'Sign up'}
+              {register.isPending ? <LoadingState variant="button" message="Creating account..." /> : 'Sign up'}
             </button>
           </div>
           
@@ -433,7 +446,7 @@ export default function SignUpPage() {
             <div className='mt-6 flex flex-col space-y-3'>
               <button
                 onClick={() => handleSocialLogin('google')}
-                disabled={isLoading}
+                disabled={register.isPending}
                 className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
               >
                 <FaGoogle className='h-5 w-5 text-red-500 mr-3' />
@@ -442,7 +455,7 @@ export default function SignUpPage() {
               
               <button
                 onClick={() => handleSocialLogin('github')}
-                disabled={isLoading}
+                disabled={register.isPending}
                 className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
               >
                 <FaGithub className='h-5 w-5 text-gray-900 mr-3' />
@@ -451,7 +464,7 @@ export default function SignUpPage() {
               
               <button
                 onClick={() => handleSocialLogin('facebook')}
-                disabled={isLoading}
+                disabled={register.isPending}
                 className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
               >
                 <FaFacebook className='h-5 w-5 text-[#1877F2] mr-3' />
@@ -460,7 +473,7 @@ export default function SignUpPage() {
               
               <button
                 onClick={() => handleSocialLogin('azure-ad')}
-                disabled={isLoading}
+                disabled={register.isPending}
                 className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
               >
                 <FaMicrosoft className='h-5 w-5 text-[#00A4EF] mr-3' />

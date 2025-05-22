@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { 
   ArrowRightIcon, 
@@ -17,6 +16,9 @@ import { UserCourseStats } from '@/shared/types/courses/course';
 import { UserAchievement } from '@/shared/types/achievement';
 import { UserLoginStreak } from '@/client/components/dashboard/UserLoginStreak';
 import { useUserState } from '@/client/hooks/user/useUserState';
+import { LoadingState } from '@/client/components/common';
+import { useUserQuery } from '@/client/hooks/user';
+import { useDashboardQuery } from '@/client/hooks/dashboard';
 
 // Define EnrolledCourse type if it's not available
 interface EnrolledCourse {
@@ -35,90 +37,60 @@ const mockUpcomingDeadlines = [
 ];
 
 export default function Dashboard() {
-  const { data: session, status } = useSession();
   const { loginStreak } = useUserState();
-  const [stats, setStats] = useState<UserCourseStats>({
-    coursesCompleted: 0,
-    lessonsCompleted: 0,
-    totalHoursLearned: 0,
-    currentStreak: 0
-  });
-
-  const [loading, setLoading] = useState(true);
-  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
-  const [achievements, setAchievements] = useState<UserAchievement[]>([]);
   
-  useEffect(() => {
-    const fetchUserStats = async () => {
-      try {
-        if (session?.user?.id) {
-          // Use axios to call the server action from the client component
-          const apiClient = (await import('@/client/utils/http/api-client')).default;
-          const response = await apiClient.get(`/api/dashboard/stats?userId=${session.user.id}`);
-          const data = response.data;
-          if (data.success) {
-            setStats(data.stats);
-          }
-        }
-      } catch (error: unknown) {
-        console.error('Error fetching user stats:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    const fetchEnrolledCourses = async () => {
-      try {
-        if (session?.user?.id) {
-          const apiClient = (await import('@/client/utils/http/api-client')).default;
-          const response = await apiClient.get(`/api/dashboard/courses/enrolled?userId=${session.user.id}`);
-          const data = response.data;
-          if (data.success && data.courses) {
-            setEnrolledCourses(data.courses);
-          }
-        }
-      } catch (error: unknown) {
-        console.error('Error fetching enrolled courses:', error);
-      }
-    };
-    
-    const fetchAchievements = async () => {
-      try {
-        if (session?.user?.id) {
-          const apiClient = (await import('@/client/utils/http/api-client')).default;
-          const response = await apiClient.get('/api/dashboard/achievements');
-          const data = response.data;
-          if (data.success && data.achievements) {
-            setAchievements(data.achievements);
-          }
-        }
-      } catch (error: unknown) {
-        console.error('Error fetching achievements:', error);
-      }
-    };
-    
-    if (session?.user) {
-      fetchUserStats();
-      fetchEnrolledCourses();
-      fetchAchievements();
-    } else {
-      // If not logged in or session loading, just stop loading after 1s
-      const timer = setTimeout(() => {
-        setLoading(false);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [session]);
+  // Use React Query hooks
+  const { useGetCurrentUser } = useUserQuery();
+  const { useGetUserStats, useGetEnrolledCourses, useGetUserAchievements } = useDashboardQuery();
+  
+  // Get current user
+  const { 
+    data: currentUser, 
+    isLoading: isLoadingUser,
+    error: userError
+  } = useGetCurrentUser();
+  
+  // Get user stats
+  const {
+    data: stats = {
+      coursesCompleted: 0,
+      lessonsCompleted: 0,
+      totalHoursLearned: 0,
+      currentStreak: 0
+    },
+    isLoading: isLoadingStats,
+    error: statsError
+  } = useGetUserStats();
+  
+  // Get enrolled courses
+  const {
+    data: enrolledCourses = [],
+    isLoading: isLoadingCourses,
+    error: coursesError
+  } = useGetEnrolledCourses();
+  
+  // Get achievements
+  const {
+    data: achievements = [],
+    isLoading: isLoadingAchievements,
+    error: achievementsError
+  } = useGetUserAchievements();
+  
+  // Combine loading states
+  const isLoading = isLoadingUser || isLoadingStats || isLoadingCourses || isLoadingAchievements;
+  
+  // Handle errors
+  const hasError = userError || statsError || coursesError || achievementsError;
 
-  if (status === 'loading' || loading) {
+  if (isLoading) {
     return (
       <div className='flex items-center justify-center min-h-screen'>
-        <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500'></div>
+        <LoadingState variant="page" message="Loading dashboard..." />
       </div>
     );
   }
 
-  if (status === 'unauthenticated') {
+  if (!currentUser) {
     return (
       <div className='min-h-screen flex flex-col items-center justify-center'>
         <h1 className='text-2xl font-bold mb-4'>You need to be logged in to view this page</h1>
@@ -127,6 +99,23 @@ export default function Dashboard() {
           className='bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition'
         >
           Log in
+        </Link>
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className='min-h-screen flex flex-col items-center justify-center'>
+        <h1 className='text-2xl font-bold mb-4'>Something went wrong</h1>
+        <p className='text-red-500 mb-4'>
+          {userError?.message || statsError?.message || coursesError?.message || achievementsError?.message || 'An error occurred loading your dashboard'}
+        </p>
+        <Link 
+          href='/' 
+          className='bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition'
+        >
+          Go Home
         </Link>
       </div>
     );
@@ -160,7 +149,7 @@ export default function Dashboard() {
           <div className='flex flex-col md:flex-row md:justify-between md:items-center'>
             <div>
               <h1 className='text-2xl sm:text-3xl font-bold'>
-                Welcome back, {session?.user?.name?.split(' ')[0] || 'Student'}! 👋
+                Welcome back, {currentUser?.name?.split(' ')[0] || 'Student'}! 👋
               </h1>
               <p className='mt-1 text-indigo-100'>
                 Track your progress and continue your learning journey

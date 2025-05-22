@@ -1,27 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Course } from '@/shared/types/courses/course';
+import { useCoursesQuery } from '@/client/hooks/courses';
+import { LoadingState } from '@/client/components/common';
 
 interface CourseCardProps {
   course: Partial<Course> & { id: string; title: string };
-  onEnroll?: (courseId: string) => void;
   isEnrolled?: boolean;
 }
 
-export const CourseCard = ({ course, onEnroll, isEnrolled = false }: CourseCardProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+export const CourseCard = ({ course, isEnrolled = false }: CourseCardProps) => {
+  const router = useRouter();
+  
+  // Get hooks from useCoursesQuery
+  const { useEnrollInCourse } = useCoursesQuery();
+  
+  // Use React Query mutations
+  const enrollMutation = useEnrollInCourse();
   
   const handleEnroll = async () => {
-    if (onEnroll) {
-      setIsLoading(true);
-      try {
-        await onEnroll(course.id);
-      } finally {
-        setIsLoading(false);
-      }
+    try {
+      await enrollMutation.mutateAsync(course.id);
+      router.push(`/learn/${course.id}`);
+      router.refresh();
+    } catch (error: unknown) {
+      console.error('Error enrolling in course:', error);
+      // Error handling is done by the mutation
     }
   };
   
@@ -57,13 +64,13 @@ export const CourseCard = ({ course, onEnroll, isEnrolled = false }: CourseCardP
           {!isEnrolled ? (
             <button 
               onClick={handleEnroll} 
-              disabled={isLoading}
+              disabled={enrollMutation.isPending}
               className='w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors'
             >
-              {isLoading ? 'Đang xử lý...' : 'Đăng ký ngay'}
+              {enrollMutation.isPending ? <LoadingState variant="button" message="Đang xử lý..." /> : 'Đăng ký ngay'}
             </button>
           ) : (
-            <Link href={`/courses/${course.id}`} className='block w-full text-center py-2 border border-blue-600 text-blue-600 hover:bg-blue-50 rounded-md transition-colors'>
+            <Link href={`/learn/${course.id}`} className='block w-full text-center py-2 border border-blue-600 text-blue-600 hover:bg-blue-50 rounded-md transition-colors'>
               Tiếp tục học
             </Link>
           )}

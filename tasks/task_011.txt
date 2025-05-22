@@ -1,6 +1,6 @@
 # Task ID: 11
 # Title: Create useCoursesQuery Hook for Course Data CRUD Operations
-# Status: pending
+# Status: done
 # Dependencies: 4, 6, 8
 # Priority: high
 # Description: Implement a custom React Query hook in src/client/hooks/courses/useCoursesQuery.ts that provides CRUD operations for course data according to PRD sections 3.7 and 4.1.
@@ -68,25 +68,25 @@ Testing for the useCoursesQuery hook should be comprehensive and verify both fun
    - Alignment with PRD specifications in sections 3.7 and 4.1
 
 # Subtasks:
-## 1. Implement course fetching logic [pending]
+## 1. Implement course fetching logic [done]
 ### Dependencies: None
 ### Description: Create the main query function to fetch courses from the API
 ### Details:
 Utilize the API client to create a function that fetches courses. Handle pagination and any necessary query parameters. Implement error handling and loading states.
 
-## 2. Develop course mutation functions [pending]
+## 2. Develop course mutation functions [done]
 ### Dependencies: 11.1
 ### Description: Create functions for adding, updating, and deleting courses
 ### Details:
 Implement separate functions for adding a new course, updating an existing course, and deleting a course. Ensure proper error handling and optimistic updates where applicable.
 
-## 3. Implement data normalization [pending]
+## 3. Implement data normalization [done]
 ### Dependencies: 11.1, 11.2
 ### Description: Create utility functions to normalize and denormalize course data
 ### Details:
 Develop functions to convert API response data into a normalized format for efficient state management. Create corresponding denormalization functions for data presentation.
 
-## 4. Integrate and test the useCoursesQuery hook [pending]
+## 4. Integrate and test the useCoursesQuery hook [done]
 ### Dependencies: 11.1, 11.2, 11.3
 ### Description: Combine all components into the final hook and perform thorough testing
 ### Details:

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useFAQs } from '@/client/hooks/faq/useFAQs';
 import { FAQ } from '@prisma/client';
+import { LoadingState } from '@/client/components/common';
 import { 
   ChevronDownIcon, 
   ChevronUpIcon, 
@@ -140,8 +141,7 @@ export default function FAQSection() {
       {/* Loading state */}
       {loading && (
         <div className='text-center py-12'>
-          <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mx-auto'></div>
-          <p className='mt-4 text-gray-600'>Loading FAQs...</p>
+          <LoadingState variant="section" message="Loading FAQs..." />
         </div>
       )}
 

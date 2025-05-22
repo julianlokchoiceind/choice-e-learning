@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useCourses } from '@/client/hooks/courses';
+import { useState, useEffect, useMemo } from 'react';
+import { useCoursesQuery } from '@/client/hooks/courses';
+import { useTopicsQuery } from '@/client/hooks/topics';
 import Link from 'next/link';
 import Image from 'next/image';
 import { TopicsFilter } from '@/client/components/topics';
 import { Course } from '@/shared/types/courses/course';
+import { LoadingState } from '@/client/components/common';
 import { 
   MagnifyingGlassIcon, 
   FunnelIcon,
@@ -16,116 +18,142 @@ import {
   ChevronRightIcon 
 } from '@heroicons/react/24/outline';
 
-export default function CoursesSection() {
-  const {
-    loading,
-    error,
-    courses,
-    topics,
-    levels,
-    pagination,
-    fetchCourses,
-    fetchTopics,
-  } = useCourses(false); // false = public view
+// Define pagination interface
+interface Pagination {
+  page: number;
+  totalPages: number;
+  totalItems: number;
+  hasNextPage?: boolean;
+  hasPrevPage?: boolean;
+}
 
+export default function CoursesSection() {
+  // Get hooks from useCoursesQuery and useTopicsQuery
+  const { useGetCourses } = useCoursesQuery();
+  const { useGetTopics } = useTopicsQuery();
+  
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLevel, setSelectedLevel] = useState<string>('');
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   
+  // State for pagination
+  const [pagination, setPagination] = useState<Pagination>({
+    page: 1,
+    totalPages: 1,
+    totalItems: 0
+  });
+  
+  // Available levels (hardcoded for now, could be fetched from API)
+  const levels = ['beginner', 'intermediate', 'advanced'];
+  
+  // Create filter parameters
+  const coursesFilter = useMemo(() => ({
+    search: searchQuery || undefined,
+    level: selectedLevel === '' ? undefined : selectedLevel.toLowerCase(),
+    topics: selectedTopics.length > 0 ? selectedTopics : undefined,
+    page: currentPage,
+    limit: 9,
+    sortBy: 'createdAt',
+    sortOrder: 'desc' as const,
+    _cache: Date.now() // Cache-busting parameter
+  }), [searchQuery, selectedLevel, selectedTopics, currentPage]);
+  
+  // Use React Query to fetch courses - with no transformation
+  const { 
+    data: courses = [], 
+    isLoading, 
+    error: coursesError,
+    refetch: refetchCourses
+  } = useGetCourses();
+  
+  // Use React Query to fetch topics
+  const { data: topicsData } = useGetTopics();
+  
+  // Extract topics
+  const topics = Array.isArray(topicsData) ? topicsData.map(t => t.name) : [];
+  
+  // Format error message
+  const error = coursesError ? 
+    (coursesError instanceof Error ? coursesError.message : 'Failed to fetch courses') : 
+    null;
+
+  // Update pagination state whenever courses change
+  useEffect(() => {
+    // If we have API response with pagination info, we would update it here
+    // For now, we'll use a simple calculation based on the array length
+    setPagination({
+      page: currentPage,
+      totalPages: Math.ceil(courses.length / 9),
+      totalItems: courses.length
+    });
+  }, [courses, currentPage]);
+
   // For debugging topics filter
   useEffect(() => {
     console.log('Selected topics updated:', selectedTopics);
   }, [selectedTopics]);
 
+  // Effect to refetch when filter parameters change
   useEffect(() => {
-    // Fetch courses on initial load, with cache control to prevent stale data
-    const fetchInitialData = async () => {
-      // Force new request by adding a cache-busting parameter
-      await fetchCourses({
-        page: currentPage,
-        limit: 9,
-        sortBy: 'createdAt',
-        sortOrder: 'desc',
-        _cache: Date.now() // Cache-busting parameter
-      });
-    };
-    
-    fetchInitialData();
-    
-    // Fetch topics/categories
-    fetchTopics();
+    refetchCourses();
     
     // Set up a refresh interval to check for updates
     const refreshInterval = setInterval(() => {
-      fetchInitialData();
+      refetchCourses();
     }, 30000); // Refresh every 30 seconds
     
     return () => clearInterval(refreshInterval);
-  }, [fetchCourses, fetchTopics, currentPage]);
+  }, [coursesFilter, refetchCourses]);
 
   const handleSearch = () => {
-    fetchCourses({
-      search: searchQuery,
-      level: selectedLevel === '' ? undefined : selectedLevel.toLowerCase(),
-      topics: selectedTopics.length > 0 ? selectedTopics : undefined,
-      page: 1,
-      limit: 9,
-    });
     setCurrentPage(1);
+    refetchCourses();
   };
 
   const handleLevelChange = (level: string) => {
     setSelectedLevel(level);
-    fetchCourses({
-      search: searchQuery,
-      level: level === '' ? undefined : level.toLowerCase(),
-      topics: selectedTopics.length > 0 ? selectedTopics : undefined,
-      page: 1,
-      limit: 9,
-    });
     setCurrentPage(1);
+    // Refetch will happen automatically due to the dependency in useEffect
   };
-
-  // Topic changes are now handled by the TopicsFilter component
-  useEffect(() => {
-    // When selectedTopics changes, fetch courses with new filter
-    // Skip initial render
-    if (selectedTopics.length > 0 || currentPage > 1) {
-      fetchCourses({
-        search: searchQuery,
-        level: selectedLevel === '' ? undefined : selectedLevel.toLowerCase(),
-        topics: selectedTopics.length > 0 ? selectedTopics : undefined,
-        page: 1,
-        limit: 9,
-      });
-      setCurrentPage(1);
-    }
-  }, [selectedTopics]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    fetchCourses({
-      search: searchQuery,
-      level: selectedLevel === '' ? undefined : selectedLevel.toLowerCase(),
-      topics: selectedTopics.length > 0 ? selectedTopics : undefined,
-      page,
-      limit: 9,
-    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Refetch will happen automatically due to the dependency in useEffect
   };
 
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedLevel('');
     setSelectedTopics([]);
-    fetchCourses({
-      page: 1,
-      limit: 9,
-      level: undefined, // Explicitly set to undefined to clear level filter
-    });
     setCurrentPage(1);
+    // Refetch will happen automatically due to the dependency in useEffect
   };
+
+  // Filter courses based on current filter settings
+  const filteredCourses = useMemo(() => {
+    return courses.filter(course => {
+      // Apply search filter
+      if (searchQuery && !course.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+      
+      // Apply level filter
+      if (selectedLevel && course.level !== selectedLevel) {
+        return false;
+      }
+      
+      // Apply topics filter
+      if (selectedTopics.length > 0 && 
+          (!course.topics || !course.topics.some(topic => selectedTopics.includes(topic)))) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [courses, searchQuery, selectedLevel, selectedTopics]);
 
   // Placeholder image for courses without an image
   const placeholderImage = '/images/courses/course-placeholder.jpg';
@@ -151,6 +179,11 @@ export default function CoursesSection() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className='w-full pl-10 px-3 py-2 border border-gray-300 rounded-md input-focus text-gray-900'
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch();
+                  }
+                }}
               />
             </div>
           </div>
@@ -168,7 +201,7 @@ export default function CoursesSection() {
             >
               <option value=''>All Levels</option>
               {levels.map((level) => (
-                <option key={"level"} value={"level.toLowerCase()"}>
+                <option key={level} value={level}>
                   {level.charAt(0).toUpperCase() + level.slice(1)}
                 </option>
               ))}
@@ -203,9 +236,9 @@ export default function CoursesSection() {
       </div>
       
       {/* Loading state */}
-      {loading && (
+      {isLoading && (
         <div className='flex justify-center items-center h-64'>
-          <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500'></div>
+          <LoadingState variant="section" message="Loading courses..." />
         </div>
       )}
       
@@ -217,7 +250,7 @@ export default function CoursesSection() {
       )}
       
       {/* No courses found */}
-      {!loading && (!courses || courses.length === 0) && (
+      {!isLoading && (!filteredCourses || filteredCourses.length === 0) && (
         <div className='bg-yellow-50 text-yellow-700 p-8 rounded-lg text-center'>
           <h3 className='text-xl font-bold mb-2'>No courses found</h3>
           <p>Try adjusting your search or filter criteria.</p>
@@ -225,9 +258,9 @@ export default function CoursesSection() {
       )}
       
       {/* Course grid */}
-      {!loading && courses && courses.length > 0 && (
+      {!isLoading && filteredCourses && filteredCourses.length > 0 && (
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {courses.map((course) => (
+          {filteredCourses.map((course) => (
             <div key={course.id} className='border rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow'>
               <div className='relative h-48'>
                 <Image
@@ -251,12 +284,13 @@ export default function CoursesSection() {
                   </span>
                 </div>
                 <p className='text-gray-600 mb-4 line-clamp-2'>{course.description}</p>
+                
                 <div className='flex flex-wrap gap-1 mb-4'>
                   {Array.isArray(course.topics) && course.topics
                     .filter((topic: string) => topic !== 'featured') // Loại bỏ topic 'featured' khỏi hiển thị
                     .slice(0, 3).map((topic: string) => (
                     <span 
-                      key={"topic"} 
+                      key={topic} 
                       className='bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded cursor-pointer hover:bg-blue-100'
                       onClick={() => {
                         if (!selectedTopics.includes(topic)) {
@@ -273,7 +307,8 @@ export default function CoursesSection() {
                     </span>
                   )}
                 </div>
-                <div className='flex justify-between items-center'>
+                
+                <div className='flex justify-between items-center mt-4'>
                   <span className='text-lg font-bold'>${course.price.toFixed(2)}</span>
                   <Link href={`/courses/${course.id}`} className='bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md'>
                     View Course
@@ -304,7 +339,7 @@ export default function CoursesSection() {
             {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
               (page) => (
                 <button
-                  key={"page"}
+                  key={page}
                   onClick={() => handlePageChange(page)}
                   className={`px-3 py-1 rounded-md ${
                     currentPage === page

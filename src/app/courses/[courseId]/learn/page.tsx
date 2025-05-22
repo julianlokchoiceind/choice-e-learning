@@ -16,6 +16,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
 import { CourseCurriculumSidebar } from '@/client/components/layout/CourseCurriculumSidebar';
+import { LoadingState } from '@/client/components/common';
 
 interface Lesson {
   id: string;
@@ -232,7 +233,7 @@ export default function CourseLearnPage() {
   if (loading) {
     return (
       <div className='flex justify-center items-center h-screen'>
-        <div className='animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500'></div>
+        <LoadingState variant="page" message="Loading course content..." />
       </div>
     );
   }

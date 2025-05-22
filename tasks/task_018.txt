@@ -1,6 +1,6 @@
 # Task ID: 18
 # Title: Update Domain Hook Exports in Index Files
-# Status: pending
+# Status: done
 # Dependencies: 11, 12, 13, 14, 15, 16, 17
 # Priority: medium
 # Description: Update the index.ts files for each domain to properly export the newly created React Query hooks according to the guidelines in PRD section 4.5.

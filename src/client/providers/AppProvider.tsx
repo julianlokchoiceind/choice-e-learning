@@ -9,6 +9,9 @@ import SessionProvider from './SessionProvider';
 interface AppProviderProps {
   children: React.ReactNode;
   session?: Session | null;
+  enableDevTools?: boolean;
+  initialIsOpen?: boolean;
+  position?: 'bottom' | 'top' | 'left' | 'right';
 }
 
 /**
@@ -19,10 +22,25 @@ interface AppProviderProps {
  * - QueryProvider (ReactQueryProvider) as the outermost provider
  * - ToastProvider nested inside QueryProvider
  * - SessionProvider for authentication state
+ * 
+ * DevTools Configuration:
+ * - enableDevTools: Enable/disable React Query DevTools (default: true in development)
+ * - initialIsOpen: Whether DevTools should be open by default (default: false)
+ * - position: Position of the DevTools panel ('bottom', 'top', 'left', 'right')
  */
-const AppProvider = ({ children, session }: AppProviderProps) => {
+const AppProvider = ({
+  children,
+  session,
+  enableDevTools = process.env.NODE_ENV === 'development',
+  initialIsOpen = false,
+  position = 'bottom'
+}: AppProviderProps) => {
   return (
-    <QueryProvider>
+    <QueryProvider
+      enableDevTools={enableDevTools}
+      initialIsOpen={initialIsOpen}
+      position={position}
+    >
       <ToastProvider>
         <SessionProvider session={session}>
           {children}

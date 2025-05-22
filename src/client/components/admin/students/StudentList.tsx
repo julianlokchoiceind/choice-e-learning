@@ -13,27 +13,46 @@ import {
   UserGroupIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
-import { useStudents } from '@/client/hooks/students';
+import { useStudentsQuery } from '@/client/hooks/students';
+import { LoadingState } from '@/client/components/common';
+import { StudentQuery } from '@/shared/types/students/student';
 
 export default function StudentList() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
+  // Create React Query hooks from useStudentsQuery
   const { 
-    students: apiStudents, 
-    loading, 
-    error, 
-    pagination, 
-    fetchStudents, 
-    deleteStudent 
-  } = useStudents();
+    useGetStudents,
+    useDeleteStudent
+  } = useStudentsQuery();
   
-  // Create local state to manage students, which will be updated from API
-  const [students, setStudents] = useState(apiStudents || []);
+  // Get current page from URL or default to 1
+  const currentPage = parseInt(searchParams.get('page') || '1');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  
+  // Create query parameters object
+  const queryParams: StudentQuery = {
+    page: currentPage,
+    limit: 10,
+    search: searchQuery || undefined,
+    sortBy,
+    sortOrder,
+  };
+  
+  // Use React Query to fetch students
+  const { 
+    data: studentsData,
+    isLoading,
+    error,
+    refetch
+  } = useGetStudents(queryParams);
+  
+  // Use delete mutation
+  const deleteStudentMutation = useDeleteStudent();
   
   // Add CSS for buttons with no transform on hover - matching sidebar behavior
   useEffect(() => {
@@ -67,87 +86,11 @@ export default function StudentList() {
     };
   }, []);
   
-  // When API students change, update local state
-  useEffect(() => {
-    if (apiStudents && apiStudents.length > 0) {
-      console.log('Updating local students state from API:', apiStudents.length, 'items');
-      setStudents(apiStudents);
-    }
-  }, [apiStudents]);
-
-  // Get current page from URL or default to 1
-  const currentPage = parseInt(searchParams.get('page') || '1');
-  
-  // Debugging effect to track state
-  useEffect(() => {
-    console.log('STATE CHANGE: loading =', loading);
-    console.log('STATE CHANGE: students =', students?.length || 0, 'items');
-    console.log('STATE CHANGE: pagination =', pagination);
-    if (students && students.length > 0) {
-      console.log('First student:', students[0]);
-    }
-  }, [loading, students, pagination]);
-  
-  useEffect(() => {
-    // Call fetchStudents with the current parameters when component mounts or page changes
-    const fetchData = async () => {
-      try {
-        console.log('ADMIN UI: Fetching students for page:', currentPage);
-        console.log('ADMIN UI: Before fetch - Current students:', students);
-        
-        const result = await fetchStudents({
-          page: currentPage,
-          limit: 10,
-          search: searchQuery || undefined,
-          sortBy,
-          sortOrder,
-        });
-        
-        console.log('ADMIN UI: Direct result from fetchStudents:', {
-          dataLength: result?.data?.length || 0,
-          meta: result?.meta
-        });
-        
-        // Need to access students after state update
-        setTimeout(() => {
-          console.log('ADMIN UI: After fetch - Current students:', students);
-          console.log('ADMIN UI: After fetch - Student count:', students?.length || 0);
-          
-          // Force re-render if students is empty but we have data in the result
-          if ((!students || students.length === 0) && result?.data?.length > 0) {
-            console.log('ADMIN UI: Forcing manual state update with', result.data.length, 'students');
-            setStudents([...result.data]);
-          }
-        }, 100);
-      } catch (err: unknown) {
-        console.error('Error in StudentList useEffect:', err);
-        // Silent error handling - no UI error display
-      }
-    };
-    
-    fetchData();
-    // We're intentionally only depending on page changes, search query, and sorting
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, fetchStudents, searchQuery, sortBy, sortOrder]);
-  
-  // Handle search with better error management
+  // Handle search
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Search submitted with query:', searchQuery);
-    
-    try {
-      fetchStudents({
-        page: 1,
-        limit: 10,
-        search: searchQuery,
-        sortBy,
-        sortOrder,
-      });
-      router.push('/admin/students?page=1');
-    } catch (err: unknown) {
-      console.error('Error in search:', err);
-      // Silent error handling
-    }
+    router.push('/admin/students?page=1');
+    refetch();
   };
 
   // Handle sort change from dropdown
@@ -196,15 +139,6 @@ export default function StudentList() {
     
     setSortBy(newSortBy);
     setSortOrder(newSortOrder);
-    
-    fetchStudents({
-      page: 1,
-      limit: 10,
-      search: searchQuery || undefined,
-      sortBy: newSortBy,
-      sortOrder: newSortOrder,
-    });
-    
     router.push('/admin/students?page=1');
   };
   
@@ -234,17 +168,12 @@ export default function StudentList() {
       // Set deleting to null first to hide confirm/cancel buttons
       setDeletingId(null);
       
-      // Hide any visual indicator that deletion is in progress
-      // Use simple delete without any UI feedback
-      const result = await deleteStudent(id);
-      console.log('Delete result:', result);
-      
-      // Update the local state to remove the deleted student
-      setStudents(prevStudents => prevStudents.filter(student => student.id !== id));
+      // Use React Query mutation to delete
+      await deleteStudentMutation.mutateAsync(id);
       
     } catch (err: unknown) {
       console.error('Error deleting student:', err);
-      // Silently handle error - no notification displayed
+      // Error is handled by the mutation
     }
   };
   
@@ -269,6 +198,10 @@ export default function StudentList() {
     if (sortBy === 'grade' && sortOrder === 'desc') return 'gradeDesc';
     return 'newest'; // Default
   };
+  
+  // Extract students and pagination from data
+  const students = studentsData?.data || [];
+  const pagination = studentsData?.meta;
   
   return (
     <div className='space-y-6'>
@@ -343,11 +276,10 @@ export default function StudentList() {
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
-              {loading ? (
+              {isLoading ? (
                 <tr>
                   <td colSpan={7} className='text-center py-10'>
-                    <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto'></div>
-                    <p className='mt-2 text-gray-500'>Loading students...</p>
+                    <LoadingState variant="table" message="Loading students..." />
                   </td>
                 </tr>
               ) : students && students.length > 0 ? (

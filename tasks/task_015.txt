@@ -1,6 +1,6 @@
 # Task ID: 15
 # Title: Create useAuthQuery Hook for Authentication Operations
-# Status: pending
+# Status: done
 # Dependencies: 4, 6, 8
 # Priority: high
 # Description: Create a new useAuthQuery hook in src/client/hooks/auth/useAuthQuery.ts that provides authentication operations including login, registration, logout, and session management according to project requirements.

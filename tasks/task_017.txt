@@ -1,6 +1,6 @@
 # Task ID: 17
 # Title: Create useStudentsQuery Hook for Student Data Management
-# Status: pending
+# Status: done
 # Dependencies: 4, 6, 8
 # Priority: medium
 # Description: Create a new hook in src/client/hooks/students/useStudentsQuery.ts that provides functionality for fetching student data and performing CRUD operations related to students.

@@ -10,6 +10,7 @@ import {
   PencilSquareIcon, 
   QuestionMarkCircleIcon 
 } from '@heroicons/react/24/outline';
+import { LoadingState } from '@/client/components/common';
 
 export default function FAQsAdminPage() {
   const {
@@ -195,8 +196,7 @@ export default function FAQsAdminPage() {
               {loading ? (
                 <tr>
                   <td colSpan={4} className='text-center py-10'>
-                    <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500 mx-auto'></div>
-                    <p className='mt-2 text-gray-500'>Loading FAQs...</p>
+                    <LoadingState variant="table" message="Loading FAQs..." />
                   </td>
                 </tr>
               ) : faqs.length === 0 ? (

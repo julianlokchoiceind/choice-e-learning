@@ -4,15 +4,26 @@ import React, { useState, FormEvent, useEffect } from 'react';
 import Link from 'next/link';
 import { FaGoogle, FaGithub, FaFacebook } from 'react-icons/fa';
 import { FaMicrosoft } from 'react-icons/fa6';
-import { useAuth, LoginCredentials } from '@/client/hooks/auth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn, getProviders } from 'next-auth/react';
 import Notification from '@/client/components/ui/Notification';
+import { LoadingState } from '@/client/components/common';
+import { useAuthQuery } from '@/client/hooks/auth';
+
+// Interface for LoginCredentials
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, isLoading, error } = useAuth();
+  
+  // Use React Query hooks for authentication
+  const { useLogin } = useAuthQuery();
+  const login = useLogin();
+  
   const [formData, setFormData] = useState<LoginCredentials>({
     email: '',
     password: '',
@@ -105,22 +116,20 @@ export default function LoginPage() {
     }
     
     try {
-      // Call login function
-      const result = await login(formData);
+      // Call login mutation from useAuthQuery
+      await login.mutateAsync(formData);
       
-      if (result) {
-        // Show success notification
-        setNotification({
-          show: true,
-          type: 'success',
-          message: 'Successfully logged in! Please wait...'
-        });
-        
-        // Delay redirect to ensure notification is visible
-        setTimeout(() => {
-          // Redirect will happen via next-auth after this
-        }, 1500);
-      }
+      // Show success notification
+      setNotification({
+        show: true,
+        type: 'success',
+        message: 'Successfully logged in! Please wait...'
+      });
+      
+      // Delay redirect to ensure notification is visible
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1500);
     } catch (err: unknown) {
       console.error('Login error:', err);
       setNotification({
@@ -189,17 +198,13 @@ export default function LoginPage() {
     }
   };
   
-  // Show notification when there's an auth error or success message
+  // Show notification when there's an error or success message from login mutation
   useEffect(() => {
-    if (error) {
-      // Check if this is an actual error or just an informational message
-      // We use status code 200 in useAuth.ts to indicate informational messages
-      const notificationType = error.status === 200 ? 'success' : 'error';
-      
+    if (login.error) {
       setNotification({
         show: true,
-        type: notificationType,
-        message: error.message
+        type: 'error',
+        message: (login.error as Error).message || 'Login failed. Please try again.'
       });
     }
     
@@ -228,7 +233,7 @@ export default function LoginPage() {
         setFormData(prev => ({ ...prev, email }));
       }
     }
-  }, [error, searchParams]);
+  }, [login.error, searchParams]);
   
   // Pre-fill email if provided as a query param (e.g., from registration)
   useEffect(() => {
@@ -340,10 +345,10 @@ export default function LoginPage() {
           <div>
             <button
               type='submit'
-              disabled={isLoading}
+              disabled={login.isPending}
               className='group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {login.isPending ? <LoadingState variant="button" message="Signing in..." /> : 'Sign in'}
             </button>
           </div>
         </form>
@@ -361,7 +366,7 @@ export default function LoginPage() {
           <div className='mt-6 flex flex-col space-y-3'>
             <button
               onClick={() => handleSocialLogin('google')}
-              disabled={isLoading}
+              disabled={login.isPending}
               className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
             >
               <FaGoogle className='h-5 w-5 text-red-500 mr-3' />
@@ -370,7 +375,7 @@ export default function LoginPage() {
             
             <button
               onClick={() => handleSocialLogin('github')}
-              disabled={isLoading}
+              disabled={login.isPending}
               className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
             >
               <FaGithub className='h-5 w-5 text-gray-900 mr-3' />
@@ -379,7 +384,7 @@ export default function LoginPage() {
             
             <button
               onClick={() => handleSocialLogin('facebook')}
-              disabled={isLoading}
+              disabled={login.isPending}
               className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
             >
               <FaFacebook className='h-5 w-5 text-[#1877F2] mr-3' />
@@ -388,7 +393,7 @@ export default function LoginPage() {
             
             <button
               onClick={() => handleSocialLogin('azure-ad')}
-              disabled={isLoading}
+              disabled={login.isPending}
               className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
             >
               <FaMicrosoft className='h-5 w-5 text-[#00A4EF] mr-3' />

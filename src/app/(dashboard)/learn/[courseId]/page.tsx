@@ -37,7 +37,7 @@ export default async function Page({ params }: PageProps) {
     <div className='page-container'>
       <h1>{course.title}</h1>
       
-      <Suspense fallback={<LoadingState />}>
+      <Suspense fallback={<div className="py-8"><LoadingState variant="section" message="Loading course content..." /></div>}>
         {/* Course content and lessons list */}
       </Suspense>
     </div>

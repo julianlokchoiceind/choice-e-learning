@@ -1,6 +1,6 @@
 # Task ID: 16
 # Title: Create useUserQuery Hook for User Profile Data and Operations
-# Status: pending
+# Status: done
 # Dependencies: 4, 6, 8
 # Priority: medium
 # Description: Create a new hook in src/client/hooks/user/useUserQuery.ts that provides access to user profile data and operations such as updating user information and managing user preferences.

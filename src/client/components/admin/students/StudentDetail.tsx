@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
 import { 
   ArrowLeftIcon,
   PencilSquareIcon,
@@ -20,21 +19,11 @@ import {
   CheckCircleIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
+import { LoadingState } from '@/client/components/common';
+import { useStudentsQuery } from '@/client/hooks/students';
+import { FormattedStudent } from '@/shared/types/students/student';
 
-interface Student {
-  id: string;
-  name?: string;
-  email: string;
-  phone?: string | null;
-  address?: string | null;
-  city?: string | null;
-  grade?: string | null;
-  imageUrl?: string | null;
-  createdAt: string | Date;
-  updatedAt: string | Date;
-  role?: string;
-}
-
+// These interfaces should be moved to shared types in a real implementation
 interface Course {
   id: string;
   title: string;
@@ -61,103 +50,84 @@ interface StudentDetailProps {
 
 export const StudentDetail = ({ studentId }: StudentDetailProps) => {
   const router = useRouter();
-  const [student, setStudent] = useState<Student | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   
+  // Get hooks from useStudentsQuery
+  const { 
+    useGetStudentById,
+    useDeleteStudent
+  } = useStudentsQuery();
+  
+  // Use React Query to fetch student by ID
+  const { 
+    data: student, 
+    isLoading, 
+    error: studentError 
+  } = useGetStudentById(studentId);
+  
+  // Use React Query mutation for delete
+  const deleteStudentMutation = useDeleteStudent();
+  
   useEffect(() => {
-    const fetchStudentData = async () => {
-      try {
-        const response = await axios.get(`/api/admin/students/${studentId}`);
-        if (response.data && response.data.success && response.data.data) {
-          setStudent(response.data.data);
-          setError(null);
-          
-          // Simulate enrolled courses data for demo
-          // In production, this would come from API
-          const mockCourses: Course[] = [
-            {
-              id: '1',
-              title: 'React Fundamentals',
-              price: 99.00,
-              level: 'intermediate',
-              progress: 65,
-              status: 'in_progress',
-              enrolledAt: new Date('2025-04-20')
-            },
-            {
-              id: '2',
-              title: 'HTML Course',
-              price: 20.00,
-              level: 'beginner',
-              progress: 100,
-              status: 'completed',
-              enrolledAt: new Date('2025-04-18')
-            }
-          ];
-          setEnrolledCourses(mockCourses);
-          
-          // Simulate payment history for demo
-          // In production, this would come from API
-          const mockPayments: Payment[] = [
-            {
-              id: 'pay1',
-              date: new Date('2025-04-20'),
-              course: 'React Fundamentals',
-              courseId: '1',
-              method: 'Credit Card',
-              amount: 99.00,
-              status: 'completed'
-            },
-            {
-              id: 'pay2',
-              date: new Date('2025-04-18'),
-              course: 'HTML Course',
-              courseId: '2',
-              method: 'PayPal',
-              amount: 20.00,
-              status: 'completed'
-            }
-          ];
-          setPayments(mockPayments);
-          
-        } else {
-          throw new Error('Invalid API response format');
-        }
-      } catch (error: unknown) {
-        console.error('Error fetching student:', error);
-        setError('Failed to fetch student details. Please try again.');
-      } finally {
-        setLoading(false);
+    // Simulate enrolled courses data for demo
+    // In production, this would come from API
+    const mockCourses: Course[] = [
+      {
+        id: '1',
+        title: 'React Fundamentals',
+        price: 99.00,
+        level: 'intermediate',
+        progress: 65,
+        status: 'in_progress',
+        enrolledAt: new Date('2025-04-20')
+      },
+      {
+        id: '2',
+        title: 'HTML Course',
+        price: 20.00,
+        level: 'beginner',
+        progress: 100,
+        status: 'completed',
+        enrolledAt: new Date('2025-04-18')
       }
-    };
+    ];
+    setEnrolledCourses(mockCourses);
     
-    fetchStudentData();
-  }, [studentId]);
+    // Simulate payment history for demo
+    // In production, this would come from API
+    const mockPayments: Payment[] = [
+      {
+        id: 'pay1',
+        date: new Date('2025-04-20'),
+        course: 'React Fundamentals',
+        courseId: '1',
+        method: 'Credit Card',
+        amount: 99.00,
+        status: 'completed'
+      },
+      {
+        id: 'pay2',
+        date: new Date('2025-04-18'),
+        course: 'HTML Course',
+        courseId: '2',
+        method: 'PayPal',
+        amount: 20.00,
+        status: 'completed'
+      }
+    ];
+    setPayments(mockPayments);
+  }, []);
   
   const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this student?')) {
       try {
-        const response = await axios.delete(`/api/admin/students/${studentId}`);
-        if (response.data && response.data.success) {
-          // Nếu xóa thành công, quay về trang danh sách
-          router.push('/admin/students');
-        } else {
-          throw new Error(response.data?.error || 'Unknown error');
-        }
+        await deleteStudentMutation.mutateAsync(studentId);
+        // If deletion is successful, navigate back to students list
+        router.push('/admin/students');
       } catch (error: unknown) {
         console.error('Error deleting student:', error);
-        setError(
-          typeof error === 'object' && error !== null && 'response' in error && 
-          error.response && typeof error.response === 'object' && 'data' in error.response && 
-          error.response.data && typeof error.response.data === 'object' && 'error' in error.response.data
-            ? String(error.response.data.error)
-            : typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string'
-              ? error.message
-              : 'Failed to delete student. Please try again.'
-        );
+        // Error handling is done by the mutation
       }
     }
   };
@@ -171,19 +141,25 @@ export const StudentDetail = ({ studentId }: StudentDetailProps) => {
       .toUpperCase();
   };
   
-  if (loading) {
+  // Show loading state
+  if (isLoading) {
     return (
       <div className='flex justify-center items-center min-h-[60vh]'>
-        <div className='animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500'></div>
+        <LoadingState variant="page" message="Loading student details..." />
       </div>
     );
   }
   
-  if (error || !student) {
+  // Show error state
+  if (studentError || !student) {
+    const errorMessage = studentError instanceof Error 
+      ? studentError.message 
+      : 'Failed to fetch student data';
+    
     return (
       <div className='text-center py-10'>
         <h1 className='text-2xl font-bold text-red-600 mb-4'>Error</h1>
-        <p className='text-gray-600 mb-6'>{error || 'Student not found'}</p>
+        <p className='text-gray-600 mb-6'>{errorMessage || 'Student not found'}</p>
         <Link 
           href='/admin/students' 
           className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700'
@@ -193,6 +169,15 @@ export const StudentDetail = ({ studentId }: StudentDetailProps) => {
       </div>
     );
   }
+  
+  // Format dates for display
+  const formatDate = (date: string | Date) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
   
   return (
     <div className='space-y-6'>
@@ -216,9 +201,16 @@ export const StudentDetail = ({ studentId }: StudentDetailProps) => {
           <button
             onClick={handleDelete}
             className='inline-flex items-center px-4 py-2 border border-red-300 bg-white rounded-md text-red-700 shadow-sm hover:bg-red-50'
+            disabled={deleteStudentMutation.isPending}
           >
-            <TrashIcon className='h-4 w-4 mr-2' />
-            Delete
+            {deleteStudentMutation.isPending ? (
+              <LoadingState variant="button" message="Deleting..." />
+            ) : (
+              <>
+                <TrashIcon className='h-4 w-4 mr-2' />
+                Delete
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -252,196 +244,170 @@ export const StudentDetail = ({ studentId }: StudentDetailProps) => {
             </div>
             
             {/* Contact Information */}
-            <div className='space-y-3 mb-8'>
-              <div className='p-4 bg-gray-50 rounded-lg flex items-start'>
-                <div className='w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center mr-4'>
-                  <EnvelopeIcon className='h-4 w-4 text-indigo-600' />
-                </div>
+            <div className='space-y-4'>
+              <h4 className='text-lg font-semibold text-gray-700 mb-2'>Contact Information</h4>
+              
+              <div className='flex items-start'>
+                <EnvelopeIcon className='h-5 w-5 text-indigo-600 mt-0.5 mr-3' />
                 <div>
-                  <div className='text-sm text-gray-500'>Email</div>
-                  <div className='text-base text-gray-800'>{student.email}</div>
+                  <p className='text-sm text-gray-500'>Email</p>
+                  <p className='text-gray-800'>{student.email}</p>
                 </div>
               </div>
               
               {student.phone && (
-                <div className='p-4 bg-gray-50 rounded-lg flex items-start'>
-                  <div className='w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center mr-4'>
-                    <PhoneIcon className='h-4 w-4 text-indigo-600' />
-                  </div>
+                <div className='flex items-start'>
+                  <PhoneIcon className='h-5 w-5 text-indigo-600 mt-0.5 mr-3' />
                   <div>
-                    <div className='text-sm text-gray-500'>Phone</div>
-                    <div className='text-base text-gray-800'>{student.phone}</div>
+                    <p className='text-sm text-gray-500'>Phone</p>
+                    <p className='text-gray-800'>{student.phone}</p>
                   </div>
                 </div>
               )}
               
               {(student.address || student.city) && (
-                <div className='p-4 bg-gray-50 rounded-lg flex items-start'>
-                  <div className='w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center mr-4'>
-                    <MapPinIcon className='h-4 w-4 text-indigo-600' />
-                  </div>
+                <div className='flex items-start'>
+                  <MapPinIcon className='h-5 w-5 text-indigo-600 mt-0.5 mr-3' />
                   <div>
-                    <div className='text-sm text-gray-500'>Address</div>
-                    <div className='text-base text-gray-800'>
-                      {student.address}
-                      {student.address && student.city && ', '}
-                      {student.city}
-                    </div>
+                    <p className='text-sm text-gray-500'>Address</p>
+                    <p className='text-gray-800'>
+                      {student.address}{student.address && student.city ? ', ' : ''}{student.city}
+                    </p>
                   </div>
                 </div>
               )}
             </div>
             
-            {/* Activity Section */}
-            <h3 className='text-lg font-bold text-gray-800 mb-4'>Activity</h3>
-            <div className='grid grid-cols-2 gap-4'>
-              <div className='p-4 bg-gray-50 rounded-lg'>
-                <div className='text-sm text-gray-500'>Last Login</div>
-                <div className='text-base font-semibold text-gray-800'>24/4/2025 - 14:30</div>
+            {/* Account Information */}
+            <div className='mt-8 space-y-4'>
+              <h4 className='text-lg font-semibold text-gray-700 mb-2'>Account Information</h4>
+              
+              <div className='flex items-start'>
+                <CalendarIcon className='h-5 w-5 text-indigo-600 mt-0.5 mr-3' />
+                <div>
+                  <p className='text-sm text-gray-500'>Registered</p>
+                  <p className='text-gray-800'>{formatDate(student.createdAt)}</p>
+                </div>
               </div>
               
-              <div className='p-4 bg-gray-50 rounded-lg'>
-                <div className='text-sm text-gray-500'>Completion Rate</div>
-                <div className='flex flex-col'>
-                  <div className='text-base font-semibold text-gray-800 mb-1'>70%</div>
-                  <div className='w-full h-2 bg-gray-200 rounded-full'>
-                    <div className='w-[70%] h-2 bg-indigo-600 rounded-full'></div>
-                  </div>
+              <div className='flex items-start'>
+                <UserIcon className='h-5 w-5 text-indigo-600 mt-0.5 mr-3' />
+                <div>
+                  <p className='text-sm text-gray-500'>Role</p>
+                  <p className='text-gray-800'>{student.role || 'Student'}</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
         
-        {/* Right Column: Details and Courses */}
-        <div className='bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200'>
-          <div className='p-6'>
-            <h2 className='text-xl font-bold text-gray-800 mb-6'>Account Information</h2>
-            
-            {/* Info Cards Grid */}
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mb-8'>
-              <div className='p-4 bg-gray-50 rounded-lg'>
-                <div className='text-sm text-gray-500'>ID</div>
-                <div className='text-sm font-mono text-gray-800 break-all'>{student.id}</div>
-              </div>
+        {/* Right Column: Courses and Payments */}
+        <div className='space-y-6'>
+          {/* Enrolled Courses */}
+          <div className='bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200'>
+            <div className='p-6'>
+              <h2 className='text-xl font-bold text-gray-800 mb-4'>Enrolled Courses</h2>
               
-              <div className='p-4 bg-gray-50 rounded-lg'>
-                <div className='text-sm text-gray-500'>Created At</div>
-                <div className='text-base text-gray-800'>{new Date(student.createdAt).toLocaleDateString()}</div>
-              </div>
-              
-              <div className='p-4 bg-gray-50 rounded-lg'>
-                <div className='text-sm text-gray-500'>Last Updated</div>
-                <div className='text-base text-gray-800'>{new Date(student.updatedAt).toLocaleDateString()}</div>
-              </div>
-              
-              <div className='p-4 bg-gray-50 rounded-lg'>
-                <div className='text-sm text-gray-500'>Status</div>
-                <div className='mt-1'>
-                  <span className='px-3 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full'>
-                    Active
-                  </span>
+              {enrolledCourses.length === 0 ? (
+                <div className='text-center py-8 text-gray-500'>
+                  <AcademicCapIcon className='h-12 w-12 mx-auto text-gray-300 mb-2' />
+                  <p>No courses enrolled yet</p>
                 </div>
-              </div>
-            </div>
-            
-            {/* Enrolled Courses Section */}
-            <h2 className='text-xl font-bold text-gray-800 mb-4'>Enrolled Courses</h2>
-            
-            <div className='space-y-4'>
-              {enrolledCourses.map(course => (
-                <div key={course.id} className={`p-4 rounded-lg relative border-2 ${course.status === 'completed' ? 
-                  'bg-blue-50/50 border-blue-500/30' : 'bg-indigo-50/50 border-indigo-500/30'}`}>
-                  <div className='flex justify-between items-start'>
-                    <div>
-                      <h4 className='text-lg font-semibold text-gray-800'>{course.title}</h4>
-                      <div className='text-sm text-gray-500 mt-1'>
-                        Enrolled: {new Date(course.enrolledAt).toLocaleDateString()}
-                      </div>
-                      <div className='mt-2'>
-                        <span className={`px-3 py-1 text-xs font-medium rounded-full ${course.status === 'completed' ? 
-                          'text-green-800 bg-green-100' : 'text-indigo-800 bg-indigo-100'}`}>
-                          {course.status === 'completed' ? 'Completed' : 'In Progress'}
+              ) : (
+                <div className='space-y-4'>
+                  {enrolledCourses.map((course) => (
+                    <div key={course.id} className='border rounded-lg p-4 hover:bg-gray-50 transition-colors'>
+                      <div className='flex justify-between items-start mb-2'>
+                        <h3 className='font-medium text-indigo-700'>{course.title}</h3>
+                        <span className={`text-xs px-2 py-1 rounded-full ${
+                          course.status === 'completed' ? 'bg-green-100 text-green-800' :
+                          course.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {course.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                         </span>
                       </div>
-                    </div>
-                    
-                    {/* Progress Circle */}
-                    <div className='relative w-16 h-16'>
-                      <svg className='w-16 h-16' viewBox='0 0 36 36'>
-                        <circle cx='18' cy='18' r='16' fill='none' stroke='#e2e8f0' strokeWidth='2'></circle>
-                        <circle 
-                          cx='18' cy='18' r='16' 
-                          fill='none' 
-                          stroke={"course.status === 'completed' ? '#16a34a' : '#4f46e5'"} 
-                          strokeWidth='2' 
-                          strokeDasharray='100' 
-                          strokeDashoffset={"100 - (course.progress || 0)"} 
-                          transform='rotate(-90 18 18)'
-                        ></circle>
-                      </svg>
-                      <div className='absolute inset-0 flex items-center justify-center'>
-                        <span className='text-sm font-semibold'>{course.progress}%</span>
+                      
+                      <div className='flex justify-between text-sm text-gray-600'>
+                        <span>Level: {course.level.charAt(0).toUpperCase() + course.level.slice(1)}</span>
+                        <span>${course.price.toFixed(2)}</span>
+                      </div>
+                      
+                      {course.progress !== undefined && (
+                        <div className='mt-2'>
+                          <div className='flex justify-between text-xs mb-1'>
+                            <span>Progress</span>
+                            <span>{course.progress}%</span>
+                          </div>
+                          <div className='h-2 bg-gray-200 rounded-full overflow-hidden'>
+                            <div 
+                              className='h-full bg-indigo-600 rounded-full' 
+                              style={{ width: `${course.progress}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className='mt-2 text-xs text-gray-500'>
+                        Enrolled on {formatDate(course.enrolledAt)}
                       </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           </div>
-        </div>
-      </div>
-      
-      {/* Payment History Section (Single Column) */}
-      <div className='bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200'>
-        <div className='p-6'>
-          <h2 className='text-xl font-bold text-gray-800 mb-6'>Payment History</h2>
           
-          {/* Payment History Table */}
-          <div className='overflow-x-auto'>
-            <table className='min-w-full'>
-              <thead>
-                <tr className='bg-gray-50'>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Date</th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Course</th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Payment Method</th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Amount</th>
-                  <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Status</th>
-                </tr>
-              </thead>
-              <tbody className='divide-y divide-gray-200'>
-                {payments.map(payment => (
-                  <tr key={payment.id} className='hover:bg-gray-50'>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-800'>
-                      {new Date(payment.date).toLocaleDateString()}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-800'>
-                      {payment.course}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-800'>
-                      {payment.method}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800'>
-                      ${payment.amount.toFixed(2)}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap'>
-                      <span className='px-3 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full'>
-                        {payment.status === 'completed' ? 'Completed' : payment.status === 'pending' ? 'Pending' : 'Failed'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            
-            {payments.length === 0 && (
-              <div className='py-8 text-center text-gray-500'>
-                No payment records found
-              </div>
-            )}
+          {/* Payment History */}
+          <div className='bg-white rounded-xl shadow-sm overflow-hidden border border-gray-200'>
+            <div className='p-6'>
+              <h2 className='text-xl font-bold text-gray-800 mb-4'>Payment History</h2>
+              
+              {payments.length === 0 ? (
+                <div className='text-center py-8 text-gray-500'>
+                  <BanknotesIcon className='h-12 w-12 mx-auto text-gray-300 mb-2' />
+                  <p>No payment records found</p>
+                </div>
+              ) : (
+                <div className='overflow-x-auto'>
+                  <table className='min-w-full'>
+                    <thead>
+                      <tr className='border-b'>
+                        <th className='text-left py-2 text-sm font-medium text-gray-600'>Date</th>
+                        <th className='text-left py-2 text-sm font-medium text-gray-600'>Course</th>
+                        <th className='text-left py-2 text-sm font-medium text-gray-600'>Method</th>
+                        <th className='text-right py-2 text-sm font-medium text-gray-600'>Amount</th>
+                        <th className='text-right py-2 text-sm font-medium text-gray-600'>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {payments.map((payment) => (
+                        <tr key={payment.id} className='border-b last:border-b-0 hover:bg-gray-50 transition-colors'>
+                          <td className='py-3 text-sm'>{formatDate(payment.date)}</td>
+                          <td className='py-3 text-sm font-medium text-indigo-700'>{payment.course}</td>
+                          <td className='py-3 text-sm'>{payment.method}</td>
+                          <td className='py-3 text-sm text-right'>${payment.amount.toFixed(2)}</td>
+                          <td className='py-3 text-right'>
+                            <span className={`text-xs px-2 py-1 rounded-full ${
+                              payment.status === 'completed' ? 'bg-green-100 text-green-800' :
+                              payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+export default StudentDetail;

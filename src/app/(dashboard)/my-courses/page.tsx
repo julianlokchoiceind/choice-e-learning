@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/server/auth/auth-options';
 import { redirect } from 'next/navigation';
 import { CourseCard } from '@/client/components/courses/CourseCard';
+import { LoadingState } from '@/client/components/common';
 
 export default async function MyCoursesPage() {
   const session = await getServerSession(authOptions);
@@ -19,7 +20,7 @@ export default async function MyCoursesPage() {
     <div className='my-courses-page'>
       <h1>Khóa học của tôi</h1>
       
-      <Suspense fallback={<div>Đang tải khóa học...</div>}>
+      <Suspense fallback={<div className="flex justify-center items-center py-12"><LoadingState variant="section" message="Đang tải khóa học..." /></div>}>
         <div className='enrolled-courses'>
           {enrolledCourses.length > 0 ? (
             <div className='course-grid'>

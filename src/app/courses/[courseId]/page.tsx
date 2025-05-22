@@ -9,6 +9,7 @@ import { CheckCircleIcon, UserCircleIcon, ClockIcon, BookOpenIcon, StarIcon } fr
 import { CalendarIcon, PuzzlePieceIcon } from '@heroicons/react/24/outline';
 import { UserIcon, AcademicCapIcon, DevicePhoneMobileIcon, DocumentTextIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { useCoursePlaceholder } from '@/client/hooks/courses';
+import { LoadingState } from '@/client/components/common';
 
 interface Instructor {
   id: string;
@@ -196,7 +197,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
   if (loading) {
     return (
       <div className='flex justify-center items-center h-screen'>
-        <div className='animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500'></div>
+        <LoadingState variant="page" message="Loading course details..." />
       </div>
     );
   }

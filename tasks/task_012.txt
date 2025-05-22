@@ -1,6 +1,6 @@
 # Task ID: 12
 # Title: Create useTopicsQuery Hook for CRUD Operations
-# Status: pending
+# Status: done
 # Dependencies: 4, 6, 8
 # Priority: high
 # Description: Create a new hook in src/client/hooks/topics/useTopicsQuery.ts that provides CRUD operations for topic data according to PRD section 4.2.

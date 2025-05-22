@@ -1,5 +1,8 @@
+'use client';
+
 import { Metadata } from 'next';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import { 
   CodeBracketIcon, 
   TrophyIcon, 
@@ -8,6 +11,7 @@ import {
   TagIcon,
   ArrowRightIcon
 } from '@heroicons/react/24/outline';
+import { LoadingState } from '@/client/components/common';
 
 export const metadata: Metadata = {
   title: 'Coding Challenges | Choice E-Learning',
@@ -15,6 +19,23 @@ export const metadata: Metadata = {
 };
 
 export default function ChallengesPage() {
+  const [loading, setLoading] = useState(true);
+  
+  // Simulate data loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1200);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen">
+      <LoadingState variant="page" message="Loading challenges..." />
+    </div>;
+  }
+  
   return (
     <div className='container mx-auto px-4 py-16'>
       <div className='text-center mb-12'>

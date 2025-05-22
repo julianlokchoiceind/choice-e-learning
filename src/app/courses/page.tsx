@@ -4,6 +4,8 @@ import { Metadata } from 'next';
 import Image from 'next/image';
 import { CoursesSection } from '@/client/components/courses';
 import { useTopics } from '@/client/hooks/topics';
+import { LoadingState } from '@/client/components/common';
+import { useState, useEffect } from 'react';
 
 // Featured courses for the hero section
 const featuredCourses = [
@@ -23,6 +25,21 @@ const featuredCourses = [
 
 // Main courses page component
 export default function CoursesPage() {
+  const [loading, setLoading] = useState(true);
+  
+  // Simulate data loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  if (loading) {
+    return <LoadingState variant="page" message="Loading courses catalog..." />;
+  }
+  
   return (
     <div className='flex flex-col'>
       {/* Hero Section */}

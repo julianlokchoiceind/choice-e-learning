@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   UsersIcon, 
@@ -24,11 +26,7 @@ import {
   Cog8ToothIcon
 } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-
-export const metadata = {
-  title: 'Admin Dashboard | Choice E-Learning',
-  description: 'Manage courses, users, and content on the Choice E-Learning platform',
-};
+import { LoadingState } from '@/client/components/common';
 
 // TypeScript interfaces for component props
 interface StatsCardProps {
@@ -63,6 +61,21 @@ interface OverviewTabProps {
 }
 
 export default function AdminDashboardPage() {
+  const [loading, setLoading] = useState(true);
+  
+  // Simulate data loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  if (loading) {
+    return <LoadingState variant="page" message="Loading dashboard..." />;
+  }
+  
   return (
     <>
       {/* Stats Cards */}
