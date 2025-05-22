@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { Course, CourseFilter, CourseListItem } from '@/shared/types/courses/course';
+import { useToast } from '@/client/hooks/common';
 
 /**
  * React Query hook for managing courses
@@ -167,13 +168,50 @@ const useCoursesQuery = (isAdmin = false) => {
     });
   };
 
+  /**
+   * Enroll in a course
+   */
+  const useEnrollInCourse = () => {
+    // Sử dụng useToast hook để hiển thị thông báo
+    const { success: toastSuccess, error: toastError } = useToast();
+    
+    return useMutation({
+      mutationFn: async (courseId: string) => {
+        try {
+          const response = await axios.post(`/api/courses/${courseId}/enroll`);
+          return response.data.data;
+        } catch (error) {
+          if (axios.isAxiosError(error)) {
+            throw new Error(error.response?.data?.message || 'Failed to enroll in course');
+          }
+          throw new Error('An unexpected error occurred');
+        }
+      },
+      onSuccess: (_, courseId) => {
+        // Invalidate relevant queries
+        queryClient.invalidateQueries({ queryKey: ['courses'] });
+        queryClient.invalidateQueries({ queryKey: ['course', courseId] });
+        queryClient.invalidateQueries({ queryKey: ['enrolledCourses'] });
+        queryClient.invalidateQueries({ queryKey: ['userProgress'] });
+        
+        // Show success toast
+        toastSuccess('Đăng ký khóa học thành công!');
+      },
+      onError: (error) => {
+        // Show error toast
+        toastError(error instanceof Error ? error.message : 'Đăng ký khóa học thất bại');
+      }
+    });
+  };
+
   return {
     useGetCourses,
     useGetCourse,
     useCreateCourse,
     useUpdateCourse,
     useDeleteCourse,
-    useGetCourseTopics
+    useGetCourseTopics,
+    useEnrollInCourse
   };
 };
 
