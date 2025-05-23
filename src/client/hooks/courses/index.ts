@@ -3,12 +3,6 @@
  */
 
 /**
- * Exports the useCourses hook for managing courses state
- */
-export * from './useCourses';
-export { default as useCourses } from './useCourses';
-
-/**
  * Exports the useCoursePlaceholder hook for course placeholder data
  */
 export * from './useCoursePlaceholder';

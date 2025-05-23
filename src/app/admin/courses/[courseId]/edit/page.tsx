@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CourseFormTabs, DraftStatusBadge, CurriculumTab, BasicInfoTab } from '@/client/components/admin/courses';
-import { Chapter } from '@/shared/types/courses/course';
+import { LoadingState } from '@/client/components/common';
+import { useCoursesQuery } from '@/client/hooks/courses';
+import { Chapter, CourseStatus } from '@/shared/types/courses/course';
 
 interface FormValues {
   title: string;
@@ -17,10 +19,13 @@ interface FormValues {
 
 export default function EditCoursePage({ params }: { params: { courseId: string } }) {
   const router = useRouter();
+  
+  // Use React Query hooks
+  const { useGetCourse, useUpdateCourse } = useCoursesQuery(true); // isAdmin = true
+  const { data: courseData, isLoading, error } = useGetCourse(params.courseId);
+  const updateCourseMutation = useUpdateCourse();
+  
   const [activeTab, setActiveTab] = useState('basicInfo');
-  const [isLoading, setIsLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [isPublishing, setIsPublishing] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [lessons, setLessons] = useState<any[]>([]);
@@ -60,52 +65,36 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
     };
   }, []);
   
-  // Fetch course data on component mount
+  // Update form values when course data is loaded
   useEffect(() => {
-    const fetchCourse = async () => {
-      try {
-        const apiClient = (await import('@/client/utils/http/api-client')).default;
-        const response = await apiClient.get(`/api/admin/courses/${params.courseId}`);
-        
-        if (response.data.success) {
-          const courseData = response.data.data;
-          
-          // Check if this is a newly created course with default values
-          const isNewCourse = courseData.title === 'Untitled Course' && 
-                             courseData.description === 'Course description...';
-          
-          // Update form values - for new courses, we'll use empty strings to allow placeholders to show
-          setValues({
-            title: isNewCourse ? '' : courseData.title || '',
-            description: isNewCourse ? '' : courseData.description || '',
-            price: String(courseData.price || 0),
-            level: courseData.level || 'beginner',
-            topics: courseData.topics || [],
-            imageUrl: courseData.imageUrl || ''
-          });
-          
-          if (courseData.chapters) {
-            setChapters(courseData.chapters);
-          }
-          
-          if (courseData.lessons) {
-            setLessons(courseData.lessons);
-          }
-          
-          setLastSaved(new Date(courseData.updatedAt));
-        } else {
-          throw new Error('Failed to fetch course data');
-        }
-      } catch (error) {
-        console.error('Error fetching course:', error);
-        alert('Error loading course data. Please try again.');
-      } finally {
-        setIsLoading(false);
+    if (courseData) {
+      // Check if this is a newly created course with default values
+      const isNewCourse = courseData.title === 'Untitled Course' && 
+                         courseData.description === 'Course description...';
+      
+      // Update form values - for new courses, we'll use empty strings to allow placeholders to show
+      setValues({
+        title: isNewCourse ? '' : courseData.title || '',
+        description: isNewCourse ? '' : courseData.description || '',
+        price: String(courseData.price || 0),
+        level: courseData.level || 'beginner',
+        topics: courseData.topics || [],
+        imageUrl: courseData.imageUrl || ''
+      });
+      
+      if (courseData.chapters) {
+        setChapters(courseData.chapters);
       }
-    };
-    
-    fetchCourse();
-  }, [params.courseId]);
+      
+      if (courseData.lessons) {
+        setLessons(courseData.lessons);
+      }
+      
+      if (courseData.updatedAt) {
+        setLastSaved(new Date(courseData.updatedAt));
+      }
+    }
+  }, [courseData]);
   
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -136,10 +125,8 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   
   // Handle update draft
   const handleUpdateDraft = async () => {
-    setIsUpdating(true);
-    
     try {
-      // Prepare data for API - let backend handle defaults
+      // Prepare data for API - only basic course fields
       const courseData = {
         title: values.title.trim(),
         description: values.description.trim(),
@@ -147,75 +134,51 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
         level: values.level,
         topics: values.topics,
         imageUrl: values.imageUrl,
-        status: 'draft',
-        chapters: chapters.map(chapter => ({
-          title: chapter.title,
-          description: chapter.description || '',
-          order: chapter.order
-        })),
-        lessons: lessons.length > 0 ? lessons.map(lesson => ({
-          title: lesson.title,
-          description: lesson.content || '',
-          videoUrl: lesson.videoUrl,
-          order: lesson.order,
-          chapterId: lesson.chapterId,
-          resources: lesson.resources || []
-        })) : []
+        status: CourseStatus.DRAFT,
       };
       
-      // Send data to API
-      const apiClient = (await import('@/client/utils/http/api-client')).default;
-      const response = await apiClient.put(`/api/admin/courses/${params.courseId}`, courseData);
+      await updateCourseMutation.mutateAsync({
+        id: params.courseId,
+        data: courseData
+      });
       
-      if (response.data.success) {
-        setLastSaved(new Date());
-        alert('Course updated successfully');
-      } else {
-        throw new Error(response.data.error || 'Failed to update course');
-      }
+      setLastSaved(new Date());
+      alert('Course updated successfully');
     } catch (error: any) {
       console.error('Error updating course:', error);
       alert('Error updating course: ' + (error.message || 'Unknown error'));
-    } finally {
-      setIsUpdating(false);
     }
   };
   
   // Handle form submission (publish)
   const handlePublish = async () => {
-    setIsPublishing(true);
-    
     try {
       // Enhanced validation
       if (!values.title || !values.description) {
         alert('Please fill in required fields: title and description');
-        setIsPublishing(false);
         return;
       }
       
       // Validate description length
       if (values.description.length < 10) {
         alert('Description must be at least 10 characters');
-        setIsPublishing(false);
         return;
       }
       
       // Validate chapters and lessons for published courses
       if (chapters.length === 0) {
         alert('At least one chapter is required for publishing');
-        setIsPublishing(false);
         setActiveTab('curriculum');
         return;
       }
       
       if (lessons.length === 0) {
         alert('At least one lesson is required for publishing');
-        setIsPublishing(false);
         setActiveTab('curriculum');
         return;
       }
       
-      // Prepare data for API - let backend handle defaults
+      // Prepare data for API - only basic course fields  
       const courseData = {
         title: values.title,
         description: values.description,
@@ -223,36 +186,18 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
         level: values.level,
         topics: values.topics,
         imageUrl: values.imageUrl,
-        status: 'published',
-        chapters: chapters.map(chapter => ({
-          title: chapter.title,
-          description: chapter.description || '',
-          order: chapter.order
-        })),
-        lessons: lessons.map(lesson => ({
-          title: lesson.title,
-          description: lesson.content || '',
-          videoUrl: lesson.videoUrl,
-          order: lesson.order,
-          chapterId: lesson.chapterId,
-          resources: lesson.resources || []
-        }))
+        status: CourseStatus.PUBLISHED,
       };
       
-      // Send data to API
-      const apiClient = (await import('@/client/utils/http/api-client')).default;
-      const response = await apiClient.put(`/api/admin/courses/${params.courseId}`, courseData);
+      await updateCourseMutation.mutateAsync({
+        id: params.courseId,
+        data: courseData
+      });
       
-      if (response.data.success) {
-        router.push('/admin/courses');
-      } else {
-        throw new Error(response.data.error || 'Failed to update course');
-      }
+      router.push('/admin/courses');
     } catch (error: any) {
       console.error('Error publishing course:', error);
       alert('Error publishing course: ' + (error.message || 'Unknown error'));
-    } finally {
-      setIsPublishing(false);
     }
   };
   
@@ -265,10 +210,15 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   );
   
   if (isLoading) {
+    return <LoadingState variant="page" message="Loading course data..." />;
+  }
+  
+  if (error) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-        <p className="ml-4 text-gray-600">Loading course data...</p>
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          Error loading course data. Please try again.
+        </div>
       </div>
     );
   }
@@ -290,19 +240,27 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
           <button
             type="button"
             onClick={handleUpdateDraft}
-            disabled={isUpdating || isPublishing}
-            className="px-6 py-2.5 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-70 admin-button"
+            disabled={updateCourseMutation.isPending}
+            className="px-6 py-2.5 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-70 admin-button flex items-center"
           >
-            {isUpdating ? 'Updating...' : 'Update Draft'}
+            {updateCourseMutation.isPending ? (
+              <LoadingState variant="button" message="Updating..." />
+            ) : (
+              'Update Draft'
+            )}
           </button>
           
           <button
             type="button"
             onClick={handlePublish}
-            disabled={isPublishing || isUpdating}
-            className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-70 admin-button"
+            disabled={updateCourseMutation.isPending}
+            className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-70 admin-button flex items-center"
           >
-            {isPublishing ? 'Publishing...' : 'Publish Course'}
+            {updateCourseMutation.isPending ? (
+              <LoadingState variant="button" message="Publishing..." />
+            ) : (
+              'Publish Course'
+            )}
           </button>
         </div>
       </div>

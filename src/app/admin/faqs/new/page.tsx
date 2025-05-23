@@ -3,12 +3,24 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useFAQs } from '@/client/hooks/faq/useFAQs';
+import { useFAQsQuery } from '@/client/hooks/faq';
+import { LoadingState } from '@/client/components/common';
 import { ArrowLeftIcon, DocumentPlusIcon as SaveIcon } from '@heroicons/react/24/outline';
 
 export default function NewFAQPage() {
   const router = useRouter();
-  const { createFAQ, fetchCategories, categories, loading, error } = useFAQs(true);
+  
+  // Use React Query hooks
+  const { useCreateFAQ, useGetFAQs } = useFAQsQuery();
+  const createFAQMutation = useCreateFAQ();
+  
+  // Get FAQ categories from existing FAQs
+  const { data: faqsResponse, isLoading: loadingCategories } = useGetFAQs();
+  
+  // Extract unique categories from FAQs
+  const categories = faqsResponse?.data 
+    ? Array.from(new Set(faqsResponse.data.map(faq => faq.category).filter(Boolean)))
+    : [];
 
   const [formData, setFormData] = useState({
     question: '',
@@ -19,13 +31,7 @@ export default function NewFAQPage() {
 
   const [useNewCategory, setUseNewCategory] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Fetch existing categories on initial load
-    fetchCategories();
-  }, [fetchCategories]);
 
   const validate = () => {
     const errors: Record<string, string> = {};
@@ -57,14 +63,13 @@ export default function NewFAQPage() {
       return;
     }
     
-    setSubmitting(true);
     setSubmitError(null);
     
     try {
       // Use either existing category or new category
       const categoryToUse = useNewCategory ? formData.newCategory : formData.category;
       
-      await createFAQ({
+      await createFAQMutation.mutateAsync({
         question: formData.question,
         answer: formData.answer,
         category: categoryToUse,
@@ -77,8 +82,6 @@ export default function NewFAQPage() {
       setSubmitError(
         'Failed to create FAQ. Please check your inputs and try again.'
       );
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -195,22 +198,26 @@ export default function NewFAQPage() {
               </div>
             ) : (
               <div>
-                <select
-                  id='category'
-                  name='category'
-                  value={formData.category}
-                  onChange={handleChange}
-                  className={`w-full p-3 border rounded-lg ${
-                    formErrors.category ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                >
-                  <option value=''>Select a category</option>
-                  {categories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
+                {loadingCategories ? (
+                  <LoadingState variant="section" message="Loading categories..." />
+                ) : (
+                  <select
+                    id='category'
+                    name='category'
+                    value={formData.category}
+                    onChange={handleChange}
+                    className={`w-full p-3 border rounded-lg ${
+                      formErrors.category ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  >
+                    <option value=''>Select a category</option>
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                )}
                 {formErrors.category && (
                   <p className='mt-1 text-sm text-red-500'>{formErrors.category}</p>
                 )}
@@ -229,18 +236,15 @@ export default function NewFAQPage() {
           </Link>
           <button
             type='submit'
-            disabled={submitting}
+            disabled={createFAQMutation.isPending}
             className={`px-4 py-2 rounded-lg flex items-center ${
-              submitting
+              createFAQMutation.isPending
                 ? 'bg-blue-400 cursor-not-allowed'
                 : 'bg-blue-600 hover:bg-blue-700'
             } text-white`}
           >
-            {submitting ? (
-              <>
-                <span className='animate-spin inline-block h-4 w-4 border-t-2 border-b-2 border-white rounded-full mr-2'></span>
-                Creating...
-              </>
+            {createFAQMutation.isPending ? (
+              <LoadingState variant="button" message="Creating..." />
             ) : (
               <>
                 <SaveIcon className='w-5 h-5 mr-2' />

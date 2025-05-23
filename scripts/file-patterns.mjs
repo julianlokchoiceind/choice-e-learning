@@ -246,7 +246,7 @@ export default withAuth;`,
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useAuth } from '@/client/hooks/auth/useAuth';
+import { useAuthQuery } from '@/client/hooks/auth';
 import { LoadingState } from '@/client/components/common/LoadingState';
 
 interface ProtectedRouteProps {
@@ -266,7 +266,7 @@ export default ProtectedRoute;`,
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { z } from 'zod';
-import { useAuth } from '@/client/hooks/auth/useAuth';
+import { useAuthQuery } from '@/client/hooks/auth';
 
 // Validation schema
 const formSchema = z.object({

@@ -3,12 +3,7 @@
  */
 
 /**
- * Exports the useAuth hook for authentication state management
- */
-export * from './useAuth';
-
-/**
- * Exports the useAuthQuery hook for React Query operations on authentication
+ * Exports the useAuthQuery hook for React Query authentication operations
  */
 export * from './useAuthQuery';
 export { default as useAuthQuery } from './useAuthQuery';
