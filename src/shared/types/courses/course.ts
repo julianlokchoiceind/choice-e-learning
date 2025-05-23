@@ -327,6 +327,6 @@ export interface CourseFilter {
   page?: number;
   limit?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  order?: 'asc' | 'desc';
   isPublished?: boolean;
 }

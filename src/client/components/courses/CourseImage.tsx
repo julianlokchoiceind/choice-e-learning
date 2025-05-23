@@ -34,11 +34,11 @@ const CourseImage = ({
     large: 'h-48 w-full'
   };
   
-  // Combined className
-  const combinedClassName = `${sizeStyles[size]} object-cover ${className}`;
+  // Combined className with consistent object-cover
+  const combinedClassName = `relative ${sizeStyles[size]} ${className}`;
   
   return (
-    <div className={`relative ${combinedClassName}`}>
+    <div className={combinedClassName}>
       <Image
         src={imageSrc}
         alt={imageAlt}
@@ -46,8 +46,12 @@ const CourseImage = ({
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         className="object-cover rounded-md"
         onError={(e: any) => {
-          (e.target as HTMLImageElement).src = '/images/courses/course-placeholder.jpg';
+          const target = e.target as HTMLImageElement;
+          if (target.src !== '/images/courses/course-placeholder.jpg') {
+            target.src = '/images/courses/course-placeholder.jpg';
+          }
         }}
+        priority={size === 'large'} // Prioritize large images for better UX
       />
     </div>
   );

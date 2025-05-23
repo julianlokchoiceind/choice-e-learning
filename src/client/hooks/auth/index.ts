@@ -3,7 +3,7 @@
  */
 
 /**
- * Exports the useAuthQuery hook for React Query authentication operations
+ * Exports the useAuth hook for NextAuth authentication operations
  */
-export * from './useAuthQuery';
-export { default as useAuthQuery } from './useAuthQuery';
+export * from './useAuth';
+export { default as useAuth } from './useAuth';

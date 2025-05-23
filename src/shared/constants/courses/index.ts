@@ -1,2 +1,1 @@
-export * from './admin-course-defaults';
-export * from './course-constants'; 
+export * from './admin-course-defaults'; 

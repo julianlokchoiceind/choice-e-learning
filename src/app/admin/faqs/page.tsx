@@ -39,7 +39,6 @@ export default function FAQsAdminPage() {
   const {
     data,
     isLoading,
-    error,
     refetch
   } = useGetFAQs(filter);
 
@@ -170,15 +169,8 @@ export default function FAQsAdminPage() {
           </div>
         </div>
 
-        {/* Error message */}
-        {error && (
-          <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 mx-4 mt-4'>
-            {error instanceof Error ? error.message : 'Failed to fetch FAQs'}
-          </div>
-        )}
-
         {/* FAQ list */}
-        <div className='overflow-x-auto'>
+        <div className='bg-white shadow-md rounded-lg overflow-hidden'>
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
               <tr>

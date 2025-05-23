@@ -56,17 +56,15 @@ export default function CoursesSection() {
     page: currentPage,
     limit: 9,
     sortBy: 'createdAt',
-    sortOrder: 'desc' as const,
-    _cache: Date.now() // Cache-busting parameter
+    order: 'desc' as const
   }), [searchQuery, selectedLevel, selectedTopics, currentPage]);
   
-  // Use React Query to fetch courses - with no transformation
+  // Use React Query to fetch courses - passing filter parameters
   const { 
     data: courses = [], 
     isLoading, 
-    error: coursesError,
     refetch: refetchCourses
-  } = useGetCourses();
+  } = useGetCourses(coursesFilter);
   
   // Use React Query to fetch topics
   const { data: topicsData } = useGetTopics();
@@ -74,11 +72,6 @@ export default function CoursesSection() {
   // Extract topics
   const topics = Array.isArray(topicsData) ? topicsData.map(t => t.name) : [];
   
-  // Format error message
-  const error = coursesError ? 
-    (coursesError instanceof Error ? coursesError.message : 'Failed to fetch courses') : 
-    null;
-
   // Update pagination state whenever courses change
   useEffect(() => {
     // If we have API response with pagination info, we would update it here
@@ -95,33 +88,24 @@ export default function CoursesSection() {
     console.log('Selected topics updated:', selectedTopics);
   }, [selectedTopics]);
 
-  // Effect to refetch when filter parameters change
-  useEffect(() => {
-    refetchCourses();
-    
-    // Set up a refresh interval to check for updates
-    const refreshInterval = setInterval(() => {
-      refetchCourses();
-    }, 30000); // Refresh every 30 seconds
-    
-    return () => clearInterval(refreshInterval);
-  }, [coursesFilter, refetchCourses]);
-
+  // React Query will automatically refetch when coursesFilter changes
+  // No need for manual refetch calls
+  
   const handleSearch = () => {
     setCurrentPage(1);
-    refetchCourses();
+    // No manual refetch needed - React Query handles it
   };
 
   const handleLevelChange = (level: string) => {
     setSelectedLevel(level);
     setCurrentPage(1);
-    // Refetch will happen automatically due to the dependency in useEffect
+    // No manual refetch needed - React Query handles it
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // Refetch will happen automatically due to the dependency in useEffect
+    // No manual refetch needed - React Query handles it
   };
 
   const clearFilters = () => {
@@ -129,31 +113,11 @@ export default function CoursesSection() {
     setSelectedLevel('');
     setSelectedTopics([]);
     setCurrentPage(1);
-    // Refetch will happen automatically due to the dependency in useEffect
+    // No manual refetch needed - React Query handles it
   };
 
-  // Filter courses based on current filter settings
-  const filteredCourses = useMemo(() => {
-    return courses.filter(course => {
-      // Apply search filter
-      if (searchQuery && !course.title.toLowerCase().includes(searchQuery.toLowerCase())) {
-        return false;
-      }
-      
-      // Apply level filter
-      if (selectedLevel && course.level !== selectedLevel) {
-        return false;
-      }
-      
-      // Apply topics filter
-      if (selectedTopics.length > 0 && 
-          (!course.topics || !course.topics.some(topic => selectedTopics.includes(topic)))) {
-        return false;
-      }
-      
-      return true;
-    });
-  }, [courses, searchQuery, selectedLevel, selectedTopics]);
+  // Use courses directly from API (already filtered)
+  const filteredCourses = courses || [];
 
   // Placeholder image for courses without an image
   const placeholderImage = '/images/courses/course-placeholder.jpg';
@@ -239,13 +203,6 @@ export default function CoursesSection() {
       {isLoading && (
         <div className='flex justify-center items-center h-64'>
           <LoadingState variant="section" message="Loading courses..." />
-        </div>
-      )}
-      
-      {/* Error message */}
-      {error && (
-        <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-8'>
-          {error}
         </div>
       )}
       

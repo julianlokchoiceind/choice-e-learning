@@ -17,8 +17,8 @@ import {
  * API endpoints for FAQ operations
  */
 const API = {
-  FAQS: '/api/faqs',
-  FAQ: (id: string) => `/api/faqs/${id}`,
+  FAQS: '/api/admin/faqs',
+  FAQ: (id: string) => `/api/admin/faqs/${id}`,
 };
 
 /**
@@ -62,7 +62,8 @@ export const useFAQsQuery = () => {
       queryKey: ['faqs', filter],
       queryFn: async (): Promise<FAQPaginatedResult> => {
         const response = await apiClient.get(API.FAQS, { params: filter });
-        return response.data;
+        // Handle nested structure from apiSuccess: response.data = { success: true, data: { data: [...], meta: {...} } }
+        return response.data.data;
       },
       ...options
     });

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { UserIcon, Bars3Icon, XMarkIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
-import { useAuthQuery } from '@/client/hooks/auth';
+import { useAuth } from '@/client/hooks/auth';
 import Notification from '@/client/components/ui/Notification';
 import { ErrorBoundary } from 'react-error-boundary';
 import { LoadingState } from '@/client/components/common';
@@ -63,10 +63,8 @@ const LoadingHeader = () => (
 );
 
 const Header = () => {
-  // Use React Query for authentication
-  const { useGetCurrentUser, useLogout, isAuthenticated } = useAuthQuery();
-  const { data: currentUser, isLoading: isLoadingUser } = useGetCurrentUser();
-  const logoutMutation = useLogout();
+  // Use NextAuth authentication hook
+  const { user, isLoading, isAuthenticated, logout } = useAuth();
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [notification, setNotification] = useState<{
@@ -74,6 +72,7 @@ const Header = () => {
     type: 'success' | 'error' | 'info';
     message: string;
   } | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Track if component is mounted to prevent hydration errors
   const [isMounted, setIsMounted] = useState(false);
@@ -89,6 +88,8 @@ const Header = () => {
 
   const handleLogout = async () => {
     try {
+      setIsLoggingOut(true);
+      
       // Show notification immediately before logging out
       setNotification({
         show: true,
@@ -96,8 +97,8 @@ const Header = () => {
         message: 'Successfully signed out!'
       });
       
-      // Execute logout mutation with React Query
-      await logoutMutation.mutateAsync();
+      // Execute logout with NextAuth
+      await logout();
       
     } catch (error: unknown) {
       console.error('Sign out failed:', error);
@@ -106,6 +107,8 @@ const Header = () => {
         type: 'error',
         message: 'Sign out failed. Please try again.'
       });
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -116,13 +119,13 @@ const Header = () => {
   }
   
   // Show loading header while checking authentication
-  if (isLoadingUser) {
+  if (isLoading) {
     return <LoadingHeader />;
   }
   
   // Only try to access user properties if we're authenticated
   // Use nullish coalescing for additional safety
-  const userName = currentUser?.name ? currentUser.name.split(' ')[0] : 'User';
+  const userName = user?.name ? user.name.split(' ')[0] : 'User';
 
   return (
     <ErrorBoundary fallback={<HeaderErrorFallback />}>
@@ -169,7 +172,7 @@ const Header = () => {
             
             {/* Right Side Links - with fixed width containers to prevent layout shifts */}
             <div className='flex items-center space-x-4 min-w-[120px] justify-end relative'>
-              {currentUser ? (
+              {isAuthenticated ? (
                 <>
                   <Link href='/dashboard' aria-label='Dashboard' className='text-white/80 hover:text-white transition-colors'>
                     <UserIcon className='h-4 w-4' />
@@ -179,10 +182,10 @@ const Header = () => {
                   </span>
                   <button 
                     onClick={handleLogout}
-                    disabled={logoutMutation.isPending}
+                    disabled={isLoggingOut}
                     className='hidden md:flex items-center text-white/80 hover:text-white text-xs font-medium transition-colors'
                   >
-                    {logoutMutation.isPending ? (
+                    {isLoggingOut ? (
                       <LoadingState variant="button" message="Signing out..." />
                     ) : (
                       <>
@@ -261,7 +264,7 @@ const Header = () => {
                 {/* Authentication Section */}
                 <div className='pt-4 border-t border-white/10'>
                   <div className='space-y-4 py-2'>
-                    {currentUser ? (
+                    {isAuthenticated ? (
                       <>
                         <Link 
                           href='/dashboard' 
@@ -275,10 +278,10 @@ const Header = () => {
                             toggleMobileMenu();
                             handleLogout();
                           }}
-                          disabled={logoutMutation.isPending}
+                          disabled={isLoggingOut}
                           className='w-full block bg-white/10 hover:bg-white/20 text-white text-xl font-medium py-2.5 px-6 rounded-full text-center transition-colors'
                         >
-                          {logoutMutation.isPending ? 'Signing out...' : 'Sign Out'}
+                          {isLoggingOut ? 'Signing out...' : 'Sign Out'}
                         </button>
                       </>
                     ) : (

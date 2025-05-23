@@ -57,23 +57,23 @@ const getStatusBadgeClass = (status: string, isPublished: boolean): string => {
   }
 };
 
-const getSortParams = (sortOption: string): { sortBy: string; sortOrder: 'asc' | 'desc' } => {
+const getSortParams = (sortOption: string): { sortBy: string; order: 'asc' | 'desc' } => {
   switch (sortOption) {
     case 'title-asc':
-      return { sortBy: 'title', sortOrder: 'asc' };
+      return { sortBy: 'title', order: 'asc' };
     case 'title-desc':
-      return { sortBy: 'title', sortOrder: 'desc' };
+      return { sortBy: 'title', order: 'desc' };
     case 'price-asc':
-      return { sortBy: 'price', sortOrder: 'asc' };
+      return { sortBy: 'price', order: 'asc' };
     case 'price-desc':
-      return { sortBy: 'price', sortOrder: 'desc' };
+      return { sortBy: 'price', order: 'desc' };
     case 'students':
-      return { sortBy: 'students', sortOrder: 'desc' };
+      return { sortBy: 'students', order: 'desc' };
     case 'oldest':
-      return { sortBy: 'createdAt', sortOrder: 'asc' };
+      return { sortBy: 'createdAt', order: 'asc' };
     case 'newest':
     default:
-      return { sortBy: 'createdAt', sortOrder: 'desc' };
+      return { sortBy: 'createdAt', order: 'desc' };
   }
 };
 
@@ -104,26 +104,22 @@ export default function CoursesPage() {
   const { 
     data,
     isLoading,
-    error: queryError,
     refetch
   } = useGetCourses(courseFilter);
   
-  // Extract courses and pagination from response
-  const courses = Array.isArray(data) ? data : (data as any)?.data || [];
-  const pagination = {
+  // Extract courses and pagination from response (standardized like FAQ page)
+  const courses = data?.data || [];
+  const pagination = data?.meta || { 
     page: currentPage,
     pageSize: 10,
-    totalItems: Array.isArray(data) ? data.length : ((data as any)?.meta?.totalItems || 0),
-    totalPages: Array.isArray(data) ? 1 : ((data as any)?.meta?.totalPages || 1),
+    totalItems: 0,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPrevPage: false
   };
   
   // Use React Query for delete mutation
   const deleteCourse = useDeleteCourse();
-  
-  // Format error message
-  const error = queryError ? 
-    (queryError instanceof Error ? queryError.message : 'Failed to fetch courses') : 
-    null;
   
   // Add CSS for buttons with no transform on hover
   useEffect(() => {
@@ -272,53 +268,50 @@ export default function CoursesPage() {
           </div>
         </div>
 
-        {/* Error message */}
-        {error && (
-          <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 mx-4 mt-4'>
-            {error}
-          </div>
-        )}
-
         {/* Courses list */}
         <div className='overflow-x-auto'>
-          {isLoading || deleteCourse.isPending ? (
-            <div className='py-10 text-center'>
-              <LoadingState variant="table" message={deleteCourse.isPending ? 'Deleting course...' : 'Loading courses...'} />
-            </div>
-          ) : courses.length === 0 ? (
-            <div className='py-10 text-center'>
-              <p className='text-gray-500'>No courses found.</p>
-              <p className='text-sm mt-1'>Create a new course or try with a different search term.</p>
-            </div>
-          ) : (
-            <table className='min-w-full divide-y divide-gray-200'>
-              <thead className='bg-gray-50'>
+          <table className='min-w-full divide-y divide-gray-200'>
+            <thead className='bg-gray-50'>
+              <tr>
+                <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                  #
+                </th>
+                <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                  Course Title
+                </th>
+                <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                  Level
+                </th>
+                <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                  Students
+                </th>
+                <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                  Price
+                </th>
+                <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                  Status
+                </th>
+                <th scope='col' className='py-4 px-6 text-right font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className='bg-white divide-y divide-gray-200'>
+              {isLoading || deleteCourse.isPending ? (
                 <tr>
-                  <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
-                    #
-                  </th>
-                  <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
-                    Course Title
-                  </th>
-                  <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
-                    Level
-                  </th>
-                  <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
-                    Students
-                  </th>
-                  <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
-                    Price
-                  </th>
-                  <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
-                    Status
-                  </th>
-                  <th scope='col' className='py-4 px-6 text-right font-medium text-indigo-700 capitalize tracking-wider text-base'>
-                    Actions
-                  </th>
+                  <td colSpan={7} className='text-center py-10'>
+                    <LoadingState variant="table" message={deleteCourse.isPending ? 'Deleting course...' : 'Loading courses...'} />
+                  </td>
                 </tr>
-              </thead>
-              <tbody className='bg-white divide-y divide-gray-200'>
-                {courses.map((course, index) => (
+              ) : courses.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className='text-center py-10 text-gray-500'>
+                    <p>No courses found</p>
+                    <p className='text-sm mt-1'>Create a new course or try with a different search term.</p>
+                  </td>
+                </tr>
+              ) : (
+                courses.map((course, index) => (
                   <tr key={course.id} className='hover:bg-gray-50 transition-colors duration-150'>
                     <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
                       {index + 1}
@@ -389,46 +382,55 @@ export default function CoursesPage() {
                       </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+                ))
+              )}
+            </tbody>
+          </table>
           
-          {/* Pagination - only show if we have courses */}
-          {!isLoading && courses.length > 0 && pagination && pagination.totalPages > 0 && (
-            <div className='px-6 py-4 border-t border-gray-200 flex items-center justify-between'>
-              <div className='text-sm text-gray-600'>
-                Showing {courses.length} of {pagination.totalItems || courses.length} courses
-              </div>
-              <div className='flex space-x-1'>
+          {/* Pagination */}
+          {!isLoading && pagination && pagination.totalPages > 1 && (
+            <div className='px-6 py-4 flex justify-center'>
+              <div className='flex space-x-2'>
                 <button 
                   onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className={`p-2 ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'} admin-button`}
+                  className={`px-3 py-1 rounded-md ${
+                    currentPage === 1
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  } admin-button`}
                 >
-                  <ChevronLeftIcon className='h-5 w-5' />
+                  Previous
                 </button>
                 
-                {Array.from({length: pagination.totalPages}, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`w-8 h-8 flex items-center justify-center rounded-md ${
-                      currentPage === page 
-                        ? 'bg-indigo-600 text-white' 
-                        : 'text-gray-700 hover:bg-gray-100'
-                    } admin-button`}
-                  >
-                    {page}
-                  </button>
-                ))}
+                {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-1 rounded-md admin-button ${
+                        currentPage === page
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
                 
                 <button 
-                  onClick={() => handlePageChange(Math.min(pagination.totalPages, currentPage + 1))}
+                  onClick={() =>
+                    handlePageChange(Math.min(pagination.totalPages, currentPage + 1))
+                  }
                   disabled={currentPage === pagination.totalPages}
-                  className={`p-2 ${currentPage === pagination.totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:bg-gray-100 rounded'} admin-button`}
+                  className={`px-3 py-1 rounded-md ${
+                    currentPage === pagination.totalPages
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  } admin-button`}
                 >
-                  <ChevronRightIcon className='h-5 w-5' />
+                  Next
                 </button>
               </div>
             </div>

@@ -1,12 +1,11 @@
 'use client';
 
-import { useAuthQuery } from '@/client/hooks/auth';
+import { useAuth } from '@/client/hooks/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { UserRole } from '@/shared/types/auth/roles';
 import { hasRole } from '@/server/auth/roles';
 import { LoadingState } from '@/client/components/common';
-import { User } from '@/shared/types/user';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -18,18 +17,8 @@ interface ProtectedRouteProps {
  * Protects routes that require authentication and specific roles
  */
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const { useGetCurrentUser } = useAuthQuery();
+  const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
-  
-  // Get current user with React Query
-  const { 
-    data: user, 
-    isLoading,
-    error 
-  } = useGetCurrentUser();
-  
-  // Determine if user is authenticated
-  const isAuthenticated = !!user && !error;
 
   useEffect(() => {
     // Skip checks while loading

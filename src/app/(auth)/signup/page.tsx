@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { signIn, getProviders } from 'next-auth/react';
 import Notification from '@/client/components/ui/Notification';
 import { LoadingState } from '@/client/components/common';
-import { useAuthQuery } from '@/client/hooks/auth';
+import { useAuth } from '@/client/hooks/auth';
 
 // Interface for RegisterCredentials
 interface RegisterCredentials {
@@ -20,9 +20,8 @@ interface RegisterCredentials {
 export default function SignUpPage() {
   const router = useRouter();
   
-  // Use React Query hooks for authentication
-  const { useRegister } = useAuthQuery();
-  const register = useRegister();
+  // Use NextAuth authentication hook
+  const { register, isLoading } = useAuth();
   
   const [formData, setFormData] = useState<RegisterCredentials & { confirmPassword: string }>({
     name: '',
@@ -50,6 +49,7 @@ export default function SignUpPage() {
     message: string;
     details?: string;
   } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -157,23 +157,29 @@ export default function SignUpPage() {
       return;
     }
     
+    setIsSubmitting(true);
+    
     try {
-      // Call register mutation with only the required fields
+      // Call register function with only the required fields
       const { confirmPassword, ...credentials } = formData;
-      await register.mutateAsync(credentials);
+      const result = await register(credentials);
       
-      // Show success notification
-      setNotification({
-        show: true,
-        type: 'success',
-        message: 'Your account was created successfully!',
-        details: 'Redirecting to dashboard...'
-      });
-      
-      // Delay redirect to ensure notification is visible
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 1500);
+      if (result.success) {
+        // Show success notification
+        setNotification({
+          show: true,
+          type: 'success',
+          message: 'Your account was created successfully!',
+          details: 'Redirecting to dashboard...'
+        });
+      } else {
+        // Error handling is already done in useAuth hook via toast
+        setNotification({
+          show: true,
+          type: 'error',
+          message: result.error || 'Registration failed. Please try again.'
+        });
+      }
     } catch (err: unknown) {
       console.error('Registration error:', err);
       setNotification({
@@ -181,21 +187,12 @@ export default function SignUpPage() {
         type: 'error',
         message: (err as Error).message || 'Registration failed. Please try again.'
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
   
-  // Show error notification when there's an auth error
-  React.useEffect(() => {
-    if (register.error) {
-      setNotification({
-        show: true,
-        type: 'error',
-        message: (register.error as Error).message || 'Registration failed. Please try again.'
-      });
-    }
-  }, [register.error]);
-
-  // Add a useEffect to check available providers on component mount
+  // Handle URL query parameters and other side effects
   useEffect(() => {
     async function checkProviders() {
       try {
@@ -426,10 +423,10 @@ export default function SignUpPage() {
           <div>
             <button
               type='submit'
-              disabled={register.isPending}
-              className='group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+              disabled={isSubmitting || isLoading}
+              className='group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50'
             >
-              {register.isPending ? <LoadingState variant="button" message="Creating account..." /> : 'Sign up'}
+              {isSubmitting || isLoading ? <LoadingState variant="button" message="Creating account..." /> : 'Sign up'}
             </button>
           </div>
           
@@ -446,8 +443,8 @@ export default function SignUpPage() {
             <div className='mt-6 flex flex-col space-y-3'>
               <button
                 onClick={() => handleSocialLogin('google')}
-                disabled={register.isPending}
-                className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                disabled={isSubmitting || isLoading}
+                className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50'
               >
                 <FaGoogle className='h-5 w-5 text-red-500 mr-3' />
                 <span>Continue with Google</span>
@@ -455,8 +452,8 @@ export default function SignUpPage() {
               
               <button
                 onClick={() => handleSocialLogin('github')}
-                disabled={register.isPending}
-                className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                disabled={isSubmitting || isLoading}
+                className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50'
               >
                 <FaGithub className='h-5 w-5 text-gray-900 mr-3' />
                 <span>Continue with GitHub</span>
@@ -464,19 +461,19 @@ export default function SignUpPage() {
               
               <button
                 onClick={() => handleSocialLogin('facebook')}
-                disabled={register.isPending}
-                className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                disabled={isSubmitting || isLoading}
+                className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50'
               >
-                <FaFacebook className='h-5 w-5 text-[#1877F2] mr-3' />
+                <FaFacebook className='h-5 w-5 text-blue-600 mr-3' />
                 <span>Continue with Facebook</span>
               </button>
               
               <button
                 onClick={() => handleSocialLogin('azure-ad')}
-                disabled={register.isPending}
-                className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                disabled={isSubmitting || isLoading}
+                className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50'
               >
-                <FaMicrosoft className='h-5 w-5 text-[#00A4EF] mr-3' />
+                <FaMicrosoft className='h-5 w-5 text-blue-500 mr-3' />
                 <span>Continue with Microsoft</span>
               </button>
             </div>

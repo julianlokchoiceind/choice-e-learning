@@ -13,6 +13,7 @@ import {
 import { CourseStatus } from '@/shared/types/courses/course';
 import { useCoursesQuery } from '@/client/hooks/courses';
 import { LoadingState } from '@/client/components/common';
+import { CourseImage } from '@/client/components/courses';
 
 interface Course {
   id: string;
@@ -37,34 +38,6 @@ interface CourseFormData {
   videoUrl: string;
   imageUrl?: string;
   status: CourseStatus;
-}
-
-// Custom Image component with error handling
-function CourseImage({ src, alt }: { src: string, alt: string }) {
-  const [imgError, setImgError] = useState(false);
-  
-  if (imgError) {
-    return (
-      <div className='h-12 w-20 bg-gray-100 rounded flex items-center justify-center'>
-        <BookOpenIcon className='h-6 w-6 text-gray-400' />
-      </div>
-    );
-  }
-  
-  // Handle invalid URL
-  if (!src) {
-    src = '/images/courses/course-placeholder.jpg';
-  }
-  
-  // Use Image component with error handling
-  return (
-    <Image src={src} 
-      alt={alt || 'Course image'}
-      className='h-12 w-20 object-cover rounded'
-      width={500} height={300}
-      onError={() => setImgError(true)}
-    />
-  );
 }
 
 // Main component for Course Management
@@ -196,14 +169,15 @@ export default function CourseManager() {
         // Update existing course
         await updateCourseMutation.mutateAsync({
           id: selectedCourse.id,
-          title: formData.title,
-          description: formData.description,
-          price: formData.price,
-          level: formData.level,
-          topics: topicsArray,
-          videoUrl: formData.videoUrl,
-          imageUrl: formData.imageUrl,
-          status: formData.status
+          data: {
+            title: formData.title,
+            description: formData.description,
+            price: formData.price,
+            level: formData.level,
+            topics: topicsArray,
+            imageUrl: formData.imageUrl,
+            status: formData.status
+          }
         });
       } else {
         // Create new course
@@ -213,7 +187,6 @@ export default function CourseManager() {
           price: formData.price,
           level: formData.level,
           topics: topicsArray,
-          videoUrl: formData.videoUrl,
           imageUrl: formData.imageUrl,
           status: formData.status
         });
@@ -289,7 +262,6 @@ export default function CourseManager() {
     if (isPublished) return 'bg-green-100 text-green-800';
     switch (status) {
       case CourseStatus.DRAFT: return 'bg-gray-100 text-gray-800';
-      case CourseStatus.REVIEW: return 'bg-yellow-100 text-yellow-800';
       case CourseStatus.PUBLISHED: return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
@@ -300,7 +272,6 @@ export default function CourseManager() {
     if (isPublished) return 'Published';
     switch (status) {
       case CourseStatus.DRAFT: return 'Draft';
-      case CourseStatus.REVIEW: return 'In Review';
       case CourseStatus.PUBLISHED: return 'Published';
       default: return 'Draft';
     }
@@ -356,8 +327,9 @@ export default function CourseManager() {
                     <div className='flex items-center'>
                       <div className='flex-shrink-0 h-12 w-20 relative'>
                         <CourseImage 
-                          src={course.imageUrl || '/images/courses/course-placeholder.jpg'} 
-                          alt={course.title} 
+                          course={course}
+                          size="small"
+                          className="h-12 w-20"
                         />
                       </div>
                       <div className='ml-4'>
@@ -527,7 +499,6 @@ export default function CourseManager() {
                 className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
               >
                 <option value={CourseStatus.DRAFT}>Draft</option>
-                <option value={CourseStatus.REVIEW}>In Review</option>
                 <option value={CourseStatus.PUBLISHED}>Published</option>
               </select>
               {formErrors.status && (

@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn, getProviders } from 'next-auth/react';
 import Notification from '@/client/components/ui/Notification';
 import { LoadingState } from '@/client/components/common';
-import { useAuthQuery } from '@/client/hooks/auth';
+import { useAuth } from '@/client/hooks/auth';
 
 // Interface for LoginCredentials
 interface LoginCredentials {
@@ -20,9 +20,8 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  // Use React Query hooks for authentication
-  const { useLogin } = useAuthQuery();
-  const login = useLogin();
+  // Use NextAuth authentication hook
+  const { login, isLoading } = useAuth();
   
   const [formData, setFormData] = useState<LoginCredentials>({
     email: '',
@@ -41,6 +40,7 @@ export default function LoginPage() {
     type: 'success' | 'error' | 'info';
     message: string;
   } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Add a useEffect to check available providers on component mount
   useEffect(() => {
@@ -114,22 +114,28 @@ export default function LoginPage() {
     if (!validateForm()) {
       return;
     }
+
+    setIsSubmitting(true);
     
     try {
-      // Call login mutation from useAuthQuery
-      await login.mutateAsync(formData);
+      // Use NextAuth login function
+      const result = await login(formData);
       
-      // Show success notification
-      setNotification({
-        show: true,
-        type: 'success',
-        message: 'Successfully logged in! Please wait...'
-      });
-      
-      // Delay redirect to ensure notification is visible
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 1500);
+      if (result.success) {
+        // Show success notification
+        setNotification({
+          show: true,
+          type: 'success',
+          message: 'Successfully logged in! Please wait...'
+        });
+      } else {
+        // Error handling is already done in useAuth hook via toast
+        setNotification({
+          show: true,
+          type: 'error',
+          message: result.error || 'Login failed. Please try again.'
+        });
+      }
     } catch (err: unknown) {
       console.error('Login error:', err);
       setNotification({
@@ -137,9 +143,11 @@ export default function LoginPage() {
         type: 'error',
         message: (err as Error).message || 'Login failed. Please try again.'
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
-  
+
   // Handle social login with provider
   const handleSocialLogin = async (provider: string) => {
     try {
@@ -198,16 +206,8 @@ export default function LoginPage() {
     }
   };
   
-  // Show notification when there's an error or success message from login mutation
+  // Handle URL query parameters for messages  
   useEffect(() => {
-    if (login.error) {
-      setNotification({
-        show: true,
-        type: 'error',
-        message: (login.error as Error).message || 'Login failed. Please try again.'
-      });
-    }
-    
     // Handle URL query parameters for messages
     const message = searchParams.get('message');
     if (message) {
@@ -233,7 +233,7 @@ export default function LoginPage() {
         setFormData(prev => ({ ...prev, email }));
       }
     }
-  }, [login.error, searchParams]);
+  }, [searchParams]);
   
   // Pre-fill email if provided as a query param (e.g., from registration)
   useEffect(() => {
@@ -345,10 +345,10 @@ export default function LoginPage() {
           <div>
             <button
               type='submit'
-              disabled={login.isPending}
-              className='group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+              disabled={isSubmitting || isLoading}
+              className='group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50'
             >
-              {login.isPending ? <LoadingState variant="button" message="Signing in..." /> : 'Sign in'}
+              {isSubmitting || isLoading ? <LoadingState variant="button" message="Signing in..." /> : 'Sign in'}
             </button>
           </div>
         </form>
@@ -366,8 +366,8 @@ export default function LoginPage() {
           <div className='mt-6 flex flex-col space-y-3'>
             <button
               onClick={() => handleSocialLogin('google')}
-              disabled={login.isPending}
-              className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+              disabled={isSubmitting || isLoading}
+              className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50'
             >
               <FaGoogle className='h-5 w-5 text-red-500 mr-3' />
               <span>Continue with Google</span>
@@ -375,8 +375,8 @@ export default function LoginPage() {
             
             <button
               onClick={() => handleSocialLogin('github')}
-              disabled={login.isPending}
-              className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+              disabled={isSubmitting || isLoading}
+              className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50'
             >
               <FaGithub className='h-5 w-5 text-gray-900 mr-3' />
               <span>Continue with GitHub</span>
@@ -384,19 +384,19 @@ export default function LoginPage() {
             
             <button
               onClick={() => handleSocialLogin('facebook')}
-              disabled={login.isPending}
-              className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+              disabled={isSubmitting || isLoading}
+              className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50'
             >
-              <FaFacebook className='h-5 w-5 text-[#1877F2] mr-3' />
+              <FaFacebook className='h-5 w-5 text-blue-600 mr-3' />
               <span>Continue with Facebook</span>
             </button>
             
             <button
               onClick={() => handleSocialLogin('azure-ad')}
-              disabled={login.isPending}
-              className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+              disabled={isSubmitting || isLoading}
+              className='flex items-center w-full justify-center rounded-md border border-gray-300 bg-white py-2.5 px-6 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50'
             >
-              <FaMicrosoft className='h-5 w-5 text-[#00A4EF] mr-3' />
+              <FaMicrosoft className='h-5 w-5 text-blue-500 mr-3' />
               <span>Continue with Microsoft</span>
             </button>
           </div>

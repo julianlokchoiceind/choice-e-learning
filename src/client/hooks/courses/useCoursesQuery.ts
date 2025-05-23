@@ -30,10 +30,21 @@ const useCoursesQuery = (isAdmin = false) => {
           if (filters.page) params.append('page', filters.page.toString());
           if (filters.limit) params.append('limit', filters.limit.toString());
           if (filters.sortBy) params.append('sortBy', filters.sortBy);
-          if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
+          if (filters.order) params.append('order', filters.order);
           
           const response = await axios.get(`${baseUrl}?${params.toString()}`);
-          return response.data.data;
+          
+          // Handle different response structures for admin vs public API
+          if (isAdmin) {
+            // Admin API returns: { success: true, courses: [...], meta: { pagination: {...} } }
+            return {
+              data: response.data?.courses || [],
+              meta: response.data?.meta?.pagination || {}
+            };
+          } else {
+            // Public API returns: { success: true, data: [...], meta: {...} }
+            return response.data?.data || [];
+          }
         } catch (error) {
           if (axios.isAxiosError(error)) {
             throw new Error(error.response?.data?.message || 'Failed to fetch courses');

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCoursesQuery } from '@/client/hooks/courses';
-import { useAuthQuery } from '@/client/hooks/auth';
+import { useAuth } from '@/client/hooks/auth';
 import { LoadingState } from '@/client/components/common';
 
 interface EnrollButtonProps {
@@ -17,19 +17,16 @@ export const EnrollButton = ({ courseId, isEnrolled = false }: EnrollButtonProps
   // Get hooks from useCoursesQuery
   const { useEnrollInCourse } = useCoursesQuery();
   
-  // Get hooks from useAuthQuery
-  const { useGetCurrentUser } = useAuthQuery();
+  // Get authentication state from useAuth
+  const { user, isLoading, isAuthenticated } = useAuth();
   
   // Use React Query mutations
   const enrollMutation = useEnrollInCourse();
   
-  // Use React Query to check authentication status
-  const { data: currentUser, isLoading: isLoadingUser } = useGetCurrentUser();
-  
   const handleEnroll = async () => {
     try {
       // Check if user is authenticated
-      if (!currentUser) {
+      if (!isAuthenticated || !user) {
         // Redirect to login page with redirect back to this course
         router.push(`/login?redirectTo=/courses/${courseId}`);
         return;
@@ -61,7 +58,7 @@ export const EnrollButton = ({ courseId, isEnrolled = false }: EnrollButtonProps
   return (
     <button
       onClick={handleEnroll}
-      disabled={enrollMutation.isPending || isLoadingUser}
+      disabled={enrollMutation.isPending || isLoading}
       className='button primary full-width'
     >
       {enrollMutation.isPending ? (
