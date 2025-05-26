@@ -153,12 +153,6 @@ export default function CoursesPage() {
     };
   }, []);
   
-  // Handle search
-  const handleSearch = () => {
-    setCurrentPage(1);
-    refetch();
-  };
-  
   // Handle page change
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -193,26 +187,20 @@ export default function CoursesPage() {
 
       {/* Filter and search controls */}
       <div className='bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden'>
-        <div className='p-4 border-b border-gray-200 flex flex-wrap gap-4 justify-between items-center'>
-          <div className='flex flex-wrap gap-4 items-center'>
-            <div className='relative'>
-              <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
-                <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
-              </div>
-              <input 
-                type='text' 
-                placeholder='Search courses...' 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className='py-2 pl-10 pr-4 block w-full sm:w-80 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)] outline-none'
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSearch();
-                  }
-                }}
-              />
+        <div className='p-4 border-b border-gray-200 flex justify-between items-center flex-wrap gap-4'>
+          <div className='relative'>
+            <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+              <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
             </div>
-            
+            <input 
+              type='text' 
+              placeholder='Search courses...' 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className='py-2 pl-10 pr-4 block w-full sm:w-80 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)] outline-none'
+            />
+          </div>
+          <div className='flex items-center space-x-2'>
             <select 
               value={selectedLevel}
               onChange={(e) => {
@@ -240,15 +228,6 @@ export default function CoursesPage() {
               <option value='draft'>Draft</option>
             </select>
             
-            <button
-              onClick={handleSearch}
-              className='py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md admin-button'
-            >
-              Filter
-            </button>
-          </div>
-          
-          <div>
             <select 
               value={sortOption}
               onChange={(e) => {
@@ -300,7 +279,13 @@ export default function CoursesPage() {
               {isLoading || deleteCourse.isPending ? (
                 <tr>
                   <td colSpan={7} className='text-center py-10'>
-                    <LoadingState variant="table" message={deleteCourse.isPending ? 'Deleting course...' : 'Loading courses...'} />
+                    <LoadingState 
+                      variant="table" 
+                      message={deleteCourse.isPending ? 'Deleting course...' : 'Loading courses...'} 
+                      columns={7}
+                      rows={6}
+                      columnWidths={['8%', '35%', '12%', '10%', '12%', '10%', '13%']}
+                    />
                   </td>
                 </tr>
               ) : courses.length === 0 ? (

@@ -250,14 +250,14 @@ export default function StudentList() {
                 handleSortChange(e.target.value);
               }}
             >
-              <option value='newest'>Sort By: Newest</option>
-              <option value='oldest'>Sort By: Oldest</option>
-              <option value='nameAsc'>Sort By: Name (A-Z)</option>
-              <option value='nameDesc'>Sort By: Name (Z-A)</option>
-              <option value='emailAsc'>Sort By: Email (A-Z)</option>
-              <option value='emailDesc'>Sort By: Email (Z-A)</option>
-              <option value='gradeAsc'>Sort By: Grade (Low-High)</option>
-              <option value='gradeDesc'>Sort By: Grade (High-Low)</option>
+              <option value='newest'>Newest</option>
+              <option value='oldest'>Oldest</option>
+              <option value='nameAsc'>Name (A-Z)</option>
+              <option value='nameDesc'>Name (Z-A)</option>
+              <option value='emailAsc'>Email (A-Z)</option>
+              <option value='emailDesc'>Email (Z-A)</option>
+              <option value='gradeAsc'>Grade (Low-High)</option>
+              <option value='gradeDesc'>Grade (High-Low)</option>
             </select>
           </div>
         </div>
@@ -279,7 +279,13 @@ export default function StudentList() {
               {isLoading ? (
                 <tr>
                   <td colSpan={7} className='text-center py-10'>
-                    <LoadingState variant="table" message="Loading students..." />
+                    <LoadingState 
+                      variant="table" 
+                      message="Loading students..." 
+                      columns={7}
+                      rows={6}
+                      columnWidths={['8%', '25%', '20%', '15%', '12%', '10%', '10%']}
+                    />
                   </td>
                 </tr>
               ) : students && students.length > 0 ? (

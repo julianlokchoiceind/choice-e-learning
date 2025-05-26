@@ -108,17 +108,6 @@ export default function TopicsPage() {
     };
   }, []);
 
-  const handleSearch = () => {
-    try {
-      console.log('[TopicsPage] Searching topics with query:', searchQuery);
-      setCurrentPage(1);
-      refetch();
-    } catch (error: unknown) {
-      console.error('[TopicsPage] Exception in search handler:', error);
-      // Continue with UI
-    }
-  };
-
   const handleStatusChange = (status: string) => {
     let activeStatus: boolean | undefined;
     
@@ -178,11 +167,6 @@ export default function TopicsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className='py-2 pl-10 pr-4 block w-full sm:w-80 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)] outline-none'
-              onKeyDown={(e: any) => {
-                if (e.key === 'Enter') {
-                  handleSearch();
-                }
-              }}
             />
           </div>
           <div className='flex items-center space-x-2'>
@@ -195,12 +179,6 @@ export default function TopicsPage() {
               <option value='active'>Active Only</option>
               <option value='inactive'>Inactive Only</option>
             </select>
-            <button
-              onClick={handleSearch}
-              className='py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md admin-button'
-            >
-              Search
-            </button>
           </div>
         </div>
 
@@ -227,7 +205,13 @@ export default function TopicsPage() {
               {isLoading ? (
                 <tr>
                   <td colSpan={5} className='text-center py-10'>
-                    <LoadingState variant="table" message="Loading topics..." />
+                    <LoadingState 
+                      variant="table" 
+                      message="Loading topics..." 
+                      columns={5}
+                      rows={6}
+                      columnWidths={['25%', '30%', '15%', '15%', '15%']}
+                    />
                   </td>
                 </tr>
               ) : topics.length === 0 ? (

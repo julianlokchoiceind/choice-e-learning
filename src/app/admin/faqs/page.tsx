@@ -91,11 +91,6 @@ export default function FAQsAdminPage() {
     };
   }, []);
 
-  const handleSearch = () => {
-    setCurrentPage(1);
-    refetch();
-  };
-
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     setCurrentPage(1);
@@ -160,12 +155,6 @@ export default function FAQsAdminPage() {
                 </option>
               ))}
             </select>
-            <button
-              onClick={handleSearch}
-              className='py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md admin-button'
-            >
-              Search
-            </button>
           </div>
         </div>
 
@@ -184,7 +173,13 @@ export default function FAQsAdminPage() {
               {isLoading ? (
                 <tr>
                   <td colSpan={4} className='text-center py-10'>
-                    <LoadingState variant="table" message="Loading FAQs..." />
+                    <LoadingState 
+                      variant="table" 
+                      message="Loading FAQs..." 
+                      columns={4}
+                      rows={6}
+                      columnWidths={['40%', '20%', '20%', '20%']}
+                    />
                   </td>
                 </tr>
               ) : faqs.length === 0 ? (
