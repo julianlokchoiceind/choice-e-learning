@@ -225,7 +225,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
                       className='w-full bg-transparent border border-red-500 text-red-500 py-2 rounded-md text-sm hover:bg-red-50'
                       disabled={unenrollMutation.isPending}
                     >
-                      {unenrollMutation.isPending ? 'Đang xử lý...' : 'Hủy đăng ký'}
+                      {unenrollMutation.isPending ? 'Processing...' : 'Hủy đăng ký'}
                     </button>
                   </div>
                 ) : (
@@ -234,7 +234,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
                     className='w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-md font-medium'
                     disabled={enrollMutation.isPending}
                   >
-                    {enrollMutation.isPending ? 'Đang xử lý...' : (course.price > 0 ? `Mua khóa học - ${course.price}` : 'Đăng ký miễn phí')}
+                    {enrollMutation.isPending ? 'Processing...' : (course.price > 0 ? `Mua khóa học - ${course.price}` : 'Đăng ký miễn phí')}
                   </button>
                 )}
 
@@ -392,7 +392,7 @@ export default function CourseDetailPage({ params }: { params: { courseId: strin
                     className='w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium'
                     disabled={enrollMutation.isPending}
                   >
-                    {enrollMutation.isPending ? 'Đang xử lý...' : 'Đăng ký ngay'}
+                    {enrollMutation.isPending ? 'Processing...' : 'Enroll Now'}
                   </button>
                 )}
               </div>

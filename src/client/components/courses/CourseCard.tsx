@@ -67,7 +67,7 @@ export const CourseCard = ({ course, isEnrolled = false }: CourseCardProps) => {
               disabled={enrollMutation.isPending}
               className='w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors'
             >
-              {enrollMutation.isPending ? <LoadingState variant="button" message="Đang xử lý..." /> : 'Đăng ký ngay'}
+              {enrollMutation.isPending ? <LoadingState variant="button" message="Processing..." /> : 'Enroll Now'}
             </button>
           ) : (
             <Link href={`/learn/${course.id}`} className='block w-full text-center py-2 border border-blue-600 text-blue-600 hover:bg-blue-50 rounded-md transition-colors'>

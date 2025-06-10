@@ -214,7 +214,7 @@ export default function StudentList() {
         </div>
         <Link
           href='/admin/students/new'
-          className='px-4 py-2 rounded-md flex items-center admin-button add-btn'
+          className='btn-admin-primary'
         >
           <PlusIcon className='h-5 w-5 mr-1' />
           Add New Student
@@ -276,12 +276,12 @@ export default function StudentList() {
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
-              {isLoading ? (
+              {isLoading || deleteStudentMutation.isPending ? (
                 <tr>
                   <td colSpan={7} className='text-center py-10'>
                     <LoadingState 
                       variant="table" 
-                      message="Loading students..." 
+                      message={deleteStudentMutation.isPending ? 'Deleting student...' : 'Loading students...'} 
                       columns={7}
                       rows={6}
                       columnWidths={['8%', '25%', '20%', '15%', '12%', '10%', '10%']}
@@ -370,7 +370,7 @@ export default function StudentList() {
         </div>
         
         {/* Pagination */}
-        {pagination && pagination.totalPages > 0 && (
+        {pagination && pagination.totalPages > 1 && (
           <div className='flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200'>
             <div className='text-sm text-gray-600'>
               Showing {students?.length || 0} of {pagination.total} students

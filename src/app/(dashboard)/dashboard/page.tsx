@@ -40,18 +40,83 @@ export default function Dashboard() {
   const { useGetCurrentUser, useGetUserLoginStreak } = useUserQuery();
   const { useGetUserStats, useGetEnrolledCourses, useGetUserAchievements } = useDashboardQuery();
   
-  // Get current user
+  // Get current user with robust error handling
   const { 
     data: currentUser, 
     isLoading: isLoadingUser,
-    error: userError
+    error: userError,
+    status: userStatus,
+    refetch: refetchUser
   } = useGetCurrentUser();
+  
+  // Monitor session status
+  const [sessionIssue, setSessionIssue] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   // Get user login streak directly from React Query
   const {
     data: userLoginStreak = 0,
-    isLoading: isLoadingStreak
+    isLoading: isLoadingStreak,
+    error: streakError 
   } = useGetUserLoginStreak();
+  
+  // Effect to handle authentication 
+  useEffect(() => {
+    // If user is not loading but there's no user data, we have a session issue
+    if (!isLoadingUser && userStatus === 'error') {
+      setSessionIssue(true);
+      // Try to refetch user data
+      refetchUser();
+    }
+    
+    // Mark session as checked once we have a definitive status
+    if (!isLoadingUser && (userStatus === 'success' || userStatus === 'error')) {
+      setSessionChecked(true);
+    }
+  }, [isLoadingUser, userStatus, refetchUser]);
+
+  // Effect to handle session issues
+  useEffect(() => {
+    if (userError) {
+      console.error('Authentication error detected in dashboard:', userError);
+      setSessionIssue(true);
+      
+      // If error is authentication-related, try to refetch more aggressively
+      if (userError.message?.includes('authentication') || userError.message?.includes('unauthorized')) {
+        console.log('Authentication error detected, attempting immediate refetch...');
+        refetchUser();
+      }
+    }
+    
+    // Reset session issue flag when user data loads successfully
+    if (currentUser && sessionIssue) {
+      console.log('Session recovered, user data loaded successfully');
+      setSessionIssue(false);
+    }
+    
+    // Add manual refetch if needed for session timing issues
+    if ((userStatus === 'error' || !currentUser) && status === 'authenticated') {
+      const timer = setTimeout(() => {
+        console.log('Attempting to refetch user data after delay...');
+        refetchUser();
+      }, 1500); // Reduced timeout for faster recovery
+      
+      return () => clearTimeout(timer);
+    }
+  }, [userStatus, userError, currentUser, refetchUser, sessionIssue, status]);
+  
+  // Trigger other queries only when we have user data
+  useEffect(() => {
+    if (currentUser && currentUser.id) {
+      console.log('User authenticated, triggering dashboard data fetch');
+      // No need to do anything explicit as the queries will auto-trigger
+      // based on their dependencies on the user ID
+    } else if (status === 'authenticated' && !currentUser) {
+      // If we're authenticated but don't have user data, try to refetch
+      console.log('Session authenticated but missing user data, refetching...');
+      refetchUser();
+    }
+  }, [currentUser, status, refetchUser]);
   
   // Get user stats
   const {
@@ -85,16 +150,33 @@ export default function Dashboard() {
   // Type safe achievements
   const achievements = (achievementsData || []) as UserAchievement[];
   
-  // Combine loading states
-  const isLoading = isLoadingUser || isLoadingStats || isLoadingCourses || isLoadingAchievements || isLoadingStreak;
+  // Combine loading states - distinguish between initial loading and session loading
+  const isInitialLoading = isLoadingUser || isLoadingStats || isLoadingCourses || isLoadingAchievements || isLoadingStreak;
   
-  // Handle errors
-  const hasError = userError || statsError || coursesError || achievementsError;
+  // Check if we're waiting for session to be ready
+  const isSessionLoading = status === 'loading';
+  
+  // Combined loading state
+  const isLoading = isInitialLoading || isSessionLoading;
+  
+  // Handle errors - but don't treat authentication errors as fatal errors during initial load
+  const isAuthError = userError && userError.message?.includes('authentication');
+  const hasError = (userError && !isAuthError) || statsError || coursesError || achievementsError;
 
-  if (isLoading) {
+  // Show loading state while checking authentication
+  if ((isLoadingUser || status === 'loading') && !sessionChecked) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
+        <LoadingState message="Loading dashboard..." />
+      </div>
+    );
+  }
+  
+  // If we have auth errors but session is still loading, show a different loading message
+  if (isAuthError && isSessionLoading) {
     return (
       <div className='flex items-center justify-center min-h-screen'>
-        <LoadingState variant="page" message="Loading dashboard..." />
+        <LoadingState variant="page" message="Verifying your session..." />
       </div>
     );
   }

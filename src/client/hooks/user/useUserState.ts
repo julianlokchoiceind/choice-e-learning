@@ -1,6 +1,6 @@
 import { useSession } from 'next-auth/react';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useApiRequest } from '@/client/hooks/common/useApiRequest';
 import { User } from '@/shared/types/user';
 
 export function useUserState() {
@@ -8,6 +8,7 @@ export function useUserState() {
   const [user, setUser] = useState<Partial<User> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const apiRequest = useApiRequest();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -17,8 +18,8 @@ export function useUserState() {
       }
 
       try {
-        const response = await axios.get('/api/dashboard/user/me');
-        if (response.data.success) {
+        const response = await apiRequest.get('/api/dashboard/user/me');
+        if (response && response.data && response.data.success) {
           setUser(response.data.data);
         } else {
           setError('Failed to load user data');

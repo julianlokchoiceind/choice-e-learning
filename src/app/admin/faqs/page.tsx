@@ -120,7 +120,7 @@ export default function FAQsAdminPage() {
         </div>
         <Link 
           href='/admin/faqs/new' 
-          className='px-4 py-2 rounded-md flex items-center admin-button add-faq-btn'
+          className='btn-admin-primary'
         >
           <PlusIcon className='h-5 w-5 mr-1' />
           Add New FAQ
@@ -170,12 +170,12 @@ export default function FAQsAdminPage() {
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
-              {isLoading ? (
+              {isLoading || deleteFAQ.isPending ? (
                 <tr>
                   <td colSpan={4} className='text-center py-10'>
                     <LoadingState 
                       variant="table" 
-                      message="Loading FAQs..." 
+                      message={deleteFAQ.isPending ? 'Deleting FAQ...' : 'Loading FAQs...'} 
                       columns={4}
                       rows={6}
                       columnWidths={['40%', '20%', '20%', '20%']}
@@ -220,14 +220,12 @@ export default function FAQsAdminPage() {
                             <button
                               onClick={() => handleDeleteConfirm(faq.id)}
                               className='text-red-600 hover:text-red-800 font-medium bg-red-50 px-2 py-1 rounded admin-button'
-                              disabled={deleteFAQ.isPending}
                             >
-                              {deleteFAQ.isPending ? 'Deleting...' : 'Confirm'}
+                              Confirm
                             </button>
                             <button
                               onClick={() => setConfirmDelete(null)}
                               className='text-gray-600 hover:text-gray-800 bg-gray-50 px-2 py-1 rounded admin-button'
-                              disabled={deleteFAQ.isPending}
                             >
                               Cancel
                             </button>

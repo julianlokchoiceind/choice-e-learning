@@ -36,17 +36,17 @@ const AppProvider = ({
   position = 'bottom'
 }: AppProviderProps) => {
   return (
-    <QueryProvider
-      enableDevTools={enableDevTools}
-      initialIsOpen={initialIsOpen}
-      position={position}
-    >
-      <ToastProvider>
-        <SessionProvider session={session}>
+    <SessionProvider session={session}>
+      <QueryProvider
+        enableDevTools={enableDevTools}
+        initialIsOpen={initialIsOpen}
+        position={position}
+      >
+        <ToastProvider>
           {children}
-        </SessionProvider>
-      </ToastProvider>
-    </QueryProvider>
+        </ToastProvider>
+      </QueryProvider>
+    </SessionProvider>
   );
 };
 

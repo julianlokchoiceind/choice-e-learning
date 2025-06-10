@@ -147,7 +147,7 @@ export default function TopicsPage() {
         </div>
         <Link
           href='/admin/topics/new'
-          className='px-4 py-2 rounded-md flex items-center admin-button add-topic-btn'
+          className='btn-admin-primary'
         >
           <PlusIcon className='h-5 w-5 mr-1' />
           Add New Topic
@@ -202,12 +202,12 @@ export default function TopicsPage() {
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
-              {isLoading ? (
+              {isLoading || deleteTopicMutation.isPending ? (
                 <tr>
                   <td colSpan={5} className='text-center py-10'>
                     <LoadingState 
                       variant="table" 
-                      message="Loading topics..." 
+                      message={deleteTopicMutation.isPending ? 'Deleting topic...' : 'Loading topics...'} 
                       columns={5}
                       rows={6}
                       columnWidths={['25%', '30%', '15%', '15%', '15%']}
@@ -259,14 +259,13 @@ export default function TopicsPage() {
                             <button
                               onClick={() => handleDeleteConfirm(topic.id)}
                               className='text-red-600 hover:text-red-800 font-medium bg-red-50 px-2 py-1 rounded admin-button'
-                              disabled={Boolean(topic?._count?.courses && topic._count.courses > 0) || deleteTopicMutation.isPending}
+                              disabled={Boolean(topic?._count?.courses && topic._count.courses > 0)}
                             >
-                              {deleteTopicMutation.isPending ? 'Deleting...' : 'Confirm'}
+                              Confirm
                             </button>
                             <button
                               onClick={() => setConfirmDelete(null)}
                               className='text-gray-600 hover:text-gray-800 bg-gray-50 px-2 py-1 rounded admin-button'
-                              disabled={deleteTopicMutation.isPending}
                             >
                               Cancel
                             </button>
@@ -293,7 +292,7 @@ export default function TopicsPage() {
         </div>
         
         {/* Pagination */}
-        {!isLoading && pagination && pagination.totalPages > 0 && (
+        {!isLoading && pagination && pagination.totalPages > 1 && (
           <div className='flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200'>
             <div className='text-sm text-gray-600'>
               Showing {topics.length} of {pagination.totalItems} topics

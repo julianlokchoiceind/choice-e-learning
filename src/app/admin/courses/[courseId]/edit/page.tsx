@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import { CourseFormTabs, DraftStatusBadge, CurriculumTab, BasicInfoTab } from '@/client/components/admin/courses';
 import { LoadingState } from '@/client/components/common';
 import { useCoursesQuery } from '@/client/hooks/courses';
@@ -40,20 +41,10 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
     imageUrl: ''
   });
   
-  // Add CSS for consistent button styling with other admin pages but avoid pointer issues
+  // Fix for cursor flickering only
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
-      .admin-button {
-        transition: background-color 0.2s ease-in-out !important;
-        position: relative;
-        z-index: 5;
-      }
-      .admin-button:hover {
-        box-shadow: none !important;
-        background-color: var(--hover-color, inherit);
-      }
-      /* Fix for cursor flickering */
       .tab-container button {
         cursor: pointer !important;
       }
@@ -143,10 +134,9 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
       });
       
       setLastSaved(new Date());
-      alert('Course updated successfully');
     } catch (error: any) {
       console.error('Error updating course:', error);
-      alert('Error updating course: ' + (error.message || 'Unknown error'));
+      // Error is handled by the mutation meta in useCoursesQuery
     }
   };
   
@@ -155,25 +145,25 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
     try {
       // Enhanced validation
       if (!values.title || !values.description) {
-        alert('Please fill in required fields: title and description');
+        toast.error('Please fill in required fields: title and description');
         return;
       }
       
       // Validate description length
       if (values.description.length < 10) {
-        alert('Description must be at least 10 characters');
+        toast.error('Description must be at least 10 characters');
         return;
       }
       
       // Validate chapters and lessons for published courses
       if (chapters.length === 0) {
-        alert('At least one chapter is required for publishing');
+        toast.error('At least one chapter is required for publishing');
         setActiveTab('curriculum');
         return;
       }
       
       if (lessons.length === 0) {
-        alert('At least one lesson is required for publishing');
+        toast.error('At least one lesson is required for publishing');
         setActiveTab('curriculum');
         return;
       }
@@ -197,7 +187,7 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
       router.push('/admin/courses');
     } catch (error: any) {
       console.error('Error publishing course:', error);
-      alert('Error publishing course: ' + (error.message || 'Unknown error'));
+      // Error is handled by the mutation meta in useCoursesQuery
     }
   };
   
@@ -241,7 +231,7 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
             type="button"
             onClick={handleUpdateDraft}
             disabled={updateCourseMutation.isPending}
-            className="px-6 py-2.5 border border-gray-300 rounded-md text-gray-500 hover:bg-gray-50 transition-colors disabled:opacity-70 admin-button flex items-center"
+            className="btn-admin-secondary-lg"
           >
             {updateCourseMutation.isPending ? (
               <LoadingState variant="button" message="Updating..." />
@@ -254,7 +244,7 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
             type="button"
             onClick={handlePublish}
             disabled={updateCourseMutation.isPending}
-            className="px-6 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:opacity-70 admin-button flex items-center"
+            className="btn-admin-primary-lg"
           >
             {updateCourseMutation.isPending ? (
               <LoadingState variant="button" message="Publishing..." />
@@ -288,7 +278,7 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
           <div className="flex space-x-4">
             <Link
               href="/admin/courses"
-              className="flex items-center text-gray-600 hover:text-gray-800 py-2.5 px-6 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors admin-button"
+              className="flex items-center text-gray-600 hover:text-gray-800 py-2.5 px-6 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
             >
               Back
             </Link>
@@ -296,7 +286,7 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
               <button
                 type="button"
                 onClick={() => handleTabChange('curriculum')}
-                className="flex items-center bg-blue-500 hover:bg-blue-600 text-white py-2.5 px-8 rounded-md transition-colors admin-button"
+                className="btn-admin-primary-lg"
               >
                 Next
               </button>

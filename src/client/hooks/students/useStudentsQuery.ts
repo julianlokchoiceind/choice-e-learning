@@ -1,9 +1,8 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
-import apiClient from '@/client/utils/http/api-client';
-import { useToast } from '@/client/hooks/common/useToast';
+import { useApiRequest, ApiRequestError } from '@/client/hooks/common/useApiRequest';
+// Remove direct useToast import as we're using QueryProvider for toasts
 import { useQueryUtils } from '@/client/hooks/common/useQueryUtils';
 import {
   FormattedStudent,
@@ -44,8 +43,10 @@ const API = {
  */
 export const useStudentsQuery = () => {
   const queryClient = useQueryClient();
-  const { success } = useToast();
+  // Use QueryProvider's toast system via meta
   const { showErrorToast } = useQueryUtils();
+  // Khởi tạo useApiRequest hook
+  const apiRequest = useApiRequest();
 
   /**
    * Fetch students with pagination, sorting, and filtering
@@ -57,17 +58,28 @@ export const useStudentsQuery = () => {
     return useQuery({
       queryKey: ['students', params],
       queryFn: async (): Promise<PaginatedStudentsResponse> => {
-        // Build URL with query parameters
-        const queryParams = new URLSearchParams();
-        if (params.search) queryParams.append('search', params.search);
-        if (params.page) queryParams.append('page', params.page.toString());
-        if (params.limit) queryParams.append('limit', params.limit.toString());
-        if (params.sortBy) queryParams.append('sortBy', params.sortBy);
-        if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
-        
-        const url = `${API.STUDENTS}?${queryParams.toString()}`;
-        const response = await apiClient.get(url);
-        return response.data;
+        try {
+          // Sử dụng params object thay vì URLSearchParams
+          const queryParams: Record<string, string | number> = {};
+          if (params.search) queryParams.search = params.search;
+          if (params.page) queryParams.page = params.page;
+          if (params.limit) queryParams.limit = params.limit;
+          if (params.sortBy) queryParams.sortBy = params.sortBy;
+          if (params.sortOrder) queryParams.sortOrder = params.sortOrder;
+          
+          const response = await apiRequest.get(API.STUDENTS, { params: queryParams });
+          
+          // Kiểm tra response null/undefined
+          if (!response || !response.data) {
+            console.error('Error fetching students: Empty response');
+            throw new Error('Failed to fetch students: No data returned');
+          }
+          
+          return response.data;
+        } catch (error) {
+          console.error('Error fetching students:', error);
+          throw error;
+        }
       }
     });
   };
@@ -82,8 +94,24 @@ export const useStudentsQuery = () => {
     return useQuery({
       queryKey: ['students', id],
       queryFn: async (): Promise<FormattedStudent> => {
-        const response = await apiClient.get(API.STUDENT(id));
-        return response.data.data;
+        try {
+          if (!id) {
+            throw new Error('Student ID is required');
+          }
+          
+          const response = await apiRequest.get(API.STUDENT(id));
+          
+          // Kiểm tra response null/undefined
+          if (!response || !response.data || !response.data.data) {
+            console.error(`Error fetching student ${id}: Empty response`);
+            throw new Error('Failed to fetch student: No data returned');
+          }
+          
+          return response.data.data;
+        } catch (error) {
+          console.error(`Error fetching student ${id}:`, error);
+          throw error;
+        }
       },
       enabled: !!id
     });
@@ -97,18 +125,33 @@ export const useStudentsQuery = () => {
   const useCreateStudent = () => {
     return useMutation({
       mutationFn: async (data: CreateStudentDTO): Promise<FormattedStudent> => {
-        const response = await apiClient.post(API.STUDENTS, data);
-        return response.data.data;
+        try {
+          const response = await apiRequest.post(API.STUDENTS, data);
+          
+          // Kiểm tra response null/undefined
+          if (!response || !response.data || !response.data.data) {
+            console.error('Error creating student: Empty response');
+            throw new Error('Failed to create student: No data returned');
+          }
+          
+          return response.data.data;
+        } catch (error) {
+          console.error('Error creating student:', error);
+          throw error;
+        }
       },
       onSuccess: (data) => {
         // Invalidate students list query to refetch
         queryClient.invalidateQueries({ queryKey: ['students'] });
-        success('Student created successfully');
         return data;
       },
-      onError: (err: AxiosError) => {
+      onError: (err: ApiRequestError) => {
         showErrorToast(err, 'Failed to create student');
         throw err;
+      },
+      meta: {
+        successToast: 'Student created successfully',
+        errorToast: 'Failed to create student'
       },
     });
   };
@@ -127,19 +170,34 @@ export const useStudentsQuery = () => {
         id: string; 
         data: UpdateStudentDTO 
       }): Promise<FormattedStudent> => {
-        const response = await apiClient.patch(API.STUDENT(id), data);
-        return response.data.data;
+        try {
+          const response = await apiRequest.patch(API.STUDENT(id), data);
+          
+          // Kiểm tra response null/undefined
+          if (!response || !response.data || !response.data.data) {
+            console.error(`Error updating student ${id}: Empty response`);
+            throw new Error('Failed to update student: No data returned');
+          }
+          
+          return response.data.data;
+        } catch (error) {
+          console.error(`Error updating student ${id}:`, error);
+          throw error;
+        }
       },
       onSuccess: (data, variables) => {
         // Invalidate both the list and the specific student
         queryClient.invalidateQueries({ queryKey: ['students'] });
         queryClient.invalidateQueries({ queryKey: ['students', variables.id] });
-        success('Student updated successfully');
         return data;
       },
-      onError: (err: AxiosError) => {
+      onError: (err: ApiRequestError) => {
         showErrorToast(err, 'Failed to update student');
         throw err;
+      },
+      meta: {
+        successToast: 'Student updated successfully',
+        errorToast: 'Failed to update student'
       },
     });
   };
@@ -152,18 +210,26 @@ export const useStudentsQuery = () => {
   const useDeleteStudent = () => {
     return useMutation({
       mutationFn: async (id: string): Promise<void> => {
-        await apiClient.delete(API.STUDENT(id));
+        try {
+          await apiRequest.delete(API.STUDENT(id));
+        } catch (error) {
+          console.error(`Error deleting student ${id}:`, error);
+          throw error;
+        }
       },
       onSuccess: (_, variables) => {
         // Invalidate students list query to refetch
         queryClient.invalidateQueries({ queryKey: ['students'] });
         // Remove the specific student from cache
         queryClient.removeQueries({ queryKey: ['students', variables] });
-        success('Student deleted successfully');
       },
-      onError: (err: AxiosError) => {
+      onError: (err: ApiRequestError) => {
         showErrorToast(err, 'Failed to delete student');
         throw err;
+      },
+      meta: {
+        successToast: 'Student deleted successfully',
+        errorToast: 'Failed to delete student'
       },
     });
   };

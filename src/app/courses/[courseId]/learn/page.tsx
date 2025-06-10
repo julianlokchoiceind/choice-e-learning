@@ -19,7 +19,7 @@ import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
 import { CourseCurriculumSidebar } from '@/client/components/layout/CourseCurriculumSidebar';
 import { LoadingState } from '@/client/components/common';
 import { useCoursesQuery } from '@/client/hooks/courses';
-import { useLessonsQuery } from '@/client/hooks/learn';
+import { useLessonsQuery } from '@/client/hooks/lessons';
 import apiClient from '@/client/utils/http/api-client';
 
 interface Lesson {

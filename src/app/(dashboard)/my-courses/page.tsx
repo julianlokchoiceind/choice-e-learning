@@ -20,7 +20,7 @@ export default async function MyCoursesPage() {
     <div className='my-courses-page'>
       <h1>Khóa học của tôi</h1>
       
-      <Suspense fallback={<div className="flex justify-center items-center py-12"><LoadingState variant="section" message="Đang tải khóa học..." /></div>}>
+      <Suspense fallback={<div className="flex justify-center items-center py-12"><LoadingState variant="section" message="Loading courses..." /></div>}>
         <div className='enrolled-courses'>
           {enrolledCourses.length > 0 ? (
             <div className='course-grid'>

@@ -62,7 +62,7 @@ export const EnrollButton = ({ courseId, isEnrolled = false }: EnrollButtonProps
       className='button primary full-width'
     >
       {enrollMutation.isPending ? (
-        <LoadingState variant="button" message="Đang xử lý..." />
+        <LoadingState variant="button" message="Processing..." />
       ) : (
         'Đăng ký khóa học'
       )}

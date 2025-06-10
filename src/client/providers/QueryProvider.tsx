@@ -21,6 +21,47 @@ import React, { useState } from 'react';
  * @property {boolean} [initialIsOpen] - Whether DevTools should be open by default (default: false)
  * @property {'bottom' | 'top' | 'left' | 'right'} [position] - Position of the DevTools panel
  */
+
+/**
+ * Helper functions for toast notification system
+ * No custom types needed - we'll use type assertions and carefully check properties
+ */
+
+/**
+ * Check if meta contains successToast property
+ */
+const hasSuccessToast = (meta?: any): boolean => {
+  return meta !== undefined && 'successToast' in meta;
+};
+
+/**
+ * Check if meta contains errorToast property
+ */
+const hasErrorToast = (meta?: any): boolean => {
+  return meta !== undefined && 'errorToast' in meta;
+};
+
+/**
+ * Check if meta contains suppressErrorToast property
+ */
+const hasSuppressErrorToast = (meta?: any): boolean => {
+  return meta !== undefined && 'suppressErrorToast' in meta;
+};
+
+/**
+ * Get success toast message from meta
+ */
+const getSuccessToastMessage = (meta?: any): string => {
+  if (!hasSuccessToast(meta)) return 'Operation completed successfully';
+  return typeof meta.successToast === 'string' ? meta.successToast : 'Operation completed successfully';
+};
+
+/**
+ * Get error toast message from meta
+ */
+const getErrorToastMessage = (meta?: any, defaultMessage?: string): string | undefined => {
+  return hasErrorToast(meta) ? meta.errorToast : defaultMessage;
+};
 export interface QueryProviderProps {
   children: React.ReactNode;
   defaultOptions?: DefaultOptions;
@@ -125,36 +166,50 @@ export const QueryProvider: React.FC<QueryProviderProps> = ({
               ? ` while fetching ${String(query.queryKey[0])}` 
               : '';
             
-            toast.error(
-              `Something went wrong${queryContext}: ${errorMessage}`,
-              {
-                id: `query-error-${query.queryKey.join('-')}`, // Prevent duplicate toasts
-                duration: 5000
-              }
-            );
+            // Show toast with proper options
+            toast.error(`Something went wrong${queryContext}: ${errorMessage}`, {
+              id: `query-error-${query.queryKey.join('-')}`, // Prevent duplicate toasts
+              duration: 5000,
+              position: 'top-center'
+            });
           }
         }
       }),
       mutationCache: new MutationCache({
+        onSuccess: (_data, _variables, _context, mutation) => {
+          // Show success toast if specified in mutation metadata
+          if (hasSuccessToast(mutation.meta)) {
+            const message = getSuccessToastMessage(mutation.meta);
+              
+            // Show toast with proper options
+            toast.success(message, {
+              id: `mutation-success-${Date.now()}`,
+              duration: 3000,
+              position: 'top-center'
+            });
+          }
+        },
         onError: (error, _variables, _context, mutation) => {
-          // Only show error toast if the mutation has no error boundary
-          if (mutation.meta?.suppressErrorToast !== true) {
+          // Show error toast unless suppressed
+          if (!hasSuppressErrorToast(mutation.meta) || (mutation.meta && mutation.meta.suppressErrorToast !== true)) {
             const errorMessage = error instanceof Error 
               ? error.message 
               : 'Unknown error';
+            
+            // Use custom error message from metadata if available
+            const customErrorMessage = getErrorToastMessage(mutation.meta);
             
             // Get context from mutationKey for more descriptive error messages
             const mutationContext = mutation.options.mutationKey 
               ? ` during ${String(mutation.options.mutationKey[0])}` 
               : '';
             
-            toast.error(
-              `Operation failed${mutationContext}: ${errorMessage}`,
-              {
-                id: `mutation-error-${Date.now()}`,
-                duration: 5000
-              }
-            );
+            // Show toast with proper options
+            toast.error(customErrorMessage || `Operation failed${mutationContext}: ${errorMessage}`, {
+              id: `mutation-error-${Date.now()}`,
+              duration: 5000,
+              position: 'top-center'
+            });
           }
         }
       }),

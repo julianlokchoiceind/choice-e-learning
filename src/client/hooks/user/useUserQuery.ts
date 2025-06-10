@@ -1,9 +1,10 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 import { AxiosError } from 'axios';
-import apiClient from '@/client/utils/http/api-client';
-import { useToast } from '@/client/hooks/common/useToast';
+import { useApiRequest, ApiRequestError } from '@/client/hooks/common/useApiRequest';
+// Remove direct useToast import as we're using QueryProvider for toasts
 import { useQueryUtils } from '@/client/hooks/common/useQueryUtils';
 import { 
   User, 
@@ -20,7 +21,7 @@ const API = {
   ME: '/api/dashboard/user/me',
   PREFERENCES: '/api/dashboard/user/preferences',
   USER_PREFERENCES: (id: string) => `/api/dashboard/user/preferences/${id}`,
-  LOGIN_STREAK: '/api/dashboard/user/login-streak',
+  // Login streak is now included in the ME endpoint
 };
 
 /**
@@ -47,8 +48,10 @@ const API = {
  */
 export const useUserQuery = () => {
   const queryClient = useQueryClient();
-  const { success } = useToast();
+  // Use QueryProvider's toast system via meta
   const { showErrorToast } = useQueryUtils();
+  // Khởi tạo useApiRequest hook
+  const apiRequest = useApiRequest();
 
   /**
    * Fetch current user profile data
@@ -62,7 +65,10 @@ export const useUserQuery = () => {
     return useQuery({
       queryKey: ['user', 'profile'],
       queryFn: async (): Promise<UserProfile> => {
-        const response = await apiClient.get(API.PROFILE);
+        const response = await apiRequest.get<{data: UserProfile}>(API.PROFILE);
+        if (!response || !response.data) {
+          throw new Error('Failed to fetch user profile');
+        }
         return response.data.data;
       },
       ...options
@@ -81,7 +87,10 @@ export const useUserQuery = () => {
     return useQuery({
       queryKey: ['user', 'current'],
       queryFn: async (): Promise<User> => {
-        const response = await apiClient.get(API.ME);
+        const response = await apiRequest.get<{data: User}>(API.ME);
+        if (!response || !response.data) {
+          throw new Error('Failed to fetch current user');
+        }
         return response.data.data;
       },
       ...options
@@ -100,7 +109,10 @@ export const useUserQuery = () => {
     return useQuery({
       queryKey: ['user', 'preferences'],
       queryFn: async (): Promise<UserPreferences> => {
-        const response = await apiClient.get(API.PREFERENCES);
+        const response = await apiRequest.get<{data: UserPreferences}>(API.PREFERENCES);
+        if (!response || !response.data) {
+          throw new Error('Failed to fetch user preferences');
+        }
         return response.data.data;
       },
       ...options
@@ -113,17 +125,43 @@ export const useUserQuery = () => {
    * @param options - Additional React Query options
    * @returns Query result with user login streak (number), loading state, and error
    */
-  const useGetUserLoginStreak = (
-    options?: UseQueryOptions<number, Error, number, string[]>
-  ) => {
+  const useGetUserLoginStreak = () => {
+    // Get session data for user ID
+    const { data: session, status } = useSession();
+    
+    // Check authentication status - wait for session to be fully loaded
+    const isAuthenticated = status === 'authenticated' && !!session?.user;
+    const isLoading = status === 'loading';
+    
     return useQuery({
-      queryKey: ['user', 'login-streak'],
+      queryKey: ['userLoginStreak', session?.user?.id],
+      // Only enable the query when authentication is confirmed
+      enabled: isAuthenticated && !isLoading && !!session?.user?.id,
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
       queryFn: async (): Promise<number> => {
-        const response = await apiClient.get(API.LOGIN_STREAK);
-        return response.data.streak || 0;
+        try {
+          // Double-check authentication status for safety
+          if (!session?.user?.id) {
+            console.warn('User ID missing for login streak query');
+            throw new Error('User ID required to fetch login streak');
+          }
+          
+          // Get user login streak from API
+          const response = await apiRequest.get<{streak: number}>(`/api/users/${session.user.id}/login-streak`);
+          if (!response || !response.data) {
+            return 0; // Return default value if no response
+          }
+          return response.data.streak || 0;
+        } catch (error) {
+          console.error('Error fetching user login streak:', error);
+          // Return a default value of 0 instead of throwing to prevent UI disruption
+          return 0;
+        }
       },
-      ...options
-    });
+      // Provide a fallback value if the query fails
+      placeholderData: 0,
+    });  
   };
 
   /**
@@ -134,20 +172,27 @@ export const useUserQuery = () => {
   const useUpdateUserProfile = () => {
     return useMutation({
       mutationFn: async (data: Partial<UserProfile>): Promise<UserProfile> => {
-        const response = await apiClient.put(API.PROFILE, data);
+        const response = await apiRequest.put<{data: UserProfile}>(API.PROFILE, data);
+        if (!response || !response.data) {
+          throw new Error('Failed to update profile: No response');
+        }
         return response.data.data;
       },
       onSuccess: (data) => {
         // Invalidate user profile and current user queries
         queryClient.invalidateQueries({ queryKey: ['user', 'profile'] });
         queryClient.invalidateQueries({ queryKey: ['user', 'current'] });
-        success('Profile updated successfully');
         return data;
       },
-      onError: (err: AxiosError) => {
-        showErrorToast(err, 'Failed to update profile');
-        throw err;
+      onError: (error: unknown) => {
+        const apiError = error as ApiRequestError;
+        showErrorToast(apiError, 'Failed to update profile');
+        throw apiError;
       },
+      meta: {
+        successToast: 'Profile updated successfully',
+        errorToast: 'Failed to update profile'
+      }
     });
   };
 
@@ -159,18 +204,25 @@ export const useUserQuery = () => {
   const useUpdateUserPreferences = () => {
     return useMutation({
       mutationFn: async (data: UpdatePreferencesInput): Promise<UserPreferences> => {
-        const response = await apiClient.put(API.PREFERENCES, data);
+        const response = await apiRequest.put<{data: UserPreferences}>(API.PREFERENCES, data);
+        if (!response || !response.data) {
+          throw new Error('Failed to update preferences: No response');
+        }
         return response.data.data;
       },
       onSuccess: (data) => {
         // Invalidate user preferences query
         queryClient.invalidateQueries({ queryKey: ['user', 'preferences'] });
-        success('Preferences updated successfully');
         return data;
       },
-      onError: (err: AxiosError) => {
-        showErrorToast(err, 'Failed to update preferences');
-        throw err;
+      onError: (error: unknown) => {
+        const apiError = error as ApiRequestError;
+        showErrorToast(apiError, 'Failed to update preferences');
+        throw apiError;
+      },
+      meta: {
+        successToast: 'Preferences updated successfully',
+        errorToast: 'Failed to update preferences'
       },
     });
   };

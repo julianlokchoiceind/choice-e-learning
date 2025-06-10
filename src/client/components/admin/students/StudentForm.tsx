@@ -30,7 +30,6 @@ interface StudentFormProps {
 export const StudentForm = ({ studentId }: StudentFormProps) => {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   
   // Get hooks from useStudentsQuery
   const { 
@@ -92,7 +91,6 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
   
   const onSubmit = async (data: FormValues) => {
     setError(null);
-    setSuccess(null);
     
     try {
       if (studentId) {
@@ -101,11 +99,9 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
           id: studentId, 
           data 
         });
-        setSuccess('Student updated successfully');
       } else {
         // Create new student
         await createStudentMutation.mutateAsync(data);
-        setSuccess('Student created successfully');
       }
       
       // Redirect after a short delay to show success message
@@ -134,11 +130,6 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
         </div>
       )}
       
-      {success && (
-        <div className='mb-6 bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-md'>
-          {success}
-        </div>
-      )}
       
       <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>

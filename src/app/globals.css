@@ -161,6 +161,64 @@ body {
 
 /* Component styles with Tailwind */
 @layer components {
+  /* Admin button styles for consistent UI */
+  .btn-admin-primary {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white rounded-md shadow-sm transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    background: linear-gradient(to right, #3b82f6, #1d4ed8);
+    border: none;
+    transform: none !important;
+  }
+  
+  .btn-admin-primary:hover {
+    background: linear-gradient(to right, #2563eb, #1e40af);
+    color: white;
+    transform: none !important;
+  }
+
+  .btn-admin-secondary {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm transition-colors duration-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-admin-danger {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm transition-colors duration-200 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-admin-outline {
+    @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-blue-600 bg-transparent border border-blue-600 rounded-md shadow-sm transition-colors duration-200 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Large button variants */
+  .btn-admin-primary-lg {
+    @apply inline-flex items-center justify-center px-6 py-2.5 text-base font-medium text-white rounded-md shadow-sm transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    background: linear-gradient(to right, #3b82f6, #1d4ed8);
+    border: none;
+    transform: none !important;
+  }
+  
+  .btn-admin-primary-lg:hover {
+    background: linear-gradient(to right, #2563eb, #1e40af);
+    color: white;
+    transform: none !important;
+  }
+
+  .btn-admin-secondary-lg {
+    @apply btn-admin-secondary px-6 py-2.5 text-base;
+  }
+
+  .btn-admin-danger-lg {
+    @apply btn-admin-danger px-6 py-2.5 text-base;
+  }
+
+  /* Small button variants */
+  .btn-admin-primary-sm {
+    @apply btn-admin-primary px-3 py-1.5 text-xs;
+  }
+
+  .btn-admin-secondary-sm {
+    @apply btn-admin-secondary px-3 py-1.5 text-xs;
+  }
+
+  /* Original marketing buttons */
   .button-primary {
     @apply inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-[#0066cc] rounded-full transition-all hover:bg-[#0077ed] hover:shadow-lg hover:-translate-y-0.5;
   }

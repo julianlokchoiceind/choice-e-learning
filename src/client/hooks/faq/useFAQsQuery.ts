@@ -1,9 +1,8 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
-import apiClient from '@/client/utils/http/api-client';
-import { useToast } from '@/client/hooks/common/useToast';
+import { useApiRequest, ApiRequestError } from '@/client/hooks/common/useApiRequest';
+// Remove direct useToast import as we're using QueryProvider for toasts
 import { useQueryUtils } from '@/client/hooks/common/useQueryUtils';
 import { 
   FAQItem, 
@@ -44,8 +43,10 @@ const API = {
  */
 export const useFAQsQuery = () => {
   const queryClient = useQueryClient();
-  const { success } = useToast();
+  // Use QueryProvider's toast system via meta
   const { showErrorToast } = useQueryUtils();
+  // Khởi tạo useApiRequest hook
+  const apiRequest = useApiRequest();
 
   /**
    * Fetch all FAQs with optional filtering
@@ -61,9 +62,21 @@ export const useFAQsQuery = () => {
     return useQuery({
       queryKey: ['faqs', filter],
       queryFn: async (): Promise<FAQPaginatedResult> => {
-        const response = await apiClient.get(API.FAQS, { params: filter });
-        // Handle nested structure from apiSuccess: response.data = { success: true, data: { data: [...], meta: {...} } }
-        return response.data.data;
+        try {
+          const response = await apiRequest.get(API.FAQS, { params: filter });
+          
+          // Kiểm tra response null/undefined
+          if (!response || !response.data) {
+            console.error('Error fetching FAQs: Empty response');
+            throw new Error('Failed to fetch FAQs: No data returned');
+          }
+          
+          // Handle nested structure from apiSuccess: response.data = { success: true, data: { data: [...], meta: {...} } }
+          return response.data.data || { data: [], meta: { total: 0 } };
+        } catch (error) {
+          console.error('Error fetching FAQs:', error);
+          throw error;
+        }
       },
       ...options
     });
@@ -83,8 +96,24 @@ export const useFAQsQuery = () => {
     return useQuery({
       queryKey: ['faqs', id],
       queryFn: async (): Promise<FAQItem> => {
-        const response = await apiClient.get(API.FAQ(id));
-        return response.data;
+        try {
+          if (!id) {
+            throw new Error('FAQ ID is required');
+          }
+          
+          const response = await apiRequest.get(API.FAQ(id));
+          
+          // Kiểm tra response null/undefined
+          if (!response || !response.data) {
+            console.error(`Error fetching FAQ ${id}: Empty response`);
+            throw new Error('Failed to fetch FAQ: No data returned');
+          }
+          
+          return response.data;
+        } catch (error) {
+          console.error(`Error fetching FAQ ${id}:`, error);
+          throw error;
+        }
       },
       enabled: !!id, // Only run the query if ID is provided
       ...options
@@ -99,18 +128,23 @@ export const useFAQsQuery = () => {
   const useCreateFAQ = () => {
     return useMutation({
       mutationFn: async (data: CreateFAQInput): Promise<FAQItem> => {
-        const response = await apiClient.post(API.FAQS, data);
+        const response = await apiRequest.post(API.FAQS, data);
+        if (!response || !response.data) {
+          throw new Error('Failed to create FAQ: No data returned');
+        }
         return response.data;
       },
       onSuccess: (data) => {
         // Invalidate FAQs query to refetch the list
         queryClient.invalidateQueries({ queryKey: ['faqs'] });
-        success('FAQ created successfully');
         return data;
       },
-      onError: (err: AxiosError) => {
+      onError: (err: ApiRequestError) => {
         showErrorToast(err, 'Failed to create FAQ');
         throw err;
+      },
+      meta: {
+        successToast: 'FAQ created successfully'
       },
     });
   };
@@ -124,19 +158,24 @@ export const useFAQsQuery = () => {
     return useMutation({
       mutationFn: async (params: { id: string; data: UpdateFAQInput }): Promise<FAQItem> => {
         const { id, data } = params;
-        const response = await apiClient.put(API.FAQ(id), data);
+        const response = await apiRequest.put(API.FAQ(id), data);
+        if (!response || !response.data) {
+          throw new Error('Failed to update FAQ: No data returned');
+        }
         return response.data;
       },
       onSuccess: (data) => {
         // Invalidate specific FAQ query and the FAQs list
         queryClient.invalidateQueries({ queryKey: ['faqs', data.id] });
         queryClient.invalidateQueries({ queryKey: ['faqs'] });
-        success('FAQ updated successfully');
         return data;
       },
-      onError: (err: AxiosError) => {
+      onError: (err: ApiRequestError) => {
         showErrorToast(err, 'Failed to update FAQ');
         throw err;
+      },
+      meta: {
+        successToast: 'FAQ updated successfully'
       },
     });
   };
@@ -149,17 +188,19 @@ export const useFAQsQuery = () => {
   const useDeleteFAQ = () => {
     return useMutation({
       mutationFn: async (id: string): Promise<void> => {
-        await apiClient.delete(API.FAQ(id));
+        await apiRequest.delete(API.FAQ(id));
       },
       onSuccess: (_data, id) => {
         // Remove FAQ from cache and invalidate FAQs list
         queryClient.removeQueries({ queryKey: ['faqs', id] });
         queryClient.invalidateQueries({ queryKey: ['faqs'] });
-        success('FAQ deleted successfully');
       },
-      onError: (err: AxiosError) => {
+      onError: (err: ApiRequestError) => {
         showErrorToast(err, 'Failed to delete FAQ');
         throw err;
+      },
+      meta: {
+        successToast: 'FAQ deleted successfully'
       },
     });
   };

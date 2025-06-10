@@ -3,7 +3,7 @@
 // src/client/components/learn/LessonPlayer.tsx
 import { useState, useEffect } from 'react';
 import { Lesson } from '@/shared/types/lessons/lesson';
-import { useLessonsQuery } from '@/client/hooks/learn';
+import { useLessonsQuery } from '@/client/hooks/lessons';
 import { LoadingState } from '@/client/components/common';
 
 interface LessonPlayerProps {
@@ -141,7 +141,7 @@ export const LessonPlayer = ({
             className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition'
             disabled={markLessonComplete.isPending}
           >
-            {markLessonComplete.isPending ? 'Đang xử lý...' : 'Đánh dấu hoàn thành'}
+            {markLessonComplete.isPending ? 'Processing...' : 'Đánh dấu hoàn thành'}
           </button>
         )}
       </div>

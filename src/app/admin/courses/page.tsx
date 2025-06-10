@@ -178,7 +178,7 @@ export default function CoursesPage() {
         </div>
         <Link
           href='/admin/courses/new'
-          className='px-4 py-2 rounded-md flex items-center admin-button add-course-btn'
+          className='btn-admin-primary'
         >
           <PlusIcon className='h-5 w-5 mr-1' />
           Add New Course

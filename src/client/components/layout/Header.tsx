@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { UserIcon, Bars3Icon, XMarkIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/client/hooks/auth';
-import Notification from '@/client/components/ui/Notification';
 import { ErrorBoundary } from 'react-error-boundary';
 import { LoadingState } from '@/client/components/common';
+import { logLogout, logSessionState } from '@/client/utils/session';
 
 // Simple fallback component when error occurs
 const HeaderErrorFallback = () => (
@@ -63,24 +65,22 @@ const LoadingHeader = () => (
 );
 
 const Header = () => {
-  // Use NextAuth authentication hook
-  const { user, isLoading, isAuthenticated, logout } = useAuth();
-  
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [notification, setNotification] = useState<{
-    show: boolean;
-    type: 'success' | 'error' | 'info';
-    message: string;
-  } | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  // Track if component is mounted to prevent hydration errors
   const [isMounted, setIsMounted] = useState(false);
 
-  // Safely set mounted state after render
+  // Track if component is mounted to prevent hydration errors
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    
+    // Log session state when component mounts and session is available
+    if (session) {
+      logSessionState(session, false);
+    }
+  }, [session]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -90,23 +90,30 @@ const Header = () => {
     try {
       setIsLoggingOut(true);
       
-      // Show notification immediately before logging out
-      setNotification({
-        show: true,
-        type: 'success',
-        message: 'Successfully signed out!'
-      });
+      // Log logout initiation with session data
+      logLogout('initiated', session);
       
-      // Execute logout with NextAuth
-      await logout();
+      // Execute logout with NextAuth - toast will be handled by QueryProvider
+      const result = await logout();
       
+      // No need to manually redirect - logout function already handles this
+      // The hard refresh with cache busting is done in useAuth.logout
+      
+      if (!result.success) {
+        const error = new Error(result.error || 'Unknown logout error');
+        logLogout('failed', session, error);
+        console.error('Sign out failed:', result.error);
+        // Error toast will be handled by QueryProvider
+      } else {
+        // Log successful logout
+        logLogout('completed', session);
+      }
     } catch (error: unknown) {
+      // Log logout error
+      const err = error instanceof Error ? error : new Error('Unknown error during logout');
+      logLogout('error', session, err);
       console.error('Sign out failed:', error);
-      setNotification({
-        show: true,
-        type: 'error',
-        message: 'Sign out failed. Please try again.'
-      });
+      // Error toast will be handled by QueryProvider
     } finally {
       setIsLoggingOut(false);
     }
@@ -119,9 +126,13 @@ const Header = () => {
   }
   
   // Show loading header while checking authentication
-  if (isLoading) {
+  // Force re-evaluation of session status on each render
+  if (isLoading || status === 'loading') {
     return <LoadingHeader />;
   }
+  
+  // Double-check authentication status to ensure UI consistency
+  const isReallyAuthenticated = status === 'authenticated' && !!session?.user;
   
   // Only try to access user properties if we're authenticated
   // Use nullish coalescing for additional safety
@@ -129,19 +140,6 @@ const Header = () => {
 
   return (
     <ErrorBoundary fallback={<HeaderErrorFallback />}>
-      {/* Notification */}
-      {notification?.show && (
-        <div className='fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md'>
-          <Notification
-            type={notification.type}
-            message={notification.message}
-            onClose={() => setNotification(null)}
-            autoClose={true}
-            autoCloseDelay={3000} // Increased to 3 seconds for better visibility
-          />
-        </div>
-      )}
-
       <header className='bg-[rgba(0,0,0,0.8)] backdrop-blur-md fixed w-full top-0 z-40'>
         <div className='max-w-[980px] mx-auto'>
           <nav className='flex h-[44px] items-center justify-between px-4 md:px-0'>
@@ -172,7 +170,7 @@ const Header = () => {
             
             {/* Right Side Links - with fixed width containers to prevent layout shifts */}
             <div className='flex items-center space-x-4 min-w-[120px] justify-end relative'>
-              {isAuthenticated ? (
+              {isReallyAuthenticated ? (
                 <>
                   <Link href='/dashboard' aria-label='Dashboard' className='text-white/80 hover:text-white transition-colors'>
                     <UserIcon className='h-4 w-4' />

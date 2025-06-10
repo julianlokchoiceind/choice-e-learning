@@ -25,7 +25,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
   
   return (
     <div className='lesson-page'>
-      <Suspense fallback={<div>Đang tải bài học...</div>}>
+      <Suspense fallback={<div>Loading lesson...</div>}>
         <LessonPlayer lesson={lesson} course={course} />
       </Suspense>
     </div>

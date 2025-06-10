@@ -34,8 +34,8 @@ export default function NewCoursePage() {
         
         if (response?.data?.success) {
           const courseId = response.data.data.id;
-          // Redirect to edit page
-          router.push(`/admin/courses/${courseId}/edit`);
+          // Redirect to edit page with replace to avoid double loading
+          router.replace(`/admin/courses/${courseId}/edit`);
         } else {
           throw new Error(response?.data?.error || 'Failed to create course draft');
         }
@@ -47,12 +47,12 @@ export default function NewCoursePage() {
     createDraft();
   }, [router, apiRequest]); 
   
-  // Simple loading UI
+  // Optimized loading UI
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
-        <h1 className="text-xl font-semibold text-gray-800 mb-4">Creating New Course...</h1>
-        <p className="text-gray-600">Please wait while we set up your course draft.</p>
+        <h1 className="text-xl font-semibold text-gray-800 mb-4">Setting up your course...</h1>
+        <p className="text-gray-600">This will just take a moment.</p>
         <div className="mt-6">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-500 border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
             <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useToast } from './useToast';
+import toast from 'react-hot-toast';
 
 /**
  * Custom types for error handling
@@ -79,7 +79,7 @@ const extractErrorMessage = (error: unknown): string => {
  * }
  */
 export const useQueryUtils = () => {
-  const { error: showToast } = useToast();
+  // Use react-hot-toast directly instead of useToast
 
   /**
    * Displays an error toast with a user-friendly message
@@ -93,8 +93,8 @@ export const useQueryUtils = () => {
     fallbackMessage = 'An unexpected error occurred'
   ) => {
     const message = extractErrorMessage(err) || fallbackMessage;
-    showToast(message);
-  }, [showToast]);
+    toast.error(message);
+  }, []);
 
   /**
    * Standard error handler for React Query operations

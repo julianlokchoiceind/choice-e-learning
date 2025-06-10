@@ -10,7 +10,7 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import { Lesson } from '@/shared/types/lessons/lesson';
-import { useLessonsQuery } from '@/client/hooks/learn';
+import { useLessonsQuery } from '@/client/hooks/lessons';
 import { useCoursesQuery } from '@/client/hooks/courses';
 import { LoadingState } from '@/client/components/common';
 
@@ -125,7 +125,7 @@ export const LessonList = () => {
 
       {isLoading ? (
         <div className="flex justify-center items-center h-40">
-          <LoadingState variant="section" message="Đang tải bài học..." />
+          <LoadingState variant="section" message="Loading lessons..." />
         </div>
       ) : lessons.length === 0 ? (
         <div className="bg-gray-50 p-6 text-center rounded-md">
