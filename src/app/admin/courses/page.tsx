@@ -36,7 +36,7 @@ const getLevelBadgeClass = (level: string): string => {
     case 'beginner':
       return 'bg-green-100 text-green-800';
     case 'intermediate':
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-[var(--color-primary-light)] text-[var(--color-primary-dark)]';
     case 'advanced':
       return 'bg-purple-100 text-purple-800';
     default:
@@ -252,25 +252,25 @@ export default function CoursesPage() {
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
               <tr>
-                <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                <th scope='col' className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>
                   #
                 </th>
-                <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                <th scope='col' className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>
                   Course Title
                 </th>
-                <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                <th scope='col' className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>
                   Level
                 </th>
-                <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                <th scope='col' className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>
                   Students
                 </th>
-                <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                <th scope='col' className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>
                   Price
                 </th>
-                <th scope='col' className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                <th scope='col' className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>
                   Status
                 </th>
-                <th scope='col' className='py-4 px-6 text-right font-medium text-indigo-700 capitalize tracking-wider text-base'>
+                <th scope='col' className='py-4 px-6 text-right font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>
                   Actions
                 </th>
               </tr>
@@ -299,12 +299,25 @@ export default function CoursesPage() {
                 courses.map((course, index) => (
                   <tr key={course.id} className='hover:bg-gray-50 transition-colors duration-150'>
                     <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
-                      {index + 1}
+                      {(() => {
+                        const page = pagination?.page || 1;
+                        const limit = 10;
+                        const totalItems = pagination?.totalItems || 0;
+                        const { order } = getSortParams(sortOption);
+                        
+                        if (order === 'asc') {
+                          // For ASC: continuous numbering (1, 2, 3...)
+                          return (page - 1) * limit + index + 1;
+                        } else {
+                          // For DESC: reverse continuous numbering 
+                          return totalItems - ((page - 1) * limit + index);
+                        }
+                      })()}
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap'>
                       <div className='flex items-center'>
                         <div className='flex-shrink-0 h-10 w-10 rounded-md bg-gray-200 overflow-hidden'>
-                          <CourseImage course={course} />
+                          <CourseImage course={course} size="small" />
                         </div>
                         <div className='ml-4'>
                           <div className='text-sm font-medium text-gray-900'>{formatCourseTitle(course.title)}</div>

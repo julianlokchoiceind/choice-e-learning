@@ -12,18 +12,10 @@ import { ApiErrorCode } from './api-errors';
 // Định nghĩa kiểu dữ liệu cho route handler
 export type RouteParams = Record<string, string>;
 export type RouteContext = { params: RouteParams };
+
+// AuthenticatedContext properly extends RouteContext without redefining params
 export type AuthenticatedContext = RouteContext & { 
   user: any;
-  params: {
-    [key: string]: string;
-  } & {
-    studentId?: string;
-    courseId?: string;
-    lessonId?: string;
-    topicId?: string;
-    faqId?: string;
-    userId?: string;
-  }
 };
 
 // Route parameter extraction helper
@@ -129,6 +121,10 @@ export function withRole(
  */
 export function withAdmin(handler: AuthenticatedHandlerFunction): HandlerFunction {
   return withErrorHandling(async function adminWrapper(req, context) {
+    console.log('[withAdmin] Original context:', JSON.stringify(context, null, 2));
+    console.log('[withAdmin] Context type:', typeof context);
+    console.log('[withAdmin] Context keys:', Object.keys(context || {}));
+    
     // Require admin role
     const auth = await requireAdmin(req);
     
@@ -143,6 +139,8 @@ export function withAdmin(handler: AuthenticatedHandlerFunction): HandlerFunctio
       ...context,
       user: auth.user || { id: '', role: UserRole.STUDENT, email: '' }
     };
+    
+    console.log('[withAdmin] Auth context:', JSON.stringify(authContext, null, 2));
     
     if (auth.user) {
       const userEmail = auth.user?.email || 'unknown';

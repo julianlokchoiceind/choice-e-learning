@@ -258,7 +258,7 @@ export default function AdminDashboardPage() {
         <div className='bg-white rounded-lg shadow-md p-6 border border-gray-100'>
           <h3 className='text-lg font-semibold mb-4 text-gray-800'>School Overview</h3>
           <div className='flex space-x-2 border-b mb-4'>
-            <button className='px-4 py-2 text-sm transition-colors duration-150 text-blue-700 bg-blue-50 rounded-t-md border-b-2 border-blue-700'>
+            <button className='px-4 py-2 text-sm transition-colors duration-150 text-[var(--color-primary-dark)] bg-[var(--color-primary-lighter)] rounded-t-md border-b-2 border-[var(--color-primary-dark)]'>
               Week
             </button>
             <button className='px-4 py-2 text-sm transition-colors duration-150 text-gray-600 hover:text-gray-800'>
@@ -404,16 +404,16 @@ export default function AdminDashboardPage() {
             <table className='min-w-full divide-y divide-gray-200'>
               <thead>
                 <tr>
-                  <th scope='col' className='px-4 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider'>
+                  <th scope='col' className='px-4 py-3 text-left text-xs font-medium text-[var(--color-primary-text)] uppercase tracking-wider'>
                     Course Title
                   </th>
-                  <th scope='col' className='px-4 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider'>
+                  <th scope='col' className='px-4 py-3 text-left text-xs font-medium text-[var(--color-primary-text)] uppercase tracking-wider'>
                     Level
                   </th>
-                  <th scope='col' className='px-4 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider'>
+                  <th scope='col' className='px-4 py-3 text-left text-xs font-medium text-[var(--color-primary-text)] uppercase tracking-wider'>
                     Students
                   </th>
-                  <th scope='col' className='px-4 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider'>
+                  <th scope='col' className='px-4 py-3 text-left text-xs font-medium text-[var(--color-primary-text)] uppercase tracking-wider'>
                     Price
                   </th>
                 </tr>
@@ -421,7 +421,7 @@ export default function AdminDashboardPage() {
               <tbody className='bg-white divide-y divide-gray-200'>
                 <tr className='hover:bg-gray-50 transition-colors duration-150'>
                   <td className='px-4 py-4 whitespace-nowrap font-medium text-gray-800'>Advanced React and NextJS</td>
-                  <td className='px-4 py-4 whitespace-nowrap'><span className='px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs'>Advanced</span></td>
+                  <td className='px-4 py-4 whitespace-nowrap'><span className='px-2 py-1 bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] rounded-full text-xs'>Advanced</span></td>
                   <td className='px-4 py-4 whitespace-nowrap text-gray-700'>47</td>
                   <td className='px-4 py-4 whitespace-nowrap font-medium text-gray-800'>$129.99</td>
                 </tr>
@@ -445,7 +445,7 @@ export default function AdminDashboardPage() {
                 <button className='p-2 text-gray-400 hover:text-gray-600 transition-colors duration-150'>
                   <ChevronLeftIcon className='h-5 w-5' />
                 </button>
-                <button className='w-8 h-8 bg-blue-600 text-white rounded-md flex items-center justify-center'>
+                <button className='w-8 h-8 bg-[var(--color-primary-text)] text-white rounded-md flex items-center justify-center'>
                   1
                 </button>
                 <button className='w-8 h-8 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center transition-colors duration-150'>
@@ -496,7 +496,7 @@ export default function AdminDashboardPage() {
             />
           </div>
           <div className='flex justify-center mt-4'>
-            <button className='px-4 py-2 text-blue-600 font-medium hover:bg-blue-50 rounded-md transition-colors duration-150'>
+            <button className='px-4 py-2 text-[var(--color-primary-text)] font-medium hover:bg-[var(--color-primary-lighter)] rounded-md transition-colors duration-150'>
               View More
             </button>
           </div>
@@ -575,7 +575,7 @@ function StudentItem({ name, className, image }: StudentItemProps) {
           <p className='text-sm text-gray-600'>{className}</p>
         </div>
       </div>
-      <button className='p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition-colors duration-150' aria-label='Message'>
+      <button className='p-2 rounded-full bg-gray-100 text-gray-600 hover:bg-[var(--color-primary-light)] hover:text-[var(--color-primary-text)] transition-colors duration-150' aria-label='Message'>
         <EnvelopeIcon className='h-5 w-5' />
       </button>
     </div>

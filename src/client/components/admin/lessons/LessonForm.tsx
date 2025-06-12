@@ -86,7 +86,7 @@ export const LessonForm: React.FC<LessonFormProps> = ({
           value={formData.title}
           onChange={handleChange}
           disabled={isLoading}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-0 focus:border-[var(--color-primary)] sm:text-sm"
         />
         {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
       </div>
@@ -102,7 +102,7 @@ export const LessonForm: React.FC<LessonFormProps> = ({
           value={formData.content}
           onChange={handleChange}
           disabled={isLoading}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-0 focus:border-[var(--color-primary)] sm:text-sm"
         ></textarea>
       </div>
       
@@ -117,7 +117,7 @@ export const LessonForm: React.FC<LessonFormProps> = ({
           value={formData.videoUrl || ''}
           onChange={handleChange}
           disabled={isLoading}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-0 focus:border-[var(--color-primary)] sm:text-sm"
         />
       </div>
       
@@ -132,7 +132,7 @@ export const LessonForm: React.FC<LessonFormProps> = ({
           value={formData.order}
           onChange={handleChange}
           disabled={isLoading}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-0 focus:border-[var(--color-primary)] sm:text-sm"
         />
         {errors.order && <p className="mt-1 text-sm text-red-600">{errors.order}</p>}
       </div>

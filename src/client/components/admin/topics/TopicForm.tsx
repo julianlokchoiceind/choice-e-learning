@@ -145,7 +145,7 @@ export const TopicForm = ({
             onChange={handleChange}
             className={`w-full px-3 py-2 border ${
               formErrors.name ? 'border-red-500' : 'border-gray-300'
-            } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            } rounded-md focus:ring-0 focus:border-[var(--color-primary)]`}
             disabled={isLoading}
           />
           {formErrors.name && (
@@ -165,7 +165,7 @@ export const TopicForm = ({
             rows={4}
             className={`w-full px-3 py-2 border ${
               formErrors.description ? 'border-red-500' : 'border-gray-300'
-            } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            } rounded-md focus:ring-0 focus:border-[var(--color-primary)]`}
             disabled={isLoading}
           ></textarea>
           {formErrors.description && (
@@ -182,7 +182,7 @@ export const TopicForm = ({
             onChange={(e) => 
               setFormData(prev => ({ ...prev, isActive: e.target.checked }))
             }
-            className='h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500'
+            className='h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-[var(--color-primary)]'
             disabled={isLoading}
           />
           <label htmlFor='isActive' className='ml-2 block text-sm text-gray-700'>
@@ -194,7 +194,7 @@ export const TopicForm = ({
           <button
             type='submit'
             disabled={isLoading}
-            className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed'
+            className='btn-admin-primary'
           >
             {isLoading ? (topicId ? 'Saving...' : 'Creating...') : (topicId ? 'Save Changes' : 'Create Topic')}
           </button>

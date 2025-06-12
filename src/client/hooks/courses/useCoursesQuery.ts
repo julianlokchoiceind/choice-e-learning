@@ -307,6 +307,79 @@ const useCoursesQuery = (isAdmin = false) => {
     });
   };
 
+  /**
+   * Update course curriculum (chapters and lessons) (admin only)
+   */
+  const useUpdateCurriculum = () => {
+    if (!isAdmin) {
+      throw new Error('Unauthorized: Admin access required to update curriculum');
+    }
+    
+    return useMutation({
+      mutationFn: async ({ courseId, chapters, lessons }: { 
+        courseId: string; 
+        chapters: any[]; 
+        lessons: any[] 
+      }) => {
+        try {
+          console.log('=== UPDATE CURRICULUM DEBUG ===');
+          console.log('Course ID:', courseId);
+          console.log('Base URL:', baseUrl);
+          console.log('Full URL:', `${baseUrl}/${courseId}`);
+          console.log('Chapters to update:', chapters);
+          console.log('Lessons to update:', lessons);
+          console.log('Request payload:', JSON.stringify({ chapters, lessons }, null, 2));
+          
+          const response = await apiRequest.put<{data: Course}>(`${baseUrl}/${courseId}`, {
+            chapters,
+            lessons
+          });
+          
+          console.log('Response received:', response);
+          
+          if (!response) {
+            console.error('No response received from API');
+            throw new Error('Failed to update curriculum: No response');
+          }
+          
+          console.log('Update successful, returning data');
+          return response.data.data;
+        } catch (error: unknown) {
+          console.error('=== UPDATE CURRICULUM ERROR ===');
+          console.error('Full error object:', error);
+          
+          const apiError = error as any;
+          if (apiError?.response) {
+            console.error('Response status:', apiError.response.status);
+            console.error('Response data:', apiError.response.data);
+            console.error('Response headers:', apiError.response.headers);
+          }
+          if (apiError?.request) {
+            console.error('Request URL:', apiError.request.responseURL || apiError.config?.url);
+            console.error('Request method:', apiError.config?.method);
+          }
+          
+          // More detailed error for debugging
+          if (apiError?.response?.status === 404) {
+            throw new Error(`Course not found (ID: ${courseId})`);
+          }
+          
+          throw new Error(apiError?.message || 'Failed to update curriculum');
+        }
+      },
+      onSuccess: (_, variables) => {
+        // Invalidate specific course query and courses list
+        queryClient.invalidateQueries({ queryKey: ['course', variables.courseId] });
+        queryClient.invalidateQueries({ queryKey: ['courses'] });
+      },
+      // Use meta for toast notifications
+      meta: {
+        successToast: 'Curriculum saved successfully',
+        errorToast: 'Failed to save curriculum'
+      }
+    });
+  };
+
   return {
     useGetCourses,
     useGetCourse,
@@ -314,7 +387,8 @@ const useCoursesQuery = (isAdmin = false) => {
     useUpdateCourse,
     useDeleteCourse,
     useGetCourseTopics,
-    useEnrollInCourse
+    useEnrollInCourse,
+    useUpdateCurriculum
   };
 };
 

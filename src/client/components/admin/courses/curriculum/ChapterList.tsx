@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import { Chapter } from '@/shared/types/courses/course';
 import ChapterItem from './ChapterItem';
 import LessonItem from './LessonItem';
@@ -96,7 +97,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
                         id="lessonTitle"
                         name="lessonTitle"
                         placeholder="Enter lesson name"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md input-focus"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]"
                       />
                     </div>
                     
@@ -142,9 +143,9 @@ const ChapterList: React.FC<ChapterListProps> = ({
                 <button
                   type="button"
                   onClick={() => setAddingLessonForChapter(chapter.id)}
-                  className="mt-3 flex items-center text-blue-500 hover:text-blue-700"
+                  className="mt-3 flex items-center text-sm text-blue-500 hover:text-blue-700 font-medium"
                 >
-                  <span className="text-lg mr-1">+</span> Add Lesson
+                  <PlusIcon className="h-4 w-4 mr-1" /> Add Lesson
                 </button>
               )}
             </div>

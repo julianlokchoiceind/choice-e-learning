@@ -16,8 +16,8 @@ import {
  * API endpoints for lesson operations
  */
 const API = {
-  LESSONS: '/api/lessons',
-  LESSON: (id: string) => `/api/lessons/${id}`,
+  LESSONS: '/api/admin/lessons',
+  LESSON: (id: string) => `/api/admin/lessons/${id}`,
   COURSE_LESSONS: (courseId: string) => `/api/courses/${courseId}/lessons`,
 };
 
@@ -58,7 +58,8 @@ export const useLessonsQuery = () => {
    */
   const useGetLessons = (
     courseId?: string,
-    options?: UseQueryOptions<Lesson[], Error, Lesson[], (string | undefined)[]>
+    filters?: any,
+    options?: UseQueryOptions<any, Error, any, (string | undefined | any)[]>
   ) => {
     // Get session data for authentication status
     const { data: session, status } = useSession();
@@ -68,12 +69,30 @@ export const useLessonsQuery = () => {
     const isLoading = status === 'loading';
     
     return useQuery({
-      queryKey: ['lessons', courseId],
-      queryFn: async (): Promise<Lesson[]> => {
+      queryKey: ['lessons', courseId, filters],
+      queryFn: async () => {
         try {
-          const url = courseId ? API.COURSE_LESSONS(courseId) : API.LESSONS;
+          // Build query params
+          const params = new URLSearchParams();
+          
+          if (courseId) {
+            params.append('courseId', courseId);
+          }
+          
+          // Add filter params if provided
+          if (filters) {
+            Object.entries(filters).forEach(([key, value]) => {
+              if (value !== undefined && value !== null && value !== '') {
+                params.append(key, String(value));
+              }
+            });
+          }
+          
+          const url = `${API.LESSONS}?${params.toString()}`;
           const response = await apiRequest.get(url);
-          return response?.data || [];
+          
+          // Return the full response with data and meta
+          return response?.data || { data: [], meta: null };
         } catch (error) {
           console.error('Error fetching lessons:', error);
           throw error;
@@ -84,8 +103,13 @@ export const useLessonsQuery = () => {
       // Add retry logic for transient errors
       retry: 3,
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
-      // Provide empty array as placeholder data for better UX
-      placeholderData: [],
+      // Provide empty response as placeholder data for better UX
+      placeholderData: { data: [], meta: null },
+      // Suppress global error toast as the component handles errors
+      meta: {
+        suppressErrorToast: true,
+        ...options?.meta
+      },
       ...options
     });
   };

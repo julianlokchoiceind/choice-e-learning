@@ -142,7 +142,7 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
               {...register('name')}
               placeholder='Enter student name'
               autoComplete='name'
-              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
               onFocus={(e) => e.target.select()}
             />
             {errors.name && (
@@ -160,7 +160,7 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
               {...register('email')}
               placeholder='Enter email address'
               autoComplete='email'
-              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
               onFocus={(e) => e.target.select()}
             />
             {errors.email && (
@@ -177,7 +177,7 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
               {...register('phone')}
               placeholder='Enter phone number'
               autoComplete='tel'
-              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
               onFocus={(e) => e.target.select()}
             />
             {errors.phone && (
@@ -194,7 +194,7 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
               {...register('address')}
               placeholder='Enter address'
               autoComplete='street-address'
-              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
               onFocus={(e) => e.target.select()}
             />
             {errors.address && (
@@ -211,7 +211,7 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
               {...register('city')}
               placeholder='Enter city'
               autoComplete='address-level2'
-              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
               onFocus={(e) => e.target.select()}
             />
             {errors.city && (
@@ -227,7 +227,7 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
               id='grade'
               {...register('grade')}
               placeholder='Enter grade'
-              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
               onFocus={(e) => e.target.select()}
             />
             {errors.grade && (
@@ -243,7 +243,7 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
               id='imageUrl'
               {...register('imageUrl')}
               placeholder='Enter image URL'
-              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+              className='w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
               onFocus={(e) => e.target.select()}
             />
             {errors.imageUrl && (
@@ -261,7 +261,7 @@ export const StudentForm = ({ studentId }: StudentFormProps) => {
           </Link>
           <button
             type='submit'
-            className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500'
+            className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-0 focus:border-[var(--color-primary)]'
             disabled={createStudentMutation.isPending || updateStudentMutation.isPending}
           >
             {(createStudentMutation.isPending || updateStudentMutation.isPending) ? (

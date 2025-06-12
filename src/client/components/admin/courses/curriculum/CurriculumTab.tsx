@@ -8,7 +8,7 @@ import ChapterList from './ChapterList';
 
 interface CurriculumTabProps {
   initialChapters?: Chapter[];
-  onUpdateCurriculum: (chapters: Chapter[], lessons: any[]) => void;
+  onUpdateCurriculum: (chapters: any[], lessons: any[]) => void;
 }
 
 const CurriculumTab: React.FC<CurriculumTabProps> = ({ 
@@ -21,8 +21,9 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
   
   // Handle adding new chapter
   const handleAddChapter = (chapter: Partial<Chapter>) => {
+    const tempId = `temp-${Date.now()}`;
     const newChapter = {
-      id: `temp-${Date.now()}`,
+      id: tempId,
       title: chapter.title || 'New chapter',
       description: chapter.description || '',
       order: chapters.length + 1,
@@ -37,15 +38,39 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
     setChapters(updatedChapters);
     setIsAddingChapter(false);
     
-    // Create lessons array for API
-    const allLessons = updatedChapters.flatMap(chapter => 
-      (chapter.lessons || []).map(lesson => ({
-        ...lesson,
-        chapterId: chapter.id
-      }))
-    );
-    
-    onUpdateCurriculum(updatedChapters, allLessons);
+    // Debounce the API call to prevent too many requests
+    setTimeout(() => {
+      // Prepare data for API - filter out temporary chapters and clean data
+      const apiChapters = updatedChapters.map(chapter => {
+        // Don't send temporary chapters to API, let the backend create them
+        if (chapter.id.startsWith('temp-')) {
+          return {
+            title: chapter.title,
+            description: chapter.description,
+            order: chapter.order
+            // No ID - let database auto-generate
+          };
+        }
+        return {
+          id: chapter.id,
+          title: chapter.title,
+          description: chapter.description,
+          order: chapter.order
+        };
+      });
+      
+      // Create lessons array for API (exclude lessons from temp chapters for now)
+      const allLessons = updatedChapters
+        .filter(chapter => !chapter.id.startsWith('temp-'))
+        .flatMap(chapter => 
+          (chapter.lessons || []).map(lesson => ({
+            ...lesson,
+            chapterId: chapter.id
+          }))
+        );
+      
+      onUpdateCurriculum(apiChapters, allLessons);
+    }, 500); // Debounce for 500ms
   };
   
   // Handle editing chapter
@@ -57,15 +82,34 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
     setChapters(updatedChapters);
     setEditingChapterId(null);
     
-    // Create lessons array for API
-    const allLessons = updatedChapters.flatMap(chapter => 
-      (chapter.lessons || []).map(lesson => ({
-        ...lesson,
-        chapterId: chapter.id
-      }))
-    );
+    // Prepare data for API - clean data and handle temporary IDs
+    const apiChapters = updatedChapters.map(chapter => {
+      if (chapter.id.startsWith('temp-')) {
+        return {
+          title: chapter.title,
+          description: chapter.description,
+          order: chapter.order
+        };
+      }
+      return {
+        id: chapter.id,
+        title: chapter.title,
+        description: chapter.description,
+        order: chapter.order
+      };
+    });
     
-    onUpdateCurriculum(updatedChapters, allLessons);
+    // Create lessons array for API (exclude lessons from temp chapters)
+    const allLessons = updatedChapters
+      .filter(chapter => !chapter.id.startsWith('temp-'))
+      .flatMap(chapter => 
+        (chapter.lessons || []).map(lesson => ({
+          ...lesson,
+          chapterId: chapter.id
+        }))
+      );
+    
+    onUpdateCurriculum(apiChapters, allLessons);
   };
   
   // Handle deleting chapter
@@ -81,15 +125,34 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
       
       setChapters(reorderedChapters);
       
-      // Create lessons array for API
-      const allLessons = reorderedChapters.flatMap(chapter => 
-        (chapter.lessons || []).map(lesson => ({
-          ...lesson,
-          chapterId: chapter.id
-        }))
-      );
+      // Prepare data for API
+      const apiChapters = reorderedChapters.map(chapter => {
+        if (chapter.id.startsWith('temp-')) {
+          return {
+            title: chapter.title,
+            description: chapter.description,
+            order: chapter.order
+          };
+        }
+        return {
+          id: chapter.id,
+          title: chapter.title,
+          description: chapter.description,
+          order: chapter.order
+        };
+      });
       
-      onUpdateCurriculum(reorderedChapters, allLessons);
+      // Create lessons array for API (exclude lessons from temp chapters)
+      const allLessons = reorderedChapters
+        .filter(chapter => !chapter.id.startsWith('temp-'))
+        .flatMap(chapter => 
+          (chapter.lessons || []).map(lesson => ({
+            ...lesson,
+            chapterId: chapter.id
+          }))
+        );
+      
+      onUpdateCurriculum(apiChapters, allLessons);
     }
   };
   
@@ -174,7 +237,7 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
         <button
           type="button"
           onClick={() => setIsAddingChapter(true)}
-          className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+          className="btn-admin-primary"
         >
           <PlusIcon className="h-5 w-5 mr-1" />
           Add Chapter

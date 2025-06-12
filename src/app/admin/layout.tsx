@@ -6,6 +6,7 @@ import ProtectedRoute from '@/client/components/auth/ProtectedRoute';
 import { UserRole } from '@/shared/types/auth/roles';
 import { MagnifyingGlassIcon, BellIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import { LoadingState } from '@/client/components/common';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -21,11 +22,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   // Show a minimal loading state until client-side hydration is complete
   if (!isMounted) {
-    return (
-      <div className='flex h-screen w-full items-center justify-center bg-slate-50'>
-        <div className='h-16 w-16 animate-spin rounded-full border-t-4 border-solid border-indigo-600'></div>
-      </div>
-    );
+    return <LoadingState variant="page" message="Loading admin panel..." />;
   }
   
   return (
@@ -37,15 +34,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Main Content */}
         <div className='flex-1 flex flex-col overflow-hidden bg-white shadow-sm'>
           {/* Header */}
-          <header className='bg-white border-b px-6 py-4 shadow-sm z-10'>
-            <div className='flex items-center justify-between'>
+          <header className='bg-white border-b border-gray-200 h-[73px] px-6 flex items-center z-10'>
+            <div className='flex items-center justify-between w-full'>
               <div className='flex items-center'>
-                <div className='relative ml-4 md:ml-6'>
+                <div className='relative'>
                   <span className='absolute inset-y-0 left-0 flex items-center pl-3'>
                     <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
                   </span>
                   <input 
-                    className='form-input w-full sm:w-64 rounded-md pl-10 pr-4 py-2 border border-gray-300 focus:border-blue-600 focus:ring-0 focus:outline-none' 
+                    className='form-input w-full sm:w-64 rounded-md pl-10 pr-4 py-2 border border-gray-300 focus:border-[var(--color-primary-text)] focus:ring-0 focus:outline-none' 
                     type='text' 
                     placeholder='Search...' 
                     id='admin-global-search'
@@ -75,7 +72,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           {/* Footer */}
           <footer className='bg-white py-4 px-6 border-t'>
             <div className='text-center text-sm text-gray-600'>
-              Copyright © Designed & Developed by <a href='https://choiceind.com' className='text-blue-600 hover:underline transition-colors duration-150'>Choiceind.com</a> 2025
+              Copyright © Designed & Developed by <a href='https://choiceind.com' className='text-[var(--color-primary-text)] hover:underline transition-colors duration-150'>Choiceind.com</a> 2025
             </div>
           </footer>
         </div>

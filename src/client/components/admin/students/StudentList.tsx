@@ -266,13 +266,13 @@ export default function StudentList() {
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
               <tr>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>#</th>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>Name</th>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>Email</th>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>Phone</th>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>City</th>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>Grade</th>
-                <th className='py-4 px-6 text-right font-medium text-indigo-700 capitalize tracking-wider text-base'>Actions</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>#</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Name</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Email</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Phone</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>City</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Grade</th>
+                <th className='py-4 px-6 text-right font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Actions</th>
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
@@ -293,11 +293,23 @@ export default function StudentList() {
                   return (
                     <tr key={student.id} className='hover:bg-gray-50 transition-colors duration-150'>
                       <td className='py-4 px-6 whitespace-nowrap text-sm font-medium text-gray-900'>
-                        {((pagination?.page || 1) - 1) * 10 + index + 1}
+                        {(() => {
+                          const page = pagination?.page || 1;
+                          const limit = 10;
+                          const totalItems = pagination?.total || 0;
+                          
+                          if (sortOrder === 'asc') {
+                            // For ASC: continuous numbering (1, 2, 3...)
+                            return (page - 1) * limit + index + 1;
+                          } else {
+                            // For DESC: reverse continuous numbering 
+                            return totalItems - ((page - 1) * limit + index);
+                          }
+                        })()}
                       </td>
                       <td className='py-4 px-6'>
                         <div className='flex items-center gap-3'>
-                          <div className='h-10 w-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-medium text-sm'>
+                          <div className='h-10 w-10 rounded-full bg-indigo-100 text-[var(--color-primary-dark)] flex items-center justify-center font-medium text-sm'>
                             {student.imageUrl ? (
                               <Image src={student.imageUrl} alt={student.name} className='h-10 w-10 rounded-full object-cover' width={500} height={300} />
                             ) : (
@@ -315,7 +327,7 @@ export default function StudentList() {
                         <div className='flex justify-end space-x-2'>
                           <button
                             onClick={() => router.push(`/admin/students/${student.id}`)}
-                            className='text-blue-600 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 rounded-md p-1.5 transition-colors duration-150 admin-button'
+                            className='btn-admin-secondary btn-admin-sm p-1.5'
                             aria-label='View student details'
                           >
                             <EyeIcon className='h-5 w-5' />

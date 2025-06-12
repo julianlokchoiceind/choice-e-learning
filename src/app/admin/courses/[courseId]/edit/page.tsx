@@ -22,9 +22,10 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   const router = useRouter();
   
   // Use React Query hooks
-  const { useGetCourse, useUpdateCourse } = useCoursesQuery(true); // isAdmin = true
+  const { useGetCourse, useUpdateCourse, useUpdateCurriculum } = useCoursesQuery(true); // isAdmin = true
   const { data: courseData, isLoading, error } = useGetCourse(params.courseId);
   const updateCourseMutation = useUpdateCourse();
+  const updateCurriculumMutation = useUpdateCurriculum();
   
   const [activeTab, setActiveTab] = useState('basicInfo');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -109,9 +110,24 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   };
   
   // Handle curriculum updates
-  const handleUpdateCurriculum = (updatedChapters: Chapter[], updatedLessons: any[]) => {
-    setChapters(updatedChapters);
-    setLessons(updatedLessons);
+  const handleUpdateCurriculum = async (apiChapters: any[], apiLessons: any[]) => {
+    try {
+      // Save to database with cleaned API data
+      await updateCurriculumMutation.mutateAsync({
+        courseId: params.courseId,
+        chapters: apiChapters,
+        lessons: apiLessons
+      });
+      
+      // Update last saved timestamp
+      setLastSaved(new Date());
+      
+      // Refresh course data to get updated chapters with real IDs
+      // This will update the local state with actual data from the server
+    } catch (error: any) {
+      console.error('Error saving curriculum:', error);
+      // Error handling is done by the mutation meta
+    }
   };
   
   // Handle update draft

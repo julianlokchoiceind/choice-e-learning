@@ -194,29 +194,30 @@ export default function TopicsPage() {
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
               <tr>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm'>Name</th>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm'>Description</th>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm'>Status</th>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 uppercase tracking-wider text-sm'>Courses</th>
-                <th className='py-4 px-6 text-right font-medium text-indigo-700 uppercase tracking-wider text-sm'>Actions</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>#</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Name</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Description</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Status</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Courses</th>
+                <th className='py-4 px-6 text-right font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Actions</th>
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
               {isLoading || deleteTopicMutation.isPending ? (
                 <tr>
-                  <td colSpan={5} className='text-center py-10'>
+                  <td colSpan={6} className='text-center py-10'>
                     <LoadingState 
                       variant="table" 
                       message={deleteTopicMutation.isPending ? 'Deleting topic...' : 'Loading topics...'} 
-                      columns={5}
+                      columns={6}
                       rows={6}
-                      columnWidths={['25%', '30%', '15%', '15%', '15%']}
+                      columnWidths={['8%', '22%', '25%', '15%', '15%', '15%']}
                     />
                   </td>
                 </tr>
               ) : topics.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className='text-center py-10 text-gray-500'>
+                  <td colSpan={6} className='text-center py-10 text-gray-500'>
                     <p>No topics found.</p>
                     <p className='text-sm mt-1'>Try adjusting your search criteria or add a new topic.</p>
                   </td>
@@ -224,6 +225,22 @@ export default function TopicsPage() {
               ) : (
                 topics.map((topic, index) => (
                   <tr key={topic.id} className='hover:bg-gray-50 transition-colors duration-150'>
+                    <td className='py-4 px-6 whitespace-nowrap text-sm font-medium text-gray-900'>
+                      {(() => {
+                        const page = pagination?.page || 1;
+                        const limit = 10;
+                        const totalItems = pagination?.totalItems || 0;
+                        const sortOrder = topicFilter.sortOrder;
+                        
+                        if (sortOrder === 'asc') {
+                          // For ASC: continuous numbering (1, 2, 3...)
+                          return (page - 1) * limit + index + 1;
+                        } else {
+                          // For DESC: reverse continuous numbering 
+                          return totalItems - ((page - 1) * limit + index);
+                        }
+                      })()}
+                    </td>
                     <td className='py-4 px-6 text-gray-800 font-medium'>
                       {topic.name}
                     </td>

@@ -80,7 +80,7 @@ export default function CourseDetailPage() {
         <p className='text-gray-600 mb-6'>{error instanceof Error ? error.message : 'Course not found'}</p>
         <Link 
           href='/admin/courses' 
-          className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700'
+          className='px-4 py-2 bg-[var(--color-primary-text)] text-white rounded-md hover:bg-[var(--color-primary-dark)]'
         >
           Back to All Courses
         </Link>
@@ -128,7 +128,7 @@ export default function CourseDetailPage() {
                     course.topics.map((topic, index) => (
                       <span 
                         key={index}
-                        className='bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm'
+                        className='bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] px-2 py-1 rounded-full text-sm'
                       >
                         {topic}
                       </span>
@@ -142,7 +142,7 @@ export default function CourseDetailPage() {
               <div className='flex justify-end space-x-3'>
                 <Link
                   href={`/admin/courses/${courseId}/edit`}
-                  className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center'
+                  className='px-4 py-2 bg-[var(--color-primary-text)] text-white rounded-md hover:bg-[var(--color-primary-dark)] flex items-center'
                 >
                   <PencilIcon className='h-4 w-4 mr-2' />
                   Edit Course
@@ -169,7 +169,7 @@ export default function CourseDetailPage() {
               <h2 className='text-xl font-semibold'>Lessons</h2>
               <Link
                 href={`/admin/courses/${courseId}/edit?tab=lessons`}
-                className='text-blue-600 hover:text-blue-800 text-sm flex items-center'
+                className='text-[var(--color-primary-text)] hover:text-[var(--color-primary-dark)] text-sm flex items-center'
               >
                 <PencilIcon className='h-4 w-4 mr-1' />
                 Manage Lessons

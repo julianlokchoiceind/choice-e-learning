@@ -163,42 +163,59 @@ export default function FAQsAdminPage() {
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
               <tr>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>Question</th>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>Category</th>
-                <th className='py-4 px-6 text-left font-medium text-indigo-700 capitalize tracking-wider text-base'>Created</th>
-                <th className='py-4 px-6 text-right font-medium text-indigo-700 capitalize tracking-wider text-base'>Actions</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] capitalize tracking-wider text-base'>#</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] capitalize tracking-wider text-base'>Question</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] capitalize tracking-wider text-base'>Category</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] capitalize tracking-wider text-base'>Created</th>
+                <th className='py-4 px-6 text-right font-medium text-[var(--color-primary-dark)] capitalize tracking-wider text-base'>Actions</th>
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
               {isLoading || deleteFAQ.isPending ? (
                 <tr>
-                  <td colSpan={4} className='text-center py-10'>
+                  <td colSpan={5} className='text-center py-10'>
                     <LoadingState 
                       variant="table" 
                       message={deleteFAQ.isPending ? 'Deleting FAQ...' : 'Loading FAQs...'} 
-                      columns={4}
+                      columns={5}
                       rows={6}
-                      columnWidths={['40%', '20%', '20%', '20%']}
+                      columnWidths={['8%', '37%', '20%', '20%', '15%']}
                     />
                   </td>
                 </tr>
               ) : faqs.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className='text-center py-10 text-gray-500'>
+                  <td colSpan={5} className='text-center py-10 text-gray-500'>
                     <p>No FAQs found</p>
                     <p className='text-sm mt-1'>Try with a different search term or add a new FAQ.</p>
                   </td>
                 </tr>
               ) : (
-                faqs.map((faq) => (
+                faqs.map((faq, index) => (
                   <tr key={faq.id} className='hover:bg-gray-50 transition-colors duration-150'>
+                    <td className='py-4 px-6 whitespace-nowrap text-sm font-medium text-gray-900'>
+                      {(() => {
+                        const page = pagination?.page || 1;
+                        const limit = 10;
+                        const totalItems = pagination?.total || 0;
+                        const sortOrder = filter.sortOrder;
+                        
+                        if (sortOrder === 'asc') {
+                          // For ASC: continuous numbering (1, 2, 3...)
+                          return (page - 1) * limit + index + 1;
+                        } else {
+                          // For DESC: reverse continuous numbering 
+                          return totalItems - ((page - 1) * limit + index);
+                        }
+                      })()}
+                    </td>
                     <td className='py-4 px-6 text-gray-800'>
                       <div className='font-medium truncate max-w-sm'>
                         {faq.question}
                       </div>
                     </td>
                     <td className='py-4 px-6 text-gray-600'>
-                      <span className='px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs'>
+                      <span className='px-2 py-1 bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] rounded-full text-xs'>
                         {faq.category}
                       </span>
                     </td>

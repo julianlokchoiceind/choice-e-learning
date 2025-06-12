@@ -321,7 +321,7 @@ export const StudentDetail = ({ studentId }: StudentDetailProps) => {
                         <h3 className='font-medium text-indigo-700'>{course.title}</h3>
                         <span className={`text-xs px-2 py-1 rounded-full ${
                           course.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          course.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                          course.status === 'in_progress' ? 'bg-[var(--color-primary-light)] text-[var(--color-primary-dark)]' :
                           'bg-gray-100 text-gray-800'
                         }`}>
                           {course.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}

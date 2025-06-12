@@ -233,7 +233,7 @@ export default function EditFAQPage({ params }: EditFAQPageProps) {
               <button
                 type='button'
                 onClick={() => setUseNewCategory(!useNewCategory)}
-                className='text-sm text-blue-600 hover:text-blue-800'
+                className='text-sm text-[var(--color-primary-text)] hover:text-[var(--color-primary-dark)]'
               >
                 {useNewCategory ? 'Select Existing Category' : 'Add New Category'}
               </button>
@@ -292,7 +292,7 @@ export default function EditFAQPage({ params }: EditFAQPageProps) {
           </Link>
           <button
             type='submit'
-            className='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center'
+            className='px-4 py-2 bg-[var(--color-primary-text)] text-white rounded-md hover:bg-[var(--color-primary-dark)] flex items-center'
             disabled={updateFAQMutation.isPending}
           >
             {updateFAQMutation.isPending ? (

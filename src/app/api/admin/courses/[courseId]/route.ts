@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/server/db/prisma-client';
 import { withAdmin, AuthenticatedContext } from '@/server/api/route-handlers';
 
+// Type for route params
+type RouteParams = {
+  params: {
+    courseId: string;
+  };
+};
+
 // GET a specific course by ID (admin view)
 export const GET = withAdmin(async (req: NextRequest, context: AuthenticatedContext) => {
   try {
@@ -127,15 +134,46 @@ export const GET = withAdmin(async (req: NextRequest, context: AuthenticatedCont
 // PUT - Update a course
 export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedContext) => {
   try {
-    const courseId = context.params.courseId;
+    console.log('=== PUT COURSE UPDATE DEBUG ===');
+    console.log('Full context object:', JSON.stringify(context, null, 2));
+    console.log('Context keys:', Object.keys(context));
+    console.log('Params object:', context.params);
+    console.log('Params type:', typeof context.params);
+    
+    // Check if params exists
+    if (!context.params) {
+      console.error('context.params is undefined');
+      return NextResponse.json(
+        { success: false, error: 'Invalid request context - params missing' },
+        { status: 500 }
+      );
+    }
+    
+    console.log('Raw courseId from params:', context.params?.courseId);
+    
+    // Try to get courseId from params or fallback to URL parsing
+    let courseId = context.params?.courseId;
+    
+    // Fallback: Extract courseId from URL if params is not available
+    if (!courseId && req.url) {
+      const urlParts = req.url.split('/');
+      const courseIdIndex = urlParts.findIndex(part => part === 'courses') + 1;
+      if (courseIdIndex > 0 && courseIdIndex < urlParts.length) {
+        courseId = urlParts[courseIdIndex];
+        console.log('Extracted courseId from URL:', courseId);
+      }
+    }
     
     // Validate course ID
     if (!courseId) {
+      console.error('No courseId found in params or URL');
       return NextResponse.json(
         { success: false, error: 'Invalid course ID' },
         { status: 400 }
       );
     }
+    
+    console.log('Course ID to update:', courseId);
     
     // Kiểm tra course tồn tại TRƯỚC khi xử lý bất kỳ logic nào
     const existingCourse = await prisma.course.findUnique({
@@ -210,28 +248,105 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
     };
     
     // Handle chapters and lessons updates if provided
-    if (body.chapters && Array.isArray(body.chapters)) {
-      // Process chapters (create, update)
-      // In a real implementation, this would handle chapter updates
-      console.log(`Processing ${body.chapters.length} chapters for update`);
-    }
-    
-    if (body.lessons && Array.isArray(body.lessons)) {
-      // Process lessons (create, update)
-      // In a real implementation, this would handle lesson updates and resources
-      console.log(`Processing ${body.lessons.length} lessons for update`);
-      
-      // Make sure each lesson has proper defaults
-      body.lessons.forEach((lesson: any) => {
-        if (!lesson.videoUrl) {
-          lesson.videoUrl = '';
+    if ((body.chapters && Array.isArray(body.chapters)) || (body.lessons && Array.isArray(body.lessons))) {
+      // Use transaction to ensure data consistency
+      await prisma.$transaction(async (tx) => {
+        // Handle chapters first
+        if (body.chapters && Array.isArray(body.chapters)) {
+          console.log(`Processing ${body.chapters.length} chapters for update`);
+          
+          // Get existing chapters
+          const existingChapters = await tx.chapter.findMany({
+            where: { courseId },
+            include: { lessons: true }
+          });
+          
+          const existingChapterIds = existingChapters.map(c => c.id);
+          const incomingChapterIds = body.chapters.filter((c: any) => c.id).map((c: any) => c.id);
+          
+          // Delete chapters that are no longer in the incoming data
+          const chaptersToDelete = existingChapterIds.filter(id => !incomingChapterIds.includes(id));
+          if (chaptersToDelete.length > 0) {
+            await tx.chapter.deleteMany({
+              where: { id: { in: chaptersToDelete } }
+            });
+          }
+          
+          // Process each chapter (create or update)
+          for (const chapter of body.chapters) {
+            const chapterData = {
+              title: chapter.title || 'Untitled Chapter',
+              description: chapter.description || '',
+              order: chapter.order || 1,
+              courseId
+            };
+            
+            if (chapter.id && existingChapterIds.includes(chapter.id)) {
+              // Update existing chapter
+              await tx.chapter.update({
+                where: { id: chapter.id },
+                data: chapterData
+              });
+            } else {
+              // Create new chapter
+              await tx.chapter.create({
+                data: {
+                  ...chapterData,
+                  id: chapter.id || undefined // Use provided ID if available
+                }
+              });
+            }
+          }
         }
         
-        // Ensure resources is properly handled
-        if (lesson.resources && Array.isArray(lesson.resources)) {
-          // Store resources as JSON in resourcesData
-          const resources = lesson.resources || [];
-          updateData.resourcesData = JSON.stringify(resources);
+        // Handle lessons after chapters
+        if (body.lessons && Array.isArray(body.lessons)) {
+          console.log(`Processing ${body.lessons.length} lessons for update`);
+          
+          // Get existing lessons
+          const existingLessons = await tx.lesson.findMany({
+            where: { courseId }
+          });
+          
+          const existingLessonIds = existingLessons.map(l => l.id);
+          const incomingLessonIds = body.lessons.filter((l: any) => l.id).map((l: any) => l.id);
+          
+          // Delete lessons that are no longer in the incoming data
+          const lessonsToDelete = existingLessonIds.filter(id => !incomingLessonIds.includes(id));
+          if (lessonsToDelete.length > 0) {
+            await tx.lesson.deleteMany({
+              where: { id: { in: lessonsToDelete } }
+            });
+          }
+          
+          // Process each lesson (create or update)
+          for (const lesson of body.lessons) {
+            const lessonData = {
+              title: lesson.title || 'Untitled Lesson',
+              content: lesson.content || '',
+              videoUrl: lesson.videoUrl || '',
+              order: lesson.order || 1,
+              courseId,
+              chapterId: lesson.chapterId || null,
+              resourcesData: lesson.resources ? JSON.stringify(lesson.resources) : null
+            };
+            
+            if (lesson.id && existingLessonIds.includes(lesson.id)) {
+              // Update existing lesson
+              await tx.lesson.update({
+                where: { id: lesson.id },
+                data: lessonData
+              });
+            } else {
+              // Create new lesson
+              await tx.lesson.create({
+                data: {
+                  ...lessonData,
+                  id: lesson.id || undefined // Use provided ID if available
+                }
+              });
+            }
+          }
         }
       });
     }

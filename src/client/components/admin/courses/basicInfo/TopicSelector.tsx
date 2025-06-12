@@ -46,12 +46,12 @@ export default function TopicSelector({ selectedTopics, onChange }: TopicSelecto
       {selectedTopics.length > 0 && (
         <div className='flex flex-wrap gap-2 mb-3'>
           {selectedTopics.map((topic, index) => (
-            <div key={index} className='bg-blue-100 text-blue-800 px-2 py-1 rounded-full flex items-center text-sm'>
+            <div key={index} className='bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] px-2 py-1 rounded-full flex items-center text-sm'>
               <span>{topic}</span>
               <button
                 type='button'
                 onClick={() => removeTopic(topic)}
-                className='ml-1 text-blue-600 hover:text-blue-800'
+                className='ml-1 text-[var(--color-primary-text)] hover:text-[var(--color-primary-dark)]'
               >
                 <XCircleIcon className='h-4 w-4' />
               </button>
@@ -80,7 +80,7 @@ export default function TopicSelector({ selectedTopics, onChange }: TopicSelecto
                     id={`topic-${topic.id}`}
                     checked={selectedTopics.includes(topic.name)}
                     onChange={() => toggleTopic(topic.name)}
-                    className='w-4 h-4 text-blue-600 rounded focus:ring-[var(--color-focus-ring)]'
+                    className='w-4 h-4 text-[var(--color-primary-text)] rounded focus:ring-[var(--color-focus-ring)]'
                   />
                   <label 
                     htmlFor={`topic-${topic.id}`} 

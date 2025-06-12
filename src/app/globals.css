@@ -40,8 +40,14 @@ input:focus {
   --background-end-rgb: 255, 255, 255;
   
   /* Colors */
-  --color-primary: #6366f1; /* indigo-500 */
-  --color-primary-hover: #4f46e5; /* indigo-600 */
+  --color-primary: #3b82f6; /* blue-500 */
+  --color-primary-hover: #2563eb; /* blue-600 */
+  --color-primary-dark: #1d4ed8; /* blue-700 */
+  --color-primary-light: #dbeafe; /* blue-100 */
+  --color-primary-lighter: #eff6ff; /* blue-50 */
+  --color-primary-text: #2563eb; /* blue-600 for text */
+  --color-primary-gradient-start: #3b82f6; /* blue-500 */
+  --color-primary-gradient-end: #1d4ed8; /* blue-700 */
   --color-background: #ffffff;
   --color-text: #1d1d1f;
   --color-text-secondary: #86868b;
@@ -61,6 +67,22 @@ body {
   background: var(--color-background);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Curriculum Tab Typography */
+.curriculum-chapter-title {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.curriculum-add-lesson {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+}
+
+.curriculum-lesson-count {
+  font-size: 0.875rem; /* 14px */
 }
 
 /* Custom animations - must be outside @layer */
@@ -174,17 +196,48 @@ body {
     color: white;
     transform: none !important;
   }
+  
+  .btn-admin-primary:active {
+    transform: none !important;
+  }
 
   .btn-admin-secondary {
     @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm transition-colors duration-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed;
+    transform: none !important;
+  }
+  
+  .btn-admin-secondary:hover {
+    transform: none !important;
+  }
+  
+  .btn-admin-secondary:active {
+    transform: none !important;
   }
 
   .btn-admin-danger {
     @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm transition-colors duration-200 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed;
+    transform: none !important;
+  }
+  
+  .btn-admin-danger:hover {
+    transform: none !important;
+  }
+  
+  .btn-admin-danger:active {
+    transform: none !important;
   }
 
   .btn-admin-outline {
     @apply inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-blue-600 bg-transparent border border-blue-600 rounded-md shadow-sm transition-colors duration-200 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed;
+    transform: none !important;
+  }
+  
+  .btn-admin-outline:hover {
+    transform: none !important;
+  }
+  
+  .btn-admin-outline:active {
+    transform: none !important;
   }
 
   /* Large button variants */
@@ -200,22 +253,62 @@ body {
     color: white;
     transform: none !important;
   }
+  
+  .btn-admin-primary-lg:active {
+    transform: none !important;
+  }
 
   .btn-admin-secondary-lg {
     @apply btn-admin-secondary px-6 py-2.5 text-base;
+    transform: none !important;
+  }
+  
+  .btn-admin-secondary-lg:hover {
+    transform: none !important;
+  }
+  
+  .btn-admin-secondary-lg:active {
+    transform: none !important;
   }
 
   .btn-admin-danger-lg {
     @apply btn-admin-danger px-6 py-2.5 text-base;
+    transform: none !important;
+  }
+  
+  .btn-admin-danger-lg:hover {
+    transform: none !important;
+  }
+  
+  .btn-admin-danger-lg:active {
+    transform: none !important;
   }
 
   /* Small button variants */
   .btn-admin-primary-sm {
     @apply btn-admin-primary px-3 py-1.5 text-xs;
+    transform: none !important;
+  }
+  
+  .btn-admin-primary-sm:hover {
+    transform: none !important;
+  }
+  
+  .btn-admin-primary-sm:active {
+    transform: none !important;
   }
 
   .btn-admin-secondary-sm {
     @apply btn-admin-secondary px-3 py-1.5 text-xs;
+    transform: none !important;
+  }
+  
+  .btn-admin-secondary-sm:hover {
+    transform: none !important;
+  }
+  
+  .btn-admin-secondary-sm:active {
+    transform: none !important;
   }
 
   /* Original marketing buttons */

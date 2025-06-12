@@ -36,7 +36,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
         </button>
         
         <div>
-          <h3 className="font-medium text-gray-900">
+          <h3 className="text-base font-semibold text-gray-900">
             Chapter {chapter.order}: {chapter.title}
           </h3>
           {chapter.description && (
@@ -53,7 +53,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
         <button
           type="button"
           onClick={onAddLesson}
-          className="p-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded"
+          className="p-1.5 text-[var(--color-primary-text)] hover:text-[var(--color-primary-dark)] hover:bg-[var(--color-primary-lighter)] rounded-md transition-colors"
           title="Add lesson"
         >
           <PlusIcon className="h-5 w-5" />
@@ -62,7 +62,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
         <button
           type="button"
           onClick={onEdit}
-          className="p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-200 rounded"
+          className="p-1.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
           title="Edit chapter"
         >
           <PencilIcon className="h-5 w-5" />
@@ -71,7 +71,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
         <button
           type="button"
           onClick={onDelete}
-          className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
+          className="p-1.5 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-md transition-colors"
           title="Delete chapter"
         >
           <TrashIcon className="h-5 w-5" />

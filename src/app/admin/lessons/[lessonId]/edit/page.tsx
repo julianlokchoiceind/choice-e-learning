@@ -1,24 +1,39 @@
-import { notFound } from 'next/navigation';
-import { LessonForm } from '@/client/components/admin/lessons/LessonForm';
-import { getLesson } from '@/server/services/lessons/lesson-service';
+'use client';
 
-interface EditLessonPageProps {
-  params: {
-    lessonId: string;
-  };
-}
+import { useParams } from 'next/navigation';
+import { LessonEditForm } from '@/client/components/admin/lessons/LessonEditForm';
+import { useLessonsQuery } from '@/client/hooks/lessons';
+import { LoadingState } from '@/client/components/common';
 
-export default async function EditLessonPage({ params }: EditLessonPageProps) {
-  const lesson = await getLesson(params.lessonId);
+export default function EditLessonPage() {
+  const params = useParams();
+  const lessonId = params.lessonId as string;
+  const { useGetLesson } = useLessonsQuery();
   
-  if (!lesson) {
-    notFound();
+  const { data: lesson, isLoading, error } = useGetLesson(lessonId);
+  
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <LoadingState variant="page" message="Loading lesson..." />
+      </div>
+    );
+  }
+  
+  if (error || !lesson) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900">Lesson Not Found</h2>
+          <p className="mt-2 text-gray-600">The lesson you're looking for doesn't exist.</p>
+        </div>
+      </div>
+    );
   }
   
   return (
-    <div className='admin-edit-lesson'>
-      <h1>Edit Lesson: {lesson.title}</h1>
-      <LessonForm lessonId={params.lessonId} courseId={lesson.courseId} initialData={lesson} />
+    <div className="container mx-auto px-4 py-8">
+      <LessonEditForm lesson={lesson} />
     </div>
   );
 }

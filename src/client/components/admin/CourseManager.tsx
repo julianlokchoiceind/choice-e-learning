@@ -284,7 +284,7 @@ export default function CourseManager() {
         <h2 className='text-xl font-semibold text-indigo-600'>All Courses</h2>
         <button
           onClick={handleAddCourse}
-          className='px-4 py-2 flex items-center rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition-colors'
+          className='btn-admin-primary'
         >
           <PlusIcon className='h-5 w-5 mr-1' />
           Add New Course
@@ -439,7 +439,7 @@ export default function CourseManager() {
                 name='title'
                 value={formData.title}
                 onChange={handleInputChange}
-                className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                className='w-full p-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
                 placeholder='Course Title'
               />
               {formErrors.title && (
@@ -456,7 +456,7 @@ export default function CourseManager() {
                 name='level'
                 value={formData.level}
                 onChange={handleInputChange}
-                className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                className='w-full p-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
               >
                 <option value='beginner'>Beginner</option>
                 <option value='intermediate'>Intermediate</option>
@@ -479,7 +479,7 @@ export default function CourseManager() {
                 onChange={handleInputChange}
                 step='0.01'
                 min='0'
-                className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                className='w-full p-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
                 placeholder='0.00'
               />
               {formErrors.price && (
@@ -496,7 +496,7 @@ export default function CourseManager() {
                 name='status'
                 value={formData.status}
                 onChange={handleInputChange}
-                className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                className='w-full p-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
               >
                 <option value={CourseStatus.DRAFT}>Draft</option>
                 <option value={CourseStatus.PUBLISHED}>Published</option>
@@ -516,7 +516,7 @@ export default function CourseManager() {
                 value={formData.description}
                 onChange={handleInputChange}
                 rows={4}
-                className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                className='w-full p-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
                 placeholder='Course description'
               ></textarea>
               {formErrors.description && (
@@ -534,7 +534,7 @@ export default function CourseManager() {
                 name='topics'
                 value={formData.topics}
                 onChange={handleInputChange}
-                className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                className='w-full p-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
                 placeholder='JavaScript, React, Web Development'
               />
               <p className='mt-1 text-xs text-gray-500'>Enter topics separated by commas</p>
@@ -553,7 +553,7 @@ export default function CourseManager() {
                 name='videoUrl'
                 value={formData.videoUrl}
                 onChange={handleInputChange}
-                className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                className='w-full p-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
                 placeholder='https://youtube.com/watch?v=...'
               />
               {formErrors.videoUrl && (
@@ -571,7 +571,7 @@ export default function CourseManager() {
                 name='imageUrl'
                 value={formData.imageUrl}
                 onChange={handleInputChange}
-                className='w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500'
+                className='w-full p-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]'
                 placeholder='https://example.com/image.jpg'
               />
               {formErrors.imageUrl && (
@@ -591,7 +591,7 @@ export default function CourseManager() {
             <button
               type='submit'
               disabled={isSubmitting}
-              className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+              className='px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-0 focus:border-[var(--color-primary)] focus:ring-offset-2'
             >
               {isSubmitting ? (
                 <LoadingState variant="button" message="Saving..." />

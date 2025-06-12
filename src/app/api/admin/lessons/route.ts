@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { apiSuccess, apiError } from '@/server/api/api-response';
 import { ApiErrorCode } from '@/server/api/api-errors';
 import { 
+  getLessons,
   getLessonsByCourse, 
   createLesson, 
   updateLessonsOrder 
@@ -15,19 +16,36 @@ import {
 
 /**
  * GET /api/admin/lessons
- * Lấy danh sách các bài học theo khóa học (admin view)
+ * Get lessons with optional filtering (admin view)
  */
 export const GET = withAdmin(async (request: NextRequest) => {
   try {
     const searchParams = request.nextUrl.searchParams;
     const courseId = searchParams.get('courseId');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const search = searchParams.get('search') || undefined;
+    const status = searchParams.get('status') || undefined;
+    const sortBy = searchParams.get('sortBy') || 'createdAt';
+    const sortOrder = (searchParams.get('order') || 'desc') as 'asc' | 'desc';
     
-    if (!courseId) {
-      return apiError('Thiếu tham số courseId', undefined, ApiErrorCode.BAD_REQUEST);
+    // If courseId is provided without other filters, use the old method for backward compatibility
+    if (courseId && !search && !status && page === 1 && limit === 10) {
+      const lessons = await getLessonsByCourse(courseId);
+      return apiSuccess(lessons);
     }
     
-    const lessons = await getLessonsByCourse(courseId);
-    return apiSuccess(lessons);
+    // Use the new method with full filtering support
+    const result = await getLessons({
+      page,
+      limit,
+      courseId: courseId || undefined,
+      search,
+      sortBy,
+      sortOrder
+    });
+    
+    return apiSuccess(result.data, undefined, result.meta);
   } catch (error: any) {
     console.error('Error fetching lessons:', error);
     return apiError(

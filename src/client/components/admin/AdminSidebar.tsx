@@ -17,8 +17,6 @@ import {
   FolderIcon,
   QuestionMarkCircleIcon,
   ChevronDownIcon,
-  ChevronRightIcon,
-  PlusCircleIcon,
   UserGroupIcon
 } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -36,10 +34,13 @@ interface MenuItemProps {
   submenu?: { text: string; href: string }[];
   isActive?: boolean;
   isFirst?: boolean;
+  isOpen?: boolean;
+  onToggle?: () => void;
 }
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
 
   useEffect(() => {
     // Add global CSS to prevent transform on hover
@@ -92,6 +93,15 @@ export default function AdminSidebar() {
         { text: 'Add New Course', href: '/admin/courses/new' }
       ],
       isActive: pathname?.startsWith('/admin/courses')
+    },
+    {
+      icon: <AcademicCapIcon className='h-5 w-5' />,
+      text: 'Lessons',
+      submenu: [
+        { text: 'All Lessons', href: '/admin/lessons' },
+        { text: 'Add New Lesson', href: '/admin/lessons/new' }
+      ],
+      isActive: pathname?.startsWith('/admin/lessons')
     },
     {
       icon: <FolderIcon className='h-5 w-5' />,
@@ -157,8 +167,8 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <div className='w-64 text-white flex flex-col bg-gradient-to-b from-blue-500 via-blue-600 to-blue-800 shadow-lg h-full'>
-      <div className='p-5 flex items-center border-b border-blue-400/30'>
+    <div className='w-64 text-white flex flex-col bg-gradient-to-b from-[var(--color-primary-gradient-start)] via-[var(--color-primary)] to-[var(--color-primary-gradient-end)] shadow-lg h-full'>
+      <div className='h-[73px] px-5 flex items-center border-b border-gray-300/50'>
         <div className='mr-3 w-10 h-10 flex-shrink-0'>
           <Image 
             src='/images/logos/choiceind logox2.png' 
@@ -183,6 +193,12 @@ export default function AdminSidebar() {
                 submenu={item.submenu}
                 isActive={item.isActive}
                 isFirst={index === 0}
+                isOpen={openMenuIndex === index}
+                onToggle={() => {
+                  if (item.submenu) {
+                    setOpenMenuIndex(openMenuIndex === index ? null : index);
+                  }
+                }}
               />
             ))}
           </div>
@@ -192,29 +208,27 @@ export default function AdminSidebar() {
       <div className='px-4 py-6'>
         <Link
           href='/admin/help'
-          className='flex items-center justify-center p-4 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 rounded-lg shadow-md mb-4 transition-all duration-200 transform hover:scale-[1.02] border border-blue-400/20'
+          className='btn-admin-primary w-full justify-center py-4 mb-4'
         >
           <QuestionMarkCircleIcon className='h-5 w-5 mr-2 text-white' />
           <span className='font-semibold text-white'>Help Desk</span>
         </Link>
       </div>
 
-      <div className='border-t border-blue-400/30 mt-auto'>
+      <div className='border-t border-gray-300 mt-auto'>
         <div className='px-5 py-4 text-center'>
-          <p className='text-sm text-blue-100'>Administrator Dashboard</p>
+          <p className='text-sm text-gray-400'>Administrator Dashboard</p>
         </div>
       </div>
     </div>
   );
 }
 
-function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false }: MenuItemProps) {
-  const [isOpen, setIsOpen] = useState(isActive);
-  
+function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false, isOpen = false, onToggle }: MenuItemProps) {
   const toggleSubmenu = (e: React.MouseEvent) => {
-    if (submenu) {
+    if (submenu && onToggle) {
       e.preventDefault();
-      setIsOpen(!isOpen);
+      onToggle();
     }
   };
 
@@ -225,8 +239,8 @@ function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false
           onClick={toggleSubmenu}
           className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium sidebar-menu-item ${isFirst ? 'first-menu-item' : ''} ${
             isActive 
-              ? 'bg-blue-700/70 text-white' 
-              : 'text-white hover:bg-blue-500/60 hover:text-white'
+              ? 'bg-[var(--color-primary-dark)]/70 text-white' 
+              : 'text-white hover:bg-[var(--color-primary-gradient-start)]/60 hover:text-white'
           }`}
         >
           <div className='flex items-center'>
@@ -242,8 +256,8 @@ function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false
           href={href || '#'}
           className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium sidebar-menu-item ${isFirst ? 'first-menu-item' : ''} ${
             isActive 
-              ? 'bg-blue-700/70 text-white' 
-              : 'text-white hover:bg-blue-500/60 hover:text-white'
+              ? 'bg-[var(--color-primary-dark)]/70 text-white' 
+              : 'text-white hover:bg-[var(--color-primary-gradient-start)]/60 hover:text-white'
           }`}
         >
           <div className='flex items-center'>
@@ -267,7 +281,7 @@ function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false
                   <Link
                     key={`${text}-${index}`}
                     href={item.href}
-                    className='flex items-center px-3 py-2 text-sm text-blue-100 hover:text-white hover:bg-blue-500/50 rounded-md sidebar-menu-item'
+                    className='flex items-center px-3 py-2 text-sm text-[var(--color-primary-light)] hover:text-white hover:bg-[var(--color-primary-gradient-start)]/50 rounded-md sidebar-menu-item'
                   >
                     {item.text}
                   </Link>
