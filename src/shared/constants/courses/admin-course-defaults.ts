@@ -9,13 +9,7 @@ export const ADMIN_COURSE_DEFAULTS = {
   imageUrl: DEFAULT_COURSE_PLACEHOLDER,
   status: 'draft',
   chapters: [],
-  lessons: [{
-    title: 'Introduction',
-    order: 1,
-    videoUrl: '',
-    description: '',
-    resources: []
-  }]
+  lessons: []
 };
 
 // Course constants

@@ -63,7 +63,14 @@ export const useFAQsQuery = () => {
       queryKey: ['faqs', filter],
       queryFn: async (): Promise<FAQPaginatedResult> => {
         try {
-          const response = await apiRequest.get(API.FAQS, { params: filter });
+          // Build query string
+          const params = new URLSearchParams();
+          if (filter?.search) params.append('search', filter.search);
+          if (filter?.category) params.append('category', filter.category);
+          if (filter?.page) params.append('page', filter.page.toString());
+          if (filter?.limit) params.append('limit', filter.limit.toString());
+          
+          const response = await apiRequest.get(`${API.FAQS}?${params.toString()}`);
           
           // Kiểm tra response null/undefined
           if (!response || !response.data) {
@@ -205,12 +212,40 @@ export const useFAQsQuery = () => {
     });
   };
 
+  /**
+   * Bulk delete FAQs
+   */
+  const useBulkDeleteFAQs = () => {
+    return useMutation({
+      mutationFn: async (faqIds: string[]): Promise<any> => {
+        const response = await apiRequest.post('/api/admin/faqs/bulk-delete', { faqIds });
+        return response?.data;
+      },
+      onSuccess: () => {
+        // Invalidate all FAQ queries to refresh the list
+        queryClient.invalidateQueries({ 
+          queryKey: ['faqs'],
+          exact: false
+        });
+      },
+      onError: (err: ApiRequestError) => {
+        showErrorToast(err, 'Failed to delete FAQs');
+        throw err;
+      },
+      meta: {
+        successToast: 'FAQs deleted successfully',
+        errorToast: 'Failed to delete FAQs'
+      },
+    });
+  };
+
   return {
     useGetFAQs,
     useGetFAQ,
     useCreateFAQ,
     useUpdateFAQ,
     useDeleteFAQ,
+    useBulkDeleteFAQs
   };
 };
 

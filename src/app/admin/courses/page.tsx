@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useCoursesQuery } from '@/client/hooks/courses';
+import { useSelection } from '@/client/hooks/common';
 import { 
   PlusIcon, 
   PencilSquareIcon, 
@@ -10,9 +11,14 @@ import {
   MagnifyingGlassIcon,
   FunnelIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  AcademicCapIcon
 } from '@heroicons/react/24/outline';
-import { LoadingState } from '@/client/components/common';
+import { 
+  LoadingState, 
+  BulkDeleteButton, 
+  SelectAllCheckbox 
+} from '@/client/components/common';
 import { CourseImage } from '@/client/components/courses';
 
 // Helper functions
@@ -34,26 +40,28 @@ const formatStatus = (status: string, isPublished: boolean): string => {
 const getLevelBadgeClass = (level: string): string => {
   switch (level?.toLowerCase()) {
     case 'beginner':
-      return 'bg-green-100 text-green-800';
+      return 'badge-beginner';
     case 'intermediate':
-      return 'bg-[var(--color-primary-light)] text-[var(--color-primary-dark)]';
+      return 'badge-intermediate';
     case 'advanced':
-      return 'bg-purple-100 text-purple-800';
+      return 'badge-advanced';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'badge-all';
   }
 };
 
 const getStatusBadgeClass = (status: string, isPublished: boolean): string => {
-  if (isPublished === false) return 'bg-gray-100 text-gray-800';
+  if (isPublished === false) return 'badge-draft';
   
   switch (status?.toLowerCase()) {
     case 'published':
-      return 'bg-green-100 text-green-800';
+      return 'badge-published';
+    case 'draft':
+      return 'badge-draft';
     case 'private':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'badge-draft';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'badge-inactive';
   }
 };
 
@@ -80,7 +88,7 @@ const getSortParams = (sortOption: string): { sortBy: string; order: 'asc' | 'de
 export default function CoursesPage() {
   // Use the useCoursesQuery hook with isAdmin=true
   const coursesQuery = useCoursesQuery(true);
-  const { useGetCourses, useDeleteCourse } = coursesQuery;
+  const { useGetCourses, useDeleteCourse, useBulkDeleteCourses } = coursesQuery;
   
   // State for filters and pagination
   const [searchQuery, setSearchQuery] = useState('');
@@ -89,6 +97,13 @@ export default function CoursesPage() {
   const [sortOption, setSortOption] = useState('newest');
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  
+  // Selection state for bulk operations
+  const {
+    selectedItems,
+    toggleSelectItem,
+    clearSelection
+  } = useSelection<string>();
   
   // Create filter object from state
   const courseFilter = useMemo(() => ({
@@ -120,6 +135,7 @@ export default function CoursesPage() {
   
   // Use React Query for delete mutation
   const deleteCourse = useDeleteCourse();
+  const bulkDeleteCourses = useBulkDeleteCourses();
   
   // Add CSS for buttons with no transform on hover
   useEffect(() => {
@@ -169,20 +185,60 @@ export default function CoursesPage() {
       // Error is handled by the mutation
     }
   };
+  
+  // Handle bulk delete
+  const handleBulkDelete = async (courseIds: string[]) => {
+    try {
+      await bulkDeleteCourses.mutateAsync(courseIds);
+      clearSelection();
+    } catch (error: unknown) {
+      console.error('Error deleting courses:', error);
+    }
+  };
+  
+  // Clear selection when courses data changes
+  useEffect(() => {
+    clearSelection();
+  }, [data, clearSelection]);
+
+  // Calculate selection state based on current courses
+  const isAllSelected = courses.length > 0 && selectedItems.size === courses.length;
+  const isIndeterminate = selectedItems.size > 0 && selectedItems.size < courses.length;
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      clearSelection();
+    } else {
+      courses.forEach(course => {
+        if (!selectedItems.has(course.id)) {
+          toggleSelectItem(course.id);
+        }
+      });
+    }
+  };
 
   return (
     <div className='space-y-6'>
       <div className='flex justify-between items-center'>
         <div className='flex items-center mb-6'>
+          <AcademicCapIcon className='h-7 w-7 text-indigo-600 mr-3' />
           <h1 className='text-2xl font-bold text-gray-800'>Courses Management</h1>
         </div>
-        <Link
-          href='/admin/courses/new'
-          className='btn-admin-primary'
-        >
-          <PlusIcon className='h-5 w-5 mr-1' />
-          Add New Course
-        </Link>
+        <div className='flex items-center gap-3'>
+          {selectedItems.size > 0 && (
+            <BulkDeleteButton
+              selectedItems={selectedItems}
+              onDelete={handleBulkDelete}
+              itemLabel="course"
+            />
+          )}
+          <Link
+            href='/admin/courses/new'
+            className='btn-admin-primary'
+          >
+            <PlusIcon className='h-5 w-5 mr-1' />
+            Add New Course
+          </Link>
+        </div>
       </div>
 
       {/* Filter and search controls */}
@@ -252,6 +308,14 @@ export default function CoursesPage() {
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
               <tr>
+                <th scope='col' className='w-10 px-6 py-4'>
+                  <SelectAllCheckbox
+                    isAllSelected={isAllSelected}
+                    isIndeterminate={isIndeterminate}
+                    onToggleAll={toggleSelectAll}
+                    disabled={courses.length === 0}
+                  />
+                </th>
                 <th scope='col' className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>
                   #
                 </th>
@@ -276,21 +340,21 @@ export default function CoursesPage() {
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
-              {isLoading || deleteCourse.isPending ? (
+              {isLoading || deleteCourse.isPending || bulkDeleteCourses.isPending ? (
                 <tr>
-                  <td colSpan={7} className='text-center py-10'>
+                  <td colSpan={8} className='text-center py-10'>
                     <LoadingState 
                       variant="table" 
-                      message={deleteCourse.isPending ? 'Deleting course...' : 'Loading courses...'} 
-                      columns={7}
+                      message={bulkDeleteCourses.isPending ? 'Deleting courses...' : deleteCourse.isPending ? 'Deleting course...' : 'Loading courses...'} 
+                      columns={8}
                       rows={6}
-                      columnWidths={['8%', '35%', '12%', '10%', '12%', '10%', '13%']}
+                      columnWidths={['5%', '8%', '30%', '12%', '10%', '12%', '10%', '13%']}
                     />
                   </td>
                 </tr>
               ) : courses.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className='text-center py-10 text-gray-500'>
+                  <td colSpan={8} className='text-center py-10 text-gray-500'>
                     <p>No courses found</p>
                     <p className='text-sm mt-1'>Create a new course or try with a different search term.</p>
                   </td>
@@ -298,6 +362,14 @@ export default function CoursesPage() {
               ) : (
                 courses.map((course, index) => (
                   <tr key={course.id} className='hover:bg-gray-50 transition-colors duration-150'>
+                    <td className='w-10 px-6 py-4'>
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.has(course.id)}
+                        onChange={() => toggleSelectItem(course.id)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                    </td>
                     <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
                       {(() => {
                         const page = pagination?.page || 1;
@@ -326,7 +398,7 @@ export default function CoursesPage() {
                       </div>
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap'>
-                      <span className={`px-2 py-1 text-xs rounded-full ${getLevelBadgeClass(course.level)}`}>
+                      <span className={getLevelBadgeClass(course.level)}>
                         {formatLevel(course.level)}
                       </span>
                     </td>
@@ -337,7 +409,7 @@ export default function CoursesPage() {
                       ${course.price.toFixed(2)}
                     </td>
                     <td className='px-6 py-4 whitespace-nowrap'>
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(course.status, course.isPublished)}`}>
+                      <span className={getStatusBadgeClass(course.status, course.isPublished)}>
                         {formatStatus(course.status, course.isPublished)}
                       </span>
                     </td>

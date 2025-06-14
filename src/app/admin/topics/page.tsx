@@ -12,7 +12,12 @@ import {
   XCircleIcon,
   FolderIcon
 } from '@heroicons/react/24/outline';
-import { LoadingState } from '@/client/components/common';
+import { 
+  LoadingState,
+  BulkDeleteButton,
+  SelectAllCheckbox
+} from '@/client/components/common';
+import { useSelection } from '@/client/hooks/common';
 import { TopicFilter, Topic, TopicPagination } from '@/shared/types/topics/topics';
 
 // Define API response structure
@@ -31,13 +36,21 @@ export default function TopicsPage() {
   // Get hooks from useTopicsQuery
   const { 
     useGetTopics,
-    useDeleteTopic
+    useDeleteTopic,
+    useBulkDeleteTopics
   } = useTopicsQuery();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [showActive, setShowActive] = useState<boolean | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  
+  // Selection state for bulk operations
+  const {
+    selectedItems,
+    toggleSelectItem,
+    clearSelection
+  } = useSelection<string>();
   
   // Create filter object
   const topicFilter: TopicFilter = {
@@ -59,6 +72,7 @@ export default function TopicsPage() {
   
   // Use React Query for delete mutation
   const deleteTopicMutation = useDeleteTopic();
+  const bulkDeleteTopics = useBulkDeleteTopics();
   
   // Extract topics and pagination from response
   // Since our API might return different formats, we need to handle both possibilities
@@ -137,6 +151,36 @@ export default function TopicsPage() {
       // Error is handled by the mutation
     }
   };
+  
+  // Handle bulk delete
+  const handleBulkDelete = async (topicIds: string[]) => {
+    try {
+      await bulkDeleteTopics.mutateAsync(topicIds);
+      clearSelection();
+    } catch (error: unknown) {
+      console.error('Error deleting topics:', error);
+    }
+  };
+  
+  // Clear selection when topics data changes
+  useEffect(() => {
+    clearSelection();
+  }, [data, clearSelection]);
+
+  // Calculate selection state based on current topics
+  const isAllSelected = topics.length > 0 && selectedItems.size === topics.length;
+  const isIndeterminate = selectedItems.size > 0 && selectedItems.size < topics.length;
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      clearSelection();
+    } else {
+      topics.forEach(topic => {
+        if (!selectedItems.has(topic.id)) {
+          toggleSelectItem(topic.id);
+        }
+      });
+    }
+  };
 
   return (
     <div className='space-y-6'>
@@ -145,13 +189,22 @@ export default function TopicsPage() {
           <FolderIcon className='h-7 w-7 text-indigo-600 mr-3' />
           <h1 className='text-2xl font-bold text-gray-800'>Topics Management</h1>
         </div>
-        <Link
-          href='/admin/topics/new'
-          className='btn-admin-primary'
-        >
-          <PlusIcon className='h-5 w-5 mr-1' />
-          Add New Topic
-        </Link>
+        <div className='flex items-center gap-3'>
+          {selectedItems.size > 0 && (
+            <BulkDeleteButton
+              selectedItems={selectedItems}
+              onDelete={handleBulkDelete}
+              itemLabel="topic"
+            />
+          )}
+          <Link
+            href='/admin/topics/new'
+            className='btn-admin-primary'
+          >
+            <PlusIcon className='h-5 w-5 mr-1' />
+            Add New Topic
+          </Link>
+        </div>
       </div>
 
       {/* Filter and search controls */}
@@ -194,6 +247,14 @@ export default function TopicsPage() {
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
               <tr>
+                <th scope='col' className='w-10 px-6 py-4'>
+                  <SelectAllCheckbox
+                    isAllSelected={isAllSelected}
+                    isIndeterminate={isIndeterminate}
+                    onToggleAll={toggleSelectAll}
+                    disabled={topics.length === 0}
+                  />
+                </th>
                 <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>#</th>
                 <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Name</th>
                 <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Description</th>
@@ -203,21 +264,21 @@ export default function TopicsPage() {
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
-              {isLoading || deleteTopicMutation.isPending ? (
+              {isLoading || deleteTopicMutation.isPending || bulkDeleteTopics.isPending ? (
                 <tr>
-                  <td colSpan={6} className='text-center py-10'>
+                  <td colSpan={7} className='text-center py-10'>
                     <LoadingState 
                       variant="table" 
-                      message={deleteTopicMutation.isPending ? 'Deleting topic...' : 'Loading topics...'} 
-                      columns={6}
+                      message={bulkDeleteTopics.isPending ? 'Deleting topics...' : deleteTopicMutation.isPending ? 'Deleting topic...' : 'Loading topics...'} 
+                      columns={7}
                       rows={6}
-                      columnWidths={['8%', '22%', '25%', '15%', '15%', '15%']}
+                      columnWidths={['5%', '8%', '20%', '22%', '13%', '13%', '19%']}
                     />
                   </td>
                 </tr>
               ) : topics.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className='text-center py-10 text-gray-500'>
+                  <td colSpan={7} className='text-center py-10 text-gray-500'>
                     <p>No topics found.</p>
                     <p className='text-sm mt-1'>Try adjusting your search criteria or add a new topic.</p>
                   </td>
@@ -225,6 +286,14 @@ export default function TopicsPage() {
               ) : (
                 topics.map((topic, index) => (
                   <tr key={topic.id} className='hover:bg-gray-50 transition-colors duration-150'>
+                    <td className='w-10 px-6 py-4'>
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.has(topic.id)}
+                        onChange={() => toggleSelectItem(topic.id)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                    </td>
                     <td className='py-4 px-6 whitespace-nowrap text-sm font-medium text-gray-900'>
                       {(() => {
                         const page = pagination?.page || 1;

@@ -345,3 +345,31 @@ export const studentService = {
     }
   }
 };
+
+/**
+ * Bulk delete students
+ * @param studentIds Array of student IDs to delete
+ * @returns Object with deleted and failed arrays
+ */
+export async function bulkDeleteStudents(studentIds: string[]): Promise<{
+  deleted: string[];
+  failed: { id: string; error: string }[];
+}> {
+  const deleted: string[] = [];
+  const failed: { id: string; error: string }[] = [];
+
+  for (const studentId of studentIds) {
+    try {
+      await studentService.deleteStudent(studentId);
+      deleted.push(studentId);
+    } catch (error: unknown) {
+      console.error(`Failed to delete student ${studentId}:`, error);
+      failed.push({
+        id: studentId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  return { deleted, failed };
+}

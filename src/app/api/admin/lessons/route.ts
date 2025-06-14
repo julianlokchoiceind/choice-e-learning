@@ -4,10 +4,8 @@ import { ApiErrorCode } from '@/server/api/api-errors';
 import { 
   getLessons,
   getLessonsByCourse, 
-  createLesson, 
   updateLessonsOrder 
 } from '@/server/services/lessons/lesson-service';
-import { createLessonSchema } from '@/shared/schemas/lessons/lesson-schema';
 import { 
   withAdmin,
   withErrorHandling,
@@ -30,7 +28,7 @@ export const GET = withAdmin(async (request: NextRequest) => {
     const sortOrder = (searchParams.get('order') || 'desc') as 'asc' | 'desc';
     
     // If courseId is provided without other filters, use the old method for backward compatibility
-    if (courseId && !search && !status && page === 1 && limit === 10) {
+    if (courseId && !search && !status && page === 1 && limit === 10 && sortBy === 'createdAt') {
       const lessons = await getLessonsByCourse(courseId);
       return apiSuccess(lessons);
     }
@@ -41,6 +39,7 @@ export const GET = withAdmin(async (request: NextRequest) => {
       limit,
       courseId: courseId || undefined,
       search,
+      status,
       sortBy,
       sortOrder
     });
@@ -50,34 +49,6 @@ export const GET = withAdmin(async (request: NextRequest) => {
     console.error('Error fetching lessons:', error);
     return apiError(
       'Failed to fetch lessons',
-      error instanceof Error ? error.message : undefined,
-      error.code || ApiErrorCode.INTERNAL_SERVER_ERROR
-    );
-  }
-});
-
-/**
- * POST /api/admin/lessons
- * Tạo bài học mới (admin only)
- */
-export const POST = withAdmin(async (request: NextRequest, context: AuthenticatedContext) => {
-  try {
-    const body = await request.json();
-    const validatedData = createLessonSchema.parse(body);
-    
-    const newLesson = await createLesson(validatedData);
-    return apiSuccess(newLesson, 'Lesson created successfully', undefined, 201);
-  } catch (error: any) {
-    console.error('Error creating lesson:', error);
-    if (error.name === 'ZodError') {
-      return apiError(
-        'Dữ liệu không hợp lệ',
-        error.format(),
-        ApiErrorCode.VALIDATION_ERROR
-      );
-    }
-    return apiError(
-      'Failed to create lesson',
       error instanceof Error ? error.message : undefined,
       error.code || ApiErrorCode.INTERNAL_SERVER_ERROR
     );

@@ -1,14 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { Chapter } from '@/shared/types/courses/course';
 import ChapterForm from './ChapterForm';
 import ChapterList from './ChapterList';
+import { useCoursesQuery } from '@/client/hooks/courses';
+import { useParams } from 'next/navigation';
 
 interface CurriculumTabProps {
   initialChapters?: Chapter[];
-  onUpdateCurriculum: (chapters: any[], lessons: any[]) => void;
+  onUpdateCurriculum: (chapters: any[], lessons: any[]) => Promise<void>;
 }
 
 const CurriculumTab: React.FC<CurriculumTabProps> = ({ 
@@ -16,18 +18,29 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
   onUpdateCurriculum 
 }) => {
   const [chapters, setChapters] = useState<Chapter[]>(initialChapters);
+  const params = useParams();
+  const courseId = params.courseId as string;
+  const { useGetCourse } = useCoursesQuery(true);
+  const { data: courseData } = useGetCourse(courseId);
   const [isAddingChapter, setIsAddingChapter] = useState(false);
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
   
+  // Update chapters when course data is refreshed
+  useEffect(() => {
+    if (courseData?.chapters) {
+      setChapters(courseData.chapters);
+    }
+  }, [courseData?.chapters]);
+  
   // Handle adding new chapter
-  const handleAddChapter = (chapter: Partial<Chapter>) => {
+  const handleAddChapter = async (chapter: Partial<Chapter>) => {
     const tempId = `temp-${Date.now()}`;
     const newChapter = {
       id: tempId,
       title: chapter.title || 'New chapter',
       description: chapter.description || '',
       order: chapters.length + 1,
-      courseId: '',
+      courseId: courseId,
       lessons: [],
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -38,43 +51,41 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
     setChapters(updatedChapters);
     setIsAddingChapter(false);
     
-    // Debounce the API call to prevent too many requests
-    setTimeout(() => {
-      // Prepare data for API - filter out temporary chapters and clean data
-      const apiChapters = updatedChapters.map(chapter => {
-        // Don't send temporary chapters to API, let the backend create them
-        if (chapter.id.startsWith('temp-')) {
-          return {
-            title: chapter.title,
-            description: chapter.description,
-            order: chapter.order
-            // No ID - let database auto-generate
-          };
-        }
+    // Prepare data for API
+    const apiChapters = updatedChapters.map(chapter => {
+      if (chapter.id.startsWith('temp-')) {
         return {
-          id: chapter.id,
           title: chapter.title,
           description: chapter.description,
           order: chapter.order
         };
-      });
-      
-      // Create lessons array for API (exclude lessons from temp chapters for now)
-      const allLessons = updatedChapters
-        .filter(chapter => !chapter.id.startsWith('temp-'))
-        .flatMap(chapter => 
-          (chapter.lessons || []).map(lesson => ({
+      }
+      return {
+        id: chapter.id,
+        title: chapter.title,
+        description: chapter.description,
+        order: chapter.order
+      };
+    });
+    
+    // Create lessons array for API
+    const allLessons = updatedChapters
+      .flatMap(chapter => 
+        (chapter.lessons || [])
+          .filter(lesson => !lesson.id.startsWith('temp-'))
+          .map(lesson => ({
             ...lesson,
             chapterId: chapter.id
           }))
-        );
-      
-      onUpdateCurriculum(apiChapters, allLessons);
-    }, 500); // Debounce for 500ms
+      );
+    
+    // Call the API and wait for the response
+    await onUpdateCurriculum(apiChapters, allLessons);
+    // The useEffect will update the chapters with real IDs when courseData is refreshed
   };
   
   // Handle editing chapter
-  const handleEditChapter = (chapterId: string, data: Partial<Chapter>) => {
+  const handleEditChapter = async (chapterId: string, data: Partial<Chapter>) => {
     const updatedChapters = chapters.map(chapter => 
       chapter.id === chapterId ? { ...chapter, ...data } : chapter
     );
@@ -109,11 +120,11 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
         }))
       );
     
-    onUpdateCurriculum(apiChapters, allLessons);
+    await onUpdateCurriculum(apiChapters, allLessons);
   };
   
   // Handle deleting chapter
-  const handleDeleteChapter = (chapterId: string) => {
+  const handleDeleteChapter = async (chapterId: string) => {
     if (confirm('Are you sure you want to delete this chapter and all its lessons?')) {
       const updatedChapters = chapters.filter(chapter => chapter.id !== chapterId);
       
@@ -142,31 +153,33 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
         };
       });
       
-      // Create lessons array for API (exclude lessons from temp chapters)
+      // Create lessons array for API (exclude lessons from temp chapters and temp lessons)
       const allLessons = reorderedChapters
         .filter(chapter => !chapter.id.startsWith('temp-'))
         .flatMap(chapter => 
-          (chapter.lessons || []).map(lesson => ({
-            ...lesson,
-            chapterId: chapter.id
-          }))
+          (chapter.lessons || [])
+            .filter(lesson => !lesson.id.startsWith('temp-'))
+            .map(lesson => ({
+              ...lesson,
+              chapterId: chapter.id
+            }))
         );
       
-      onUpdateCurriculum(apiChapters, allLessons);
+      await onUpdateCurriculum(apiChapters, allLessons);
     }
   };
   
   // Handle adding new lesson to chapter
-  const handleAddLesson = (chapterId: string, lesson: any) => {
+  const handleAddLesson = async (chapterId: string, lesson: any) => {
     const updatedChapters = chapters.map(chapter => {
       if (chapter.id === chapterId) {
         const newLesson = {
           id: `temp-lesson-${Date.now()}`,
           title: lesson.title || 'New lesson',
           content: '',
-          videoUrl: 'https://www.youtube.com/watch?v=placeholder',
+          videoUrl: '',
           order: (chapter.lessons?.length || 0) + 1,
-          courseId: '',
+          courseId: courseId,
           chapterId: chapter.id,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -183,19 +196,56 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
     
     setChapters(updatedChapters);
     
-    // Create lessons array for API
-    const allLessons = updatedChapters.flatMap(chapter => 
-      (chapter.lessons || []).map(lesson => ({
-        ...lesson,
-        chapterId: chapter.id
-      }))
-    );
+    // Prepare data for API - only send lessons from non-temp chapters
+    const apiChapters = updatedChapters.map(chapter => {
+      if (chapter.id.startsWith('temp-')) {
+        return {
+          title: chapter.title,
+          description: chapter.description,
+          order: chapter.order
+        };
+      }
+      return {
+        id: chapter.id,
+        title: chapter.title,
+        description: chapter.description,
+        order: chapter.order
+      };
+    });
     
-    onUpdateCurriculum(updatedChapters, allLessons);
+    // Create lessons array for API
+    const allLessons = updatedChapters
+      .flatMap(chapter => {
+        // Skip lessons from temp chapters
+        if (chapter.id.startsWith('temp-')) {
+          return [];
+        }
+        return (chapter.lessons || [])
+          .map(lesson => {
+            // For temp lessons, don't send the ID
+            if (lesson.id.startsWith('temp-')) {
+              return {
+                title: lesson.title,
+                content: lesson.content || '',
+                videoUrl: lesson.videoUrl || '',
+                order: lesson.order,
+                courseId: courseId,
+                chapterId: chapter.id
+              };
+            }
+            return {
+              ...lesson,
+              chapterId: chapter.id
+            };
+          });
+      });
+    
+    // Save immediately
+    await onUpdateCurriculum(apiChapters, allLessons);
   };
   
   // Handle deleting lesson
-  const handleDeleteLesson = (chapterId: string, lessonId: string) => {
+  const handleDeleteLesson = async (chapterId: string, lessonId: string) => {
     if (confirm('Are you sure you want to delete this lesson?')) {
       const updatedChapters = chapters.map(chapter => {
         if (chapter.id === chapterId) {
@@ -225,7 +275,24 @@ const CurriculumTab: React.FC<CurriculumTabProps> = ({
         }))
       );
       
-      onUpdateCurriculum(updatedChapters, allLessons);
+      // Prepare API data
+      const apiChapters = updatedChapters.map(chapter => {
+        if (chapter.id.startsWith('temp-')) {
+          return {
+            title: chapter.title,
+            description: chapter.description,
+            order: chapter.order
+          };
+        }
+        return {
+          id: chapter.id,
+          title: chapter.title,
+          description: chapter.description,
+          order: chapter.order
+        };
+      });
+      
+      await onUpdateCurriculum(apiChapters, allLessons);
     }
   };
   

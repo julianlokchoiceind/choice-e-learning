@@ -48,7 +48,6 @@ export const ADMIN_ROUTES = {
   NEW_COURSE: '/admin/courses/new',
   EDIT_COURSE: (id: string) => `/admin/courses/${id}/edit`,
   LESSONS: '/admin/lessons',
-  NEW_LESSON: (courseId: string) => `/admin/lessons/new/${courseId}`,
   EDIT_LESSON: (id: string) => `/admin/lessons/${id}/edit`,
   STUDENTS: '/admin/students',
   NEW_STUDENT: '/admin/students/new',

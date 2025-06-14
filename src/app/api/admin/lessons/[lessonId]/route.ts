@@ -22,7 +22,8 @@ export const GET = withAdmin(async (
   context: AuthenticatedContext
 ) => {
   try {
-    const lessonId = context.params.lessonId;
+    const params = context.params as { lessonId: string };
+    const lessonId = params.lessonId;
     
     if (!lessonId) {
       return apiError('Thiếu ID bài học', undefined, ApiErrorCode.BAD_REQUEST);
@@ -54,7 +55,8 @@ export const PUT = withAdmin(async (
   context: AuthenticatedContext
 ) => {
   try {
-    const lessonId = context.params.lessonId;
+    const params = context.params as { lessonId: string };
+    const lessonId = params.lessonId;
     
     // Validate lesson ID
     if (!lessonId) {
@@ -117,7 +119,8 @@ export const DELETE = withAdmin(async (
   context: AuthenticatedContext
 ) => {
   try {
-    const lessonId = context.params.lessonId;
+    const params = context.params as { lessonId: string };
+    const lessonId = params.lessonId;
     
     // Validate lesson ID
     if (!lessonId) {

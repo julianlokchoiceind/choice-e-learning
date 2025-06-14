@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateUser, checkUserRole, requireAdmin, requireSelfOrAdmin } from '@/server/auth/auth-middleware';
 import { UserRole } from '@/shared/types/auth/roles';
-import { apiError, apiServerError, apiUnauthorized } from './api-response';
+import { apiError, apiServerError, apiUnauthorized, apiForbidden } from './api-response';
 import { ApiErrorCode } from './api-errors';
 
 // Định nghĩa kiểu dữ liệu cho route handler
@@ -38,11 +38,22 @@ export type AuthenticatedHandlerFunction = (
  * @param handler The route handler function
  * @returns A wrapped handler with consistent error handling
  */
-export function withErrorHandling(handler: HandlerFunction): HandlerFunction {
-  return async function errorHandlingWrapper(req, context) {
+export function withErrorHandling(handler: HandlerFunction) {
+  return async function errorHandlingWrapper(
+    req: NextRequest,
+    context?: { params?: Record<string, string> }
+  ): Promise<NextResponse> {
     try {
-      const result = await handler(req, context);
-      return result || apiServerError('Handler returned undefined');
+      // Create route context from Next.js params
+      const routeContext: RouteContext = {
+        params: context?.params || {}
+      };
+      
+      const result = await handler(req, routeContext);
+      if (!result) {
+        return apiServerError('Handler returned undefined');
+      }
+      return result;
     } catch (error: unknown) {
       console.error(`API error [${req.method} ${req.nextUrl.pathname}]:`, error);
       console.error('Error stack:', (error as Error).stack);
@@ -63,25 +74,49 @@ export function withErrorHandling(handler: HandlerFunction): HandlerFunction {
  * @param handler The authenticated route handler function
  * @returns A wrapped handler with authentication and error handling
  */
-export function withAuth(handler: AuthenticatedHandlerFunction): HandlerFunction {
-  return withErrorHandling(async function authWrapper(req, context) {
-    // Authenticate user
-    const auth = await authenticateUser(req);
-    
-    if (!auth.success) {
-      return auth.response;
+export function withAuth(handler: AuthenticatedHandlerFunction) {
+  return async function authWrapper(
+    req: NextRequest,
+    context?: { params?: Record<string, string> }
+  ): Promise<NextResponse> {
+    try {
+      // Authenticate user
+      const auth = await authenticateUser(req);
+      
+      if (!auth.success) {
+        return auth.response || apiUnauthorized();
+      }
+      
+      // Create route context from Next.js params
+      const routeContext: RouteContext = {
+        params: context?.params || {}
+      };
+      
+      // Create authenticated context with user data
+      const authContext: AuthenticatedContext = {
+        ...routeContext,
+        user: auth.user
+      };
+      
+      // Call handler with authenticated user
+      const result = await handler(req, authContext);
+      if (!result) {
+        return apiServerError('Authenticated handler returned undefined');
+      }
+      return result;
+    } catch (error: unknown) {
+      console.error(`API error [${req.method} ${req.nextUrl.pathname}]:`, error);
+      console.error('Error stack:', (error as Error).stack);
+      
+      // Return standardized error response
+      return apiServerError(
+        'An unexpected error occurred',
+        process.env.NODE_ENV === 'development' 
+          ? (error as Error).message 
+          : undefined
+      );
     }
-    
-    // Create new context with user data
-    const authContext: AuthenticatedContext = {
-      ...context,
-      user: auth.user
-    };
-    
-    // Call handler with authenticated user
-    const result = await handler(req, authContext);
-    return result || apiServerError('Authenticated handler returned undefined');
-  });
+  };
 }
 
 /**
@@ -93,25 +128,49 @@ export function withAuth(handler: AuthenticatedHandlerFunction): HandlerFunction
 export function withRole(
   handler: AuthenticatedHandlerFunction, 
   roles: UserRole | UserRole[]
-): HandlerFunction {
-  return withErrorHandling(async function roleWrapper(req, context) {
-    // Check user role
-    const auth = await checkUserRole(req, roles);
-    
-    if (!auth.success) {
-      return auth.response;
+) {
+  return async function roleWrapper(
+    req: NextRequest,
+    context?: { params?: Record<string, string> }
+  ): Promise<NextResponse> {
+    try {
+      // Check user role
+      const auth = await checkUserRole(req, roles);
+      
+      if (!auth.success) {
+        return auth.response || apiForbidden();
+      }
+      
+      // Create route context from Next.js params
+      const routeContext: RouteContext = {
+        params: context?.params || {}
+      };
+      
+      // Create authenticated context with user data
+      const authContext: AuthenticatedContext = {
+        ...routeContext,
+        user: auth.user
+      };
+      
+      // Call handler with authenticated user
+      const result = await handler(req, authContext);
+      if (!result) {
+        return apiServerError('Role-based handler returned undefined');
+      }
+      return result;
+    } catch (error: unknown) {
+      console.error(`API error [${req.method} ${req.nextUrl.pathname}]:`, error);
+      console.error('Error stack:', (error as Error).stack);
+      
+      // Return standardized error response
+      return apiServerError(
+        'An unexpected error occurred',
+        process.env.NODE_ENV === 'development' 
+          ? (error as Error).message 
+          : undefined
+      );
     }
-    
-    // Create new context with user data
-    const authContext: AuthenticatedContext = {
-      ...context,
-      user: auth.user
-    };
-    
-    // Call handler with authenticated user
-    const result = await handler(req, authContext);
-    return result || apiServerError('Role-based handler returned undefined');
-  });
+  };
 }
 
 /**
@@ -119,51 +178,53 @@ export function withRole(
  * @param handler The authenticated route handler function
  * @returns A wrapped handler with admin-only authentication
  */
-export function withAdmin(handler: AuthenticatedHandlerFunction): HandlerFunction {
-  return withErrorHandling(async function adminWrapper(req, context) {
-    console.log('[withAdmin] Original context:', JSON.stringify(context, null, 2));
-    console.log('[withAdmin] Context type:', typeof context);
-    console.log('[withAdmin] Context keys:', Object.keys(context || {}));
-    
-    // Require admin role
-    const auth = await requireAdmin(req);
-    
-    if (!auth.success) {
-      console.log('Admin authentication failed for:', req.url);
-      console.log('Auth error:', auth);
-      return auth.response;
-    }
-    
-    // Create new context with admin user data
-    const authContext: AuthenticatedContext = {
-      ...context,
-      user: auth.user || { id: '', role: UserRole.STUDENT, email: '' }
-    };
-    
-    console.log('[withAdmin] Auth context:', JSON.stringify(authContext, null, 2));
-    
-    if (auth.user) {
-      const userEmail = auth.user?.email || 'unknown';
-      console.log(`Admin API access granted for ${userEmail} to ${req.url}`);
-      console.log('User data:', {
-        id: auth.user?.id || '',
-        email: userEmail,
-        role: auth.user?.role || ''
-      });
-    } else {
-      console.log('Admin API access granted but user data is undefined');
-    }
-    
-    // Call handler with authenticated admin user
+export function withAdmin(handler: AuthenticatedHandlerFunction) {
+  // Return a function that matches Next.js route handler signature
+  return async function adminWrapper(
+    req: NextRequest,
+    context?: { params?: Record<string, string> }
+  ): Promise<NextResponse> {
     try {
+      
+      // Require admin role
+      const auth = await requireAdmin(req);
+      
+      if (!auth.success) {
+        return auth.response || apiUnauthorized();
+      }
+      
+      // Create context with params from Next.js
+      const routeContext: RouteContext = {
+        params: context?.params || {}
+      };
+      
+      // Create authenticated context with admin user data
+      const authContext: AuthenticatedContext = {
+        ...routeContext,
+        user: auth.user || { id: '', role: UserRole.STUDENT, email: '' }
+      };
+      
+      
+      
+      // Call handler with authenticated admin user
       const result = await handler(req, authContext);
-      console.log(`Admin API response for ${req.url} sent successfully`);
-      return result || apiServerError('Admin handler returned undefined');
+      if (!result) {
+        return apiServerError('Admin handler returned undefined');
+      }
+      return result;
     } catch (error: unknown) {
       console.error(`Admin API error for ${req.url}:`, error);
-      throw error;
+      console.error('Error stack:', (error as Error).stack);
+      
+      // Return standardized error response
+      return apiServerError(
+        'An unexpected error occurred',
+        process.env.NODE_ENV === 'development' 
+          ? (error as Error).message 
+          : undefined
+      );
     }
-  });
+  };
 }
 
 /**

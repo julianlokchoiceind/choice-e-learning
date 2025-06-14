@@ -209,6 +209,40 @@ const useCoursesQuery = (isAdmin = false) => {
   };
 
   /**
+   * Update a course silently (for autosave - no toast notifications)
+   */
+  const useUpdateCourseSilent = () => {
+    if (!isAdmin) {
+      throw new Error('Unauthorized: Admin access required to update courses');
+    }
+    
+    return useMutation({
+      mutationFn: async ({ id, data }: { id: string; data: Partial<Course> }) => {
+        try {
+          const response = await apiRequest.put<{data: Course}>(`${baseUrl}/${id}`, data);
+          
+          // Kiểm tra response null/undefined
+          if (!response) {
+            throw new Error('Failed to update course: No response');
+          }
+          
+          return response.data.data;
+        } catch (error: unknown) {
+          console.error('Error updating course:', error);
+          const apiError = error as ApiRequestError;
+          throw new Error(apiError?.message || 'Failed to update course');
+        }
+      },
+      onSuccess: (_, variables) => {
+        // Invalidate specific course query and courses list
+        queryClient.invalidateQueries({ queryKey: ['course', variables.id] });
+        queryClient.invalidateQueries({ queryKey: ['courses'] });
+      },
+      // No toast meta for silent updates - autosave shouldn't show notifications
+    });
+  };
+
+  /**
    * Delete a course (admin only)
    */
   const useDeleteCourse = () => {
@@ -308,6 +342,42 @@ const useCoursesQuery = (isAdmin = false) => {
   };
 
   /**
+   * Bulk delete courses (admin only)
+   */
+  const useBulkDeleteCourses = () => {
+    if (!isAdmin) {
+      throw new Error('Unauthorized: Admin access required to bulk delete courses');
+    }
+    
+    return useMutation({
+      mutationFn: async (courseIds: string[]) => {
+        try {
+          const response = await apiRequest.post<{data: any}>(`${baseUrl}/bulk-delete`, { courseIds });
+          
+          if (!response) {
+            throw new Error('Failed to bulk delete courses: No response');
+          }
+          
+          return response.data.data;
+        } catch (error: unknown) {
+          console.error('Error bulk deleting courses:', error);
+          const apiError = error as ApiRequestError;
+          throw new Error(apiError?.message || 'Failed to bulk delete courses');
+        }
+      },
+      onSuccess: () => {
+        // Invalidate courses queries to refresh data
+        queryClient.invalidateQueries({ queryKey: ['courses'] });
+      },
+      // Use meta for toast notifications
+      meta: {
+        successToast: 'Courses deleted successfully',
+        errorToast: 'Failed to delete courses'
+      }
+    });
+  };
+
+  /**
    * Update course curriculum (chapters and lessons) (admin only)
    */
   const useUpdateCurriculum = () => {
@@ -322,42 +392,20 @@ const useCoursesQuery = (isAdmin = false) => {
         lessons: any[] 
       }) => {
         try {
-          console.log('=== UPDATE CURRICULUM DEBUG ===');
-          console.log('Course ID:', courseId);
-          console.log('Base URL:', baseUrl);
-          console.log('Full URL:', `${baseUrl}/${courseId}`);
-          console.log('Chapters to update:', chapters);
-          console.log('Lessons to update:', lessons);
-          console.log('Request payload:', JSON.stringify({ chapters, lessons }, null, 2));
           
           const response = await apiRequest.put<{data: Course}>(`${baseUrl}/${courseId}`, {
             chapters,
             lessons
           });
           
-          console.log('Response received:', response);
           
           if (!response) {
-            console.error('No response received from API');
             throw new Error('Failed to update curriculum: No response');
           }
           
-          console.log('Update successful, returning data');
           return response.data.data;
         } catch (error: unknown) {
-          console.error('=== UPDATE CURRICULUM ERROR ===');
-          console.error('Full error object:', error);
-          
           const apiError = error as any;
-          if (apiError?.response) {
-            console.error('Response status:', apiError.response.status);
-            console.error('Response data:', apiError.response.data);
-            console.error('Response headers:', apiError.response.headers);
-          }
-          if (apiError?.request) {
-            console.error('Request URL:', apiError.request.responseURL || apiError.config?.url);
-            console.error('Request method:', apiError.config?.method);
-          }
           
           // More detailed error for debugging
           if (apiError?.response?.status === 404) {
@@ -371,11 +419,14 @@ const useCoursesQuery = (isAdmin = false) => {
         // Invalidate specific course query and courses list
         queryClient.invalidateQueries({ queryKey: ['course', variables.courseId] });
         queryClient.invalidateQueries({ queryKey: ['courses'] });
+        // IMPORTANT: Also invalidate lessons queries to ensure All Lessons page updates
+        queryClient.invalidateQueries({ queryKey: ['lessons'] });
+        // Invalidate lessons for the specific course as well
+        queryClient.invalidateQueries({ queryKey: ['lessons', variables.courseId] });
       },
-      // Use meta for toast notifications
+      // No toast notifications for curriculum updates - they're too frequent
       meta: {
-        successToast: 'Curriculum saved successfully',
-        errorToast: 'Failed to save curriculum'
+        suppressErrorToast: true
       }
     });
   };
@@ -385,7 +436,9 @@ const useCoursesQuery = (isAdmin = false) => {
     useGetCourse,
     useCreateCourse,
     useUpdateCourse,
+    useUpdateCourseSilent,
     useDeleteCourse,
+    useBulkDeleteCourses,
     useGetCourseTopics,
     useEnrollInCourse,
     useUpdateCurriculum

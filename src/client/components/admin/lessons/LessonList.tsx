@@ -24,9 +24,14 @@ interface Course {
   title: string;
 }
 
+// Define the type for lesson with computed status
+interface LessonWithStatus extends Lesson {
+  status?: 'published' | 'draft';
+}
+
 // Define the type for response data
 interface LessonsResponse {
-  data: Lesson[];
+  data: LessonWithStatus[];
   meta?: {
     page: number;
     totalPages: number;
@@ -55,7 +60,14 @@ export const LessonList = () => {
     data: lessonsData, 
     isLoading: lessonsLoading, 
     error: lessonsError 
-  } = useGetLessons(selectedCourse || undefined);
+  } = useGetLessons(selectedCourse || undefined, {
+    status: statusFilter,
+    search: searchQuery,
+    sortBy: sortOrder === 'newest' ? 'createdAt' : sortOrder === 'oldest' ? 'createdAt' : 'title',
+    order: sortOrder === 'oldest' ? 'asc' : sortOrder === 'title' ? 'asc' : 'desc',
+    page: currentPage,
+    limit: 10
+  });
   
   // Sử dụng mutation từ React Query cho xóa bài học
   const deleteLessonMutation = useDeleteLesson();
@@ -93,55 +105,8 @@ export const LessonList = () => {
   const isLoading = lessonsLoading || coursesLoading;
   const error = lessonsError;
 
-  // Mock data for demonstration
-  const mockLessons = [
-    {
-      id: '5071f77bcf86cd799439011',
-      title: 'Introduction to React Components',
-      courseId: 'react-fundamentals',
-      courseName: 'React Fundamentals',
-      chapterName: 'Chapter 1',
-      order: 1,
-      duration: 15,
-      status: 'Published',
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: '5071f77bcf86cd799439012',
-      title: 'Understanding Props and State',
-      courseId: 'react-fundamentals',
-      courseName: 'React Fundamentals',
-      chapterName: 'Chapter 1',
-      order: 2,
-      duration: 18,
-      status: 'Draft',
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: '5071f77bcf86cd799439013',
-      title: 'Event Handling in React',
-      courseId: 'react-fundamentals',
-      courseName: 'React Fundamentals',
-      chapterName: 'Chapter 2',
-      order: 1,
-      duration: 22,
-      status: 'Published',
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: '5071f77bcf86cd799439014',
-      title: 'Working with Forms',
-      courseId: 'react-fundamentals',
-      courseName: 'React Fundamentals',
-      chapterName: 'Chapter 2',
-      order: 2,
-      duration: 25,
-      status: 'Draft',
-      createdAt: new Date().toISOString()
-    }
-  ];
-
-  const displayLessons = mockLessons;
+  // Use actual lessons data
+  const displayLessons = lessons;
 
   return (
     <div className="space-y-6">
@@ -150,10 +115,6 @@ export const LessonList = () => {
         <div className='flex items-center mb-6'>
           <h1 className='text-2xl font-bold text-gray-800'>Lessons Management</h1>
         </div>
-        <Link href="/admin/lessons/new" className="btn-admin-primary">
-          <PlusIcon className="h-5 w-5 mr-1" />
-          Add New Lesson
-        </Link>
       </div>
 
       {/* Search and Filters */}
@@ -245,13 +206,9 @@ export const LessonList = () => {
           <h3 className="text-lg font-semibold text-gray-900 mb-2">No lessons found</h3>
           <p className="text-gray-500 mb-6">
             {selectedCourse 
-              ? 'Try selecting a different course or create a new lesson for this course'
-              : 'Get started by creating your first lesson'}
+              ? 'This course has no lessons yet. Add lessons through the course curriculum.'
+              : 'No lessons found. Lessons are created within courses.'}
           </p>
-          <Link href="/admin/lessons/new" className="btn-admin-primary">
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Create First Lesson
-          </Link>
         </div>
       ) : (
         <>
@@ -299,22 +256,20 @@ export const LessonList = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900">{lesson.courseName}</div>
-                      <div className="text-xs text-gray-500">{lesson.chapterName}</div>
+                      <div className="text-sm text-gray-900">
+                        {courses.find(c => c.id === lesson.courseId)?.title || lesson.courseId}
+                      </div>
+                      {lesson.chapterId && <div className="text-xs text-gray-500">Chapter: {lesson.chapterId}</div>}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{lesson.order}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{lesson.duration} min</div>
+                      <div className="text-sm text-gray-900">{lesson.duration || '-'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${
-                        lesson.status === 'Published'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {lesson.status}
+                      <span className={lesson.status === 'published' ? 'badge-published' : 'badge-draft'}>
+                        {lesson.status === 'published' ? 'Published' : 'Draft'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">

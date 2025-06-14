@@ -12,6 +12,7 @@ export async function getLessons(options: {
   limit?: number;
   courseId?: string;
   search?: string;
+  status?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }) {
@@ -21,6 +22,7 @@ export async function getLessons(options: {
       limit = 10,
       courseId,
       search,
+      status,
       sortBy = 'createdAt',
       sortOrder = 'desc'
     } = options;
@@ -57,27 +59,78 @@ export async function getLessons(options: {
     const orderBy: any = {};
     orderBy[sortBy] = sortOrder;
 
-    // Get total count for pagination
-    const total = await prisma.lesson.count({ where });
-
-    // Fetch lessons
-    const lessons = await prisma.lesson.findMany({
-      where,
-      skip,
-      take,
-      orderBy,
-      select: {
-        id: true,
-        title: true,
-        content: true,
-        videoUrl: true,
-        order: true,
-        courseId: true,
-        chapterId: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    });
+    // Fetch all lessons first if we need to filter by status
+    // (since status is computed, not stored in DB)
+    let lessons: any[];
+    let total: number;
+    
+    if (status) {
+      // Need to fetch all and then filter
+      const allLessons = await prisma.lesson.findMany({
+        where,
+        orderBy,
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          videoUrl: true,
+          order: true,
+          courseId: true,
+          chapterId: true,
+          duration: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      });
+      
+      // Add computed status and filter
+      const allLessonsWithStatus = allLessons.map(lesson => ({
+        ...lesson,
+        status: (lesson.content && lesson.content.length > 10) || 
+                (lesson.videoUrl && lesson.videoUrl.trim() !== '' && !lesson.videoUrl.includes('placeholder'))
+          ? 'published' 
+          : 'draft'
+      }));
+      
+      const filteredLessons = allLessonsWithStatus.filter(
+        lesson => lesson.status === status.toLowerCase()
+      );
+      
+      total = filteredLessons.length;
+      // Apply pagination to filtered results
+      lessons = filteredLessons.slice(skip, skip + take);
+    } else {
+      // Normal pagination without status filter
+      total = await prisma.lesson.count({ where });
+      
+      const dbLessons = await prisma.lesson.findMany({
+        where,
+        skip,
+        take,
+        orderBy,
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          videoUrl: true,
+          order: true,
+          courseId: true,
+          chapterId: true,
+          duration: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      });
+      
+      // Add computed status field
+      lessons = dbLessons.map(lesson => ({
+        ...lesson,
+        status: (lesson.content && lesson.content.length > 10) || 
+                (lesson.videoUrl && lesson.videoUrl.trim() !== '' && !lesson.videoUrl.includes('placeholder'))
+          ? 'published' 
+          : 'draft'
+      }));
+    }
 
     return {
       data: lessons,
@@ -289,7 +342,17 @@ export async function getLessonsByCourseId(courseId: string) {
       orderBy: { order: 'asc' }
     });
 
-    return lessons;
+    // Add computed status field for UI compatibility
+    const lessonsWithStatus = lessons.map(lesson => ({
+      ...lesson,
+      // Compute status based on content and video
+      status: (lesson.content && lesson.content.length > 10) || 
+              (lesson.videoUrl && lesson.videoUrl.trim() !== '' && !lesson.videoUrl.includes('placeholder'))
+        ? 'published' 
+        : 'draft'
+    }));
+
+    return lessonsWithStatus;
   } catch (error: unknown) {
     console.error(`Error getting lessons for course ${courseId}:`, error);
     throw ApiError.fromError(error);
@@ -320,6 +383,36 @@ export async function updateLessonsOrder(lessons: { id: string, order: number }[
   }
 }
 
+/**
+ * Bulk delete lessons
+ * @param lessonIds Array of lesson IDs to delete
+ * @returns Object with deleted and failed arrays
+ */
+export async function bulkDeleteLessons(lessonIds: string[]): Promise<{
+  deleted: string[];
+  failed: { id: string; error: string }[];
+}> {
+  const deleted: string[] = [];
+  const failed: { id: string; error: string }[] = [];
+
+  for (const lessonId of lessonIds) {
+    try {
+      await prisma.lesson.delete({
+        where: { id: lessonId }
+      });
+      deleted.push(lessonId);
+    } catch (error: unknown) {
+      console.error(`Failed to delete lesson ${lessonId}:`, error);
+      failed.push({
+        id: lessonId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  return { deleted, failed };
+}
+
 export default {
   getLessons,
   getLessonById,
@@ -329,5 +422,6 @@ export default {
   deleteLesson,
   getLessonsByCourseId,
   getLessonsByCourse,
-  updateLessonsOrder
+  updateLessonsOrder,
+  bulkDeleteLessons
 };

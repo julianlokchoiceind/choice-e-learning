@@ -1,6 +1,5 @@
 'use client';
 
-import { Metadata } from 'next';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -14,11 +13,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { LoadingState } from '@/client/components/common';
 import apiClient from '@/client/utils/http/api-client';
-
-export const metadata: Metadata = {
-  title: 'Coding Challenges | Choice E-Learning',
-  description: 'Test your skills with our coding challenges and compete with other learners.',
-};
 
 interface Challenge {
   id: string;

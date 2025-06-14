@@ -10,16 +10,20 @@ export const lessonSchema = z.object({
     .max(200, 'Tiêu đề không được vượt quá 200 ký tự'),
   content: z.string()
     .optional(),
-  videoUrl: z.string()
-    .url('URL video không hợp lệ')
-    .optional()
-    .nullable(),
+  videoUrl: z.union([
+    z.string().url('URL video không hợp lệ'),
+    z.literal(''),
+    z.null()
+  ]).optional(),
   order: z.number()
     .int('Thứ tự phải là số nguyên')
     .min(0, 'Thứ tự phải là số không âm'),
   courseId: z.string()
     .min(1, 'ID khóa học không được để trống'),
   chapterId: z.string()
+    .optional()
+    .nullable(),
+  duration: z.string()
     .optional()
     .nullable(),
 });

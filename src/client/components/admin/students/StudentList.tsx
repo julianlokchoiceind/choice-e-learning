@@ -14,7 +14,12 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import { useStudentsQuery } from '@/client/hooks/students';
-import { LoadingState } from '@/client/components/common';
+import { 
+  LoadingState,
+  BulkDeleteButton,
+  SelectAllCheckbox
+} from '@/client/components/common';
+import { useSelection } from '@/client/hooks/common';
 import { StudentQuery } from '@/shared/types/students/student';
 
 export default function StudentList() {
@@ -24,7 +29,8 @@ export default function StudentList() {
   // Create React Query hooks from useStudentsQuery
   const { 
     useGetStudents,
-    useDeleteStudent
+    useDeleteStudent,
+    useBulkDeleteStudents
   } = useStudentsQuery();
   
   // Get current page from URL or default to 1
@@ -33,6 +39,13 @@ export default function StudentList() {
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  
+  // Selection state for bulk operations
+  const {
+    selectedItems,
+    toggleSelectItem,
+    clearSelection
+  } = useSelection<string>();
   
   // Create query parameters object
   const queryParams: StudentQuery = {
@@ -53,6 +66,7 @@ export default function StudentList() {
   
   // Use delete mutation
   const deleteStudentMutation = useDeleteStudent();
+  const bulkDeleteStudents = useBulkDeleteStudents();
   
   // Add CSS for buttons with no transform on hover - matching sidebar behavior
   useEffect(() => {
@@ -177,6 +191,40 @@ export default function StudentList() {
     }
   };
   
+  // Handle bulk delete
+  const handleBulkDelete = async (studentIds: string[]) => {
+    try {
+      await bulkDeleteStudents.mutateAsync(studentIds);
+      clearSelection();
+    } catch (error: unknown) {
+      console.error('Error deleting students:', error);
+    }
+  };
+  
+  // Extract students and pagination from data
+  const students = studentsData?.data || [];
+  const pagination = studentsData?.meta;
+  
+  // Clear selection when students data changes
+  useEffect(() => {
+    clearSelection();
+  }, [studentsData, clearSelection]);
+
+  // Calculate selection state based on current students
+  const isAllSelected = students.length > 0 && selectedItems.size === students.length;
+  const isIndeterminate = selectedItems.size > 0 && selectedItems.size < students.length;
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      clearSelection();
+    } else {
+      students.forEach(student => {
+        if (!selectedItems.has(student.id)) {
+          toggleSelectItem(student.id);
+        }
+      });
+    }
+  };
+  
   const getInitials = (name: string) => {
     if (!name) return '';
     return name
@@ -199,10 +247,6 @@ export default function StudentList() {
     return 'newest'; // Default
   };
   
-  // Extract students and pagination from data
-  const students = studentsData?.data || [];
-  const pagination = studentsData?.meta;
-  
   return (
     <div className='space-y-6'>
       {/* Removed action status notification */}
@@ -212,13 +256,22 @@ export default function StudentList() {
           <UserGroupIcon className='h-7 w-7 text-indigo-600 mr-3' />
           <h1 className='text-2xl font-bold text-gray-800'>Students Management</h1>
         </div>
-        <Link
-          href='/admin/students/new'
-          className='btn-admin-primary'
-        >
-          <PlusIcon className='h-5 w-5 mr-1' />
-          Add New Student
-        </Link>
+        <div className='flex items-center gap-3'>
+          {selectedItems.size > 0 && (
+            <BulkDeleteButton
+              selectedItems={selectedItems}
+              onDelete={handleBulkDelete}
+              itemLabel="student"
+            />
+          )}
+          <Link
+            href='/admin/students/new'
+            className='btn-admin-primary'
+          >
+            <PlusIcon className='h-5 w-5 mr-1' />
+            Add New Student
+          </Link>
+        </div>
       </div>
 
       <div className='bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden'>
@@ -266,6 +319,14 @@ export default function StudentList() {
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
               <tr>
+                <th scope='col' className='w-10 px-6 py-4'>
+                  <SelectAllCheckbox
+                    isAllSelected={isAllSelected}
+                    isIndeterminate={isIndeterminate}
+                    onToggleAll={toggleSelectAll}
+                    disabled={students.length === 0}
+                  />
+                </th>
                 <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>#</th>
                 <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Name</th>
                 <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Email</th>
@@ -276,15 +337,15 @@ export default function StudentList() {
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
-              {isLoading || deleteStudentMutation.isPending ? (
+              {isLoading || deleteStudentMutation.isPending || bulkDeleteStudents.isPending ? (
                 <tr>
-                  <td colSpan={7} className='text-center py-10'>
+                  <td colSpan={8} className='text-center py-10'>
                     <LoadingState 
                       variant="table" 
-                      message={deleteStudentMutation.isPending ? 'Deleting student...' : 'Loading students...'} 
-                      columns={7}
+                      message={bulkDeleteStudents.isPending ? 'Deleting students...' : deleteStudentMutation.isPending ? 'Deleting student...' : 'Loading students...'} 
+                      columns={8}
                       rows={6}
-                      columnWidths={['8%', '25%', '20%', '15%', '12%', '10%', '10%']}
+                      columnWidths={['5%', '8%', '22%', '18%', '13%', '12%', '10%', '12%']}
                     />
                   </td>
                 </tr>
@@ -292,6 +353,14 @@ export default function StudentList() {
                 students.map((student, index) => {
                   return (
                     <tr key={student.id} className='hover:bg-gray-50 transition-colors duration-150'>
+                      <td className='w-10 px-6 py-4'>
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.has(student.id)}
+                          onChange={() => toggleSelectItem(student.id)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                      </td>
                       <td className='py-4 px-6 whitespace-nowrap text-sm font-medium text-gray-900'>
                         {(() => {
                           const page = pagination?.page || 1;
@@ -371,7 +440,7 @@ export default function StudentList() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className='text-center py-10 text-gray-500'>
+                  <td colSpan={8} className='text-center py-10 text-gray-500'>
                     <p>No students found.</p>
                     <p className='text-sm mt-1'>Try adjusting your search criteria or add a new student.</p>
                   </td>

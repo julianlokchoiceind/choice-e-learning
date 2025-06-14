@@ -59,15 +59,15 @@ export const useStudentsQuery = () => {
       queryKey: ['students', params],
       queryFn: async (): Promise<PaginatedStudentsResponse> => {
         try {
-          // Sử dụng params object thay vì URLSearchParams
-          const queryParams: Record<string, string | number> = {};
-          if (params.search) queryParams.search = params.search;
-          if (params.page) queryParams.page = params.page;
-          if (params.limit) queryParams.limit = params.limit;
-          if (params.sortBy) queryParams.sortBy = params.sortBy;
-          if (params.sortOrder) queryParams.sortOrder = params.sortOrder;
+          // Build query string
+          const queryString = new URLSearchParams();
+          if (params.search) queryString.append('search', params.search);
+          if (params.page) queryString.append('page', params.page.toString());
+          if (params.limit) queryString.append('limit', params.limit.toString());
+          if (params.sortBy) queryString.append('sortBy', params.sortBy);
+          if (params.sortOrder) queryString.append('sortOrder', params.sortOrder);
           
-          const response = await apiRequest.get(API.STUDENTS, { params: queryParams });
+          const response = await apiRequest.get(`${API.STUDENTS}?${queryString.toString()}`);
           
           // Kiểm tra response null/undefined
           if (!response || !response.data) {
@@ -234,12 +234,40 @@ export const useStudentsQuery = () => {
     });
   };
 
+  /**
+   * Bulk delete students
+   */
+  const useBulkDeleteStudents = () => {
+    return useMutation({
+      mutationFn: async (studentIds: string[]): Promise<any> => {
+        const response = await apiRequest.post('/api/admin/students/bulk-delete', { studentIds });
+        return response?.data;
+      },
+      onSuccess: () => {
+        // Invalidate all student queries to refresh the list
+        queryClient.invalidateQueries({ 
+          queryKey: ['students'],
+          exact: false
+        });
+      },
+      onError: (err: ApiRequestError) => {
+        showErrorToast(err, 'Failed to delete students');
+        throw err;
+      },
+      meta: {
+        successToast: 'Students deleted successfully',
+        errorToast: 'Failed to delete students'
+      },
+    });
+  };
+
   return {
     useGetStudents,
     useGetStudentById,
     useCreateStudent,
     useUpdateStudent,
-    useDeleteStudent
+    useDeleteStudent,
+    useBulkDeleteStudents
   };
 };
 

@@ -97,10 +97,7 @@ export default function AdminSidebar() {
     {
       icon: <AcademicCapIcon className='h-5 w-5' />,
       text: 'Lessons',
-      submenu: [
-        { text: 'All Lessons', href: '/admin/lessons' },
-        { text: 'Add New Lesson', href: '/admin/lessons/new' }
-      ],
+      href: '/admin/lessons',
       isActive: pathname?.startsWith('/admin/lessons')
     },
     {
@@ -217,7 +214,7 @@ export default function AdminSidebar() {
 
       <div className='border-t border-gray-300 mt-auto'>
         <div className='px-5 py-4 text-center'>
-          <p className='text-sm text-gray-400'>Administrator Dashboard</p>
+          <p className='text-sm text-gray-300'>Administrator Dashboard</p>
         </div>
       </div>
     </div>

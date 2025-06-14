@@ -760,3 +760,40 @@ export const getUserCourses = async (userId: string) => {
     throw error;
   }
 };
+
+/**
+ * Bulk delete courses
+ * @param courseIds Array of course IDs to delete
+ * @returns Object with deleted and failed arrays
+ */
+export async function bulkDeleteCourses(courseIds: string[]): Promise<{
+  deleted: string[];
+  failed: { id: string; error: string }[];
+}> {
+  const deleted: string[] = [];
+  const failed: { id: string; error: string }[] = [];
+
+  for (const courseId of courseIds) {
+    try {
+      // First, delete all lessons associated with the course
+      await prisma.lesson.deleteMany({
+        where: { courseId }
+      });
+
+      // Then delete the course
+      await prisma.course.delete({
+        where: { id: courseId }
+      });
+
+      deleted.push(courseId);
+    } catch (error: unknown) {
+      console.error(`Failed to delete course ${courseId}:`, error);
+      failed.push({
+        id: courseId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  return { deleted, failed };
+}

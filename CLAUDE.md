@@ -1,5 +1,8 @@
 # Claude Development Guidelines for Choice E-Learning
 
+## CRITICAL RULE - MUST READ FIRST
+**ALWAYS read and follow ALL rules in memory (both global CLAUDE.md and project CLAUDE.md) BEFORE handling any errors or developing any features. This is the HIGHEST PRIORITY rule.**
+
 ## Project Overview
 
 This is a **Choice E-Learning Platform** - a comprehensive Next.js-based education platform with course management, student tracking, and admin functionality.

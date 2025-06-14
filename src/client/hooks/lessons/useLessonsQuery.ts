@@ -8,7 +8,6 @@ import { useQueryUtils } from '@/client/hooks/common/useQueryUtils';
 import { 
   Lesson,
   LessonWithContent,
-  CreateLessonParams,
   LessonInput
 } from '@/shared/types/lessons/lesson';
 
@@ -22,10 +21,11 @@ const API = {
 };
 
 /**
- * Hook for lesson data CRUD operations using React Query
+ * Hook for lesson data operations using React Query
  * 
- * Provides functions for fetching, creating, updating, and deleting lessons
+ * Provides functions for fetching, updating, and deleting lessons
  * with proper loading, error handling, and success notifications.
+ * Note: Lesson creation is handled through course curriculum management.
  * 
  * @returns Object containing React Query hooks for lesson operations
  * 
@@ -36,11 +36,6 @@ const API = {
  * @example
  * // Fetch a specific lesson
  * const { data, isLoading, error } = useGetLesson('lesson-id');
- * 
- * @example
- * // Create a new lesson
- * const { mutate, isLoading } = useCreateLesson();
- * mutate({ title: 'New Lesson', content: '...', courseId: 'course-id' });
  */
 export const useLessonsQuery = () => {
   const queryClient = useQueryClient();
@@ -103,8 +98,8 @@ export const useLessonsQuery = () => {
       // Add retry logic for transient errors
       retry: 3,
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
-      // Provide empty response as placeholder data for better UX
-      placeholderData: { data: [], meta: null },
+      // Keep data fresh
+      staleTime: 0, // Consider data stale immediately
       // Suppress global error toast as the component handles errors
       meta: {
         suppressErrorToast: true,
@@ -141,7 +136,11 @@ export const useLessonsQuery = () => {
           }
           
           const response = await apiRequest.get(API.LESSON(id));
-          return response?.data;
+          
+          // Check if the data is nested
+          const lessonData = response?.data?.data || response?.data;
+          
+          return lessonData;
         } catch (error) {
           console.error(`Error fetching lesson ${id}:`, error);
           throw error;
@@ -156,47 +155,6 @@ export const useLessonsQuery = () => {
     });
   };
 
-  /**
-   * Create a new lesson
-   * 
-   * @returns Mutation function and state for creating a lesson
-   */
-  const useCreateLesson = () => {
-    // Create a dedicated apiRequest instance for this mutation
-    const createLessonRequest = useApiRequest<Lesson>();
-    
-    return useMutation({
-      mutationFn: async (data: CreateLessonParams): Promise<Lesson> => {
-        const response = await createLessonRequest.post(API.LESSONS, data);
-        if (!response?.data) throw new Error('Failed to create lesson: No data returned');
-        return response.data;
-      },
-      onSuccess: (data) => {
-        // Invalidate lessons query to refetch the list
-        queryClient.invalidateQueries({ queryKey: ['lessons'] });
-        // Also invalidate the course-specific lessons list
-        if (data.courseId) {
-          queryClient.invalidateQueries({ 
-            queryKey: ['lessons', data.courseId] 
-          });
-          // Update the course data too since it might include lesson information
-          queryClient.invalidateQueries({ 
-            queryKey: ['courses', data.courseId] 
-          });
-        }
-        // Toast handled by QueryProvider meta
-        return data;
-      },
-      onError: (err: ApiRequestError) => {
-        showErrorToast(err, 'Failed to create lesson');
-        throw err;
-      },
-      meta: {
-        successToast: 'Lesson created successfully',
-        errorToast: 'Failed to create lesson'
-      }
-    });
-  };
 
   /**
    * Update an existing lesson
@@ -243,6 +201,46 @@ export const useLessonsQuery = () => {
   };
 
   /**
+   * Update a lesson silently (for autosave - no toast notifications)
+   * 
+   * @returns Mutation function and state for updating a lesson
+   */
+  const useUpdateLessonSilent = () => {
+    // Create a dedicated apiRequest instance for this mutation
+    const updateLessonRequest = useApiRequest<Lesson>();
+    
+    return useMutation({
+      mutationFn: async (params: { id: string; data: Partial<LessonInput> }): Promise<Lesson> => {
+        const { id, data } = params;
+        const response = await updateLessonRequest.put(API.LESSON(id), data);
+        if (!response?.data) throw new Error('Failed to update lesson: No data returned');
+        return response.data;
+      },
+      onSuccess: (data) => {
+        // Invalidate specific lesson query and the lessons list
+        queryClient.invalidateQueries({ queryKey: ['lessons', data.id] });
+        queryClient.invalidateQueries({ queryKey: ['lessons'] });
+        // Also invalidate the course-specific lessons list
+        if (data.courseId) {
+          queryClient.invalidateQueries({ 
+            queryKey: ['lessons', data.courseId] 
+          });
+          // Update the course data too since it might include lesson information
+          queryClient.invalidateQueries({ 
+            queryKey: ['courses', data.courseId] 
+          });
+        }
+        return data;
+      },
+      onError: (err: ApiRequestError) => {
+        console.error('Failed to update lesson:', err);
+        throw err;
+      },
+      // No toast meta for silent updates - autosave shouldn't show notifications
+    });
+  };
+
+  /**
    * Delete a lesson
    * 
    * @returns Mutation function and state for deleting a lesson
@@ -258,19 +256,32 @@ export const useLessonsQuery = () => {
       },
       onSuccess: (_data, params) => {
         const { id, courseId } = params;
-        // Remove lesson from cache and invalidate lessons list
+        
+        // Remove the specific lesson query
         queryClient.removeQueries({ queryKey: ['lessons', id] });
-        queryClient.invalidateQueries({ queryKey: ['lessons'] });
-        // Also invalidate the course-specific lessons list
+        
+        // Invalidate all lessons queries to ensure the list refreshes
+        // This includes queries with different filters
+        queryClient.invalidateQueries({ 
+          queryKey: ['lessons'],
+          exact: false,
+          refetchType: 'active' // Only refetch active queries
+        });
+        
+        // Update course-specific data if courseId is provided
         if (courseId) {
           queryClient.invalidateQueries({ 
-            queryKey: ['lessons', courseId] 
-          });
-          // Update the course data too since it might include lesson information
-          queryClient.invalidateQueries({ 
-            queryKey: ['courses', courseId] 
+            queryKey: ['courses', courseId],
+            exact: false
           });
         }
+        
+        // Invalidate all courses to update lesson counts
+        queryClient.invalidateQueries({ 
+          queryKey: ['courses'],
+          exact: false
+        });
+        
         // Toast handled by QueryProvider meta
       },
       onError: (err: ApiRequestError) => {
@@ -280,6 +291,38 @@ export const useLessonsQuery = () => {
       meta: {
         successToast: 'Lesson deleted successfully',
         errorToast: 'Failed to delete lesson'
+      },
+    });
+  };
+
+  /**
+   * Bulk delete lessons
+   * 
+   * @returns Mutation function and state for bulk deleting lessons
+   */
+  const useBulkDeleteLessons = () => {
+    const bulkDeleteRequest = useApiRequest();
+    
+    return useMutation({
+      mutationFn: async (lessonIds: string[]): Promise<any> => {
+        const response = await bulkDeleteRequest.post('/api/admin/lessons/bulk-delete', { lessonIds });
+        return response?.data;
+      },
+      onSuccess: () => {
+        // Invalidate all lesson queries to refresh the list
+        queryClient.invalidateQueries({ 
+          queryKey: ['lessons'],
+          exact: false,
+          refetchType: 'active'
+        });
+      },
+      onError: (err: ApiRequestError) => {
+        showErrorToast(err, 'Failed to delete lessons');
+        throw err;
+      },
+      meta: {
+        successToast: 'Lessons deleted successfully',
+        errorToast: 'Failed to delete lessons'
       },
     });
   };
@@ -317,9 +360,10 @@ export const useLessonsQuery = () => {
   return {
     useGetLessons,
     useGetLesson,
-    useCreateLesson,
     useUpdateLesson,
+    useUpdateLessonSilent,
     useDeleteLesson,
+    useBulkDeleteLessons,
     useMarkLessonComplete
   };
 };

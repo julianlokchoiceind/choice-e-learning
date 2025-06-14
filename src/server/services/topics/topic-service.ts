@@ -494,3 +494,31 @@ class TopicService {
 }
 
 export const topicService = new TopicService();
+
+/**
+ * Bulk delete topics
+ * @param topicIds Array of topic IDs to delete
+ * @returns Object with deleted and failed arrays
+ */
+export async function bulkDeleteTopics(topicIds: string[]): Promise<{
+  deleted: string[];
+  failed: { id: string; error: string }[];
+}> {
+  const deleted: string[] = [];
+  const failed: { id: string; error: string }[] = [];
+
+  for (const topicId of topicIds) {
+    try {
+      await topicService.deleteTopic(topicId);
+      deleted.push(topicId);
+    } catch (error: unknown) {
+      console.error(`Failed to delete topic ${topicId}:`, error);
+      failed.push({
+        id: topicId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  return { deleted, failed };
+}

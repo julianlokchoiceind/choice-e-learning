@@ -13,4 +13,8 @@ export * from './useToast';
 export * from './useQueryUtils';
 export * from './useQueryOptimizer';
 
-export { default as useQueryOptimizer } from './useQueryOptimizer'; 
+export { default as useQueryOptimizer } from './useQueryOptimizer';
+
+// Bulk operation hooks
+export * from './useSelection';
+export * from './useAutoSave'; 

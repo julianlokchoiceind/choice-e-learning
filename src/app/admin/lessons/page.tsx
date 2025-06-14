@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useLessonsQuery } from '@/client/hooks/lessons';
 import { useCoursesQuery } from '@/client/hooks/courses';
+import { useSelection } from '@/client/hooks/common/useSelection';
 import { 
   PlusIcon, 
   PencilSquareIcon, 
@@ -14,7 +15,11 @@ import {
   ChevronRightIcon,
   PlayCircleIcon
 } from '@heroicons/react/24/outline';
-import { LoadingState } from '@/client/components/common';
+import { 
+  LoadingState, 
+  BulkDeleteButton, 
+  SelectAllCheckbox 
+} from '@/client/components/common';
 
 // Helper functions
 const formatLessonTitle = (title: string): string => {
@@ -35,11 +40,11 @@ const formatStatus = (status: string): string => {
 const getStatusBadgeClass = (status: string): string => {
   switch (status?.toLowerCase()) {
     case 'published':
-      return 'bg-green-100 text-green-800';
+      return 'badge-published';
     case 'draft':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'badge-draft';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'badge-inactive';
   }
 };
 
@@ -69,8 +74,15 @@ export default function LessonsPage() {
   // Use the lessons and courses query hooks
   const lessonsQuery = useLessonsQuery();
   const coursesQuery = useCoursesQuery(true);
-  const { useGetLessons, useDeleteLesson } = lessonsQuery;
+  const { useGetLessons, useDeleteLesson, useBulkDeleteLessons } = lessonsQuery;
   const { useGetCourses } = coursesQuery;
+  
+  // Bulk selection hook
+  const { 
+    selectedItems,
+    toggleSelectItem,
+    clearSelection 
+  } = useSelection<string>();
   
   // State for filters and pagination
   const [searchQuery, setSearchQuery] = useState('');
@@ -81,7 +93,7 @@ export default function LessonsPage() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   
   // Get courses for the filter dropdown
-  const { data: coursesData } = useGetCourses();
+  const { data: coursesData, refetch: refetchCourses } = useGetCourses();
   const courses = coursesData?.data || [];
   
   // Create filter object from state
@@ -108,10 +120,7 @@ export default function LessonsPage() {
     isLoading,
     error,
     refetch
-  } = useGetLessons(selectedCourse === 'all' ? undefined : selectedCourse, {
-    ...lessonFilter,
-    enabled: true // Always enable the query
-  });
+  } = useGetLessons(undefined, lessonFilter);
   
   // Extract lessons and pagination from response
   const lessons = data?.data || data || [];
@@ -126,6 +135,22 @@ export default function LessonsPage() {
   
   // Use React Query for delete mutation
   const deleteLessonMutation = useDeleteLesson();
+  const bulkDeleteMutation = useBulkDeleteLessons();
+  
+  // Calculate selection state based on current lessons
+  const isAllSelected = lessons.length > 0 && selectedItems.size === lessons.length;
+  const isIndeterminate = selectedItems.size > 0 && selectedItems.size < lessons.length;
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      clearSelection();
+    } else {
+      lessons.forEach((lesson: any) => {
+        if (!selectedItems.has(lesson.id)) {
+          toggleSelectItem(lesson.id);
+        }
+      });
+    }
+  };
   
   // Add CSS for buttons with no transform on hover
   useEffect(() => {
@@ -168,12 +193,15 @@ export default function LessonsPage() {
   // Handle delete confirmation
   const handleDeleteConfirm = async (lessonId: string) => {
     try {
+      // Find the lesson to get its courseId
+      const lesson = lessons.find((l: any) => l.id === lessonId);
+      
       await deleteLessonMutation.mutateAsync({ 
         id: lessonId, 
-        courseId: selectedCourse === 'all' ? undefined : selectedCourse 
+        courseId: lesson?.courseId 
       });
       setConfirmDelete(null);
-      refetch();
+      // Don't manually refetch - let React Query handle it through cache invalidation
     } catch (error: unknown) {
       console.error('Error deleting lesson:', error);
       // Error is handled by the mutation
@@ -184,15 +212,21 @@ export default function LessonsPage() {
     <div className='space-y-6'>
       <div className='flex justify-between items-center'>
         <div className='flex items-center mb-6'>
+          <PlayCircleIcon className='h-7 w-7 text-indigo-600 mr-3' />
           <h1 className='text-2xl font-bold text-gray-800'>Lessons Management</h1>
         </div>
-        <Link
-          href='/admin/lessons/new'
-          className='btn-admin-primary'
-        >
-          <PlusIcon className='h-5 w-5 mr-1' />
-          Add New Lesson
-        </Link>
+        <div className='flex items-center gap-3'>
+          {selectedItems.size > 0 && (
+            <BulkDeleteButton
+              selectedItems={selectedItems}
+              onDelete={async (ids) => {
+                await bulkDeleteMutation.mutateAsync(ids);
+                clearSelection();
+              }}
+              itemLabel="lesson"
+            />
+          )}
+        </div>
       </div>
 
       {/* Filter and search controls */}
@@ -265,6 +299,14 @@ export default function LessonsPage() {
           <table className='min-w-full divide-y divide-gray-200'>
             <thead className='bg-gray-50'>
               <tr>
+                <th scope='col' className='py-4 px-4 text-left'>
+                  <SelectAllCheckbox
+                    isAllSelected={isAllSelected}
+                    isIndeterminate={isIndeterminate}
+                    onToggleAll={toggleSelectAll}
+                    disabled={lessons.length === 0}
+                  />
+                </th>
                 <th scope='col' className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>
                   #
                 </th>
@@ -291,19 +333,19 @@ export default function LessonsPage() {
             <tbody className='bg-white divide-y divide-gray-200'>
               {isLoading || deleteLessonMutation.isPending ? (
                 <tr>
-                  <td colSpan={7} className='text-center py-10'>
+                  <td colSpan={8} className='text-center py-10'>
                     <LoadingState 
                       variant="table" 
                       message={deleteLessonMutation.isPending ? 'Deleting lesson...' : 'Loading lessons...'} 
-                      columns={7}
+                      columns={8}
                       rows={6}
-                      columnWidths={['8%', '30%', '20%', '8%', '10%', '10%', '14%']}
+                      columnWidths={['5%', '8%', '25%', '20%', '8%', '10%', '10%', '14%']}
                     />
                   </td>
                 </tr>
               ) : error ? (
                 <tr>
-                  <td colSpan={7} className='text-center py-10'>
+                  <td colSpan={8} className='text-center py-10'>
                     <div className='text-red-600'>
                       <p className='font-medium'>Error loading lessons</p>
                       <p className='text-sm mt-1'>Please try refreshing the page.</p>
@@ -312,7 +354,7 @@ export default function LessonsPage() {
                 </tr>
               ) : lessons.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className='text-center py-10 text-gray-500'>
+                  <td colSpan={8} className='text-center py-10 text-gray-500'>
                     <PlayCircleIcon className='mx-auto h-12 w-12 text-gray-400 mb-3' />
                     <p>No lessons found</p>
                     <p className='text-sm mt-1'>Create a new lesson or try with a different search term.</p>
@@ -325,6 +367,14 @@ export default function LessonsPage() {
                   
                   return (
                     <tr key={lesson.id} className='hover:bg-gray-50 transition-colors duration-150'>
+                      <td className='px-4 py-4 whitespace-nowrap'>
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.has(lesson.id)}
+                          onChange={() => toggleSelectItem(lesson.id)}
+                          className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                        />
+                      </td>
                       <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
                         {(() => {
                           const page = pagination?.page || 1;
@@ -353,7 +403,10 @@ export default function LessonsPage() {
                         </div>
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap'>
-                        <div className='text-sm text-gray-900'>{lessonCourse?.title || 'Unknown Course'}</div>
+                        <div className='text-sm text-gray-900'>
+                          {lessonCourse?.title || 
+                           (lesson.courseId ? `Course ID: ${lesson.courseId}` : 'No Course')}
+                        </div>
                         {lesson.chapterName && (
                           <div className='text-xs text-gray-500'>{lesson.chapterName}</div>
                         )}
@@ -365,7 +418,7 @@ export default function LessonsPage() {
                         {formatDuration(lesson.duration)}
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap'>
-                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(lesson.status)}`}>
+                        <span className={getStatusBadgeClass(lesson.status)}>
                           {formatStatus(lesson.status)}
                         </span>
                       </td>

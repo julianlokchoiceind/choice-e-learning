@@ -249,13 +249,6 @@ export default function CourseDetailPage() {
               </Link>
               
               <Link
-                href={`/admin/lessons/new/${courseId}`}
-                className='block w-full text-center py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-gray-700'
-              >
-                Add New Lesson
-              </Link>
-              
-              <Link
                 href={`/courses/${courseId}`}
                 className='block w-full text-center py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-gray-700'
               >

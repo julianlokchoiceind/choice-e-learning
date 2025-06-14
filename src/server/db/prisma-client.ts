@@ -20,7 +20,7 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 function createPrismaClient(): PrismaClient {
   try {
     const client = new PrismaClient({
-      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+      log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
     });
     
     // Add middleware for error handling and retry logic

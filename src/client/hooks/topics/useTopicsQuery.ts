@@ -28,16 +28,16 @@ const useTopicsQuery = () => {
           if (Object.keys(filters).length === 0) {
             response = await apiRequest.get(`${baseUrl}`);
           } else {
-            // For complex filtering, use params object
-            const params: Record<string, string | number | boolean> = {};
-            if (filters.search) params.search = filters.search;
-            if (filters.page) params.page = filters.page;
-            if (filters.limit) params.limit = filters.limit;
-            if (filters.sortBy) params.sortBy = filters.sortBy;
-            if (filters.sortOrder) params.sortOrder = filters.sortOrder;
-            if (filters.isActive !== undefined) params.isActive = filters.isActive;
+            // For complex filtering, build query string
+            const params = new URLSearchParams();
+            if (filters.search) params.append('search', filters.search);
+            if (filters.page) params.append('page', filters.page.toString());
+            if (filters.limit) params.append('limit', filters.limit.toString());
+            if (filters.sortBy) params.append('sortBy', filters.sortBy);
+            if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
+            if (filters.isActive !== undefined) params.append('isActive', filters.isActive.toString());
             
-            response = await apiRequest.get(baseUrl, { params });
+            response = await apiRequest.get(`${baseUrl}?${params.toString()}`);
           }
           
           // Kiểm tra response null/undefined
@@ -187,12 +187,40 @@ const useTopicsQuery = () => {
     });
   };
 
+  /**
+   * Bulk delete topics
+   */
+  const useBulkDeleteTopics = () => {
+    return useMutation({
+      mutationFn: async (topicIds: string[]): Promise<any> => {
+        const response = await apiRequest.post('/api/admin/topics/bulk-delete', { topicIds });
+        return response?.data;
+      },
+      onSuccess: () => {
+        // Invalidate all topic queries to refresh the list
+        queryClient.invalidateQueries({ 
+          queryKey: ['topics'],
+          exact: false
+        });
+      },
+      onError: (err: ApiRequestError) => {
+        // Error handled by mutation meta
+        throw err;
+      },
+      meta: {
+        successToast: 'Topics deleted successfully',
+        errorToast: 'Failed to delete topics'
+      },
+    });
+  };
+
   return {
     useGetTopics,
     useGetTopic,
     useCreateTopic,
     useUpdateTopic,
-    useDeleteTopic
+    useDeleteTopic,
+    useBulkDeleteTopics
   };
 };
 

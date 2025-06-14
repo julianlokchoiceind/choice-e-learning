@@ -134,11 +134,6 @@ export const GET = withAdmin(async (req: NextRequest, context: AuthenticatedCont
 // PUT - Update a course
 export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedContext) => {
   try {
-    console.log('=== PUT COURSE UPDATE DEBUG ===');
-    console.log('Full context object:', JSON.stringify(context, null, 2));
-    console.log('Context keys:', Object.keys(context));
-    console.log('Params object:', context.params);
-    console.log('Params type:', typeof context.params);
     
     // Check if params exists
     if (!context.params) {
@@ -149,18 +144,17 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
       );
     }
     
-    console.log('Raw courseId from params:', context.params?.courseId);
     
-    // Try to get courseId from params or fallback to URL parsing
+    // Try to get courseId from params
     let courseId = context.params?.courseId;
     
-    // Fallback: Extract courseId from URL if params is not available
-    if (!courseId && req.url) {
-      const urlParts = req.url.split('/');
-      const courseIdIndex = urlParts.findIndex(part => part === 'courses') + 1;
-      if (courseIdIndex > 0 && courseIdIndex < urlParts.length) {
-        courseId = urlParts[courseIdIndex];
-        console.log('Extracted courseId from URL:', courseId);
+    // If courseId is still not found, try extracting from URL as last resort
+    if (!courseId) {
+      const url = new URL(req.url);
+      const pathSegments = url.pathname.split('/');
+      const courseIndex = pathSegments.indexOf('courses');
+      if (courseIndex !== -1 && courseIndex + 1 < pathSegments.length) {
+        courseId = pathSegments[courseIndex + 1];
       }
     }
     
@@ -173,7 +167,6 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
       );
     }
     
-    console.log('Course ID to update:', courseId);
     
     // Kiểm tra course tồn tại TRƯỚC khi xử lý bất kỳ logic nào
     const existingCourse = await prisma.course.findUnique({
@@ -241,11 +234,15 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
     }
     
     // Prepare update data with updated timestamp
-    const updateData = {
+    const updateData: any = {
       ...body,
       topicIds: topicIds.length > 0 ? topicIds : undefined, // Chỉ cập nhật nếu có dữ liệu mới
       updatedAt: new Date()
     };
+    
+    // Remove chapters and lessons from updateData as they are handled separately
+    delete updateData.chapters;
+    delete updateData.lessons;
     
     // Handle chapters and lessons updates if provided
     if ((body.chapters && Array.isArray(body.chapters)) || (body.lessons && Array.isArray(body.lessons))) {
@@ -262,7 +259,9 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
           });
           
           const existingChapterIds = existingChapters.map(c => c.id);
-          const incomingChapterIds = body.chapters.filter((c: any) => c.id).map((c: any) => c.id);
+          const incomingChapterIds = body.chapters
+            .filter((c: any) => c.id && !c.id.startsWith('temp-'))
+            .map((c: any) => c.id);
           
           // Delete chapters that are no longer in the incoming data
           const chaptersToDelete = existingChapterIds.filter(id => !incomingChapterIds.includes(id));
@@ -273,6 +272,8 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
           }
           
           // Process each chapter (create or update)
+          const chapterIdMap = new Map<string, string>(); // Map temp IDs to real IDs
+          
           for (const chapter of body.chapters) {
             const chapterData = {
               title: chapter.title || 'Untitled Chapter',
@@ -281,20 +282,22 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
               courseId
             };
             
-            if (chapter.id && existingChapterIds.includes(chapter.id)) {
+            if (chapter.id && !chapter.id.startsWith('temp-') && existingChapterIds.includes(chapter.id)) {
               // Update existing chapter
               await tx.chapter.update({
                 where: { id: chapter.id },
                 data: chapterData
               });
+              chapterIdMap.set(chapter.id, chapter.id);
             } else {
-              // Create new chapter
-              await tx.chapter.create({
-                data: {
-                  ...chapterData,
-                  id: chapter.id || undefined // Use provided ID if available
-                }
+              // Create new chapter - don't pass temp IDs
+              const newChapter = await tx.chapter.create({
+                data: chapterData
               });
+              // Map the temp ID to the real ID if it was a temp chapter
+              if (chapter.id && chapter.id.startsWith('temp-')) {
+                chapterIdMap.set(chapter.id, newChapter.id);
+              }
             }
           }
         }
@@ -309,7 +312,9 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
           });
           
           const existingLessonIds = existingLessons.map(l => l.id);
-          const incomingLessonIds = body.lessons.filter((l: any) => l.id).map((l: any) => l.id);
+          const incomingLessonIds = body.lessons
+            .filter((l: any) => l.id && !l.id.startsWith('temp-'))
+            .map((l: any) => l.id);
           
           // Delete lessons that are no longer in the incoming data
           const lessonsToDelete = existingLessonIds.filter(id => !incomingLessonIds.includes(id));
@@ -321,29 +326,33 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
           
           // Process each lesson (create or update)
           for (const lesson of body.lessons) {
+            // Map temp chapter IDs to real chapter IDs
+            let realChapterId = lesson.chapterId;
+            if (lesson.chapterId && lesson.chapterId.startsWith('temp-')) {
+              realChapterId = chapterIdMap.get(lesson.chapterId) || null;
+            }
+            
             const lessonData = {
               title: lesson.title || 'Untitled Lesson',
               content: lesson.content || '',
               videoUrl: lesson.videoUrl || '',
               order: lesson.order || 1,
               courseId,
-              chapterId: lesson.chapterId || null,
+              chapterId: realChapterId,
+              duration: lesson.duration || null,
               resourcesData: lesson.resources ? JSON.stringify(lesson.resources) : null
             };
             
-            if (lesson.id && existingLessonIds.includes(lesson.id)) {
+            if (lesson.id && !lesson.id.startsWith('temp-') && existingLessonIds.includes(lesson.id)) {
               // Update existing lesson
               await tx.lesson.update({
                 where: { id: lesson.id },
                 data: lessonData
               });
             } else {
-              // Create new lesson
+              // Create new lesson - don't pass temp IDs
               await tx.lesson.create({
-                data: {
-                  ...lessonData,
-                  id: lesson.id || undefined // Use provided ID if available
-                }
+                data: lessonData
               });
             }
           }

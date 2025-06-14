@@ -11,7 +11,9 @@ import {
 import { Lesson } from '@/shared/types/lessons/lesson';
 import { useCoursesQuery } from '@/client/hooks/courses';
 import { useLessonsQuery } from '@/client/hooks/lessons';
-import { LoadingState } from '@/client/components/common';
+import { useAutoSave } from '@/client/hooks/common';
+import { LoadingState, AutoSaveIndicator } from '@/client/components/common';
+import toast from 'react-hot-toast';
 
 interface LessonEditFormProps {
   lesson: Lesson;
@@ -30,22 +32,50 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
 }) => {
   const router = useRouter();
   const { useGetCourses } = useCoursesQuery(true);
-  const { useUpdateLesson, useCreateLesson } = useLessonsQuery();
+  const { useUpdateLesson, useUpdateLessonSilent } = useLessonsQuery();
   
-  const [formData, setFormData] = useState({
+  
+  // Initialize form data from lesson prop
+  const initialFormData = {
     title: lesson?.title || '',
     courseId: lesson?.courseId || '',
     chapterId: lesson?.chapterId || '',
     chapterName: 'Chapter 2: Components', // Mock data
     videoUrl: lesson?.videoUrl || '',
-    duration: lesson?.duration || 0,
+    duration: parseInt(lesson?.duration || '0') || 0,
     order: lesson?.order || 1,
-    status: lesson?.status || 'Draft',
     content: lesson?.content || ''
-  });
+  };
+  
+  const [formData, setFormData] = useState(initialFormData);
+  
+  // Update form data when lesson prop changes
+  React.useEffect(() => {
+    if (lesson) {
+      const newFormData = {
+        title: lesson.title || '',
+        courseId: lesson.courseId || '',
+        chapterId: lesson.chapterId || '',
+        chapterName: 'Chapter 2: Components', // Mock data
+        videoUrl: lesson.videoUrl || '',
+        duration: parseInt(lesson.duration || '0') || 0,
+        order: lesson.order || 1,
+        content: lesson.content || ''
+      };
+      setFormData(newFormData);
+      
+      // Set last saved time if lesson has updatedAt
+      if (lesson.updatedAt) {
+        setLastSaved(new Date(lesson.updatedAt));
+      }
+    }
+  }, [lesson]);
 
   const [isPublishing, setIsPublishing] = useState(false);
   const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const lessonId = lesson?.id || '';
 
   // Get courses data
   const { data: coursesData, isLoading: coursesLoading } = useGetCourses();
@@ -75,7 +105,49 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
   }, [selectedCourse, formData.chapterId]);
 
   const updateMutation = useUpdateLesson();
-  const createMutation = useCreateLesson();
+  const updateLessonSilentMutation = useUpdateLessonSilent();
+
+  // Auto-save configuration
+  const { triggerSave, isSaving, lastSaved: autoSaveLastSaved, error: autoSaveError } = useAutoSave({
+    onSave: async (data) => {
+      // Only send fields that are in the lesson schema
+      const dataToSave = {
+        title: data.title,
+        content: data.content,
+        videoUrl: data.videoUrl && data.videoUrl.trim() !== '' ? data.videoUrl : null,
+        order: parseInt(data.order.toString()) || 1,
+        courseId: data.courseId,
+        chapterId: data.chapterId || null,
+        duration: data.duration ? data.duration.toString() : null
+      };
+
+      if (isNew || !lessonId) {
+        // Lessons can only be created through course curriculum
+        console.error('Cannot create lesson through this form');
+        return;
+      }
+      
+      await updateLessonSilentMutation.mutateAsync({
+        id: lessonId,
+        data: dataToSave
+      });
+      
+      setHasChanges(false);
+      setLastSaved(new Date());
+    },
+    delay: 2000, // 2 seconds
+    enabled: hasChanges && !!lessonId && !isNew,
+    onError: (error) => {
+      console.error('Auto-save failed:', error);
+    }
+  });
+
+  // Trigger auto-save when form data changes
+  React.useEffect(() => {
+    if (hasChanges) {
+      triggerSave(formData);
+    }
+  }, [formData, hasChanges, triggerSave]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -85,25 +157,33 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
       ...prev,
       [name]: value
     }));
+    setHasChanges(true);
   };
 
   const handleSaveDraft = async () => {
     try {
+      // Only send fields that are in the lesson schema
       const dataToSave = {
-        ...formData,
-        status: 'Draft' as const,
-        duration: parseInt(formData.duration.toString()),
-        order: parseInt(formData.order.toString())
+        title: formData.title,
+        content: formData.content,
+        videoUrl: formData.videoUrl && formData.videoUrl.trim() !== '' ? formData.videoUrl : null,
+        order: parseInt(formData.order.toString()),
+        courseId: formData.courseId,
+        chapterId: formData.chapterId || null,
+        duration: formData.duration ? formData.duration.toString() : null
       };
 
       if (isNew) {
-        await createMutation.mutateAsync(dataToSave);
-      } else {
-        await updateMutation.mutateAsync({
-          id: lesson.id,
-          data: dataToSave
-        });
+        // Lessons can only be created through course curriculum
+        toast.error('Lessons must be created through course curriculum');
+        router.push('/admin/courses');
+        return;
       }
+      
+      await updateMutation.mutateAsync({
+        id: lesson.id,
+        data: dataToSave
+      });
       
       router.push('/admin/lessons');
     } catch (error) {
@@ -114,21 +194,28 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
   const handlePublish = async () => {
     setIsPublishing(true);
     try {
+      // Only send fields that are in the lesson schema
       const dataToSave = {
-        ...formData,
-        status: 'Published' as const,
-        duration: parseInt(formData.duration.toString()),
-        order: parseInt(formData.order.toString())
+        title: formData.title,
+        content: formData.content,
+        videoUrl: formData.videoUrl && formData.videoUrl.trim() !== '' ? formData.videoUrl : null,
+        order: parseInt(formData.order.toString()),
+        courseId: formData.courseId,
+        chapterId: formData.chapterId || null,
+        duration: formData.duration ? formData.duration.toString() : null
       };
 
       if (isNew) {
-        await createMutation.mutateAsync(dataToSave);
-      } else {
-        await updateMutation.mutateAsync({
-          id: lesson.id,
-          data: dataToSave
-        });
+        // Lessons can only be created through course curriculum
+        toast.error('Lessons must be created through course curriculum');
+        router.push('/admin/courses');
+        return;
       }
+      
+      await updateMutation.mutateAsync({
+        id: lesson.id,
+        data: dataToSave
+      });
       
       router.push('/admin/lessons');
     } catch (error) {
@@ -138,7 +225,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
     }
   };
 
-  const isLoading = updateMutation.isPending || createMutation.isPending;
+  const isLoading = updateMutation.isPending;
 
   if (coursesLoading) {
     return <LoadingState variant="section" message="Loading form data..." />;
@@ -153,23 +240,21 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
             {isNew ? 'Create New Lesson' : 'Edit Lesson'}
           </h1>
           <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-            formData.status === 'Published'
+            (formData.content && formData.content.length > 10) || 
+            (formData.videoUrl && formData.videoUrl.trim() !== '' && !formData.videoUrl.includes('placeholder'))
               ? 'bg-green-100 text-green-800'
               : 'bg-yellow-100 text-yellow-800'
           }`}>
-            {formData.status}
+            {(formData.content && formData.content.length > 10) || 
+             (formData.videoUrl && formData.videoUrl.trim() !== '' && !formData.videoUrl.includes('placeholder'))
+              ? 'Published' : 'Draft'}
           </span>
-          {!isNew && lesson?.updatedAt && (
-            <span className="text-sm text-gray-500">
-              Last saved: {new Date(lesson.updatedAt).toLocaleString('en-GB', {
-                day: '2-digit',
-                month: '2-digit', 
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-              })}
-            </span>
+          {!isNew && (
+            <AutoSaveIndicator 
+              isSaving={isSaving} 
+              lastSaved={autoSaveLastSaved || lastSaved} 
+              error={autoSaveError} 
+            />
           )}
         </div>
         
@@ -226,8 +311,9 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
                   name="courseId"
                   value={formData.courseId}
                   onChange={handleInputChange}
-                  className="appearance-none block w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-0 focus:border-[var(--color-primary)] text-sm cursor-pointer"
+                  className="appearance-none block w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-0 focus:border-[var(--color-primary)] text-sm cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
                   required
+                  disabled={!isNew} // Disable course selection when editing existing lesson
                 >
                   <option value="">Select course</option>
                   {courses.map((course: any) => (
@@ -255,8 +341,8 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
                   name="chapterId"
                   value={formData.chapterId}
                   onChange={handleInputChange}
-                  className="appearance-none block w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-0 focus:border-[var(--color-primary)] text-sm cursor-pointer"
-                  disabled={!formData.courseId}
+                  className="appearance-none block w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-0 focus:border-[var(--color-primary)] text-sm cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled={!formData.courseId || !isNew}
                 >
                   <option value="">
                     {!formData.courseId 
@@ -302,6 +388,9 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
             <div>
               <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-2">
                 Duration
+                <span className="text-xs text-gray-500 ml-2">
+                  (Estimated time to complete lesson)
+                </span>
               </label>
               <div className="relative">
                 <input
@@ -313,6 +402,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
                   className="block w-full px-3 py-2.5 pr-16 border border-gray-300 rounded-lg focus:ring-0 focus:border-[var(--color-primary)] text-sm"
                   placeholder="0"
                   min="0"
+                  title="Enter the estimated time in minutes that students will need to complete this lesson"
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                   <span className="text-sm text-gray-500">minutes</span>
@@ -324,7 +414,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
               <label htmlFor="order" className="block text-sm font-medium text-gray-700 mb-2">
                 Order
                 <span className="text-xs text-gray-500 ml-2">
-                  (Sequence in learning path)
+                  (Position in chapter/course sequence)
                 </span>
               </label>
               <input
@@ -336,34 +426,10 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
                 className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-0 focus:border-[var(--color-primary)] text-sm"
                 placeholder="1"
                 min="1"
-                title="Determines the sequence of this lesson within the chapter or course"
+                title="Determines the display order of this lesson within its chapter or course. Lower numbers appear first (e.g., 1 = first lesson, 2 = second lesson)"
               />
             </div>
 
-            <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
-                Status
-                <span className="text-xs text-gray-500 ml-2">
-                  (Controls visibility to students)
-                </span>
-              </label>
-              <div className="relative">
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="appearance-none block w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-0 focus:border-[var(--color-primary)] text-sm cursor-pointer"
-                  title="Draft: Only visible to admins | Published: Visible to enrolled students"
-                >
-                  <option value="Draft">Draft</option>
-                  <option value="Published">Published</option>
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <ChevronDownIcon className="h-5 w-5 text-gray-400" />
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Lesson Content */}

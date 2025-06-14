@@ -155,3 +155,31 @@ class FAQService {
 }
 
 export const faqService = new FAQService();
+
+/**
+ * Bulk delete FAQs
+ * @param faqIds Array of FAQ IDs to delete
+ * @returns Object with deleted and failed arrays
+ */
+export async function bulkDeleteFAQs(faqIds: string[]): Promise<{
+  deleted: string[];
+  failed: { id: string; error: string }[];
+}> {
+  const deleted: string[] = [];
+  const failed: { id: string; error: string }[] = [];
+
+  for (const faqId of faqIds) {
+    try {
+      await faqService.deleteFAQ(faqId);
+      deleted.push(faqId);
+    } catch (error: unknown) {
+      console.error(`Failed to delete FAQ ${faqId}:`, error);
+      failed.push({
+        id: faqId,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  return { deleted, failed };
+}

@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { CourseFormTabs, DraftStatusBadge, CurriculumTab, BasicInfoTab } from '@/client/components/admin/courses';
-import { LoadingState } from '@/client/components/common';
+import { LoadingState, AutoSaveIndicator } from '@/client/components/common';
 import { useCoursesQuery } from '@/client/hooks/courses';
+import { useAutoSave } from '@/client/hooks/common';
 import { Chapter, CourseStatus } from '@/shared/types/courses/course';
 
 interface FormValues {
@@ -22,15 +23,17 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   const router = useRouter();
   
   // Use React Query hooks
-  const { useGetCourse, useUpdateCourse, useUpdateCurriculum } = useCoursesQuery(true); // isAdmin = true
+  const { useGetCourse, useUpdateCourse, useUpdateCourseSilent, useUpdateCurriculum } = useCoursesQuery(true); // isAdmin = true
   const { data: courseData, isLoading, error } = useGetCourse(params.courseId);
   const updateCourseMutation = useUpdateCourse();
+  const updateCourseSilentMutation = useUpdateCourseSilent();
   const updateCurriculumMutation = useUpdateCurriculum();
   
   const [activeTab, setActiveTab] = useState('basicInfo');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [lessons, setLessons] = useState<any[]>([]);
+  const [hasChanges, setHasChanges] = useState(false);
   
   // Form values
   const [values, setValues] = useState<FormValues>({
@@ -41,6 +44,40 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
     topics: [],
     imageUrl: ''
   });
+  
+  // Auto-save configuration
+  const { triggerSave, isSaving, lastSaved: autoSaveLastSaved, error: autoSaveError } = useAutoSave({
+    onSave: async (data) => {
+      const formData = {
+        title: data.title || 'Untitled Course',
+        description: data.description || '',
+        price: parseFloat(data.price) || 0,
+        level: data.level,
+        topics: data.topics,
+        imageUrl: data.imageUrl || ''
+      };
+      
+      await updateCourseSilentMutation.mutateAsync({
+        id: params.courseId,
+        data: formData
+      });
+      
+      setHasChanges(false);
+    },
+    delay: 2000, // 2 seconds
+    enabled: hasChanges,
+    onError: (error) => {
+      console.error('Auto-save failed:', error);
+      toast.error('Failed to auto-save changes');
+    }
+  });
+  
+  // Trigger auto-save when form values change
+  useEffect(() => {
+    if (hasChanges) {
+      triggerSave(values);
+    }
+  }, [values, hasChanges, triggerSave]);
   
   // Fix for cursor flickering only
   useEffect(() => {
@@ -92,11 +129,13 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setValues({ ...values, [name]: value });
+    setHasChanges(true);
   };
   
   // Handle image upload
   const handleImageUpload = (url: string) => {
     setValues(prev => ({ ...prev, imageUrl: url }));
+    setHasChanges(true);
   };
   
   // Handle tab change
@@ -125,7 +164,6 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
       // Refresh course data to get updated chapters with real IDs
       // This will update the local state with actual data from the server
     } catch (error: any) {
-      console.error('Error saving curriculum:', error);
       // Error handling is done by the mutation meta
     }
   };
@@ -150,8 +188,9 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
       });
       
       setLastSaved(new Date());
+      
+      // Remove manual toast - QueryProvider will handle it via mutation meta
     } catch (error: any) {
-      console.error('Error updating course:', error);
       // Error is handled by the mutation meta in useCoursesQuery
     }
   };
@@ -202,7 +241,6 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
       
       router.push('/admin/courses');
     } catch (error: any) {
-      console.error('Error publishing course:', error);
       // Error is handled by the mutation meta in useCoursesQuery
     }
   };
@@ -235,11 +273,11 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
         <div className="flex items-center space-x-3">
           <h1 className="text-2xl font-bold text-gray-900">Edit Course</h1>
           <DraftStatusBadge />
-          {lastSaved && (
-            <span className="text-xs px-2 py-1 bg-gray-100 rounded text-gray-500">
-              Last saved: {`${lastSaved.getDate().toString().padStart(2, '0')}/${(lastSaved.getMonth() + 1).toString().padStart(2, '0')}/${lastSaved.getFullYear()} ${lastSaved.getHours().toString().padStart(2, '0')}:${lastSaved.getMinutes().toString().padStart(2, '0')}`}
-            </span>
-          )}
+          <AutoSaveIndicator 
+            isSaving={isSaving} 
+            lastSaved={autoSaveLastSaved || lastSaved} 
+            error={autoSaveError} 
+          />
         </div>
         
         <div className="flex space-x-4">
