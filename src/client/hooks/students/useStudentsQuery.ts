@@ -142,7 +142,10 @@ export const useStudentsQuery = () => {
       },
       onSuccess: (data) => {
         // Invalidate students list query to refetch
-        queryClient.invalidateQueries({ queryKey: ['students'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['students'],
+          exact: false
+        });
         return data;
       },
       onError: (err: ApiRequestError) => {
@@ -187,7 +190,10 @@ export const useStudentsQuery = () => {
       },
       onSuccess: (data, variables) => {
         // Invalidate both the list and the specific student
-        queryClient.invalidateQueries({ queryKey: ['students'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['students'],
+          exact: false
+        });
         queryClient.invalidateQueries({ queryKey: ['students', variables.id] });
         return data;
       },
@@ -201,6 +207,7 @@ export const useStudentsQuery = () => {
       },
     });
   };
+
 
   /**
    * Delete a student
@@ -219,7 +226,10 @@ export const useStudentsQuery = () => {
       },
       onSuccess: (_, variables) => {
         // Invalidate students list query to refetch
-        queryClient.invalidateQueries({ queryKey: ['students'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['students'],
+          exact: false
+        });
         // Remove the specific student from cache
         queryClient.removeQueries({ queryKey: ['students', variables] });
       },
@@ -263,6 +273,7 @@ export const useStudentsQuery = () => {
 
   return {
     useGetStudents,
+    useGetStudent: useGetStudentById, // Alias for consistency
     useGetStudentById,
     useCreateStudent,
     useUpdateStudent,

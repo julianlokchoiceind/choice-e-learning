@@ -160,7 +160,10 @@ const useCoursesQuery = (isAdmin = false) => {
       },
       onSuccess: () => {
         // Invalidate courses queries to refresh data
-        queryClient.invalidateQueries({ queryKey: ['courses'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['courses'],
+          exact: false
+        });
       },
       // Use meta for toast notifications
       meta: {
@@ -198,7 +201,10 @@ const useCoursesQuery = (isAdmin = false) => {
       onSuccess: (_, variables) => {
         // Invalidate specific course query and courses list
         queryClient.invalidateQueries({ queryKey: ['course', variables.id] });
-        queryClient.invalidateQueries({ queryKey: ['courses'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['courses'],
+          exact: false
+        });
       },
       // Use meta for toast notifications
       meta: {
@@ -208,39 +214,6 @@ const useCoursesQuery = (isAdmin = false) => {
     });
   };
 
-  /**
-   * Update a course silently (for autosave - no toast notifications)
-   */
-  const useUpdateCourseSilent = () => {
-    if (!isAdmin) {
-      throw new Error('Unauthorized: Admin access required to update courses');
-    }
-    
-    return useMutation({
-      mutationFn: async ({ id, data }: { id: string; data: Partial<Course> }) => {
-        try {
-          const response = await apiRequest.put<{data: Course}>(`${baseUrl}/${id}`, data);
-          
-          // Kiểm tra response null/undefined
-          if (!response) {
-            throw new Error('Failed to update course: No response');
-          }
-          
-          return response.data.data;
-        } catch (error: unknown) {
-          console.error('Error updating course:', error);
-          const apiError = error as ApiRequestError;
-          throw new Error(apiError?.message || 'Failed to update course');
-        }
-      },
-      onSuccess: (_, variables) => {
-        // Invalidate specific course query and courses list
-        queryClient.invalidateQueries({ queryKey: ['course', variables.id] });
-        queryClient.invalidateQueries({ queryKey: ['courses'] });
-      },
-      // No toast meta for silent updates - autosave shouldn't show notifications
-    });
-  };
 
   /**
    * Delete a course (admin only)
@@ -269,7 +242,10 @@ const useCoursesQuery = (isAdmin = false) => {
       },
       onSuccess: () => {
         // Invalidate courses queries to refresh data
-        queryClient.invalidateQueries({ queryKey: ['courses'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['courses'],
+          exact: false
+        });
       },
       // Use meta for toast notifications
       meta: {
@@ -328,7 +304,10 @@ const useCoursesQuery = (isAdmin = false) => {
       },
       onSuccess: (_, courseId) => {
         // Invalidate relevant queries
-        queryClient.invalidateQueries({ queryKey: ['courses'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['courses'],
+          exact: false
+        });
         queryClient.invalidateQueries({ queryKey: ['course', courseId] });
         queryClient.invalidateQueries({ queryKey: ['enrolledCourses'] });
         queryClient.invalidateQueries({ queryKey: ['userProgress'] });
@@ -367,7 +346,10 @@ const useCoursesQuery = (isAdmin = false) => {
       },
       onSuccess: () => {
         // Invalidate courses queries to refresh data
-        queryClient.invalidateQueries({ queryKey: ['courses'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['courses'],
+          exact: false
+        });
       },
       // Use meta for toast notifications
       meta: {
@@ -418,7 +400,10 @@ const useCoursesQuery = (isAdmin = false) => {
       onSuccess: (_, variables) => {
         // Invalidate specific course query and courses list
         queryClient.invalidateQueries({ queryKey: ['course', variables.courseId] });
-        queryClient.invalidateQueries({ queryKey: ['courses'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['courses'],
+          exact: false
+        });
         // IMPORTANT: Also invalidate lessons queries to ensure All Lessons page updates
         queryClient.invalidateQueries({ queryKey: ['lessons'] });
         // Invalidate lessons for the specific course as well
@@ -436,7 +421,6 @@ const useCoursesQuery = (isAdmin = false) => {
     useGetCourse,
     useCreateCourse,
     useUpdateCourse,
-    useUpdateCourseSilent,
     useDeleteCourse,
     useBulkDeleteCourses,
     useGetCourseTopics,

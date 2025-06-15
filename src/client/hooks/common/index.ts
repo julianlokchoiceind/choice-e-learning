@@ -17,4 +17,6 @@ export { default as useQueryOptimizer } from './useQueryOptimizer';
 
 // Bulk operation hooks
 export * from './useSelection';
-export * from './useAutoSave'; 
+
+// Navigation hooks
+export * from './useNavigationGuard'; 

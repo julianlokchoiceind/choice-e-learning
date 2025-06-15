@@ -1,39 +1,69 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { LessonEditForm } from '@/client/components/admin/lessons/LessonEditForm';
+import { GuardedFormPage } from '@/client/components/admin';
+import { LessonEditForm } from '@/client/components/admin/lessons';
 import { useLessonsQuery } from '@/client/hooks/lessons';
-import { LoadingState } from '@/client/components/common';
+import { useState } from 'react';
 
 export default function EditLessonPage() {
   const params = useParams();
   const lessonId = params.lessonId as string;
-  const { useGetLesson } = useLessonsQuery();
+  const [currentFormData, setCurrentFormData] = useState<any>(null);
   
+  const { useGetLesson, useUpdateLesson } = useLessonsQuery();
   const { data: lesson, isLoading, error } = useGetLesson(lessonId);
+  const updateLesson = useUpdateLesson();
   
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <LoadingState variant="page" message="Loading lesson..." />
-      </div>
-    );
-  }
-  
-  if (error || !lesson) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Lesson Not Found</h2>
-          <p className="mt-2 text-gray-600">The lesson you're looking for doesn't exist.</p>
-        </div>
-      </div>
-    );
-  }
-  
+  const handleSave = async () => {
+    if (!lesson) return;
+    
+    // Extract only the fields that can be updated
+    const dataToSave = currentFormData ? {
+      title: currentFormData.title,
+      content: currentFormData.content,
+      videoUrl: currentFormData.videoUrl && currentFormData.videoUrl.trim() !== '' ? currentFormData.videoUrl : null,
+      duration: currentFormData.duration?.toString() || null,
+      order: parseInt(currentFormData.order?.toString() || '1')
+    } : {
+      title: lesson.title,
+      content: lesson.content,
+      videoUrl: lesson.videoUrl,
+      duration: lesson.duration?.toString(),
+      order: lesson.order
+    };
+    
+    await updateLesson.mutateAsync({
+      id: lessonId,
+      data: dataToSave
+    });
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <LessonEditForm lesson={lesson} />
-    </div>
+    <GuardedFormPage
+      backHref="/admin/lessons"
+      backText="Back to Lessons"
+      title="Edit Lesson"
+      status={lesson?.status || 'draft'}
+      isLoading={isLoading}
+      error={error}
+      notFoundTitle="Lesson Not Found"
+      notFoundMessage="The lesson you're looking for doesn't exist or has been deleted."
+      data={lesson}
+      onFormChange={(data, isDirty) => {
+        setCurrentFormData(data);
+      }}
+      onSave={handleSave}
+      isSaving={updateLesson.isPending}
+    >
+      {(handleFormChange: any) => 
+        lesson ? (
+          <LessonEditForm 
+            lesson={lesson} 
+            onFormChange={handleFormChange}
+          />
+        ) : null
+      }
+    </GuardedFormPage>
   );
 }

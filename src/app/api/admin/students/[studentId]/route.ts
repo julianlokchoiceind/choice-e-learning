@@ -15,6 +15,7 @@ const updateStudentSchema = z.object({
   city: z.string().optional(),
   grade: z.string().optional(),
   imageUrl: z.string().optional(),
+  isActive: z.boolean().optional(),
 });
 
 // GET - Retrieve a specific student by ID

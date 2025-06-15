@@ -12,6 +12,7 @@ export interface FormattedStudent {
   city?: string | null;
   grade?: string | null;
   imageUrl?: string | null;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,6 +21,7 @@ export type StudentWithRelations = FormattedStudent;
 
 export interface StudentQuery {
   search?: string;
+  isActive?: boolean;
   page?: number;
   limit?: number;
   sortBy?: string;
@@ -44,6 +46,7 @@ export interface CreateStudentDTO {
   city?: string; 
   grade?: string;
   imageUrl?: string;
+  isActive?: boolean;
 }
 
 export interface UpdateStudentDTO {
@@ -54,4 +57,5 @@ export interface UpdateStudentDTO {
   city?: string;
   grade?: string;
   imageUrl?: string;
+  isActive?: boolean;
 }

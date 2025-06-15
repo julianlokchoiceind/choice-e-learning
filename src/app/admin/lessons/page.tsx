@@ -18,7 +18,8 @@ import {
 import { 
   LoadingState, 
   BulkDeleteButton, 
-  SelectAllCheckbox 
+  SelectAllCheckbox,
+  StatusBadge
 } from '@/client/components/common';
 
 // Helper functions
@@ -93,7 +94,7 @@ export default function LessonsPage() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   
   // Get courses for the filter dropdown
-  const { data: coursesData, refetch: refetchCourses } = useGetCourses();
+  const { data: coursesData } = useGetCourses();
   const courses = coursesData?.data || [];
   
   // Create filter object from state
@@ -404,7 +405,7 @@ export default function LessonsPage() {
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap'>
                         <div className='text-sm text-gray-900'>
-                          {lessonCourse?.title || 
+                          {lesson.course?.title || lessonCourse?.title || 
                            (lesson.courseId ? `Course ID: ${lesson.courseId}` : 'No Course')}
                         </div>
                         {lesson.chapterName && (
@@ -418,9 +419,7 @@ export default function LessonsPage() {
                         {formatDuration(lesson.duration)}
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap'>
-                        <span className={getStatusBadgeClass(lesson.status)}>
-                          {formatStatus(lesson.status)}
-                        </span>
+                        <StatusBadge status={lesson.status?.toLowerCase() as 'draft' | 'published'} size='sm' />
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium'>
                         <div className='flex space-x-2 justify-end'>

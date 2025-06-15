@@ -147,6 +147,48 @@ export const POST = withAdmin(async (req: NextRequest, context: AuthenticatedCon
       );
     }
     
+    // Generate auto title if not provided
+    if (!body.name || body.name.trim() === '') {
+      // Format ngày hiện tại
+      const today = new Date();
+      const dateStr = `${today.getDate().toString().padStart(2, '0')}${
+        (today.getMonth() + 1).toString().padStart(2, '0')}${
+        today.getFullYear()}`;
+      
+      try {
+        // Tìm topics trong ngày
+        const todayTopics = await topicService.getAllTopics({
+          search: `-${dateStr}`,
+          limit: 100
+        });
+        
+        // Filter format chuẩn và tìm số lớn nhất
+        const untitledPattern = new RegExp(`^Untitled-Topic-(\\d+)-${dateStr}$`);
+        let maxSequence = 0;
+        
+        todayTopics.data.forEach((topic: any) => {
+          const match = topic.name.match(untitledPattern);
+          if (match && match[1]) {
+            const sequence = parseInt(match[1]);
+            if (sequence > maxSequence) {
+              maxSequence = sequence;
+            }
+          }
+        });
+        
+        // Tạo tiêu đề mới với format Untitled-Topic-{number}-{date}
+        body.name = `Untitled-Topic-${maxSequence + 1}-${dateStr}`;
+        
+        console.log(`Created new topic with name: ${body.name}`);
+        
+      } catch (error) {
+        console.error('Error finding topics:', error);
+        // Fallback với timestamp
+        const timestamp = Date.now();
+        body.name = `Untitled-Topic-1-${dateStr}-${timestamp}`;
+      }
+    }
+    
     // Validate topic data with Zod
     const validation = createTopicSchema.safeParse(body);
     

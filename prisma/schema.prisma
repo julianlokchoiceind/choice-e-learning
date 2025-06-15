@@ -29,6 +29,7 @@ model User {
   avatar    String?  // Avatar URL, can be different from imageUrl
   provider  String?  // Provider cho OAuth (google, microsoft, etc)
   providerId String? // ID từ OAuth provider
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   lastLoginAt DateTime?
@@ -190,6 +191,7 @@ model FAQ {
   question  String
   answer    String
   category  String
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

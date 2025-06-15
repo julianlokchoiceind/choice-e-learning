@@ -18,6 +18,7 @@ import {
 const API = {
   FAQS: '/api/admin/faqs',
   FAQ: (id: string) => `/api/admin/faqs/${id}`,
+  PUBLIC_FAQS: '/api/marketing/faqs',
 };
 
 /**
@@ -49,7 +50,7 @@ export const useFAQsQuery = () => {
   const apiRequest = useApiRequest();
 
   /**
-   * Fetch all FAQs with optional filtering
+   * Fetch all FAQs with optional filtering (Admin)
    * 
    * @param filter - Optional filter parameters for the FAQs query
    * @param options - Additional React Query options
@@ -69,6 +70,9 @@ export const useFAQsQuery = () => {
           if (filter?.category) params.append('category', filter.category);
           if (filter?.page) params.append('page', filter.page.toString());
           if (filter?.limit) params.append('limit', filter.limit.toString());
+          if (filter?.isActive !== undefined) params.append('isActive', filter.isActive.toString());
+          if (filter?.sortBy) params.append('sortBy', filter.sortBy);
+          if (filter?.sortOrder) params.append('sortOrder', filter.sortOrder);
           
           const response = await apiRequest.get(`${API.FAQS}?${params.toString()}`);
           
@@ -79,9 +83,58 @@ export const useFAQsQuery = () => {
           }
           
           // Handle nested structure from apiSuccess: response.data = { success: true, data: { data: [...], meta: {...} } }
-          return response.data.data || { data: [], meta: { total: 0 } };
+          // Check if response.data is the final data structure or needs one more level
+          const responseData = response.data.data || response.data;
+          // Ensure we return the correct structure
+          return responseData;
         } catch (error) {
           console.error('Error fetching FAQs:', error);
+          throw error;
+        }
+      },
+      ...options
+    });
+  };
+
+  /**
+   * Fetch all public FAQs (only active) with optional filtering
+   * 
+   * @param filter - Optional filter parameters for the FAQs query
+   * @param options - Additional React Query options
+   * @returns Query result with FAQs data, loading state, and error
+   */
+  const useGetPublicFAQs = (
+    filter?: FAQFilter,
+    options?: UseQueryOptions<FAQPaginatedResult, Error, FAQPaginatedResult, (string | FAQFilter | undefined)[]>
+  ) => {
+    return useQuery({
+      queryKey: ['public-faqs', filter],
+      queryFn: async (): Promise<FAQPaginatedResult> => {
+        try {
+          // Build query string
+          const params = new URLSearchParams();
+          if (filter?.search) params.append('search', filter.search);
+          if (filter?.category) params.append('category', filter.category);
+          if (filter?.page) params.append('page', filter.page.toString());
+          if (filter?.limit) params.append('limit', filter.limit.toString());
+          if (filter?.sortBy) params.append('sortBy', filter.sortBy);
+          if (filter?.sortOrder) params.append('sortOrder', filter.sortOrder);
+          
+          const response = await apiRequest.get(`${API.PUBLIC_FAQS}?${params.toString()}`);
+          
+          // Kiểm tra response null/undefined
+          if (!response || !response.data) {
+            console.error('Error fetching public FAQs: Empty response');
+            throw new Error('Failed to fetch FAQs: No data returned');
+          }
+          
+          // Handle nested structure from apiSuccess: response.data = { success: true, data: { data: [...], meta: {...} } }
+          // Check if response.data is the final data structure or needs one more level
+          const responseData = response.data.data || response.data;
+          // Ensure we return the correct structure
+          return responseData;
+        } catch (error) {
+          console.error('Error fetching public FAQs:', error);
           throw error;
         }
       },
@@ -116,7 +169,8 @@ export const useFAQsQuery = () => {
             throw new Error('Failed to fetch FAQ: No data returned');
           }
           
-          return response.data;
+          // Handle nested structure from apiSuccess
+          return response.data.data || response.data;
         } catch (error) {
           console.error(`Error fetching FAQ ${id}:`, error);
           throw error;
@@ -139,11 +193,15 @@ export const useFAQsQuery = () => {
         if (!response || !response.data) {
           throw new Error('Failed to create FAQ: No data returned');
         }
-        return response.data;
+        // Handle nested structure from apiSuccess
+        return response.data.data || response.data;
       },
       onSuccess: (data) => {
         // Invalidate FAQs query to refetch the list
-        queryClient.invalidateQueries({ queryKey: ['faqs'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['faqs'],
+          exact: false
+        });
         return data;
       },
       onError: (err: ApiRequestError) => {
@@ -174,7 +232,10 @@ export const useFAQsQuery = () => {
       onSuccess: (data) => {
         // Invalidate specific FAQ query and the FAQs list
         queryClient.invalidateQueries({ queryKey: ['faqs', data.id] });
-        queryClient.invalidateQueries({ queryKey: ['faqs'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['faqs'],
+          exact: false
+        });
         return data;
       },
       onError: (err: ApiRequestError) => {
@@ -186,6 +247,7 @@ export const useFAQsQuery = () => {
       },
     });
   };
+
 
   /**
    * Delete a FAQ
@@ -200,7 +262,10 @@ export const useFAQsQuery = () => {
       onSuccess: (_data, id) => {
         // Remove FAQ from cache and invalidate FAQs list
         queryClient.removeQueries({ queryKey: ['faqs', id] });
-        queryClient.invalidateQueries({ queryKey: ['faqs'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['faqs'],
+          exact: false
+        });
       },
       onError: (err: ApiRequestError) => {
         showErrorToast(err, 'Failed to delete FAQ');
@@ -241,6 +306,7 @@ export const useFAQsQuery = () => {
 
   return {
     useGetFAQs,
+    useGetPublicFAQs,
     useGetFAQ,
     useCreateFAQ,
     useUpdateFAQ,

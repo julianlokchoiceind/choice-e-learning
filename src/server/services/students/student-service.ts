@@ -12,12 +12,14 @@ export type FormattedStudent = {
   city: string | null;
   grade: string | null;
   imageUrl: string | null;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 };
 
 export type StudentQueryParams = {
   search?: string;
+  isActive?: boolean;
   page?: number;
   limit?: number;
   sortBy?: string;
@@ -25,7 +27,7 @@ export type StudentQueryParams = {
 };
 
 export const studentService = {
-  getAllStudents: async ({ search, page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' }: StudentQueryParams) => {
+  getAllStudents: async ({ search, isActive, page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' }: StudentQueryParams) => {
     const skip = (page - 1) * limit;
     
     try {
@@ -46,6 +48,11 @@ export const studentService = {
           { phone: { contains: search, mode: 'insensitive' } },
           { grade: { contains: search, mode: 'insensitive' } },
         ];
+      }
+
+      // Apply isActive filter if provided
+      if (isActive !== undefined) {
+        userWhere.isActive = isActive;
       }
 
       // Count total students
@@ -89,6 +96,7 @@ export const studentService = {
           city: user.city || '-',
           grade: user.grade || '-',
           imageUrl: user.imageUrl || null,
+          isActive: user.isActive ?? true,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt
         };
@@ -143,6 +151,7 @@ export const studentService = {
         city: user.city,
         grade: user.grade,
         imageUrl: user.imageUrl,
+        isActive: user.isActive ?? true,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       };
@@ -162,6 +171,7 @@ export const studentService = {
     imageUrl?: string;
     provider?: string;
     providerId?: string;
+    isActive?: boolean;
   }) => {
     try {
       // Chuẩn bị dữ liệu tạo user
@@ -176,6 +186,7 @@ export const studentService = {
         imageUrl: data.imageUrl,
         provider: data.provider,
         providerId: data.providerId,
+        isActive: data.isActive ?? true,
       };
       
       // Nếu không phải tài khoản OAuth (không có provider), thêm password
@@ -200,6 +211,7 @@ export const studentService = {
         imageUrl: user.imageUrl,
         provider: user.provider,
         providerId: user.providerId,
+        isActive: user.isActive ?? true,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       };
@@ -219,6 +231,7 @@ export const studentService = {
     imageUrl?: string;
     provider?: string;
     providerId?: string;
+    isActive?: boolean;
   }) => {
     try {
       // Check if this is a User with role 'student'
@@ -260,6 +273,7 @@ export const studentService = {
         imageUrl: updatedUser.imageUrl,
         provider: updatedUser.provider,
         providerId: updatedUser.providerId,
+        isActive: updatedUser.isActive ?? true,
         createdAt: updatedUser.createdAt,
         updatedAt: updatedUser.updatedAt
       };

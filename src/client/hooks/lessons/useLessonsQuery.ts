@@ -175,7 +175,10 @@ export const useLessonsQuery = () => {
       onSuccess: (data) => {
         // Invalidate specific lesson query and the lessons list
         queryClient.invalidateQueries({ queryKey: ['lessons', data.id] });
-        queryClient.invalidateQueries({ queryKey: ['lessons'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['lessons'],
+          exact: false
+        });
         // Also invalidate the course-specific lessons list
         if (data.courseId) {
           queryClient.invalidateQueries({ 
@@ -200,45 +203,6 @@ export const useLessonsQuery = () => {
     });
   };
 
-  /**
-   * Update a lesson silently (for autosave - no toast notifications)
-   * 
-   * @returns Mutation function and state for updating a lesson
-   */
-  const useUpdateLessonSilent = () => {
-    // Create a dedicated apiRequest instance for this mutation
-    const updateLessonRequest = useApiRequest<Lesson>();
-    
-    return useMutation({
-      mutationFn: async (params: { id: string; data: Partial<LessonInput> }): Promise<Lesson> => {
-        const { id, data } = params;
-        const response = await updateLessonRequest.put(API.LESSON(id), data);
-        if (!response?.data) throw new Error('Failed to update lesson: No data returned');
-        return response.data;
-      },
-      onSuccess: (data) => {
-        // Invalidate specific lesson query and the lessons list
-        queryClient.invalidateQueries({ queryKey: ['lessons', data.id] });
-        queryClient.invalidateQueries({ queryKey: ['lessons'] });
-        // Also invalidate the course-specific lessons list
-        if (data.courseId) {
-          queryClient.invalidateQueries({ 
-            queryKey: ['lessons', data.courseId] 
-          });
-          // Update the course data too since it might include lesson information
-          queryClient.invalidateQueries({ 
-            queryKey: ['courses', data.courseId] 
-          });
-        }
-        return data;
-      },
-      onError: (err: ApiRequestError) => {
-        console.error('Failed to update lesson:', err);
-        throw err;
-      },
-      // No toast meta for silent updates - autosave shouldn't show notifications
-    });
-  };
 
   /**
    * Delete a lesson
@@ -343,7 +307,10 @@ export const useLessonsQuery = () => {
       onSuccess: (_data, lessonId) => {
         // Invalidate the lesson and user progress
         queryClient.invalidateQueries({ queryKey: ['lessons', lessonId] });
-        queryClient.invalidateQueries({ queryKey: ['userProgress'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['userProgress'],
+          exact: false
+        });
         // Toast handled by QueryProvider meta
       },
       onError: (err: ApiRequestError) => {
@@ -361,7 +328,6 @@ export const useLessonsQuery = () => {
     useGetLessons,
     useGetLesson,
     useUpdateLesson,
-    useUpdateLessonSilent,
     useDeleteLesson,
     useBulkDeleteLessons,
     useMarkLessonComplete

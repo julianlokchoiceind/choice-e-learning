@@ -46,7 +46,7 @@ const useTopicsQuery = () => {
             throw new Error('Failed to fetch topics: No data returned');
           }
           
-          return response.data.data || [];
+          return response.data;
         } catch (error) {
           console.error('Error fetching topics:', error);
           const err = error as ApiRequestError;
@@ -74,6 +74,7 @@ const useTopicsQuery = () => {
             throw new Error('Failed to fetch topic: No data returned');
           }
           
+          // The API returns the data directly in response.data.data
           return response.data.data;
         } catch (error) {
           console.error(`Error fetching topic ${topicId}:`, error);
@@ -109,7 +110,10 @@ const useTopicsQuery = () => {
       },
       onSuccess: () => {
         // Invalidate topics queries to refresh data
-        queryClient.invalidateQueries({ queryKey: ['topics'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['topics'],
+          exact: false
+        });
       },
       // Use meta for toast notifications
       meta: {
@@ -126,7 +130,7 @@ const useTopicsQuery = () => {
     return useMutation({
       mutationFn: async ({ id, data }: { id: string; data: Partial<Topic> }) => {
         try {
-          const response = await apiRequest.put(`${baseUrl}/${id}`, data);
+          const response = await apiRequest.patch(`${baseUrl}/${id}`, data);
           
           // Kiểm tra response null/undefined
           if (!response || !response.data) {
@@ -144,7 +148,10 @@ const useTopicsQuery = () => {
       onSuccess: (_, variables) => {
         // Invalidate specific topic query and topics list
         queryClient.invalidateQueries({ queryKey: ['topic', variables.id] });
-        queryClient.invalidateQueries({ queryKey: ['topics'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['topics'],
+          exact: false
+        });
       },
       // Use meta for toast notifications
       meta: {
@@ -153,6 +160,7 @@ const useTopicsQuery = () => {
       }
     });
   };
+
 
   /**
    * Delete a topic
@@ -177,7 +185,10 @@ const useTopicsQuery = () => {
       },
       onSuccess: () => {
         // Invalidate topics queries to refresh data
-        queryClient.invalidateQueries({ queryKey: ['topics'] });
+        queryClient.invalidateQueries({ 
+          queryKey: ['topics'],
+          exact: false
+        });
       },
       // Use meta for toast notifications
       meta: {

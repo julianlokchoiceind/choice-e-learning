@@ -248,6 +248,9 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
     if ((body.chapters && Array.isArray(body.chapters)) || (body.lessons && Array.isArray(body.lessons))) {
       // Use transaction to ensure data consistency
       await prisma.$transaction(async (tx) => {
+        // Initialize chapterIdMap outside of chapters block so it's available for lessons
+        const chapterIdMap = new Map<string, string>(); // Map temp IDs to real IDs
+        
         // Handle chapters first
         if (body.chapters && Array.isArray(body.chapters)) {
           console.log(`Processing ${body.chapters.length} chapters for update`);
@@ -272,7 +275,6 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
           }
           
           // Process each chapter (create or update)
-          const chapterIdMap = new Map<string, string>(); // Map temp IDs to real IDs
           
           for (const chapter of body.chapters) {
             const chapterData = {

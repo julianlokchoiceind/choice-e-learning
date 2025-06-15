@@ -123,7 +123,7 @@ export const POST = withAdmin(async (req: Request, context) => {
         });
         
         // Filter format chuẩn và tìm số lớn nhất
-        const untitledPattern = new RegExp(`^Untitled-(\\d+)-${dateStr}$`);
+        const untitledPattern = new RegExp(`^Untitled-Course-(\\d+)-${dateStr}$`);
         let maxSequence = 0;
         
         todayDrafts.forEach(draft => {
@@ -136,8 +136,8 @@ export const POST = withAdmin(async (req: Request, context) => {
           }
         });
         
-        // Tạo tiêu đề mới
-        body.title = `Untitled-${maxSequence + 1}-${dateStr}`;
+        // Tạo tiêu đề mới với format Untitled-Course-{number}-{date}
+        body.title = `Untitled-Course-${maxSequence + 1}-${dateStr}`;
         
         console.log(`Created new draft course with title: ${body.title}`);
         
@@ -145,7 +145,7 @@ export const POST = withAdmin(async (req: Request, context) => {
         console.error('Error finding draft courses:', error);
         // Fallback với timestamp
         const timestamp = Date.now();
-        body.title = `Untitled-1-${dateStr}-${timestamp}`;
+        body.title = `Untitled-Course-1-${dateStr}-${timestamp}`;
       }
     }
     

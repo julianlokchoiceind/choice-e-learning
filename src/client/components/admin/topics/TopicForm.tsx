@@ -1,30 +1,37 @@
 import { useState, useEffect } from 'react';
 import { ExclamationCircleIcon } from '@heroicons/react/24/outline';
+import { isFormDirty } from '@/client/utils/form-utils';
 
 interface TopicFormProps {
+  topic?: any;
   topicId?: string;
   initialData?: {
     name: string;
     description: string;
     isActive: boolean;
   };
-  onSubmit: (data) => Promise<void>;
+  onSubmit?: (data) => Promise<void>;
   isLoading?: boolean;
   courseCount?: number;
+  onFormChange?: (data: any, isDirty?: boolean) => void;
 }
 
 export const TopicForm = ({
+  topic,
   topicId,
   initialData,
   onSubmit,
   isLoading = false,
-  courseCount = 0
+  courseCount = 0,
+  onFormChange
 }: TopicFormProps) => {
   const [formData, setFormData] = useState({
-    name: initialData?.name || '',
-    description: initialData?.description || '',
-    isActive: initialData?.isActive ?? true
+    name: topic?.name || initialData?.name || '',
+    description: topic?.description || initialData?.description || '',
+    isActive: topic?.isActive ?? initialData?.isActive ?? true
   });
+  
+  const [initialFormData, setInitialFormData] = useState(formData);
   
   const [formErrors, setFormErrors] = useState<{
     name?: string;
@@ -33,26 +40,41 @@ export const TopicForm = ({
   
   const [serverError, setServerError] = useState<string | null>(null);
   
-  // Update form data when initialData changes
+  // Update form data only on initial load
   useEffect(() => {
-    if (initialData) {
-      setFormData({
-        name: initialData.name || '',
-        description: initialData.description || '',
-        isActive: initialData.isActive ?? true
-      });
-    }
-  }, [initialData]);
+    const newFormData = topic ? {
+      name: topic.name || '',
+      description: topic.description || '',
+      isActive: topic.isActive ?? true
+    } : initialData ? {
+      name: initialData.name || '',
+      description: initialData.description || '',
+      isActive: initialData.isActive ?? true
+    } : formData;
+    
+    setFormData(newFormData);
+    setInitialFormData(newFormData);
+  }, [topic?.id, initialData]); // Only depend on ID to avoid re-runs
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     
-    setFormData(prev => ({
-      ...prev,
+    const newFormData = {
+      ...formData,
       [name]: type === 'checkbox' 
         ? (e.target as HTMLInputElement).checked 
         : value
-    }));
+    };
+    
+    setFormData(newFormData);
+    
+    // Check if form is dirty with smart detection
+    const isDirty = isFormDirty(newFormData, initialFormData);
+    
+    // Notify parent of changes
+    if (onFormChange) {
+      onFormChange(newFormData, isDirty);
+    }
     
     // Clear error for this field when user types
     if (formErrors[name as keyof typeof formErrors]) {
@@ -179,9 +201,7 @@ export const TopicForm = ({
             id='isActive'
             name='isActive'
             checked={formData.isActive}
-            onChange={(e) => 
-              setFormData(prev => ({ ...prev, isActive: e.target.checked }))
-            }
+            onChange={handleChange}
             className='h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-[var(--color-primary)]'
             disabled={isLoading}
           />
@@ -190,15 +210,17 @@ export const TopicForm = ({
           </label>
         </div>
         
-        <div className='flex justify-end space-x-4 pt-4'>
-          <button
-            type='submit'
-            disabled={isLoading}
-            className='btn-admin-primary'
-          >
-            {isLoading ? (topicId ? 'Saving...' : 'Creating...') : (topicId ? 'Save Changes' : 'Create Topic')}
-          </button>
-        </div>
+        {onSubmit && (
+          <div className='flex justify-end space-x-4 pt-4'>
+            <button
+              type='submit'
+              disabled={isLoading}
+              className='btn-admin-primary'
+            >
+              {isLoading ? (topicId ? 'Saving...' : 'Creating...') : (topicId ? 'Save Changes' : 'Create Topic')}
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );

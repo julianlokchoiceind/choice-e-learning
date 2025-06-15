@@ -17,7 +17,8 @@ import { useStudentsQuery } from '@/client/hooks/students';
 import { 
   LoadingState,
   BulkDeleteButton,
-  SelectAllCheckbox
+  SelectAllCheckbox,
+  StatusBadge
 } from '@/client/components/common';
 import { useSelection } from '@/client/hooks/common';
 import { StudentQuery } from '@/shared/types/students/student';
@@ -36,6 +37,7 @@ export default function StudentList() {
   // Get current page from URL or default to 1
   const currentPage = parseInt(searchParams.get('page') || '1');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showActive, setShowActive] = useState<boolean | undefined>(undefined);
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -52,6 +54,7 @@ export default function StudentList() {
     page: currentPage,
     limit: 10,
     search: searchQuery || undefined,
+    isActive: showActive,
     sortBy,
     sortOrder,
   };
@@ -234,6 +237,22 @@ export default function StudentList() {
       .toUpperCase();
   };
 
+  // Handle status change
+  const handleStatusChange = (status: string) => {
+    let activeStatus: boolean | undefined;
+    
+    if (status === 'active') {
+      activeStatus = true;
+    } else if (status === 'inactive') {
+      activeStatus = false;
+    } else {
+      activeStatus = undefined;
+    }
+    
+    setShowActive(activeStatus);
+    router.push('/admin/students?page=1');
+  };
+
   // Convert sortBy and sortOrder to a single dropdown value
   const getCurrentSort = () => {
     if (sortBy === 'createdAt' && sortOrder === 'desc') return 'newest';
@@ -294,6 +313,16 @@ export default function StudentList() {
             />
           </div>
           <div className='flex items-center space-x-2'>
+            {/* Status dropdown */}
+            <select 
+              value={showActive === undefined ? 'all' : showActive ? 'active' : 'inactive'}
+              onChange={(e) => handleStatusChange(e.target.value)}
+              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:text-sm'
+            >
+              <option value='all'>All Status</option>
+              <option value='active'>Active Only</option>
+              <option value='inactive'>Inactive Only</option>
+            </select>
             {/* Sort dropdown */}
             <select 
               id='sort-filter'
@@ -333,19 +362,20 @@ export default function StudentList() {
                 <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Phone</th>
                 <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>City</th>
                 <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Grade</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Status</th>
                 <th className='py-4 px-6 text-right font-medium text-[var(--color-primary-dark)] uppercase tracking-wider text-sm'>Actions</th>
               </tr>
             </thead>
             <tbody className='bg-white divide-y divide-gray-200'>
               {isLoading || deleteStudentMutation.isPending || bulkDeleteStudents.isPending ? (
                 <tr>
-                  <td colSpan={8} className='text-center py-10'>
+                  <td colSpan={9} className='text-center py-10'>
                     <LoadingState 
                       variant="table" 
                       message={bulkDeleteStudents.isPending ? 'Deleting students...' : deleteStudentMutation.isPending ? 'Deleting student...' : 'Loading students...'} 
-                      columns={8}
+                      columns={9}
                       rows={6}
-                      columnWidths={['5%', '8%', '22%', '18%', '13%', '12%', '10%', '12%']}
+                      columnWidths={['5%', '7%', '18%', '16%', '11%', '10%', '9%', '10%', '14%']}
                     />
                   </td>
                 </tr>
@@ -372,7 +402,9 @@ export default function StudentList() {
                             return (page - 1) * limit + index + 1;
                           } else {
                             // For DESC: reverse continuous numbering 
-                            return totalItems - ((page - 1) * limit + index);
+                            const sttNumber = totalItems - ((page - 1) * limit + index);
+                            // Ensure we don't show negative numbers
+                            return sttNumber > 0 ? sttNumber : index + 1;
                           }
                         })()}
                       </td>
@@ -393,21 +425,24 @@ export default function StudentList() {
                       <td className='py-4 px-6 text-gray-700'>{student.city && student.city !== '-' ? student.city : '-'}</td>
                       <td className='py-4 px-6 text-gray-700'>{student.grade && student.grade !== '-' ? student.grade : '-'}</td>
                       <td className='py-4 px-6'>
+                        <StatusBadge status={student.isActive ? 'active' : 'inactive'} size='sm' />
+                      </td>
+                      <td className='py-4 px-6'>
                         <div className='flex justify-end space-x-2'>
-                          <button
-                            onClick={() => router.push(`/admin/students/${student.id}`)}
-                            className='btn-admin-secondary btn-admin-sm p-1.5'
+                          <Link
+                            href={`/admin/students/${student.id}`}
+                            className='btn-admin-secondary btn-admin-sm p-1.5 inline-block'
                             aria-label='View student details'
                           >
                             <EyeIcon className='h-5 w-5' />
-                          </button>
-                          <button
-                            onClick={() => router.push(`/admin/students/${student.id}/edit`)}
-                            className='text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 rounded-md p-1.5 transition-colors duration-150 admin-button'
+                          </Link>
+                          <Link
+                            href={`/admin/students/${student.id}/edit`}
+                            className='text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 rounded-md p-1.5 transition-colors duration-150 admin-button inline-block'
                             aria-label='Edit student'
                           >
                             <PencilSquareIcon className='h-5 w-5' />
-                          </button>
+                          </Link>
                           
                           {deletingId === student.id ? (
                             <div className='flex items-center space-x-2'>
@@ -440,7 +475,7 @@ export default function StudentList() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={8} className='text-center py-10 text-gray-500'>
+                  <td colSpan={9} className='text-center py-10 text-gray-500'>
                     <p>No students found.</p>
                     <p className='text-sm mt-1'>Try adjusting your search criteria or add a new student.</p>
                   </td>

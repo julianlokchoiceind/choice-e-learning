@@ -11,6 +11,7 @@ const updateFAQSchema = z.object({
   question: z.string().min(1, 'Question is required').optional(),
   answer: z.string().min(1, 'Answer is required').optional(),
   category: z.string().min(1, 'Category is required').optional(),
+  isActive: z.boolean().optional(),
 });
 
 // GET - Retrieve a single FAQ by ID
@@ -39,8 +40,8 @@ export const GET = withAdmin(async (_req, context) => {
   }
 });
 
-// PATCH - Update a FAQ
-export const PATCH = withAdmin(async (req, context) => {
+// PUT - Update a FAQ
+export const PUT = withAdmin(async (req, context) => {
   try {
     const faqId = context.params.faqId;
     
@@ -104,3 +105,6 @@ export const DELETE = withAdmin(async (_req, context) => {
     );
   }
 });
+
+// PATCH - Alias for PUT to support both methods
+export const PATCH = PUT;

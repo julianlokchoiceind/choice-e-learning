@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   HomeIcon,
   AcademicCapIcon,
@@ -222,11 +222,41 @@ export default function AdminSidebar() {
 }
 
 function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false, isOpen = false, onToggle }: MenuItemProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  
   const toggleSubmenu = (e: React.MouseEvent) => {
     if (submenu && onToggle) {
       e.preventDefault();
       onToggle();
     }
+  };
+  
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, targetHref: string) => {
+    e.preventDefault();
+    
+    let eventHandled = false;
+    
+    // Dispatch custom event to check for unsaved changes
+    const checkEvent = new CustomEvent('checkUnsavedChanges', {
+      detail: {
+        callback: (canNavigate: boolean) => {
+          eventHandled = true;
+          if (canNavigate) {
+            router.push(targetHref);
+          }
+        }
+      }
+    });
+    
+    window.dispatchEvent(checkEvent);
+    
+    // If no listener handles the event, proceed with navigation immediately
+    setTimeout(() => {
+      if (!eventHandled) {
+        router.push(targetHref);
+      }
+    }, 100);
   };
 
   return (
@@ -251,6 +281,7 @@ function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false
       ) : (
         <Link
           href={href || '#'}
+          onClick={(e) => handleLinkClick(e, href || '#')}
           className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium sidebar-menu-item ${isFirst ? 'first-menu-item' : ''} ${
             isActive 
               ? 'bg-[var(--color-primary-dark)]/70 text-white' 
@@ -278,6 +309,7 @@ function MenuItem({ icon, text, href, submenu, isActive = false, isFirst = false
                   <Link
                     key={`${text}-${index}`}
                     href={item.href}
+                    onClick={(e) => handleLinkClick(e, item.href)}
                     className='flex items-center px-3 py-2 text-sm text-[var(--color-primary-light)] hover:text-white hover:bg-[var(--color-primary-gradient-start)]/50 rounded-md sidebar-menu-item'
                   >
                     {item.text}

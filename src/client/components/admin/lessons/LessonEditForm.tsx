@@ -11,13 +11,16 @@ import {
 import { Lesson } from '@/shared/types/lessons/lesson';
 import { useCoursesQuery } from '@/client/hooks/courses';
 import { useLessonsQuery } from '@/client/hooks/lessons';
-import { useAutoSave } from '@/client/hooks/common';
-import { LoadingState, AutoSaveIndicator } from '@/client/components/common';
+import { LoadingState } from '@/client/components/common';
+import { isFormDirty } from '@/client/utils/form-utils';
 import toast from 'react-hot-toast';
 
 interface LessonEditFormProps {
   lesson: Lesson;
   isNew?: boolean;
+  onFormChange?: (data: any, isDirty?: boolean) => void;
+  onSubmit?: (data: any) => Promise<void>;
+  isLoading?: boolean;
 }
 
 interface Chapter {
@@ -28,7 +31,10 @@ interface Chapter {
 
 export const LessonEditForm: React.FC<LessonEditFormProps> = ({ 
   lesson, 
-  isNew = false 
+  isNew = false,
+  onFormChange,
+  onSubmit,
+  isLoading: isSubmitting = false
 }) => {
   const router = useRouter();
   const { useGetCourses } = useCoursesQuery(true);
@@ -48,6 +54,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
   };
   
   const [formData, setFormData] = useState(initialFormData);
+  const [initialFormDataRef, setInitialFormDataRef] = useState(initialFormData);
   
   // Update form data when lesson prop changes
   React.useEffect(() => {
@@ -63,19 +70,12 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
         content: lesson.content || ''
       };
       setFormData(newFormData);
-      
-      // Set last saved time if lesson has updatedAt
-      if (lesson.updatedAt) {
-        setLastSaved(new Date(lesson.updatedAt));
-      }
+      setInitialFormDataRef(newFormData);
     }
   }, [lesson]);
 
   const [isPublishing, setIsPublishing] = useState(false);
   const [chapters, setChapters] = useState<Chapter[]>([]);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const lessonId = lesson?.id || '';
 
   // Get courses data
   const { data: coursesData, isLoading: coursesLoading } = useGetCourses();
@@ -105,59 +105,24 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
   }, [selectedCourse, formData.chapterId]);
 
   const updateMutation = useUpdateLesson();
-  const updateLessonSilentMutation = useUpdateLessonSilent();
-
-  // Auto-save configuration
-  const { triggerSave, isSaving, lastSaved: autoSaveLastSaved, error: autoSaveError } = useAutoSave({
-    onSave: async (data) => {
-      // Only send fields that are in the lesson schema
-      const dataToSave = {
-        title: data.title,
-        content: data.content,
-        videoUrl: data.videoUrl && data.videoUrl.trim() !== '' ? data.videoUrl : null,
-        order: parseInt(data.order.toString()) || 1,
-        courseId: data.courseId,
-        chapterId: data.chapterId || null,
-        duration: data.duration ? data.duration.toString() : null
-      };
-
-      if (isNew || !lessonId) {
-        // Lessons can only be created through course curriculum
-        console.error('Cannot create lesson through this form');
-        return;
-      }
-      
-      await updateLessonSilentMutation.mutateAsync({
-        id: lessonId,
-        data: dataToSave
-      });
-      
-      setHasChanges(false);
-      setLastSaved(new Date());
-    },
-    delay: 2000, // 2 seconds
-    enabled: hasChanges && !!lessonId && !isNew,
-    onError: (error) => {
-      console.error('Auto-save failed:', error);
-    }
-  });
-
-  // Trigger auto-save when form data changes
-  React.useEffect(() => {
-    if (hasChanges) {
-      triggerSave(formData);
-    }
-  }, [formData, hasChanges, triggerSave]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
+    const newFormData = {
+      ...formData,
       [name]: value
-    }));
-    setHasChanges(true);
+    };
+    setFormData(newFormData);
+    
+    // Check if form is dirty with smart detection
+    const isDirty = isFormDirty(newFormData, initialFormDataRef);
+    
+    // Notify parent of changes
+    if (onFormChange) {
+      onFormChange(newFormData, isDirty);
+    }
   };
 
   const handleSaveDraft = async () => {
@@ -233,51 +198,28 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header with status and action buttons */}
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center space-x-3">
-          <h1 className="text-2xl font-bold text-gray-900">
-            {isNew ? 'Create New Lesson' : 'Edit Lesson'}
-          </h1>
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-            (formData.content && formData.content.length > 10) || 
-            (formData.videoUrl && formData.videoUrl.trim() !== '' && !formData.videoUrl.includes('placeholder'))
-              ? 'bg-green-100 text-green-800'
-              : 'bg-yellow-100 text-yellow-800'
-          }`}>
-            {(formData.content && formData.content.length > 10) || 
-             (formData.videoUrl && formData.videoUrl.trim() !== '' && !formData.videoUrl.includes('placeholder'))
-              ? 'Published' : 'Draft'}
-          </span>
-          {!isNew && (
-            <AutoSaveIndicator 
-              isSaving={isSaving} 
-              lastSaved={autoSaveLastSaved || lastSaved} 
-              error={autoSaveError} 
-            />
-          )}
-        </div>
-        
-        <div className="flex space-x-4">
+      {/* Action buttons only when onFormChange is not provided */}
+      {!onFormChange && (
+        <div className="flex justify-end space-x-4">
           <button
             type="button"
             onClick={handleSaveDraft}
-            disabled={isLoading}
+            disabled={isLoading || isSubmitting}
             className="btn-admin-secondary-lg"
-          >
-            {isLoading && !isPublishing ? 'Saving...' : 'Update Draft'}
-          </button>
-          
-          <button
-            type="button"
-            onClick={handlePublish}
-            disabled={isLoading}
-            className="btn-admin-primary-lg"
-          >
-            {isPublishing ? 'Publishing...' : 'Publish Lesson'}
-          </button>
-        </div>
-      </div>
+            >
+              {isLoading && !isPublishing ? 'Saving...' : 'Update Draft'}
+            </button>
+            
+            <button
+              type="button"
+              onClick={handlePublish}
+              disabled={isLoading || isSubmitting}
+              className="btn-admin-primary-lg"
+            >
+              {isPublishing ? 'Publishing...' : 'Publish Lesson'}
+            </button>
+          </div>
+        )}
 
       {/* Form Content */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -331,9 +273,6 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
             <div>
               <label htmlFor="chapterId" className="block text-sm font-medium text-gray-700 mb-2">
                 Chapter
-                <span className="text-xs text-gray-500 ml-2">
-                  (Optional - Select a course first)
-                </span>
               </label>
               <div className="relative">
                 <select

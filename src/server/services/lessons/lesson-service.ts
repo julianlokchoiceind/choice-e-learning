@@ -79,7 +79,13 @@ export async function getLessons(options: {
           chapterId: true,
           duration: true,
           createdAt: true,
-          updatedAt: true
+          updatedAt: true,
+          course: {
+            select: {
+              id: true,
+              title: true
+            }
+          }
         }
       });
       
@@ -118,7 +124,13 @@ export async function getLessons(options: {
           chapterId: true,
           duration: true,
           createdAt: true,
-          updatedAt: true
+          updatedAt: true,
+          course: {
+            select: {
+              id: true,
+              title: true
+            }
+          }
         }
       });
       

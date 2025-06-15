@@ -48,9 +48,65 @@ export const GET = withAdmin(async (req: NextRequest) => {
 // POST - Create a new FAQ
 export const POST = withAdmin(async (req: NextRequest) => {
   try {
-    const body = await parseRequest(req, createFAQSchema);
+    // Parse body first to get raw data
+    const rawBody = await req.json();
     
-    const faq = await faqService.createFAQ(body);
+    // Generate auto title if not provided
+    if (!rawBody.question || rawBody.question.trim() === '') {
+      // Format ngày hiện tại
+      const today = new Date();
+      const dateStr = `${today.getDate().toString().padStart(2, '0')}${
+        (today.getMonth() + 1).toString().padStart(2, '0')}${
+        today.getFullYear()}`;
+      
+      try {
+        // Tìm FAQs trong ngày
+        const todayFAQs = await faqService.getAllFAQs({
+          search: `-${dateStr}`,
+          limit: 100
+        });
+        
+        // Filter format chuẩn và tìm số lớn nhất
+        const untitledPattern = new RegExp(`^Untitled-FAQ-(\\d+)-${dateStr}$`);
+        let maxSequence = 0;
+        
+        if (todayFAQs.data && Array.isArray(todayFAQs.data)) {
+          todayFAQs.data.forEach((faq: any) => {
+            const match = faq.question.match(untitledPattern);
+            if (match && match[1]) {
+              const sequence = parseInt(match[1]);
+              if (sequence > maxSequence) {
+                maxSequence = sequence;
+              }
+            }
+          });
+        }
+        
+        // Tạo tiêu đề mới với format Untitled-FAQ-{number}-{date}
+        rawBody.question = `Untitled-FAQ-${maxSequence + 1}-${dateStr}`;
+        
+        console.log(`Created new FAQ with question: ${rawBody.question}`);
+        
+      } catch (error) {
+        console.error('Error finding FAQs:', error);
+        // Fallback với timestamp
+        const timestamp = Date.now();
+        rawBody.question = `Untitled-FAQ-1-${dateStr}-${timestamp}`;
+      }
+    }
+    
+    // Set default values if not provided
+    if (!rawBody.answer || rawBody.answer.trim() === '') {
+      rawBody.answer = 'Answer pending...';
+    }
+    if (!rawBody.category || rawBody.category.trim() === '') {
+      rawBody.category = 'General';
+    }
+    
+    // Now validate with Zod
+    const validatedData = createFAQSchema.parse(rawBody);
+    
+    const faq = await faqService.createFAQ(validatedData);
     
     return apiSuccess(faq, 'FAQ created successfully', undefined, 201);
   } catch (error: unknown) {

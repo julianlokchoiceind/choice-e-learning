@@ -15,7 +15,8 @@ import {
 import { 
   LoadingState,
   BulkDeleteButton,
-  SelectAllCheckbox
+  SelectAllCheckbox,
+  StatusBadge
 } from '@/client/components/common';
 import { useSelection } from '@/client/hooks/common';
 import { TopicFilter, Topic, TopicPagination } from '@/shared/types/topics/topics';
@@ -44,6 +45,8 @@ export default function TopicsPage() {
   const [showActive, setShowActive] = useState<boolean | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   
   // Selection state for bulk operations
   const {
@@ -56,8 +59,8 @@ export default function TopicsPage() {
   const topicFilter: TopicFilter = {
     page: currentPage,
     limit: 10,
-    sortBy: 'name',
-    sortOrder: 'asc',
+    sortBy,
+    sortOrder,
     isActive: showActive,
     search: searchQuery || undefined
   };
@@ -75,14 +78,15 @@ export default function TopicsPage() {
   const bulkDeleteTopics = useBulkDeleteTopics();
   
   // Extract topics and pagination from response
-  // Since our API might return different formats, we need to handle both possibilities
+  // The API returns a structure with data and meta.pagination
   const topics: Topic[] = Array.isArray(data) ? data : (data as any)?.data || [];
+  const paginationData = (data as any)?.meta?.pagination;
   const pagination = {
-    page: currentPage,
-    totalPages: Array.isArray(data) ? 1 : ((data as any)?.meta?.totalPages || 1),
-    totalItems: Array.isArray(data) ? data.length : ((data as any)?.meta?.totalItems || 0),
-    hasNextPage: Array.isArray(data) ? false : ((data as any)?.meta?.hasNextPage || false),
-    hasPreviousPage: Array.isArray(data) ? false : ((data as any)?.meta?.hasPreviousPage || false)
+    page: paginationData?.page || currentPage,
+    totalPages: paginationData?.totalPages || 1,
+    totalItems: paginationData?.totalItems || topics.length,
+    hasNextPage: paginationData?.hasNextPage || false,
+    hasPreviousPage: paginationData?.hasPrevPage || false
   };
   
   // Format error message
@@ -140,6 +144,48 @@ export default function TopicsPage() {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Handle sort change from dropdown
+  const handleSortChange = (sortOption: string) => {
+    let newSortBy = 'createdAt';
+    let newSortOrder: 'asc' | 'desc' = 'desc';
+    
+    // Map the dropdown value to sortBy and sortOrder values
+    switch (sortOption) {
+      case 'newest':
+        newSortBy = 'createdAt';
+        newSortOrder = 'desc';
+        break;
+      case 'oldest':
+        newSortBy = 'createdAt';
+        newSortOrder = 'asc';
+        break;
+      case 'nameAsc':
+        newSortBy = 'name';
+        newSortOrder = 'asc';
+        break;
+      case 'nameDesc':
+        newSortBy = 'name';
+        newSortOrder = 'desc';
+        break;
+      default:
+        newSortBy = 'createdAt';
+        newSortOrder = 'desc';
+    }
+    
+    setSortBy(newSortBy);
+    setSortOrder(newSortOrder);
+    setCurrentPage(1);
+  };
+
+  // Convert sortBy and sortOrder to a single dropdown value
+  const getCurrentSort = () => {
+    if (sortBy === 'createdAt' && sortOrder === 'desc') return 'newest';
+    if (sortBy === 'createdAt' && sortOrder === 'asc') return 'oldest';
+    if (sortBy === 'name' && sortOrder === 'asc') return 'nameAsc';
+    if (sortBy === 'name' && sortOrder === 'desc') return 'nameDesc';
+    return 'newest'; // Default
   };
 
   const handleDeleteConfirm = async (id: string) => {
@@ -232,6 +278,18 @@ export default function TopicsPage() {
               <option value='active'>Active Only</option>
               <option value='inactive'>Inactive Only</option>
             </select>
+            {/* Sort dropdown */}
+            <select 
+              id='sort-filter'
+              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+              value={getCurrentSort()}
+              onChange={(e) => handleSortChange(e.target.value)}
+            >
+              <option value='newest'>Newest</option>
+              <option value='oldest'>Oldest</option>
+              <option value='nameAsc'>Name (A-Z)</option>
+              <option value='nameDesc'>Name (Z-A)</option>
+            </select>
           </div>
         </div>
 
@@ -299,15 +357,10 @@ export default function TopicsPage() {
                         const page = pagination?.page || 1;
                         const limit = 10;
                         const totalItems = pagination?.totalItems || 0;
-                        const sortOrder = topicFilter.sortOrder;
                         
-                        if (sortOrder === 'asc') {
-                          // For ASC: continuous numbering (1, 2, 3...)
-                          return (page - 1) * limit + index + 1;
-                        } else {
-                          // For DESC: reverse continuous numbering 
-                          return totalItems - ((page - 1) * limit + index);
-                        }
+                        // Always show sequential numbering based on page position
+                        // regardless of sort order to maintain consistency
+                        return (page - 1) * limit + index + 1;
                       })()}
                     </td>
                     <td className='py-4 px-6 text-gray-800 font-medium'>
@@ -317,15 +370,7 @@ export default function TopicsPage() {
                       {topic.description || '-'}
                     </td>
                     <td className='py-4 px-6'>
-                      {topic.isActive ? (
-                        <span className='px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800'>
-                          Active
-                        </span>
-                      ) : (
-                        <span className='px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800'>
-                          Inactive
-                        </span>
-                      )}
+                      <StatusBadge status={topic.isActive ? 'active' : 'inactive'} size='sm' />
                     </td>
                     <td className='py-4 px-6 text-gray-600'>
                       {topic?._count?.courses ?? 0}

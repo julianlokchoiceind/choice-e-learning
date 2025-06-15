@@ -13,7 +13,8 @@ import {
 import { 
   LoadingState,
   BulkDeleteButton,
-  SelectAllCheckbox
+  SelectAllCheckbox,
+  StatusBadge
 } from '@/client/components/common';
 import { useSelection } from '@/client/hooks/common';
 import { FAQItem, FAQFilter } from '@/shared/types/faq';
@@ -28,8 +29,11 @@ export default function FAQsAdminPage() {
   // State for filters and pagination
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [showActive, setShowActive] = useState<boolean | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   
   // Selection state for bulk operations
   const {
@@ -42,10 +46,11 @@ export default function FAQsAdminPage() {
   const filter: FAQFilter = {
     search: search || undefined,
     category: selectedCategory || undefined,
+    isActive: showActive,
     page: currentPage,
     limit: 10,
-    sortBy: 'createdAt',
-    sortOrder: 'desc',
+    sortBy,
+    sortOrder,
   };
 
   // Fetch FAQs with React Query
@@ -108,12 +113,67 @@ export default function FAQsAdminPage() {
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     setCurrentPage(1);
-    refetch();
+  };
+
+  const handleStatusChange = (status: string) => {
+    let activeStatus: boolean | undefined;
+    
+    if (status === 'active') {
+      activeStatus = true;
+    } else if (status === 'inactive') {
+      activeStatus = false;
+    } else {
+      activeStatus = undefined;
+    }
+    
+    setShowActive(activeStatus);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    refetch();
+  };
+
+  // Handle sort change from dropdown
+  const handleSortChange = (sortOption: string) => {
+    let newSortBy = 'createdAt';
+    let newSortOrder: 'asc' | 'desc' = 'desc';
+    
+    // Map the dropdown value to sortBy and sortOrder values
+    switch (sortOption) {
+      case 'newest':
+        newSortBy = 'createdAt';
+        newSortOrder = 'desc';
+        break;
+      case 'oldest':
+        newSortBy = 'createdAt';
+        newSortOrder = 'asc';
+        break;
+      case 'questionAsc':
+        newSortBy = 'question';
+        newSortOrder = 'asc';
+        break;
+      case 'questionDesc':
+        newSortBy = 'question';
+        newSortOrder = 'desc';
+        break;
+      default:
+        newSortBy = 'createdAt';
+        newSortOrder = 'desc';
+    }
+    
+    setSortBy(newSortBy);
+    setSortOrder(newSortOrder);
+    setCurrentPage(1);
+  };
+
+  // Convert sortBy and sortOrder to a single dropdown value
+  const getCurrentSort = () => {
+    if (sortBy === 'createdAt' && sortOrder === 'desc') return 'newest';
+    if (sortBy === 'createdAt' && sortOrder === 'asc') return 'oldest';
+    if (sortBy === 'question' && sortOrder === 'asc') return 'questionAsc';
+    if (sortBy === 'question' && sortOrder === 'desc') return 'questionDesc';
+    return 'newest'; // Default
   };
 
   const handleDeleteConfirm = async (id: string) => {
@@ -208,6 +268,27 @@ export default function FAQsAdminPage() {
                 </option>
               ))}
             </select>
+            <select 
+              value={showActive === undefined ? 'all' : showActive ? 'active' : 'inactive'}
+              onChange={(e) => handleStatusChange(e.target.value)}
+              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+            >
+              <option value='all'>All Status</option>
+              <option value='active'>Active Only</option>
+              <option value='inactive'>Inactive Only</option>
+            </select>
+            {/* Sort dropdown */}
+            <select 
+              id='sort-filter'
+              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+              value={getCurrentSort()}
+              onChange={(e) => handleSortChange(e.target.value)}
+            >
+              <option value='newest'>Newest</option>
+              <option value='oldest'>Oldest</option>
+              <option value='questionAsc'>Question (A-Z)</option>
+              <option value='questionDesc'>Question (Z-A)</option>
+            </select>
           </div>
         </div>
 
@@ -227,6 +308,7 @@ export default function FAQsAdminPage() {
                 <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] capitalize tracking-wider text-base'>#</th>
                 <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] capitalize tracking-wider text-base'>Question</th>
                 <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] capitalize tracking-wider text-base'>Category</th>
+                <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] capitalize tracking-wider text-base'>Status</th>
                 <th className='py-4 px-6 text-left font-medium text-[var(--color-primary-dark)] capitalize tracking-wider text-base'>Created</th>
                 <th className='py-4 px-6 text-right font-medium text-[var(--color-primary-dark)] capitalize tracking-wider text-base'>Actions</th>
               </tr>
@@ -234,19 +316,19 @@ export default function FAQsAdminPage() {
             <tbody className='bg-white divide-y divide-gray-200'>
               {isLoading || deleteFAQ.isPending || bulkDeleteFAQs.isPending ? (
                 <tr>
-                  <td colSpan={6} className='text-center py-10'>
+                  <td colSpan={7} className='text-center py-10'>
                     <LoadingState 
                       variant="table" 
                       message={bulkDeleteFAQs.isPending ? 'Deleting FAQs...' : deleteFAQ.isPending ? 'Deleting FAQ...' : 'Loading FAQs...'} 
-                      columns={6}
+                      columns={7}
                       rows={6}
-                      columnWidths={['5%', '8%', '32%', '18%', '18%', '19%']}
+                      columnWidths={['5%', '8%', '28%', '15%', '12%', '15%', '17%']}
                     />
                   </td>
                 </tr>
               ) : faqs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className='text-center py-10 text-gray-500'>
+                  <td colSpan={7} className='text-center py-10 text-gray-500'>
                     <p>No FAQs found</p>
                     <p className='text-sm mt-1'>Try with a different search term or add a new FAQ.</p>
                   </td>
@@ -274,7 +356,9 @@ export default function FAQsAdminPage() {
                           return (page - 1) * limit + index + 1;
                         } else {
                           // For DESC: reverse continuous numbering 
-                          return totalItems - ((page - 1) * limit + index);
+                          const sttNumber = totalItems - ((page - 1) * limit + index);
+                          // Ensure we don't show negative numbers
+                          return sttNumber > 0 ? sttNumber : index + 1;
                         }
                       })()}
                     </td>
@@ -287,6 +371,9 @@ export default function FAQsAdminPage() {
                       <span className='px-2 py-1 bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] rounded-full text-xs'>
                         {faq.category}
                       </span>
+                    </td>
+                    <td className='py-4 px-6'>
+                      <StatusBadge status={faq.isActive ? 'active' : 'inactive'} size='sm' />
                     </td>
                     <td className='py-4 px-6 text-gray-600'>
                       {new Date(faq.createdAt).toLocaleDateString()}

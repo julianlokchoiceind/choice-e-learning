@@ -11,7 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default function FAQSection() {
-  const { useGetFAQs } = useFAQsQuery();
+  const { useGetPublicFAQs } = useFAQsQuery();
   
   // Filters state
   const [search, setSearch] = useState('');
@@ -24,25 +24,25 @@ export default function FAQSection() {
     search: search || undefined,
     category: selectedCategory || undefined,
     page: currentPage,
-    limit: 10,
+    limit: 20,  // Increase limit to show more FAQs
     sortBy: 'createdAt',
     sortOrder: 'desc' as const,
   };
 
-  // Fetch FAQs using React Query
+  // Fetch FAQs using React Query (public endpoint - only active FAQs)
   const {
     data,
     isLoading,
     error,
     refetch
-  } = useGetFAQs(filter);
+  } = useGetPublicFAQs(filter);
 
   // Extract data safely
   const faqs = data?.data || [];
   const pagination = data?.meta || {
     total: 0,
     page: 1,
-    limit: 10,
+    limit: 20,
     totalPages: 0
   };
 

@@ -1,15 +1,26 @@
-import { Metadata } from 'next';
-import { StudentForm } from '@/client/components/admin/students/StudentForm';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Add New Student - Admin Dashboard',
-  description: 'Add a new student to the e-learning platform',
-};
+import Link from 'next/link';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { StudentForm } from '@/client/components/admin/students';
 
 export default function NewStudentPage() {
   return (
-    <div className='container py-6'>
-      <h1 className='text-2xl font-bold mb-6'>Add New Student</h1>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mb-6">
+        <Link
+          href="/admin/students"
+          className="back-to-link"
+        >
+          <ArrowLeftIcon className="h-4 w-4 mr-2" />
+          Back to Students
+        </Link>
+      </div>
+      
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">Add New Student</h1>
+      </div>
+
       <StudentForm />
     </div>
   );

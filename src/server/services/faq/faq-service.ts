@@ -9,6 +9,7 @@ import { Prisma, FAQ } from '@prisma/client';
 export interface FAQFilters {
   search?: string;
   category?: string;
+  isActive?: boolean;
   page?: number;
   limit?: number;
   sortBy?: string;
@@ -29,12 +30,14 @@ export interface CreateFAQData {
   question: string;
   answer: string;
   category: string;
+  isActive?: boolean;
 }
 
 export interface UpdateFAQData {
   question?: string;
   answer?: string;
   category?: string;
+  isActive?: boolean;
 }
 
 /**
@@ -48,6 +51,7 @@ class FAQService {
     const {
       search,
       category,
+      isActive,
       page = 1,
       limit = 10,
       sortBy = 'createdAt',
@@ -68,6 +72,11 @@ class FAQService {
     // Apply category filter if provided
     if (category) {
       where.category = { equals: category, mode: 'insensitive' };
+    }
+
+    // Apply isActive filter if provided
+    if (isActive !== undefined) {
+      where.isActive = isActive;
     }
 
     // Count total FAQs matching the criteria

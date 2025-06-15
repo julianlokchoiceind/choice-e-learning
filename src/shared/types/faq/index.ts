@@ -9,6 +9,7 @@ export const createFAQSchema = z.object({
   question: z.string().min(1, 'Question is required'),
   answer: z.string().min(1, 'Answer is required'),
   category: z.string().min(1, 'Category is required'),
+  isActive: z.boolean().optional(),
 });
 
 // Type for creating a FAQ
@@ -19,6 +20,7 @@ export const updateFAQSchema = z.object({
   question: z.string().min(1, 'Question is required').optional(),
   answer: z.string().min(1, 'Answer is required').optional(),
   category: z.string().min(1, 'Category is required').optional(),
+  isActive: z.boolean().optional(),
 });
 
 // Type for updating a FAQ
@@ -28,6 +30,7 @@ export type UpdateFAQInput = z.infer<typeof updateFAQSchema>;
 export interface FAQFilter {
   search?: string;
   category?: string;
+  isActive?: boolean;
   page?: number;
   limit?: number;
   sortBy?: string;

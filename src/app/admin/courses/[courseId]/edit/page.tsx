@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { CourseFormTabs, DraftStatusBadge, CurriculumTab, BasicInfoTab } from '@/client/components/admin/courses';
-import { LoadingState, AutoSaveIndicator } from '@/client/components/common';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { CourseFormTabs, CurriculumTab, BasicInfoTab } from '@/client/components/admin/courses';
+import { LoadingState, StatusBadge, LastSavedIndicator } from '@/client/components/common';
 import { useCoursesQuery } from '@/client/hooks/courses';
-import { useAutoSave } from '@/client/hooks/common';
+import { useNavigationGuard } from '@/client/hooks/common/useNavigationGuard';
+import { isFormDirty } from '@/client/utils/form-utils';
 import { Chapter, CourseStatus } from '@/shared/types/courses/course';
 
 interface FormValues {
@@ -23,17 +25,22 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   const router = useRouter();
   
   // Use React Query hooks
-  const { useGetCourse, useUpdateCourse, useUpdateCourseSilent, useUpdateCurriculum } = useCoursesQuery(true); // isAdmin = true
+  const { useGetCourse, useUpdateCourse, useUpdateCurriculum } = useCoursesQuery(true); // isAdmin = true
   const { data: courseData, isLoading, error } = useGetCourse(params.courseId);
   const updateCourseMutation = useUpdateCourse();
-  const updateCourseSilentMutation = useUpdateCourseSilent();
   const updateCurriculumMutation = useUpdateCurriculum();
   
   const [activeTab, setActiveTab] = useState('basicInfo');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [lessons, setLessons] = useState<any[]>([]);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  
+  // Navigation guard
+  const { navigateWithConfirmation } = useNavigationGuard({
+    hasUnsavedChanges,
+    message: 'Bạn có thay đổi chưa được lưu. Bạn có chắc muốn rời khỏi trang này?'
+  });
   
   // Form values
   const [values, setValues] = useState<FormValues>({
@@ -45,39 +52,15 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
     imageUrl: ''
   });
   
-  // Auto-save configuration
-  const { triggerSave, isSaving, lastSaved: autoSaveLastSaved, error: autoSaveError } = useAutoSave({
-    onSave: async (data) => {
-      const formData = {
-        title: data.title || 'Untitled Course',
-        description: data.description || '',
-        price: parseFloat(data.price) || 0,
-        level: data.level,
-        topics: data.topics,
-        imageUrl: data.imageUrl || ''
-      };
-      
-      await updateCourseSilentMutation.mutateAsync({
-        id: params.courseId,
-        data: formData
-      });
-      
-      setHasChanges(false);
-    },
-    delay: 2000, // 2 seconds
-    enabled: hasChanges,
-    onError: (error) => {
-      console.error('Auto-save failed:', error);
-      toast.error('Failed to auto-save changes');
-    }
+  const [initialValues, setInitialValues] = useState<FormValues>({
+    title: '',
+    description: '',
+    price: '0.00',
+    level: 'beginner',
+    topics: [],
+    imageUrl: ''
   });
   
-  // Trigger auto-save when form values change
-  useEffect(() => {
-    if (hasChanges) {
-      triggerSave(values);
-    }
-  }, [values, hasChanges, triggerSave]);
   
   // Fix for cursor flickering only
   useEffect(() => {
@@ -102,14 +85,17 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
                          courseData.description === 'Course description...';
       
       // Update form values - for new courses, we'll use empty strings to allow placeholders to show
-      setValues({
+      const newFormValues = {
         title: isNewCourse ? '' : courseData.title || '',
         description: isNewCourse ? '' : courseData.description || '',
         price: String(courseData.price || 0),
         level: courseData.level || 'beginner',
         topics: courseData.topics || [],
         imageUrl: courseData.imageUrl || ''
-      });
+      };
+      
+      setValues(newFormValues);
+      setInitialValues(newFormValues);
       
       if (courseData.chapters) {
         setChapters(courseData.chapters);
@@ -128,14 +114,22 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setValues({ ...values, [name]: value });
-    setHasChanges(true);
+    const newValues = { ...values, [name]: value };
+    setValues(newValues);
+    
+    // Check if form is dirty with smart detection
+    const isDirty = isFormDirty(newValues, initialValues);
+    setHasUnsavedChanges(isDirty);
   };
   
   // Handle image upload
   const handleImageUpload = (url: string) => {
-    setValues(prev => ({ ...prev, imageUrl: url }));
-    setHasChanges(true);
+    const newValues = { ...values, imageUrl: url };
+    setValues(newValues);
+    
+    // Check if form is dirty with smart detection
+    const isDirty = isFormDirty(newValues, initialValues);
+    setHasUnsavedChanges(isDirty);
   };
   
   // Handle tab change
@@ -145,7 +139,12 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   
   // Handle topics change
   const handleTopicsChange = (topics: string[]) => {
-    setValues({ ...values, topics });
+    const newValues = { ...values, topics };
+    setValues(newValues);
+    
+    // Check if form is dirty with smart detection
+    const isDirty = isFormDirty(newValues, initialValues);
+    setHasUnsavedChanges(isDirty);
   };
   
   // Handle curriculum updates
@@ -158,8 +157,9 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
         lessons: apiLessons
       });
       
-      // Update last saved timestamp
+      // Update last saved timestamp and reset dirty state
       setLastSaved(new Date());
+      setHasUnsavedChanges(false);
       
       // Refresh course data to get updated chapters with real IDs
       // This will update the local state with actual data from the server
@@ -187,7 +187,10 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
         data: courseData
       });
       
+      // Reset dirty state after successful save
       setLastSaved(new Date());
+      setHasUnsavedChanges(false);
+      setInitialValues(values);
       
       // Remove manual toast - QueryProvider will handle it via mutation meta
     } catch (error: any) {
@@ -269,15 +272,24 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   
   return (
     <div className="space-y-6">
+      <button
+        onClick={() => navigateWithConfirmation('/admin/courses')}
+        className="back-to-link"
+      >
+        <ArrowLeftIcon className="h-4 w-4 mr-2" />
+        Back to Courses
+      </button>
+      
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-3">
           <h1 className="text-2xl font-bold text-gray-900">Edit Course</h1>
-          <DraftStatusBadge />
-          <AutoSaveIndicator 
-            isSaving={isSaving} 
-            lastSaved={autoSaveLastSaved || lastSaved} 
-            error={autoSaveError} 
-          />
+          <StatusBadge status="draft" size="sm" />
+          <LastSavedIndicator lastSaved={lastSaved} />
+          {hasUnsavedChanges && (
+            <span className="text-sm text-orange-600 font-medium">
+              • Unsaved changes
+            </span>
+          )}
         </div>
         
         <div className="flex space-x-4">
@@ -330,12 +342,12 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
         <div className="flex justify-end items-center mt-6">
           
           <div className="flex space-x-4">
-            <Link
-              href="/admin/courses"
+            <button
+              onClick={() => navigateWithConfirmation('/admin/courses')}
               className="flex items-center text-gray-600 hover:text-gray-800 py-2.5 px-6 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
             >
               Back
-            </Link>
+            </button>
             {activeTab === 'basicInfo' && (
               <button
                 type="button"

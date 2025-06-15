@@ -21,10 +21,11 @@ export async function GET(req: NextRequest) {
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = (searchParams.get('sortOrder') || 'desc') as 'asc' | 'desc';
     
-    // Get public FAQ data
+    // Get public FAQ data - only show active FAQs
     const result = await faqService.getAllFAQs({
       search,
       category,
+      isActive: true, // Only show active FAQs on public pages
       page,
       limit,
       sortBy,
