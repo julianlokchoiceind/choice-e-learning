@@ -84,7 +84,7 @@ export default function TopicDetailPage({ params }: { params: { topicId: string 
         <div className='flex items-center'>
           <Link 
             href='/admin/topics' 
-            className='mr-4 text-gray-600 hover:text-gray-900'
+            className='mr-4 text-gray-600 hover:text-gray-900 no-transform'
           >
             <ArrowLeftIcon className='h-5 w-5' />
           </Link>

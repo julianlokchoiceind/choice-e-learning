@@ -348,7 +348,7 @@ body {
 
   /* Back to navigation links */
   .back-to-link {
-    @apply inline-flex items-center text-sm text-gray-600 hover:text-gray-800;
+    @apply inline-flex items-center text-sm text-blue-600 hover:text-blue-600 transition-colors duration-200;
   }
 
   /* Level Badges */

@@ -20,8 +20,18 @@ export default function TopicsFilter({ selectedTopics, onChange }: TopicsFilterP
     error 
   } = useGetTopics({ isActive: true });
   
-  // Extract topic names from topic objects
-  const topicNames = topics.map(topic => topic.name);
+  // Debug logging
+  useEffect(() => {
+    console.log('TopicsFilter - topics data:', topics);
+    console.log('TopicsFilter - is topics array?:', Array.isArray(topics));
+    console.log('TopicsFilter - topics type:', typeof topics);
+  }, [topics]);
+  
+  // Extract topic names from topic objects - with enhanced safety check
+  const topicNames = Array.isArray(topics) ? topics.map(topic => {
+    // Handle both string and object types for topic
+    return typeof topic === 'string' ? topic : (topic?.name || topic);
+  }).filter(Boolean) : [];
   
   const handleTopicChange = (topicName: string) => {
     const updatedTopics = selectedTopics.includes(topicName)

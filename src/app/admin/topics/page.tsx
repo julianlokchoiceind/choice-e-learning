@@ -272,7 +272,7 @@ export default function TopicsPage() {
             <select 
               value={showActive === undefined ? 'all' : showActive ? 'active' : 'inactive'}
               onChange={(e) => handleStatusChange(e.target.value)}
-              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+              className='py-3 px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
             >
               <option value='all'>All Status</option>
               <option value='active'>Active Only</option>
@@ -281,7 +281,7 @@ export default function TopicsPage() {
             {/* Sort dropdown */}
             <select 
               id='sort-filter'
-              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+              className='py-3 px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
               value={getCurrentSort()}
               onChange={(e) => handleSortChange(e.target.value)}
             >

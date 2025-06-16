@@ -118,11 +118,13 @@ export const TopicForm = ({
     }
     
     try {
-      await onSubmit({
-        name: formData.name.trim(),
-        description: formData.description.trim() || undefined,
-        isActive: formData.isActive
-      });
+      if (onSubmit) {
+        await onSubmit({
+          name: formData.name.trim(),
+          description: formData.description.trim() || undefined,
+          isActive: formData.isActive
+        });
+      }
     } catch (err: unknown) {
       console.error('Error submitting topic:', err);
       const errorMessage = typeof err === 'object' && err !== null && 'response' in err && 

@@ -49,6 +49,13 @@ const hasSuppressErrorToast = (meta?: any): boolean => {
 };
 
 /**
+ * Check if meta contains suppressSuccessToast property
+ */
+const hasSuppressSuccessToast = (meta?: any): boolean => {
+  return meta !== undefined && 'suppressSuccessToast' in meta;
+};
+
+/**
  * Get success toast message from meta
  */
 const getSuccessToastMessage = (meta?: any): string => {
@@ -177,8 +184,8 @@ export const QueryProvider: React.FC<QueryProviderProps> = ({
       }),
       mutationCache: new MutationCache({
         onSuccess: (_data, _variables, _context, mutation) => {
-          // Show success toast if specified in mutation metadata
-          if (hasSuccessToast(mutation.meta)) {
+          // Show success toast if specified in mutation metadata and not suppressed
+          if (hasSuccessToast(mutation.meta) && !hasSuppressSuccessToast(mutation.meta)) {
             const message = getSuccessToastMessage(mutation.meta);
               
             // Show toast with proper options

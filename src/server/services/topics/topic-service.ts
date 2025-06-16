@@ -87,12 +87,18 @@ class TopicService {
       const take = limit;
       const totalPages = Math.ceil(total / limit) || 1;
 
-      // Create sort object
-      const orderBy: any = {};
-      orderBy[sortBy] = sortOrder;
+      // Create sort object - handle case-insensitive sorting for text fields
+      let orderBy: any = {};
+      if (sortBy === 'name') {
+        // For text fields, we'll need to sort in memory for case-insensitive sorting
+        // since MongoDB doesn't support collation directly in Prisma
+        orderBy = { [sortBy]: sortOrder };
+      } else {
+        orderBy[sortBy] = sortOrder;
+      }
 
       // Fetch topics with pagination and sorting
-      const topics = await this.prisma.topic.findMany({
+      let topics = await this.prisma.topic.findMany({
         where,
         skip,
         take,
@@ -105,6 +111,20 @@ class TopicService {
           }
         }
       });
+
+      // Apply case-insensitive sorting for text fields if needed
+      if (sortBy === 'name') {
+        topics = topics.sort((a, b) => {
+          const valueA = (a[sortBy] as string).toLowerCase();
+          const valueB = (b[sortBy] as string).toLowerCase();
+          
+          if (sortOrder === 'asc') {
+            return valueA.localeCompare(valueB);
+          } else {
+            return valueB.localeCompare(valueA);
+          }
+        });
+      }
 
       console.log(`Found ${topics.length} topics`);
 

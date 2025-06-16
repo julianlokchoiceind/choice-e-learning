@@ -87,17 +87,37 @@ class FAQService {
     const take = limit;
     const totalPages = Math.ceil(total / limit);
 
-    // Create sort object
-    const orderBy: any = {};
-    orderBy[sortBy] = sortOrder;
+    // Create sort object - handle case-insensitive sorting for text fields
+    let orderBy: any = {};
+    if (sortBy === 'question' || sortBy === 'answer' || sortBy === 'category') {
+      // For text fields, we'll need to sort in memory for case-insensitive sorting
+      // since MongoDB doesn't support collation directly in Prisma
+      orderBy = { [sortBy]: sortOrder };
+    } else {
+      orderBy[sortBy] = sortOrder;
+    }
 
     // Fetch FAQs with pagination and sorting
-    const faqs = await prismaInstance.fAQ.findMany({
+    let faqs = await prismaInstance.fAQ.findMany({
       where,
       skip,
       take,
       orderBy
     });
+
+    // Apply case-insensitive sorting for text fields if needed
+    if (sortBy === 'question' || sortBy === 'answer' || sortBy === 'category') {
+      faqs = faqs.sort((a, b) => {
+        const valueA = (a[sortBy] as string).toLowerCase();
+        const valueB = (b[sortBy] as string).toLowerCase();
+        
+        if (sortOrder === 'asc') {
+          return valueA.localeCompare(valueB);
+        } else {
+          return valueB.localeCompare(valueA);
+        }
+      });
+    }
 
     // Return FAQs with pagination metadata
     return {

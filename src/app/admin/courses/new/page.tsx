@@ -46,7 +46,7 @@ export default function NewCoursePage() {
     };
     
     createDraft();
-  }, [router, apiRequest]); 
+  }, [router, apiRequest]);
   
   // Optimized loading UI using standardized LoadingState component
   return (

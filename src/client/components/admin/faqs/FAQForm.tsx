@@ -151,12 +151,14 @@ export const FAQForm = ({
       // Use either existing category or new category
       const categoryToUse = useNewCategory ? formData.newCategory : formData.category;
       
-      await onSubmit({
-        question: formData.question.trim(),
-        answer: formData.answer.trim(),
-        category: categoryToUse.trim(),
-        isActive: formData.isActive
-      });
+      if (onSubmit) {
+        await onSubmit({
+          question: formData.question.trim(),
+          answer: formData.answer.trim(),
+          category: categoryToUse.trim(),
+          isActive: formData.isActive
+        });
+      }
     } catch (err: unknown) {
       console.error('Error submitting FAQ:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to submit FAQ. Please try again.';

@@ -19,6 +19,7 @@ const API = {
   FAQS: '/api/admin/faqs',
   FAQ: (id: string) => `/api/admin/faqs/${id}`,
   PUBLIC_FAQS: '/api/marketing/faqs',
+  CATEGORIES: '/api/marketing/faqs/categories',
 };
 
 /**
@@ -36,6 +37,10 @@ const API = {
  * @example
  * // Fetch a specific FAQ
  * const { data, isLoading, error } = useGetFAQ('faq-id');
+ * 
+ * @example
+ * // Fetch FAQ categories
+ * const { data: categories, isLoading } = useGetFAQCategories();
  * 
  * @example
  * // Create a new FAQ
@@ -182,6 +187,39 @@ export const useFAQsQuery = () => {
   };
 
   /**
+   * Fetch all FAQ categories
+   * 
+   * @param options - Additional React Query options
+   * @returns Query result with categories array, loading state, and error
+   */
+  const useGetFAQCategories = (
+    options?: UseQueryOptions<string[], Error, string[], string[]>
+  ) => {
+    return useQuery({
+      queryKey: ['faq-categories'],
+      queryFn: async (): Promise<string[]> => {
+        try {
+          const response = await apiRequest.get(API.CATEGORIES);
+          
+          // Kiểm tra response null/undefined
+          if (!response || !response.data) {
+            console.error('Error fetching FAQ categories: Empty response');
+            throw new Error('Failed to fetch FAQ categories: No data returned');
+          }
+          
+          // Handle nested structure from apiSuccess
+          return response.data.data || response.data;
+        } catch (error) {
+          console.error('Error fetching FAQ categories:', error);
+          throw error;
+        }
+      },
+      staleTime: 5 * 60 * 1000, // Categories don't change frequently, cache for 5 minutes
+      ...options
+    });
+  };
+
+  /**
    * Create a new FAQ
    * 
    * @returns Mutation function and state for creating a FAQ
@@ -308,6 +346,7 @@ export const useFAQsQuery = () => {
     useGetFAQs,
     useGetPublicFAQs,
     useGetFAQ,
+    useGetFAQCategories,
     useCreateFAQ,
     useUpdateFAQ,
     useDeleteFAQ,

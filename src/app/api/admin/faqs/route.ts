@@ -20,6 +20,8 @@ export const GET = withAdmin(async (req: NextRequest) => {
     
     const search = searchParams.get('search') || undefined;
     const category = searchParams.get('category') || undefined;
+    const isActiveParam = searchParams.get('isActive');
+    const isActive = isActiveParam === 'true' ? true : isActiveParam === 'false' ? false : undefined;
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const sortBy = searchParams.get('sortBy') || 'createdAt';
@@ -28,6 +30,7 @@ export const GET = withAdmin(async (req: NextRequest) => {
     const result = await faqService.getAllFAQs({
       search,
       category,
+      isActive,
       page,
       limit,
       sortBy,

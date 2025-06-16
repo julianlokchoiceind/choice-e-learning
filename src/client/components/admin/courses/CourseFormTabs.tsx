@@ -22,7 +22,7 @@ const CourseFormTabs: FC<CourseFormTabsProps> = ({ activeTab, onTabChange }) => 
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
-          className={`py-4 px-6 text-center flex-1 relative z-10 cursor-pointer ${
+          className={`no-transform py-4 px-6 text-center flex-1 relative z-10 cursor-pointer ${
             activeTab === tab.id
               ? 'bg-blue-50 text-blue-500 font-medium border-b-2 border-blue-500'
               : 'text-gray-500 hover:bg-gray-50'

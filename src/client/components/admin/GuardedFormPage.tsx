@@ -105,7 +105,7 @@ export const GuardedFormPage = ({
           </p>
           <button
             onClick={() => navigateWithConfirmation(backHref)}
-            className="inline-flex items-center text-blue-600 hover:text-blue-700"
+            className="inline-flex items-center text-blue-600 hover:text-blue-700 no-transform"
           >
             <ArrowLeftIcon className="h-4 w-4 mr-2" />
             {backText}
@@ -119,7 +119,7 @@ export const GuardedFormPage = ({
     <div className="space-y-6">
       <button
         onClick={() => navigateWithConfirmation(backHref)}
-        className="back-to-link"
+        className="back-to-link no-transform"
       >
         <ArrowLeftIcon className="h-4 w-4 mr-2" />
         {backText}

@@ -46,7 +46,10 @@ const useTopicsQuery = () => {
             throw new Error('Failed to fetch topics: No data returned');
           }
           
-          return response.data;
+          // Extract the actual topics array from the API response
+          // Ensure we return an array even if response.data.data is null/undefined
+          const topicsData = response.data.data;
+          return Array.isArray(topicsData) ? topicsData : [];
         } catch (error) {
           console.error('Error fetching topics:', error);
           const err = error as ApiRequestError;
@@ -74,7 +77,7 @@ const useTopicsQuery = () => {
             throw new Error('Failed to fetch topic: No data returned');
           }
           
-          // The API returns the data directly in response.data.data
+          // Extract the actual topic data from the API response
           return response.data.data;
         } catch (error) {
           console.error(`Error fetching topic ${topicId}:`, error);

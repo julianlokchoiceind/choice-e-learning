@@ -1,47 +1,70 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTopicsQuery } from '@/client/hooks/topics';
+import { useQueryClient } from '@tanstack/react-query';
+import { useApiRequest } from '@/client/hooks/common';
 import { LoadingState } from '@/client/components/common';
+
+const ADMIN_TOPIC_DEFAULTS = {
+  name: '',
+  description: '',
+  isActive: true
+};
 
 export default function NewTopicPage() {
   const router = useRouter();
-  const { useCreateTopic } = useTopicsQuery();
-  const createTopic = useCreateTopic();
+  const queryClient = useQueryClient();
+  const [isCreating, setIsCreating] = useState(false);
   
+  // Use our API request hook like courses
+  const apiRequest = useApiRequest({
+    trackRequestInSession: true,
+    sessionKey: 'create_topic_request',
+    idempotencyTimeout: 5000, // 5 seconds
+    onError: (error) => {
+      console.error('Error creating topic draft:', error);
+      alert('Error creating topic: ' + error.message);
+      router.push('/admin/topics');
+    }
+  });
+  
+  // Automatically create draft on page load
   useEffect(() => {
-    // Create a new topic immediately and redirect to edit page
-    const createNewTopic = async () => {
+    const createDraft = async () => {
+      // Skip if already loading or if we already have data
+      if (apiRequest.loading || apiRequest.data) return;
+      
+      setIsCreating(true);
+      
       try {
-        const response = await createTopic.mutateAsync({
-          name: '', // Let backend generate the name
-          description: '',
-          isActive: true
-        });
+        const response = await apiRequest.post('/api/admin/topics', ADMIN_TOPIC_DEFAULTS);
         
-        // The mutation returns the topic data directly from the hook
-        const topicId = response?.id;
-        if (!topicId) {
-          throw new Error('No topic ID returned');
+        if (response?.data?.success) {
+          const topicId = response.data.data.id;
+          // Invalidate topics queries to refresh data like Course
+          queryClient.invalidateQueries({ 
+            queryKey: ['topics'],
+            exact: false
+          });
+          // Redirect to edit page with replace to avoid double loading
+          router.replace(`/admin/topics/${topicId}/edit`);
+        } else {
+          throw new Error(response?.data?.error || 'Failed to create topic draft');
         }
-        
-        // Redirect to the edit page
-        router.push(`/admin/topics/${topicId}/edit`);
-      } catch (error) {
-        console.error('Failed to create topic:', error);
-        // If creation fails, redirect back to topics list
-        router.push('/admin/topics');
+      } catch (error: any) {
+        // Error is already handled by the hook's onError callback
       }
     };
     
-    createNewTopic();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    createDraft();
+  }, [router, apiRequest]);
   
+  // Optimized loading UI using standardized LoadingState component
   return (
     <LoadingState 
       variant="page" 
-      message="Creating new topic..." 
+      message="Setting up your topic..." 
       size="large"
     />
   );

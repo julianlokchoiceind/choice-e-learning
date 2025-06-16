@@ -13,17 +13,17 @@ input[type="button"] {
   transition: all 200ms ease-in-out;
 }
 
-button:hover, 
-.btn:hover,
-a[role="button"]:hover,
-a.btn:hover {
+button:hover:not(.no-transform), 
+.btn:hover:not(.no-transform),
+a[role="button"]:hover:not(.no-transform),
+a.btn:hover:not(.no-transform) {
   transform: translateY(-1px);
 }
 
-button:active, 
-.btn:active,
-a[role="button"]:active,
-a.btn:active {
+button:active:not(.no-transform), 
+.btn:active:not(.no-transform),
+a[role="button"]:active:not(.no-transform),
+a.btn:active:not(.no-transform) {
   transform: translateY(1px);
 }
 

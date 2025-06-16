@@ -154,3 +154,25 @@ export function formatValidationErrors(
   
   return formattedErrors;
 }
+
+/**
+ * Validate request data and return standardized result
+ * @param schema Zod schema to validate against
+ * @param data Data to validate
+ * @returns Validation result with success flag and data/errors
+ */
+export function validateRequest<T>(
+  schema: z.ZodType<T>,
+  data: unknown
+): { success: boolean; data?: T; errors?: Record<string, string> } {
+  const result = validateData(schema, data);
+  
+  if (result.success) {
+    return { success: true, data: result.data };
+  }
+  
+  return {
+    success: false,
+    errors: formatValidationErrors(result.errors || [])
+  };
+}

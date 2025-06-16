@@ -80,7 +80,7 @@ export default function CourseDetailPage() {
         <p className='text-gray-600 mb-6'>{error instanceof Error ? error.message : 'Course not found'}</p>
         <Link 
           href='/admin/courses' 
-          className='px-4 py-2 bg-[var(--color-primary-text)] text-white rounded-md hover:bg-[var(--color-primary-dark)]'
+          className='px-4 py-2 bg-[var(--color-primary-text)] text-white rounded-md hover:bg-[var(--color-primary-dark)] no-transform'
         >
           Back to All Courses
         </Link>
@@ -93,7 +93,7 @@ export default function CourseDetailPage() {
       <div className='mb-6'>
         <Link 
           href='/admin/courses' 
-          className='inline-flex items-center text-gray-600 hover:text-gray-800'
+          className='inline-flex items-center text-gray-600 hover:text-gray-800 no-transform'
         >
           <ArrowLeftIcon className='h-4 w-4 mr-1' />
           Back to Courses

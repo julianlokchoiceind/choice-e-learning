@@ -28,6 +28,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
 }) => {
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set(chapters.map(c => c.id)));
   const [addingLessonForChapter, setAddingLessonForChapter] = useState<string | null>(null);
+  const [lessonTitles, setLessonTitles] = useState<Record<string, string>>({});
   
   const toggleChapter = (chapterId: string) => {
     setExpandedChapters(prev => {
@@ -41,9 +42,20 @@ const ChapterList: React.FC<ChapterListProps> = ({
     });
   };
   
-  const handleAddLesson = (chapterId: string, lessonData: any) => {
-    onAddLesson(chapterId, lessonData);
+  const handleAddLesson = (chapterId: string) => {
+    const title = lessonTitles[chapterId]?.trim();
+    if (!title) {
+      alert('Please enter a lesson title');
+      return;
+    }
+    
+    onAddLesson(chapterId, { title });
     setAddingLessonForChapter(null);
+    // Clear the input for this chapter
+    setLessonTitles(prev => ({
+      ...prev,
+      [chapterId]: ''
+    }));
   };
   
   return (
@@ -66,7 +78,13 @@ const ChapterList: React.FC<ChapterListProps> = ({
               onToggle={() => toggleChapter(chapter.id)}
               onEdit={() => onEditChapter(chapter.id)}
               onDelete={() => onDeleteChapter(chapter.id)}
-              onAddLesson={() => setAddingLessonForChapter(chapter.id)}
+              onAddLesson={() => {
+                // Auto-expand chapter if not expanded
+                if (!expandedChapters.has(chapter.id)) {
+                  setExpandedChapters(prev => new Set([...Array.from(prev), chapter.id]));
+                }
+                setAddingLessonForChapter(chapter.id);
+              }}
             />
           )}
           
@@ -94,17 +112,26 @@ const ChapterList: React.FC<ChapterListProps> = ({
                       </label>
                       <input
                         type="text"
-                        id="lessonTitle"
-                        name="lessonTitle"
+                        value={lessonTitles[chapter.id] || ''}
+                        onChange={(e) => setLessonTitles(prev => ({
+                          ...prev,
+                          [chapter.id]: e.target.value
+                        }))}
                         placeholder="Enter lesson name"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddLesson(chapter.id);
+                          }
+                        }}
                       />
                     </div>
                     
                     <div className="flex space-x-3">
                       <button
                         type="button"
-                        onClick={() => handleAddLesson(chapter.id, { title: (document.getElementById('lessonTitle') as HTMLInputElement)?.value })}
+                        onClick={() => handleAddLesson(chapter.id)}
                         className="px-3 py-1.5 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors text-sm"
                       >
                         Add Lesson

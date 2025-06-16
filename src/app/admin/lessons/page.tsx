@@ -232,7 +232,7 @@ export default function LessonsPage() {
 
       {/* Filter and search controls */}
       <div className='bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden'>
-        <div className='p-4 border-b border-gray-200 flex justify-between items-center flex-wrap gap-4'>
+        <div className='p-6 border-b border-gray-200 flex justify-between items-center flex-wrap gap-4'>
           <div className='relative'>
             <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
               <MagnifyingGlassIcon className='h-5 w-5 text-gray-400' />
@@ -245,14 +245,14 @@ export default function LessonsPage() {
               className='py-2 pl-10 pr-4 block w-full sm:w-80 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)] outline-none'
             />
           </div>
-          <div className='flex items-center space-x-2'>
+          <div className='flex items-center space-x-3'>
             <select 
               value={selectedCourse}
               onChange={(e) => {
                 setSelectedCourse(e.target.value);
                 setCurrentPage(1);
               }}
-              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+              className='py-3 px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
             >
               <option value='all'>All Courses</option>
               {courses.map((course: any) => (
@@ -268,7 +268,7 @@ export default function LessonsPage() {
                 setSelectedStatus(e.target.value);
                 setCurrentPage(1);
               }}
-              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+              className='py-3 px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
             >
               <option value='all'>All Status</option>
               <option value='published'>Published</option>
@@ -281,7 +281,7 @@ export default function LessonsPage() {
                 setSortOption(e.target.value);
                 setCurrentPage(1);
               }}
-              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+              className='py-3 px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
             >
               <option value='newest'>Newest First</option>
               <option value='oldest'>Oldest First</option>

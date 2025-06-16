@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/server/db/prisma-client';
 import { withAdmin, AuthenticatedContext } from '@/server/api/route-handlers';
+import { updateCourse } from '@/server/db/services/course-service';
 
 // Type for route params
 type RouteParams = {
@@ -66,6 +67,7 @@ export const GET = withAdmin(async (req: NextRequest, context: AuthenticatedCont
       description: course.description,
       price: course.price,
       level: course.level,
+      status: course.status,
       topics: course.topics,
       topicsList: Array.isArray(course.topicsList) 
         ? course.topicsList.map(topic => ({
@@ -183,16 +185,14 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
     
     // Parse request body
     const body = await req.json();
+    console.log('Update course request body:', JSON.stringify(body, null, 2));
     
     // Handle empty title
     if (!body.title || body.title.trim() === '') {
       body.title = existingCourse.title;
     }
     
-    // Handle empty description for draft courses
-    if (body.status === 'draft' && (!body.description || body.description.trim() === '')) {
-      body.description = 'Course description...';
-    }
+    // No auto-fill for description - let user enter their own content
     
     // Process image URL
     if (body.imageUrl === '' || body.imageUrl === null) {
@@ -216,7 +216,7 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
           
           // Nếu không tìm thấy, tạo mới
           if (!topic) {
-            const slug = topicName.toLowerCase().replace(/\\s+/g, '-');
+            const slug = topicName.toLowerCase().replace(/\s+/g, '-');
             topic = await prisma.topic.create({
               data: {
                 name: topicName,
@@ -233,211 +233,64 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
       topicIds = topicObjects.map(topic => topic.id);
     }
     
-    // Prepare update data with updated timestamp
+    // Prepare update data with explicit field mapping - only allowed course fields
     const updateData: any = {
-      ...body,
-      topicIds: topicIds.length > 0 ? topicIds : undefined, // Chỉ cập nhật nếu có dữ liệu mới
+      title: body.title || existingCourse.title,
+      description: body.description !== undefined ? body.description : existingCourse.description,
+      price: body.price !== undefined ? body.price : existingCourse.price,
+      level: body.level || existingCourse.level,
+      imageUrl: body.imageUrl !== undefined ? body.imageUrl : existingCourse.imageUrl,
+      videoUrl: body.videoUrl !== undefined ? body.videoUrl : existingCourse.videoUrl,
+      status: body.status !== undefined ? body.status : existingCourse.status,
+      topics: body.topics !== undefined ? body.topics : existingCourse.topics,
+      topicIds: topicIds.length > 0 ? topicIds : undefined,
       updatedAt: new Date()
     };
     
-    // Remove chapters and lessons from updateData as they are handled separately
-    delete updateData.chapters;
-    delete updateData.lessons;
+    // NOTE: Curriculum updates (chapters/lessons) are now handled by dedicated endpoint:
+    // PUT /api/admin/courses/[courseId]/curriculum
+    // This prevents data leakage and ensures explicit curriculum saves only
     
-    // Handle chapters and lessons updates if provided
-    if ((body.chapters && Array.isArray(body.chapters)) || (body.lessons && Array.isArray(body.lessons))) {
-      // Use transaction to ensure data consistency
-      await prisma.$transaction(async (tx) => {
-        // Initialize chapterIdMap outside of chapters block so it's available for lessons
-        const chapterIdMap = new Map<string, string>(); // Map temp IDs to real IDs
-        
-        // Handle chapters first
-        if (body.chapters && Array.isArray(body.chapters)) {
-          console.log(`Processing ${body.chapters.length} chapters for update`);
-          
-          // Get existing chapters
-          const existingChapters = await tx.chapter.findMany({
-            where: { courseId },
-            include: { lessons: true }
-          });
-          
-          const existingChapterIds = existingChapters.map(c => c.id);
-          const incomingChapterIds = body.chapters
-            .filter((c: any) => c.id && !c.id.startsWith('temp-'))
-            .map((c: any) => c.id);
-          
-          // Delete chapters that are no longer in the incoming data
-          const chaptersToDelete = existingChapterIds.filter(id => !incomingChapterIds.includes(id));
-          if (chaptersToDelete.length > 0) {
-            await tx.chapter.deleteMany({
-              where: { id: { in: chaptersToDelete } }
-            });
-          }
-          
-          // Process each chapter (create or update)
-          
-          for (const chapter of body.chapters) {
-            const chapterData = {
-              title: chapter.title || 'Untitled Chapter',
-              description: chapter.description || '',
-              order: chapter.order || 1,
-              courseId
-            };
-            
-            if (chapter.id && !chapter.id.startsWith('temp-') && existingChapterIds.includes(chapter.id)) {
-              // Update existing chapter
-              await tx.chapter.update({
-                where: { id: chapter.id },
-                data: chapterData
-              });
-              chapterIdMap.set(chapter.id, chapter.id);
-            } else {
-              // Create new chapter - don't pass temp IDs
-              const newChapter = await tx.chapter.create({
-                data: chapterData
-              });
-              // Map the temp ID to the real ID if it was a temp chapter
-              if (chapter.id && chapter.id.startsWith('temp-')) {
-                chapterIdMap.set(chapter.id, newChapter.id);
+    console.log('Prepared update data:', JSON.stringify(updateData, null, 2));
+    
+    // Use transaction to update course and optionally lessons if status changes
+    const updatedCourse = await prisma.$transaction(async (tx) => {
+      // Update the course
+      const course = await tx.course.update({
+        where: { id: courseId },
+        data: updateData,
+        include: {
+          _count: { select: { students: true } },
+          topicsList: true,
+          chapters: {
+            orderBy: { order: 'asc' },
+            include: {
+              lessons: {
+                orderBy: { order: 'asc' }
               }
             }
-          }
-        }
-        
-        // Handle lessons after chapters
-        if (body.lessons && Array.isArray(body.lessons)) {
-          console.log(`Processing ${body.lessons.length} lessons for update`);
-          
-          // Get existing lessons
-          const existingLessons = await tx.lesson.findMany({
-            where: { courseId }
-          });
-          
-          const existingLessonIds = existingLessons.map(l => l.id);
-          const incomingLessonIds = body.lessons
-            .filter((l: any) => l.id && !l.id.startsWith('temp-'))
-            .map((l: any) => l.id);
-          
-          // Delete lessons that are no longer in the incoming data
-          const lessonsToDelete = existingLessonIds.filter(id => !incomingLessonIds.includes(id));
-          if (lessonsToDelete.length > 0) {
-            await tx.lesson.deleteMany({
-              where: { id: { in: lessonsToDelete } }
-            });
-          }
-          
-          // Process each lesson (create or update)
-          for (const lesson of body.lessons) {
-            // Map temp chapter IDs to real chapter IDs
-            let realChapterId = lesson.chapterId;
-            if (lesson.chapterId && lesson.chapterId.startsWith('temp-')) {
-              realChapterId = chapterIdMap.get(lesson.chapterId) || null;
-            }
-            
-            const lessonData = {
-              title: lesson.title || 'Untitled Lesson',
-              content: lesson.content || '',
-              videoUrl: lesson.videoUrl || '',
-              order: lesson.order || 1,
-              courseId,
-              chapterId: realChapterId,
-              duration: lesson.duration || null,
-              resourcesData: lesson.resources ? JSON.stringify(lesson.resources) : null
-            };
-            
-            if (lesson.id && !lesson.id.startsWith('temp-') && existingLessonIds.includes(lesson.id)) {
-              // Update existing lesson
-              await tx.lesson.update({
-                where: { id: lesson.id },
-                data: lessonData
-              });
-            } else {
-              // Create new lesson - don't pass temp IDs
-              await tx.lesson.create({
-                data: lessonData
-              });
-            }
+          },
+          lessons: {
+            orderBy: { order: 'asc' }
           }
         }
       });
-    }
-    
-    try {
-      // Update course with Prisma
-      let updatedCourse;
-      try {
-        updatedCourse = await prisma.course.update({
-          where: { id: courseId },
-          data: {
-            ...updateData,
-            // Luôn đảm bảo updatedAt được cập nhật, tránh trường hợp Next.js cache lại
-            updatedAt: new Date()
-          }
-        });
-        
-        // Log thông tin để debug
-        console.log(`Updated course ${courseId}`, {
-          imageUrl: updatedCourse.imageUrl,
-          updatedAt: updatedCourse.updatedAt
-        });
-      } catch (updateError: any) {
-        console.error('Error updating course:', updateError);
-        
-        // Check if the error is related to the status field
-        if (updateError.message && updateError.message.includes('Unknown argument `status`')) {
-          console.log('Status field error detected, trying without status field');
-          
-          // Create a new update data object without the status field
-          const { status, ...updateDataWithoutStatus } = updateData;
-          
-          // Try updating the course without the status field
-          updatedCourse = await prisma.course.update({
-            where: { id: courseId },
-            data: {
-              ...updateDataWithoutStatus,
-              updatedAt: new Date()
-            }
-          });
-          
-          // If we got here, the course was updated without the status field
-          console.log('Course updated successfully without status field');
-        } else {
-          // If it's another error, rethrow it
-          throw updateError;
-        }
-      }
-    } catch (error: unknown) {
-      // Course not found
-      return NextResponse.json(
-        { success: false, error: 'Course not found' },
-        { status: 404 }
-      );
-    }
-    
-    // Fetch the updated course to return in the response
-    const updatedCourse = await prisma.course.findUnique({
-      where: { id: courseId },
-      include: {
-        _count: { select: { students: true } },
-        topicsList: true,
-        chapters: {
-          orderBy: {
-            order: 'asc'
-          },
-          include: {
-            lessons: {
-              orderBy: {
-                order: 'asc'
-              }
-            }
-          }
-        },
-        lessons: {
-          orderBy: {
-            order: 'asc'
-          }
-        }
-      }
+
+      // Ensure lessons always match course status (sync on every update)
+      // Get final course status from updateData
+      const finalCourseStatus = updateData.status || existingCourse.status;
+      console.log(`Final course status: ${finalCourseStatus}, syncing lessons...`);
+      
+      const lessonStatus = finalCourseStatus === 'published' ? 'published' : 'draft';
+      
+      const lessonUpdateResult = await tx.lesson.updateMany({
+        where: { courseId: courseId },
+        data: { status: lessonStatus }
+      });
+      
+      console.log(`Updated ${lessonUpdateResult.count} lessons to status: ${lessonStatus}`);
+
+      return course;
     });
 
     if (!updatedCourse) {
@@ -454,6 +307,7 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
       description: updatedCourse.description,
       price: updatedCourse.price,
       level: updatedCourse.level,
+      status: updatedCourse.status,
       topics: updatedCourse.topics,
       topicsList: Array.isArray(updatedCourse.topicsList) 
         ? updatedCourse.topicsList.map(topic => ({
@@ -464,12 +318,11 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
           }))
         : [],
       imageUrl: updatedCourse.imageUrl,
-      // creatorId sẽ được sử dụng thay vì instructorId
       creatorId: updatedCourse.creatorId,
       studentCount: updatedCourse._count.students,
       createdAt: updatedCourse.createdAt,
       updatedAt: updatedCourse.updatedAt,
-      // Include chapters and lessons in the response
+      // Include existing chapters and lessons in response
       chapters: updatedCourse.chapters ? updatedCourse.chapters.map(chapter => ({
         id: chapter.id,
         title: chapter.title,
@@ -488,7 +341,6 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
           courseId: lesson.courseId,
           createdAt: lesson.createdAt,
           updatedAt: lesson.updatedAt,
-          // Parse resourcesData to get resources for the frontend
           resources: lesson.resourcesData ? JSON.parse(lesson.resourcesData) : []
         })) : []
       })) : [],
@@ -502,27 +354,26 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
         courseId: lesson.courseId,
         createdAt: lesson.createdAt,
         updatedAt: lesson.updatedAt,
-        // Parse resourcesData to get resources for the frontend
         resources: lesson.resourcesData ? JSON.parse(lesson.resourcesData) : []
       })) : []
     };
     
-    // Trả về response với header ngăn cache
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
       data: transformedCourse,
-      message: 'Course updated successfully',
-      timestamp: Date.now() // Thêm timestamp để client có thể biết có sự thay đổi
+      message: 'Course updated successfully'
     });
-    
-    // Thêm header để ngăn cache
-    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-    response.headers.set('Pragma', 'no-cache');
-    response.headers.set('Expires', '0');
-    
-    return response;
   } catch (error: unknown) {
     console.error('Error updating course:', error);
+    
+    // More detailed error logging
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack
+      });
+    }
+    
     return NextResponse.json(
       { success: false, error: 'Failed to update course' },
       { status: 500 }

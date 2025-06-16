@@ -762,6 +762,75 @@ export const getUserCourses = async (userId: string) => {
 };
 
 /**
+ * Publish a course and cascade update all its lessons to published status
+ * @deprecated This function is no longer used. Use simple course update instead.
+ * @param courseId Course ID to publish
+ * @returns Updated course with lessons
+ */
+// export async function publishCourseWithLessons(courseId: string) {
+//   return await prisma.$transaction(async (tx) => {
+//     // 1. Update course status to published
+//     const course = await tx.course.update({
+//       where: { id: courseId },
+//       data: { status: 'published' },
+//       include: {
+//         lessons: true,
+//         chapters: {
+//           include: {
+//             lessons: true
+//           }
+//         }
+//       }
+//     });
+//     
+//     // 2. Update all lessons in the course to published status
+//     await tx.lesson.updateMany({
+//       where: { courseId },
+//       data: { status: 'published' }
+//     });
+//     
+//     console.log(`Published course ${courseId} and ${course.lessons.length} lessons`);
+//     return course;
+//   });
+// }
+
+/**
+ * Unpublish a course and optionally cascade update lessons to draft status
+ * @deprecated This function is no longer used. Use simple course update instead.
+ * @param courseId Course ID to unpublish
+ * @param cascadeToLessons Whether to also set lessons to draft (default: true)
+ * @returns Updated course with lessons
+ */
+// export async function unpublishCourseWithLessons(courseId: string, cascadeToLessons: boolean = true) {
+//   return await prisma.$transaction(async (tx) => {
+//     // 1. Update course status to draft
+//     const course = await tx.course.update({
+//       where: { id: courseId },
+//       data: { status: 'draft' },
+//       include: {
+//         lessons: true,
+//         chapters: {
+//           include: {
+//             lessons: true
+//           }
+//         }
+//       }
+//     });
+//     
+//     // 2. Optionally update all lessons in the course to draft status
+//     if (cascadeToLessons) {
+//       await tx.lesson.updateMany({
+//         where: { courseId },
+//         data: { status: 'draft' }
+//       });
+//     }
+//     
+//     console.log(`Unpublished course ${courseId}${cascadeToLessons ? ` and ${course.lessons.length} lessons` : ''}`);
+//     return course;
+//   });
+// }
+
+/**
  * Bulk delete courses
  * @param courseIds Array of course IDs to delete
  * @returns Object with deleted and failed arrays

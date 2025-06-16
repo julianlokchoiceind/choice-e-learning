@@ -3,6 +3,11 @@ import { z } from 'zod';
 import { Chapter } from '../courses/course';
 
 /**
+ * Lesson status enum
+ */
+export type LessonStatus = 'draft' | 'published';
+
+/**
  * Lesson interface - Được trích xuất từ courses/course.ts
  */
 export interface Lesson {
@@ -11,6 +16,7 @@ export interface Lesson {
   content: string;
   videoUrl?: string | null;
   order: number;
+  status: LessonStatus;
   courseId: string;
   chapterId?: string | null;
   chapter?: Chapter;
@@ -28,6 +34,7 @@ export interface CreateLessonParams {
   content: string;
   videoUrl?: string;
   order: number;
+  status?: LessonStatus;
   courseId: string;
   chapterId?: string;
 }
@@ -50,6 +57,7 @@ export const LessonSchema = z.object({
   content: z.string().optional(),
   videoUrl: z.string().url('URL video không hợp lệ').optional().nullable(),
   order: z.number().min(0, 'Thứ tự phải là số không âm'),
+  status: z.enum(['draft', 'published']).default('draft'),
   courseId: z.string(),
   chapterId: z.string().optional().nullable(),
   createdAt: z.date().optional(),

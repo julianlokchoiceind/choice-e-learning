@@ -25,7 +25,7 @@ interface Course {
 }
 
 // Define the type for lesson with computed status
-interface LessonWithStatus extends Lesson {
+interface LessonWithStatus extends Omit<Lesson, 'status'> {
   status?: 'published' | 'draft';
 }
 

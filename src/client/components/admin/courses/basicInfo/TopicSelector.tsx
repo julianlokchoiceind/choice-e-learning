@@ -20,20 +20,23 @@ export default function TopicSelector({ selectedTopics, onChange }: TopicSelecto
     error 
   } = useGetTopics({ isActive: true });
   
+  // Ensure selectedTopics is always an array
+  const safeSelectedTopics = Array.isArray(selectedTopics) ? selectedTopics : [];
+  
   // Toggle topic selection
   const toggleTopic = (topicName: string) => {
-    if (selectedTopics.includes(topicName)) {
+    if (safeSelectedTopics.includes(topicName)) {
       // Remove topic if already selected
-      onChange(selectedTopics.filter(topic => topic !== topicName));
+      onChange(safeSelectedTopics.filter(topic => topic !== topicName));
     } else {
       // Add topic if not selected
-      onChange([...selectedTopics, topicName]);
+      onChange([...safeSelectedTopics, topicName]);
     }
   };
 
   // Remove a topic
   const removeTopic = (topicToRemove: string) => {
-    onChange(selectedTopics.filter(topic => topic !== topicToRemove));
+    onChange(safeSelectedTopics.filter(topic => topic !== topicToRemove));
   };
 
   return (
@@ -43,9 +46,9 @@ export default function TopicSelector({ selectedTopics, onChange }: TopicSelecto
       </label>
       
       {/* Display selected topics */}
-      {selectedTopics.length > 0 && (
+      {safeSelectedTopics.length > 0 && (
         <div className='flex flex-wrap gap-2 mb-3'>
-          {selectedTopics.map((topic, index) => (
+          {safeSelectedTopics.map((topic, index) => (
             <div key={index} className='bg-[var(--color-primary-light)] text-[var(--color-primary-dark)] px-2 py-1 rounded-full flex items-center text-sm'>
               <span>{topic}</span>
               <button
@@ -78,7 +81,7 @@ export default function TopicSelector({ selectedTopics, onChange }: TopicSelecto
                   <input
                     type='checkbox'
                     id={`topic-${topic.id}`}
-                    checked={selectedTopics.includes(topic.name)}
+                    checked={safeSelectedTopics.includes(topic.name)}
                     onChange={() => toggleTopic(topic.name)}
                     className='w-4 h-4 text-[var(--color-primary-text)] rounded focus:ring-[var(--color-focus-ring)]'
                   />

@@ -86,15 +86,25 @@ export function useNavigationGuard({
     };
   }, [hasUnsavedChanges, message]);
   
-  // Function to navigate with confirmation
-  const navigateWithConfirmation = useCallback((url: string) => {
+  // Function to navigate with confirmation and force refresh
+  const navigateWithConfirmation = useCallback((url: string, options?: { refresh?: boolean }) => {
     if (hasUnsavedChanges) {
       const confirmed = window.confirm(message);
       if (confirmed) {
-        router.push(url);
+        if (options?.refresh) {
+          // Force a page refresh to ensure data is updated
+          window.location.href = url;
+        } else {
+          router.push(url);
+        }
       }
     } else {
-      router.push(url);
+      if (options?.refresh) {
+        // Force a page refresh to ensure data is updated
+        window.location.href = url;
+      } else {
+        router.push(url);
+      }
     }
   }, [hasUnsavedChanges, message, router]);
   

@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { CourseFormTabs, CurriculumTab, BasicInfoTab } from '@/client/components/admin/courses';
+import { CourseFormTabs, CurriculumTab, BasicInfoTab, MediaResourcesTab } from '@/client/components/admin/courses';
 import { LoadingState, StatusBadge, LastSavedIndicator } from '@/client/components/common';
 import { useCoursesQuery } from '@/client/hooks/courses';
 import { useNavigationGuard } from '@/client/hooks/common/useNavigationGuard';
 import { isFormDirty } from '@/client/utils/form-utils';
 import { Chapter, CourseStatus } from '@/shared/types/courses/course';
+import { CurriculumTabRef } from '@/client/components/admin/courses/curriculum/CurriculumTab';
 
 interface FormValues {
   title: string;
@@ -29,20 +31,33 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   const { data: courseData, isLoading, error } = useGetCourse(params.courseId);
   const updateCourseMutation = useUpdateCourse();
   const updateCurriculumMutation = useUpdateCurriculum();
+  const queryClient = useQueryClient();
   
   const [activeTab, setActiveTab] = useState('basicInfo');
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [lessons, setLessons] = useState<any[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hasCurriculumChanges, setHasCurriculumChanges] = useState(false);
+  const curriculumRef = useRef<CurriculumTabRef>(null);
   
-  // Navigation guard
+  // Enhanced navigation function with courses list refresh
+  const navigateToCoursesWithRefresh = useCallback(() => {
+    // Force refresh courses list when navigating back
+    queryClient.invalidateQueries({ 
+      queryKey: ['courses'],
+      exact: false
+    });
+    router.push('/admin/courses');
+  }, [queryClient, router]);
+
+  // Navigation guard - check both form and curriculum changes
   const { navigateWithConfirmation } = useNavigationGuard({
-    hasUnsavedChanges,
-    message: 'Bạn có thay đổi chưa được lưu. Bạn có chắc muốn rời khỏi trang này?'
+    hasUnsavedChanges: hasUnsavedChanges || hasCurriculumChanges,
+    message: 'You have unsaved changes. Are you sure you want to leave this page?'
   });
   
-  // Form values
+  // Form values with robust defaults
   const [values, setValues] = useState<FormValues>({
     title: '',
     description: '',
@@ -80,23 +95,30 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   // Update form values when course data is loaded
   useEffect(() => {
     if (courseData) {
-      // Check if this is a newly created course with default values
-      const isNewCourse = courseData.title === 'Untitled Course' && 
-                         courseData.description === 'Course description...';
+      // Only set initial values if they haven't been set yet or if hasUnsavedChanges is false
+      // This prevents overwriting user input when switching tabs
+      const shouldUpdateValues = !hasUnsavedChanges || values.title === '';
       
-      // Update form values - for new courses, we'll use empty strings to allow placeholders to show
-      const newFormValues = {
-        title: isNewCourse ? '' : courseData.title || '',
-        description: isNewCourse ? '' : courseData.description || '',
-        price: String(courseData.price || 0),
-        level: courseData.level || 'beginner',
-        topics: courseData.topics || [],
-        imageUrl: courseData.imageUrl || ''
-      };
+      if (shouldUpdateValues) {
+        // Check if this is a newly created course with default values
+        const isNewCourse = courseData.title === 'Untitled Course' && 
+                           courseData.description === 'Course description...';
+        
+        // Update form values - preserve actual values to detect changes correctly
+        const newFormValues = {
+          title: isNewCourse ? '' : (courseData.title || ''),
+          description: courseData.description || '',
+          price: String(courseData.price || 0),
+          level: courseData.level || 'beginner',
+          topics: Array.isArray(courseData.topics) ? courseData.topics : [],
+          imageUrl: courseData.imageUrl || ''
+        };
+        
+        setValues(newFormValues);
+        setInitialValues(newFormValues);
+      }
       
-      setValues(newFormValues);
-      setInitialValues(newFormValues);
-      
+      // Always update chapters/lessons with fresh server data after saves
       if (courseData.chapters) {
         setChapters(courseData.chapters);
       }
@@ -109,7 +131,7 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
         setLastSaved(new Date(courseData.updatedAt));
       }
     }
-  }, [courseData]);
+  }, [courseData, hasUnsavedChanges, hasCurriculumChanges, values.title]);
   
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -139,7 +161,9 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   
   // Handle topics change
   const handleTopicsChange = (topics: string[]) => {
-    const newValues = { ...values, topics };
+    // Ensure topics is always an array
+    const safeTopics = Array.isArray(topics) ? topics : [];
+    const newValues = { ...values, topics: safeTopics };
     setValues(newValues);
     
     // Check if form is dirty with smart detection
@@ -168,81 +192,128 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
     }
   };
   
-  // Handle update draft
+  // Handle update draft - Save ALL tabs
   const handleUpdateDraft = async () => {
     try {
+      console.log('Starting handleUpdateDraft...');
+      
+      // Save curriculum if there are changes
+      if (hasCurriculumChanges && curriculumRef.current) {
+        console.log('Saving curriculum changes...');
+        await curriculumRef.current.saveCurriculum();
+        console.log('Curriculum saved successfully');
+        
+        // Refresh course data after curriculum save to ensure consistency
+        console.log('Refreshing course data after curriculum save...');
+        await queryClient.invalidateQueries({ queryKey: ['course', params.courseId] });
+        
+        // Add a small delay to ensure data is fresh
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+
       // Prepare data for API - only basic course fields
-      const courseData = {
-        title: values.title.trim(),
-        description: values.description.trim(),
+      const updateData = {
+        title: values.title.trim() || 'Untitled Course',
+        description: values.description.trim() || '',
         price: parseFloat(values.price) || 0,
-        level: values.level,
-        topics: values.topics,
-        imageUrl: values.imageUrl,
-        status: CourseStatus.DRAFT,
+        level: values.level || 'beginner',
+        topics: Array.isArray(values.topics) ? values.topics : [],
+        imageUrl: values.imageUrl || '',
+        status: courseData?.status || CourseStatus.DRAFT, // Preserve current status
       };
+      
+      console.log('Updating course with data:', updateData);
       
       await updateCourseMutation.mutateAsync({
         id: params.courseId,
-        data: courseData
+        data: updateData
       });
+      
+      console.log('Course updated successfully');
       
       // Reset dirty state after successful save
       setLastSaved(new Date());
       setHasUnsavedChanges(false);
+      setHasCurriculumChanges(false);
       setInitialValues(values);
       
       // Remove manual toast - QueryProvider will handle it via mutation meta
     } catch (error: any) {
+      console.error('Error in handleUpdateDraft:', error);
       // Error is handled by the mutation meta in useCoursesQuery
     }
   };
   
-  // Handle form submission (publish)
+  // Handle form submission (publish) - Enhanced validation for live publication
   const handlePublish = async () => {
     try {
-      // Enhanced validation
-      if (!values.title || !values.description) {
-        toast.error('Please fill in required fields: title and description');
-        return;
+      // FULL VALIDATION for publishing (higher standards)
+      const validationErrors: string[] = [];
+      
+      if (!values.title?.trim()) {
+        validationErrors.push('Course title is required');
       }
       
-      // Validate description length
-      if (values.description.length < 10) {
-        toast.error('Description must be at least 10 characters');
-        return;
+      if (!values.description?.trim()) {
+        validationErrors.push('Course description is required');
       }
       
-      // Validate chapters and lessons for published courses
-      if (chapters.length === 0) {
-        toast.error('At least one chapter is required for publishing');
-        setActiveTab('curriculum');
-        return;
+      // Simplified validation - only require basic course info
+      // Note: Removed strict curriculum validation to allow flexible publishing
+      
+      if (validationErrors.length > 0) {
+        // Offer choice: save draft first or fix errors
+        const shouldSaveDraft = window.confirm(
+          `Cannot publish: ${validationErrors.join('. ')}\n\nWould you like to save as draft instead?`
+        );
+        
+        if (shouldSaveDraft) {
+          await handleUpdateDraft();
+          return;
+        } else {
+          toast.error(validationErrors.join('. '));
+          return;
+        }
       }
       
-      if (lessons.length === 0) {
-        toast.error('At least one lesson is required for publishing');
-        setActiveTab('curriculum');
-        return;
+      // Save curriculum if there are changes
+      if (hasCurriculumChanges && curriculumRef.current) {
+        console.log('Publishing: Saving curriculum changes...');
+        await curriculumRef.current.saveCurriculum();
+        console.log('Publishing: Curriculum saved successfully');
+        
+        // Refresh course data after curriculum save to ensure consistency
+        console.log('Publishing: Refreshing course data after curriculum save...');
+        await queryClient.invalidateQueries({ queryKey: ['course', params.courseId] });
+        
+        // Add a small delay to ensure data is fresh
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
       
-      // Prepare data for API - only basic course fields  
+      // Simple course publish - just update course status to published
       const courseData = {
-        title: values.title,
-        description: values.description,
+        title: values.title.trim() || 'Untitled Course',
+        description: values.description.trim() || '',
         price: parseFloat(values.price) || 0,
-        level: values.level,
-        topics: values.topics,
-        imageUrl: values.imageUrl,
-        status: CourseStatus.PUBLISHED,
+        level: values.level || 'beginner',
+        topics: Array.isArray(values.topics) ? values.topics : [],
+        imageUrl: values.imageUrl || '',
+        status: CourseStatus.PUBLISHED // Set directly to published
       };
       
+      // Single API call to update course with published status
       await updateCourseMutation.mutateAsync({
         id: params.courseId,
         data: courseData
       });
       
-      router.push('/admin/courses');
+      // Reset dirty state and redirect
+      setLastSaved(new Date());
+      setHasUnsavedChanges(false);
+      setHasCurriculumChanges(false);
+      setInitialValues(values);
+      
+      navigateToCoursesWithRefresh();
     } catch (error: any) {
       // Error is handled by the mutation meta in useCoursesQuery
     }
@@ -251,8 +322,10 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   // Render curriculum tab
   const renderCurriculumTab = () => (
     <CurriculumTab
+      ref={curriculumRef}
       initialChapters={chapters}
       onUpdateCurriculum={handleUpdateCurriculum}
+      onCurriculumChange={setHasCurriculumChanges}
     />
   );
   
@@ -273,8 +346,17 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   return (
     <div className="space-y-6">
       <button
-        onClick={() => navigateWithConfirmation('/admin/courses')}
-        className="back-to-link"
+        onClick={() => {
+          if (hasUnsavedChanges || hasCurriculumChanges) {
+            const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave this page?');
+            if (confirmed) {
+              navigateToCoursesWithRefresh();
+            }
+          } else {
+            navigateToCoursesWithRefresh();
+          }
+        }}
+        className="back-to-link no-transform"
       >
         <ArrowLeftIcon className="h-4 w-4 mr-2" />
         Back to Courses
@@ -283,9 +365,9 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-3">
           <h1 className="text-2xl font-bold text-gray-900">Edit Course</h1>
-          <StatusBadge status="draft" size="sm" />
+          <StatusBadge status={courseData?.status || 'draft'} size="sm" />
           <LastSavedIndicator lastSaved={lastSaved} />
-          {hasUnsavedChanges && (
+          {(hasUnsavedChanges || hasCurriculumChanges) && (
             <span className="text-sm text-orange-600 font-medium">
               • Unsaved changes
             </span>
@@ -293,31 +375,74 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
         </div>
         
         <div className="flex space-x-4">
-          <button
-            type="button"
-            onClick={handleUpdateDraft}
-            disabled={updateCourseMutation.isPending}
-            className="btn-admin-secondary-lg"
-          >
-            {updateCourseMutation.isPending ? (
-              <LoadingState variant="button" message="Updating..." />
-            ) : (
-              'Update Draft'
-            )}
-          </button>
-          
-          <button
-            type="button"
-            onClick={handlePublish}
-            disabled={updateCourseMutation.isPending}
-            className="btn-admin-primary-lg"
-          >
-            {updateCourseMutation.isPending ? (
-              <LoadingState variant="button" message="Publishing..." />
-            ) : (
-              'Publish Course'
-            )}
-          </button>
+          {courseData?.status === 'published' ? (
+            <>
+              <button
+                type="button"
+                onClick={handleUpdateDraft}
+                disabled={updateCourseMutation.isPending}
+                className="btn-admin-secondary-lg"
+              >
+                {updateCourseMutation.isPending ? (
+                  <LoadingState variant="button" message="Updating..." />
+                ) : (
+                  'Update Course'
+                )}
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => updateCourseMutation.mutate({ 
+                  id: params.courseId, 
+                  data: { 
+                    title: values.title.trim() || 'Untitled Course',
+                    description: values.description.trim() || '',
+                    price: parseFloat(values.price) || 0,
+                    level: values.level || 'beginner',
+                    topics: Array.isArray(values.topics) ? values.topics : [],
+                    imageUrl: values.imageUrl || '',
+                    status: CourseStatus.DRAFT 
+                  } 
+                })}
+                disabled={updateCourseMutation.isPending}
+                className="btn-admin-primary-lg"
+              >
+                {updateCourseMutation.isPending ? (
+                  <LoadingState variant="button" message="Unpublishing..." />
+                ) : (
+                  'Unpublish Course'
+                )}
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={handleUpdateDraft}
+                disabled={updateCourseMutation.isPending}
+                className="btn-admin-secondary-lg"
+              >
+                {updateCourseMutation.isPending ? (
+                  <LoadingState variant="button" message="Updating..." />
+                ) : (
+                  'Update Draft'
+                )}
+              </button>
+              
+              <button
+                type="button"
+                onClick={handlePublish}
+                disabled={updateCourseMutation.isPending}
+                className="btn-admin-primary-lg"
+              >
+                {updateCourseMutation.isPending ? (
+                  <LoadingState variant="button" message="Publishing..." />
+                ) : (
+                  'Publish Course'
+                )}
+              </button>
+            </>
+          )}
         </div>
       </div>
       
@@ -326,25 +451,41 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
         <CourseFormTabs activeTab={activeTab} onTabChange={handleTabChange} />
       </div>
       
-      {/* Tab Content */}
+      {/* Tab Content - Render all tabs but hide inactive ones to preserve state */}
       <div>
-        {activeTab === 'basicInfo' && (
+        <div style={{ display: activeTab === 'basicInfo' ? 'block' : 'none' }}>
           <BasicInfoTab 
             values={values} 
             handleChange={handleChange} 
             handleImageUpload={handleImageUpload} 
             handleTopicsChange={handleTopicsChange} 
           />
-        )}
-        {activeTab === 'curriculum' && renderCurriculumTab()}
+        </div>
+        
+        <div style={{ display: activeTab === 'curriculum' ? 'block' : 'none' }}>
+          {renderCurriculumTab()}
+        </div>
+        
+        <div style={{ display: activeTab === 'media-resources' ? 'block' : 'none' }}>
+          <MediaResourcesTab courseId={params.courseId} />
+        </div>
         
         {/* Navigation Buttons */}
         <div className="flex justify-end items-center mt-6">
           
           <div className="flex space-x-4">
             <button
-              onClick={() => navigateWithConfirmation('/admin/courses')}
-              className="flex items-center text-gray-600 hover:text-gray-800 py-2.5 px-6 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              onClick={() => {
+          if (hasUnsavedChanges || hasCurriculumChanges) {
+            const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave this page?');
+            if (confirmed) {
+              navigateToCoursesWithRefresh();
+            }
+          } else {
+            navigateToCoursesWithRefresh();
+          }
+        }}
+              className="flex items-center text-gray-600 hover:text-gray-800 py-2.5 px-6 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors no-transform"
             >
               Back
             </button>

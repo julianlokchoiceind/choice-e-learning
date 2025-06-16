@@ -75,12 +75,6 @@ const getSortParams = (sortOption: string): { sortBy: string; order: 'asc' | 'de
       return { sortBy: 'price', order: 'asc' };
     case 'price-desc':
       return { sortBy: 'price', order: 'desc' };
-    case 'students':
-      return { sortBy: 'students', order: 'desc' };
-    case 'status-asc':
-      return { sortBy: 'status', order: 'asc' };
-    case 'status-desc':
-      return { sortBy: 'status', order: 'desc' };
     case 'oldest':
       return { sortBy: 'createdAt', order: 'asc' };
     case 'newest':
@@ -267,7 +261,7 @@ export default function CoursesPage() {
                 setSelectedLevel(e.target.value);
                 setCurrentPage(1);
               }}
-              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+              className='py-3 px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
             >
               <option value='all'>All Levels</option>
               <option value='beginner'>Beginner</option>
@@ -281,7 +275,7 @@ export default function CoursesPage() {
                 setSelectedStatus(e.target.value);
                 setCurrentPage(1);
               }}
-              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+              className='py-3 px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
             >
               <option value='all'>All Status</option>
               <option value='published'>Published</option>
@@ -294,7 +288,7 @@ export default function CoursesPage() {
                 setSortOption(e.target.value);
                 setCurrentPage(1);
               }}
-              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+              className='py-3 px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
             >
               <option value='newest'>Newest First</option>
               <option value='oldest'>Oldest First</option>
@@ -302,9 +296,6 @@ export default function CoursesPage() {
               <option value='title-desc'>Title (Z-A)</option>
               <option value='price-asc'>Price (Low to High)</option>
               <option value='price-desc'>Price (High to Low)</option>
-              <option value='students'>Most Students</option>
-              <option value='status-asc'>Status (Draft First)</option>
-              <option value='status-desc'>Status (Published First)</option>
             </select>
           </div>
         </div>

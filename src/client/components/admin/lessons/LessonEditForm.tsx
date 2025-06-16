@@ -38,7 +38,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
 }) => {
   const router = useRouter();
   const { useGetCourses } = useCoursesQuery(true);
-  const { useUpdateLesson, useUpdateLessonSilent } = useLessonsQuery();
+  const { useUpdateLesson } = useLessonsQuery();
   
   
   // Initialize form data from lesson prop

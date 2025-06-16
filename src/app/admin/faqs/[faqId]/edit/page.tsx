@@ -19,7 +19,7 @@ export default function EditFAQPage() {
   // Extract unique categories from all FAQs
   const categories = Array.isArray(faqs) 
     ? Array.from(
-        new Set(faqs.filter(f => f.category).map(f => f.category))
+        new Set(faqs.filter((f: any) => f.category).map((f: any) => f.category))
       ).sort()
     : [];
 

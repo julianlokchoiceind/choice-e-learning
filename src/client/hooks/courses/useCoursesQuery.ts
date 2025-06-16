@@ -43,6 +43,7 @@ const useCoursesQuery = (isAdmin = false) => {
           const params = new URLSearchParams();
           if (filters.search) params.append('search', filters.search);
           if (filters.level) params.append('level', filters.level);
+          if (filters.status) params.append('status', filters.status);
           if (filters.topics && Array.isArray(filters.topics) && filters.topics.length > 0) {
             filters.topics.forEach(topic => params.append('topics', topic));
           }
@@ -184,7 +185,13 @@ const useCoursesQuery = (isAdmin = false) => {
     return useMutation({
       mutationFn: async ({ id, data }: { id: string; data: Partial<Course> }) => {
         try {
-          const response = await apiRequest.put<{data: Course}>(`${baseUrl}/${id}`, data);
+          const response = await apiRequest.put<{data: Course}>(`${baseUrl}/${id}`, data, {
+            // Set reasonable timeout for course operations (15 seconds)
+            idempotencyTimeout: 15000,
+            // Prevent duplicate requests during processing
+            trackRequestInSession: true,
+            sessionKey: `course-update-${id}`
+          });
           
           // Kiểm tra response null/undefined
           if (!response) {
@@ -205,6 +212,9 @@ const useCoursesQuery = (isAdmin = false) => {
           queryKey: ['courses'],
           exact: false
         });
+        // Also invalidate lessons to ensure status sync is reflected
+        queryClient.invalidateQueries({ queryKey: ['lessons'] });
+        queryClient.invalidateQueries({ queryKey: ['lessons', variables.id] });
       },
       // Use meta for toast notifications
       meta: {
@@ -360,7 +370,52 @@ const useCoursesQuery = (isAdmin = false) => {
   };
 
   /**
+   * Update course status with cascade to lessons (admin only)
+   * @deprecated This function is no longer used. Use useUpdateCourse instead.
+   */
+  // const useUpdateCourseStatus = () => {
+  //   if (!isAdmin) {
+  //     throw new Error('Unauthorized: Admin access required to update course status');
+  //   }
+  //   
+  //   return useMutation({
+  //     mutationFn: async ({ courseId, status }: { courseId: string; status: 'draft' | 'published' }) => {
+  //       try {
+  //         const response = await apiRequest.put<{data: Course}>(`${baseUrl}/${courseId}/status`, { status });
+  //         
+  //         if (!response) {
+  //           throw new Error('Failed to update course status: No response');
+  //         }
+  //         
+  //         return response.data.data;
+  //       } catch (error: unknown) {
+  //         console.error('Error updating course status:', error);
+  //         const apiError = error as ApiRequestError;
+  //         throw new Error(apiError?.message || 'Failed to update course status');
+  //       }
+  //     },
+  //     onSuccess: (_, variables) => {
+  //       // Invalidate specific course query and courses list
+  //       queryClient.invalidateQueries({ queryKey: ['course', variables.courseId] });
+  //       queryClient.invalidateQueries({ 
+  //         queryKey: ['courses'],
+  //         exact: false
+  //       });
+  //       // Also invalidate lessons queries since lesson status changes too
+  //       queryClient.invalidateQueries({ queryKey: ['lessons'] });
+  //       queryClient.invalidateQueries({ queryKey: ['lessons', variables.courseId] });
+  //     },
+  //     // Use meta for toast notifications
+  //     meta: {
+  //       successToast: (variables: any) => `Course ${variables.status === 'published' ? 'published' : 'unpublished'} successfully with lessons`,
+  //       errorToast: 'Failed to update course status'
+  //     }
+  //   });
+  // };
+
+  /**
    * Update course curriculum (chapters and lessons) (admin only)
+   * Uses dedicated curriculum endpoint to avoid data leakage
    */
   const useUpdateCurriculum = () => {
     if (!isAdmin) {
@@ -374,12 +429,11 @@ const useCoursesQuery = (isAdmin = false) => {
         lessons: any[] 
       }) => {
         try {
-          
-          const response = await apiRequest.put<{data: Course}>(`${baseUrl}/${courseId}`, {
+          // Use dedicated curriculum endpoint to prevent data leakage
+          const response = await apiRequest.put<{data: Course}>(`${baseUrl}/${courseId}/curriculum`, {
             chapters,
             lessons
           });
-          
           
           if (!response) {
             throw new Error('Failed to update curriculum: No response');
@@ -409,10 +463,7 @@ const useCoursesQuery = (isAdmin = false) => {
         // Invalidate lessons for the specific course as well
         queryClient.invalidateQueries({ queryKey: ['lessons', variables.courseId] });
       },
-      // No toast notifications for curriculum updates - they're too frequent
-      meta: {
-        suppressErrorToast: true
-      }
+      // No toast notifications for curriculum - only course update shows success
     });
   };
 
@@ -421,6 +472,7 @@ const useCoursesQuery = (isAdmin = false) => {
     useGetCourse,
     useCreateCourse,
     useUpdateCourse,
+    // useUpdateCourseStatus, // Deprecated - use useUpdateCourse instead
     useDeleteCourse,
     useBulkDeleteCourses,
     useGetCourseTopics,

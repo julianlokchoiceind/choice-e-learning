@@ -74,7 +74,8 @@ export function normalizeFormData(data: any): any {
   
   if (typeof data === 'string') {
     const trimmed = data.trim();
-    return trimmed === '' ? null : trimmed;
+    // Don't convert empty strings to null for form data - preserve empty strings
+    return trimmed;
   }
   
   if (typeof data === 'number') {

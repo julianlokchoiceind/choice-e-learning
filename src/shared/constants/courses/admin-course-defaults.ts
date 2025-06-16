@@ -1,4 +1,5 @@
 import { DEFAULT_COURSE_PLACEHOLDER } from '@/client/hooks/courses';
+import { CourseStatus } from '@/shared/types/courses/course';
 
 export const ADMIN_COURSE_DEFAULTS = {
   title: '', // Để trống để backend tạo title theo định dạng
@@ -7,7 +8,7 @@ export const ADMIN_COURSE_DEFAULTS = {
   level: 'beginner',
   topics: [],
   imageUrl: DEFAULT_COURSE_PLACEHOLDER,
-  status: 'draft',
+  status: CourseStatus.DRAFT,
   chapters: [],
   lessons: []
 };
@@ -23,6 +24,3 @@ export const COURSE_CONSTANTS = {
 
 export const COURSE_LEVELS = ['beginner', 'intermediate', 'advanced', 'all-levels'] as const;
 export type CourseLevel = typeof COURSE_LEVELS[number];
-
-export const COURSE_STATUSES = ['draft', 'published', 'archived'] as const;
-export type CourseStatus = typeof COURSE_STATUSES[number];

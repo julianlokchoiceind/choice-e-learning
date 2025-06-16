@@ -23,7 +23,8 @@ export default function FAQsAdminPage() {
   const {
     useGetFAQs,
     useDeleteFAQ,
-    useBulkDeleteFAQs
+    useBulkDeleteFAQs,
+    useGetFAQCategories
   } = useFAQsQuery();
 
   // State for filters and pagination
@@ -60,6 +61,12 @@ export default function FAQsAdminPage() {
     refetch
   } = useGetFAQs(filter);
 
+  // Fetch FAQ categories
+  const {
+    data: categories = [],
+    isLoading: categoriesLoading
+  } = useGetFAQCategories();
+
   // Setup delete mutation
   const deleteFAQ = useDeleteFAQ();
   const bulkDeleteFAQs = useBulkDeleteFAQs();
@@ -73,10 +80,9 @@ export default function FAQsAdminPage() {
     totalPages: 0
   };
 
-  // Get unique categories from FAQs
-  const categories = Array.from(
-    new Set(faqs.map((faq) => faq.category))
-  );
+  // Ensure common categories are always available
+  const defaultCategories = ['General', 'Technical Support', 'Account', 'Billing', 'Courses'];
+  const allCategories = Array.from(new Set([...defaultCategories, ...categories])).sort();
 
   // Add CSS for buttons with no transform on hover - matching sidebar behavior
   useEffect(() => {
@@ -259,10 +265,10 @@ export default function FAQsAdminPage() {
             <select 
               value={selectedCategory}
               onChange={(e) => handleCategoryChange(e.target.value)}
-              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+              className='py-3 px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
             >
               <option value=''>All Categories</option>
-              {categories.map((category) => (
+              {allCategories.map((category) => (
                 <option key={category} value={category}>
                   {category}
                 </option>
@@ -271,7 +277,7 @@ export default function FAQsAdminPage() {
             <select 
               value={showActive === undefined ? 'all' : showActive ? 'active' : 'inactive'}
               onChange={(e) => handleStatusChange(e.target.value)}
-              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+              className='py-3 px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
             >
               <option value='all'>All Status</option>
               <option value='active'>Active Only</option>
@@ -280,7 +286,7 @@ export default function FAQsAdminPage() {
             {/* Sort dropdown */}
             <select 
               id='sort-filter'
-              className='py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
+              className='py-3 px-4 border border-gray-300 bg-white rounded-md shadow-sm focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none sm:text-sm'
               value={getCurrentSort()}
               onChange={(e) => handleSortChange(e.target.value)}
             >

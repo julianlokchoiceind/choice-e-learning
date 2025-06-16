@@ -147,16 +147,18 @@ export const StudentForm = ({
     }
     
     try {
-      await onSubmit({
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        phone: formData.phone.trim() || undefined,
-        address: formData.address.trim() || undefined,
-        city: formData.city.trim() || undefined,
-        grade: formData.grade.trim() || undefined,
-        imageUrl: formData.imageUrl.trim() || undefined,
-        isActive: formData.isActive
-      });
+      if (onSubmit) {
+        await onSubmit({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim() || undefined,
+          address: formData.address.trim() || undefined,
+          city: formData.city.trim() || undefined,
+          grade: formData.grade.trim() || undefined,
+          imageUrl: formData.imageUrl.trim() || undefined,
+          isActive: formData.isActive
+        });
+      }
     } catch (err: unknown) {
       console.error('Error submitting student:', err);
       const errorMessage = typeof err === 'object' && err !== null && 'response' in err && 
