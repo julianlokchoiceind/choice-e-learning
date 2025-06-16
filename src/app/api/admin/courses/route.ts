@@ -418,6 +418,9 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
       case 'students':
         orderBy.students = { _count: orderDirection };
         break;
+      case 'status':
+        orderBy.status = orderDirection;
+        break;
       case 'createdAt':
       default:
         orderBy.createdAt = orderDirection;
@@ -492,6 +495,25 @@ export const GET = withAdmin(async (req: NextRequest, context) => {
           return orderDirection === 'asc'
             ? (a.title || '').localeCompare(b.title || '', undefined, { sensitivity: 'base' })
             : (b.title || '').localeCompare(a.title || '', undefined, { sensitivity: 'base' });
+        });
+      }
+      
+      // Sort by status at Node.js level for consistent ordering
+      if (sortBy === 'status') {
+        formattedCourses.sort((a, b) => {
+          const statusA = a.status || 'published';
+          const statusB = b.status || 'published';
+          
+          // Define status order: draft < published
+          const statusOrder = { draft: 0, published: 1 };
+          const orderA = statusOrder[statusA as keyof typeof statusOrder] ?? 1;
+          const orderB = statusOrder[statusB as keyof typeof statusOrder] ?? 1;
+          
+          if (orderDirection === 'asc') {
+            return orderA - orderB;
+          } else {
+            return orderB - orderA;
+          }
         });
       }
       console.log('Formatted courses successfully, count:', formattedCourses.length);

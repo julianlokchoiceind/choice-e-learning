@@ -77,6 +77,10 @@ const getSortParams = (sortOption: string): { sortBy: string; order: 'asc' | 'de
       return { sortBy: 'price', order: 'desc' };
     case 'students':
       return { sortBy: 'students', order: 'desc' };
+    case 'status-asc':
+      return { sortBy: 'status', order: 'asc' };
+    case 'status-desc':
+      return { sortBy: 'status', order: 'desc' };
     case 'oldest':
       return { sortBy: 'createdAt', order: 'asc' };
     case 'newest':
@@ -299,6 +303,8 @@ export default function CoursesPage() {
               <option value='price-asc'>Price (Low to High)</option>
               <option value='price-desc'>Price (High to Low)</option>
               <option value='students'>Most Students</option>
+              <option value='status-asc'>Status (Draft First)</option>
+              <option value='status-desc'>Status (Published First)</option>
             </select>
           </div>
         </div>
