@@ -132,13 +132,6 @@ const ReferenceLinks: FC<ReferenceLinksProps> = ({ courseId }) => {
             External resources and documentation
           </p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="btn-admin-primary"
-        >
-          <PlusIcon className="h-4 w-4 mr-2" />
-          Add Link
-        </button>
       </div>
 
       {/* Add/Edit Form */}

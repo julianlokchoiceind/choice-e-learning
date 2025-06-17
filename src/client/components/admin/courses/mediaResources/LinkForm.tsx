@@ -119,7 +119,7 @@ const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
 
       {/* URL Field */}
       <div>
-        <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="url" className="block text-base font-medium text-gray-700 mb-2">
           URL <span className="text-red-500">*</span>
         </label>
         <div className="flex space-x-2">
@@ -131,7 +131,7 @@ const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
             onChange={handleChange}
             onBlur={handleUrlBlur}
             placeholder="https://reactjs.org/docs"
-            className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            className={`flex-1 px-3 py-2 text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
               errors.url ? 'border-red-300' : 'border-gray-300'
             }`}
           />
@@ -155,7 +155,7 @@ const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
 
       {/* Title Field */}
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="title" className="block text-base font-medium text-gray-700 mb-2">
           Title <span className="text-red-500">*</span>
         </label>
         <input
@@ -165,7 +165,7 @@ const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
           value={formData.title}
           onChange={handleChange}
           placeholder="React Official Documentation"
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`w-full px-3 py-2 text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
             errors.title ? 'border-red-300' : 'border-gray-300'
           }`}
         />
@@ -176,7 +176,7 @@ const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
 
       {/* Description Field */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="description" className="block text-base font-medium text-gray-700 mb-2">
           Description
         </label>
         <textarea
@@ -186,7 +186,7 @@ const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
           onChange={handleChange}
           rows={3}
           placeholder="Brief description of this resource (optional)"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <p className="mt-1 text-xs text-gray-500">
           Optional description to help students understand the resource

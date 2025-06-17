@@ -81,8 +81,8 @@ const ChapterForm: React.FC<ChapterFormProps> = ({
       </div>
       
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-          Chapter Name
+        <label htmlFor="title" className="block text-base font-medium text-gray-700 mb-2">
+          Chapter Title <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -90,24 +90,25 @@ const ChapterForm: React.FC<ChapterFormProps> = ({
           name="title"
           value={formData.title}
           onChange={handleChange}
-          placeholder="Enter chapter name"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]"
+          placeholder="Enter chapter title"
+          className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          required
         />
         {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
       </div>
       
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-          Description (optional)
+        <label htmlFor="description" className="block text-base font-medium text-gray-700 mb-2">
+          Description
         </label>
         <textarea
           id="description"
           name="description"
-          value={formData.description}
+          value={formData.description || ''}
           onChange={handleChange}
-          placeholder="Brief description of this chapter"
-          rows={2}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-0 focus:border-[var(--color-primary)]"
+          placeholder="Brief description of this chapter (optional)"
+          rows={3}
+          className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical"
         />
       </div>
       

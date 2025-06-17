@@ -107,7 +107,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
                   
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-base font-medium text-gray-700 mb-2">
                         Lesson Name
                       </label>
                       <input

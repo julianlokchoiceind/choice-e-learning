@@ -212,7 +212,7 @@ const ResourceUpload: FC<ResourceUploadProps> = ({ courseId, onChangesDetected }
       </div>
 
       {/* Materials List */}
-      {materials.length > 0 ? (
+      {materials.length > 0 && (
         <div className="space-y-3">
           <h4 className="text-sm font-medium text-gray-900">
             Uploaded Materials ({materials.length})
@@ -257,14 +257,6 @@ const ResourceUpload: FC<ResourceUploadProps> = ({ courseId, onChangesDetected }
             ))}
           </div>
         </div>
-      ) : (
-        !isUploading && !createMutation.isPending && (
-          <div className="text-center py-8 text-gray-500">
-            <DocumentIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-            <p>No course materials uploaded yet</p>
-            <p className="text-sm">Upload PDF, ZIP, DOC, XLS, PPT files for students</p>
-          </div>
-        )
       )}
 
       {/* Loading State */}

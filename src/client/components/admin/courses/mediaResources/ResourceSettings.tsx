@@ -116,14 +116,6 @@ const ResourceSettings: FC<ResourceSettingsProps> = ({ courseId, onChangesDetect
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h3 className="text-lg font-medium text-gray-900">Resource Settings</h3>
-        <p className="text-sm text-gray-600">
-          Configure video controls, content protection, and learning requirements
-        </p>
-      </div>
-
       {/* Video Control Settings */}
       <div className="bg-white rounded-lg border p-6">
         <div className="flex items-center space-x-3 mb-4">

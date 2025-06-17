@@ -11,23 +11,18 @@ interface MediaResourcesTabProps {
 
 const MediaResourcesTab: FC<MediaResourcesTabProps> = ({ courseId, onChangesDetected }) => {
   return (
-    <div>
-      {/* Tab Header */}
-      <div className="pb-4 mb-6 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900">Media & Resources</h2>
-        <p className="text-gray-600 mt-1">
-          Manage course materials and reference links for students
-        </p>
-      </div>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+      <h2 className="text-xl font-semibold mb-8 text-gray-800">Media & Resources</h2>
 
-      {/* Tab Content */}
       <div className="space-y-8">
         <ResourceUpload 
           courseId={courseId} 
           onChangesDetected={onChangesDetected}
         />
         
-        <ReferenceLinks courseId={courseId} />
+        <div className="border-t border-gray-100 pt-8">
+          <ReferenceLinks courseId={courseId} />
+        </div>
       </div>
     </div>
   );

@@ -285,7 +285,7 @@ const ChapterForm: React.FC<{
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-base font-medium text-gray-700 mb-2">
           Chapter Title
         </label>
         <input
@@ -298,7 +298,7 @@ const ChapterForm: React.FC<{
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-base font-medium text-gray-700 mb-2">
           Description (optional)
         </label>
         <textarea
