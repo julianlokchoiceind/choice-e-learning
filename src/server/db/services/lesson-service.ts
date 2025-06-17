@@ -52,20 +52,62 @@ export async function getLessonsForCourse(courseId: string): Promise<Lesson[]> {
  * @param data Lesson data
  * @returns Created lesson or null if creation failed
  */
-export async function createLesson(data: Prisma.LessonCreateInput): Promise<Lesson | null> {
+export async function createLesson(data: {
+  title: string;
+  content?: string | null;
+  videoUrl?: string | null;
+  duration?: string | null;
+  resourcesData?: string | null;
+  order?: number;
+  courseId: string;
+  chapterId?: string | null;
+}): Promise<Lesson | null> {
   try {
-    // If order is not provided, get the highest order and add 1
-    if (!data.order) {
+    // Verify that the course exists
+    const course = await prisma.course.findUnique({
+      where: { id: data.courseId }
+    });
+
+    if (!course) {
+      console.error(`Course with ID ${data.courseId} not found`);
+      return null;
+    }
+
+    // If order is not provided or is 0, get the highest order and add 1
+    let orderValue = data.order || 0;
+    if (orderValue <= 0) {
       const highestOrderLesson = await prisma.lesson.findFirst({
-        where: { courseId: data.course.connect?.id as string },
+        where: { courseId: data.courseId },
         orderBy: { order: 'desc' }
       });
       
-      data.order = highestOrderLesson ? highestOrderLesson.order + 1 : 1;
+      orderValue = highestOrderLesson ? highestOrderLesson.order + 1 : 1;
     }
+
+    // Let Prisma handle default status - don't override it
+    // This prevents conflicts with Prisma schema defaults
+    
+    // Create lesson with proper data structure
+    const lessonCreateData: Prisma.LessonCreateInput = {
+      title: data.title,
+      content: data.content || '',
+      videoUrl: data.videoUrl,
+      duration: data.duration,
+      resourcesData: data.resourcesData,
+      order: orderValue,
+      // Remove status field - let Prisma use default value from schema
+      course: {
+        connect: { id: data.courseId }
+      },
+      ...(data.chapterId && {
+        chapter: {
+          connect: { id: data.chapterId }
+        }
+      })
+    };
     
     return await prisma.lesson.create({
-      data
+      data: lessonCreateData
     });
   } catch (error: unknown) {
     console.error('Error creating lesson:', error);

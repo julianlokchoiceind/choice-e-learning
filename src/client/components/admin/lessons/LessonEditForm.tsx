@@ -13,7 +13,6 @@ import { useCoursesQuery } from '@/client/hooks/courses';
 import { useLessonsQuery } from '@/client/hooks/lessons';
 import { LoadingState } from '@/client/components/common';
 import { isFormDirty } from '@/client/utils/form-utils';
-import toast from 'react-hot-toast';
 
 interface LessonEditFormProps {
   lesson: Lesson;
@@ -140,7 +139,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
 
       if (isNew) {
         // Lessons can only be created through course curriculum
-        toast.error('Lessons must be created through course curriculum');
+        console.error('Lessons must be created through course curriculum');
         router.push('/admin/courses');
         return;
       }
@@ -172,7 +171,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
 
       if (isNew) {
         // Lessons can only be created through course curriculum
-        toast.error('Lessons must be created through course curriculum');
+        console.error('Lessons must be created through course curriculum');
         router.push('/admin/courses');
         return;
       }

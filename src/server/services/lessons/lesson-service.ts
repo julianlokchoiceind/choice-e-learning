@@ -78,6 +78,7 @@ export async function getLessons(options: {
           courseId: true,
           chapterId: true,
           duration: true,
+          status: true,
           createdAt: true,
           updatedAt: true,
           course: {
@@ -89,13 +90,10 @@ export async function getLessons(options: {
         }
       });
       
-      // Add computed status and filter
+      // Use status from database instead of computing
       const allLessonsWithStatus = allLessons.map(lesson => ({
         ...lesson,
-        status: (lesson.content && lesson.content.length > 10) || 
-                (lesson.videoUrl && lesson.videoUrl.trim() !== '' && !lesson.videoUrl.includes('placeholder'))
-          ? 'published' 
-          : 'draft'
+        status: lesson.status || 'draft' // Use database status with fallback
       }));
       
       const filteredLessons = allLessonsWithStatus.filter(
@@ -123,6 +121,7 @@ export async function getLessons(options: {
           courseId: true,
           chapterId: true,
           duration: true,
+          status: true,
           createdAt: true,
           updatedAt: true,
           course: {
@@ -134,13 +133,10 @@ export async function getLessons(options: {
         }
       });
       
-      // Add computed status field
+      // Use status from database instead of computing
       lessons = dbLessons.map(lesson => ({
         ...lesson,
-        status: (lesson.content && lesson.content.length > 10) || 
-                (lesson.videoUrl && lesson.videoUrl.trim() !== '' && !lesson.videoUrl.includes('placeholder'))
-          ? 'published' 
-          : 'draft'
+        status: lesson.status || 'draft' // Use database status with fallback
       }));
     }
 
@@ -354,14 +350,10 @@ export async function getLessonsByCourseId(courseId: string) {
       orderBy: { order: 'asc' }
     });
 
-    // Add computed status field for UI compatibility
+    // Use status from database instead of computing
     const lessonsWithStatus = lessons.map(lesson => ({
       ...lesson,
-      // Compute status based on content and video
-      status: (lesson.content && lesson.content.length > 10) || 
-              (lesson.videoUrl && lesson.videoUrl.trim() !== '' && !lesson.videoUrl.includes('placeholder'))
-        ? 'published' 
-        : 'draft'
+      status: lesson.status || 'draft' // Use database status with fallback
     }));
 
     return lessonsWithStatus;

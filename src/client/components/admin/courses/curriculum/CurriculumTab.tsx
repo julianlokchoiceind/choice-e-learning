@@ -23,8 +23,9 @@ const CurriculumTab = forwardRef<CurriculumTabRef, CurriculumTabProps>(({
   onUpdateCurriculum,
   onCurriculumChange
 }, ref) => {
-  const [chapters, setChapters] = useState<Chapter[]>(initialChapters);
-  const [originalChapters, setOriginalChapters] = useState<Chapter[]>(initialChapters); // Track original state
+  // ✅ Simplified state management - single source of truth
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
   const params = useParams();
   const courseId = params.courseId as string;
   const { useGetCourse } = useCoursesQuery(true);
@@ -32,34 +33,63 @@ const CurriculumTab = forwardRef<CurriculumTabRef, CurriculumTabProps>(({
   const [isAddingChapter, setIsAddingChapter] = useState(false);
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
   
-  // Initialize chapters and update after successful saves
+  // ✅ Single effect for initialization - no complex dependencies
   useEffect(() => {
-    if (courseData?.chapters) {
-      // Always update from server data, but only if we don't have unsaved changes
-      const hasChanges = JSON.stringify(chapters) !== JSON.stringify(originalChapters);
+    if (courseData?.chapters && !isInitialized) {
+      console.log('🔍 DEBUG: Loading chapters from server:', courseData.chapters);
       
-      if (!hasChanges || chapters.length === 0) {
-        // Safe to update - either no changes or initial load
-        setChapters(courseData.chapters);
-        setOriginalChapters(courseData.chapters);
-      }
+      // ✅ Always normalize order sequentially regardless of server data
+      const normalizedChapters = courseData.chapters
+        .sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || '')) // Sort by creation time
+        .map((chapter, index) => {
+          const normalizedChapter = {
+            ...chapter,
+            order: index + 1 // ✅ Force sequential: 1, 2, 3...
+          };
+          console.log(`🔢 Chapter ${index + 1}: "${chapter.title}" → order: ${normalizedChapter.order}`);
+          return normalizedChapter;
+        });
+      
+      console.log('📊 Final normalized chapters:', normalizedChapters);
+      setChapters(normalizedChapters);
+      setIsInitialized(true);
     }
-  }, [courseData?.chapters, originalChapters]); // Include originalChapters to detect change completion
+  }, [courseData?.chapters, isInitialized]);
 
-  // Check for changes and notify parent
+  // ✅ CRITICAL FIX: Force reload when course data changes (after mutation)
   useEffect(() => {
-    const hasChanges = JSON.stringify(chapters) !== JSON.stringify(originalChapters);
+    if (courseData?.chapters && isInitialized) {
+      console.log('🔄 REFRESH: Reloading chapters after data change:', courseData.chapters);
+      
+      // Re-normalize the updated data from server
+      const normalizedChapters = courseData.chapters
+        .sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''))
+        .map((chapter, index) => ({
+          ...chapter,
+          order: index + 1
+        }));
+      
+      setChapters(normalizedChapters);
+      console.log('✅ REFRESHED: Chapters updated with latest server data');
+    }
+  }, [courseData?.chapters]);
+
+  // ✅ Simple change detection based on current state
+  useEffect(() => {
+    const hasChanges = chapters.length > 0 && 
+      chapters.some(ch => ch.id.startsWith('temp-') || ch.lessons?.some(l => l.id.startsWith('temp-')));
     onCurriculumChange?.(hasChanges);
-  }, [chapters, originalChapters, onCurriculumChange]);
+  }, [chapters, onCurriculumChange]);
   
-  // Handle adding new chapter - NO AUTOSAVE
+  // ✅ Simplified add chapter with guaranteed sequential ordering
   const handleAddChapter = (chapter: Partial<Chapter>) => {
     const tempId = `temp-${Date.now()}`;
+    
     const newChapter = {
       id: tempId,
       title: chapter.title || 'New chapter',
       description: chapter.description || '',
-      order: chapters.length + 1,
+      order: chapters.length + 1, // ✅ Simple: always next number
       courseId: courseId,
       lessons: [],
       createdAt: new Date(),
@@ -67,10 +97,18 @@ const CurriculumTab = forwardRef<CurriculumTabRef, CurriculumTabProps>(({
       ...chapter
     };
     
-    const updatedChapters = [...chapters, newChapter];
+    console.log('➕ Adding new chapter:', newChapter);
+    
+    // ✅ Always recalculate ALL orders to ensure sequential 1,2,3...
+    const updatedChapters = [...chapters, newChapter].map((ch, index) => ({
+      ...ch,
+      order: index + 1
+    }));
+    
+    console.log('📋 Final chapters with sequential orders:', updatedChapters.map(ch => ({id: ch.id, title: ch.title, order: ch.order})));
+    
     setChapters(updatedChapters);
     setIsAddingChapter(false);
-    // No API call - just update local state
   };
   
   // Handle editing chapter - NO AUTOSAVE
@@ -84,19 +122,18 @@ const CurriculumTab = forwardRef<CurriculumTabRef, CurriculumTabProps>(({
     // No API call - just update local state
   };
   
-  // Handle deleting chapter - NO AUTOSAVE
+  // ✅ Simplified delete with auto-reordering
   const handleDeleteChapter = (chapterId: string) => {
     if (confirm('Are you sure you want to delete this chapter and all its lessons?')) {
-      const updatedChapters = chapters.filter(chapter => chapter.id !== chapterId);
-      
-      // Update chapter order
-      const reorderedChapters = updatedChapters.map((chapter, index) => ({
-        ...chapter,
-        order: index + 1
-      }));
+      // ✅ Filter and auto-reorder in one step
+      const reorderedChapters = chapters
+        .filter(chapter => chapter.id !== chapterId)
+        .map((chapter, index) => ({
+          ...chapter,
+          order: index + 1 // ✅ Always sequential
+        }));
       
       setChapters(reorderedChapters);
-      // No API call - just update local state
     }
   };
   
@@ -161,6 +198,7 @@ const CurriculumTab = forwardRef<CurriculumTabRef, CurriculumTabProps>(({
     const apiChapters = chapters.map(chapter => {
       if (chapter.id.startsWith('temp-')) {
         return {
+          id: chapter.id, // ✅ CRITICAL FIX: Include temp ID for server mapping
           title: chapter.title,
           description: chapter.description,
           order: chapter.order
@@ -201,11 +239,17 @@ const CurriculumTab = forwardRef<CurriculumTabRef, CurriculumTabProps>(({
     return { apiChapters, allLessons };
   };
 
-  // Expose save function to parent
+  // ✅ Simplified save with proper data refresh  
   const saveCurriculum = async () => {
     const { apiChapters, allLessons } = prepareCurriculumData();
     await onUpdateCurriculum(apiChapters, allLessons);
-    setOriginalChapters(chapters); // Update original state after successful save
+    
+    // ✅ CRITICAL FIX: Force refresh from server by resetting state
+    // This ensures latest data (including proper IDs) is loaded after save
+    setIsInitialized(false);
+    
+    // ✅ Don't clear chapters immediately - let useEffect reload from server
+    // setChapters([]); // Remove this to prevent flicker
   };
 
   // Expose methods to parent via ref

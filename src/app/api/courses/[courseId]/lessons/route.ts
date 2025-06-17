@@ -76,27 +76,16 @@ export const POST = withAdmin(async (
     
     const { chapterId, ...lessonData } = validation.data;
     
-    // Trước khi gọi createLesson, tìm order tiếp theo
-    let orderValue = lessonData.order;
-    if (!orderValue) {
-      const existingLessons = await getLessonsForCourse(courseId);
-      orderValue = existingLessons.length > 0 
-        ? Math.max(...existingLessons.map(l => l.order)) + 1 
-        : 1;
-    }
-    
-    // Tạo lesson với order đã được xác định
+    // Tạo lesson với data structure đúng cho createLesson function
     const newLesson = await createLesson({
-      ...lessonData,
-      order: orderValue,
-      course: {
-        connect: { id: courseId }
-      },
-      ...(chapterId && {
-        chapter: {
-          connect: { id: chapterId }
-        }
-      })
+      title: lessonData.title,
+      content: lessonData.content || '',
+      videoUrl: lessonData.videoUrl || null,
+      duration: lessonData.duration || null,
+      resourcesData: lessonData.resourcesData || null,
+      order: lessonData.order || 0, // Let createLesson handle order calculation
+      courseId: courseId,
+      chapterId: chapterId || null
     });
     
     if (!newLesson) {

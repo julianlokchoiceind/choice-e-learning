@@ -199,10 +199,7 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
       body.imageUrl = '/images/courses/course-placeholder.jpg';
     }
     
-    // Process video URL - make empty string instead of null for consistency
-    if (body.videoUrl === null) {
-      body.videoUrl = '';
-    }
+    // Note: videoUrl is not a field in Course model, it belongs to Lesson model
     
     // Từ mảng topics, cập nhật topicIds
     let topicIds: string[] = [];
@@ -240,7 +237,6 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
       price: body.price !== undefined ? body.price : existingCourse.price,
       level: body.level || existingCourse.level,
       imageUrl: body.imageUrl !== undefined ? body.imageUrl : existingCourse.imageUrl,
-      videoUrl: body.videoUrl !== undefined ? body.videoUrl : existingCourse.videoUrl,
       status: body.status !== undefined ? body.status : existingCourse.status,
       topics: body.topics !== undefined ? body.topics : existingCourse.topics,
       topicIds: topicIds.length > 0 ? topicIds : undefined,
@@ -281,7 +277,8 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
       const finalCourseStatus = updateData.status || existingCourse.status;
       console.log(`Final course status: ${finalCourseStatus}, syncing lessons...`);
       
-      const lessonStatus = finalCourseStatus === 'published' ? 'published' : 'draft';
+      // Use proper Prisma enum values with explicit casting
+      const lessonStatus = finalCourseStatus === 'published' ? 'published' as const : 'draft' as const;
       
       const lessonUpdateResult = await tx.lesson.updateMany({
         where: { courseId: courseId },

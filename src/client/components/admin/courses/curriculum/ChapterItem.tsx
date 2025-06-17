@@ -20,6 +20,14 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
   onDelete,
   onAddLesson
 }) => {
+  // 🔍 DEBUG: Log chapter data để check order value
+  console.log('🏷️ ChapterItem render:', {
+    id: chapter.id,
+    title: chapter.title,
+    order: chapter.order,
+    orderType: typeof chapter.order
+  });
+
   return (
     <div className="flex items-center justify-between p-4 bg-gray-100">
       <div className="flex items-center">
@@ -37,7 +45,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
         
         <div>
           <h3 className="text-base font-semibold text-gray-900">
-            Chapter {chapter.order}: {chapter.title}
+            Chapter {chapter.order || '?'}: {chapter.title}
           </h3>
           {chapter.description && (
             <p className="text-sm text-gray-500 mt-1">{chapter.description}</p>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/server/db/prisma-client';
 import { withAdmin, AuthenticatedContext } from '@/server/api/route-handlers';
+import { LessonStatus } from '@prisma/client';
 
 /**
  * PUT /api/admin/courses/[courseId]/curriculum
@@ -47,114 +48,72 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
     }
 
     // Update curriculum using transaction
+    console.log('=== STARTING CURRICULUM TRANSACTION ===');
+    console.log('Request body structure:', {
+      chaptersCount: body.chapters?.length || 0,
+      lessonsCount: body.lessons?.length || 0,
+      courseStatus: existingCourse.status
+    });
+    
     const updatedCourse = await prisma.$transaction(async (tx) => {
-      // Initialize chapterIdMap for lessons processing
-      const chapterIdMap = new Map<string, string>();
+      console.log('=== INSIDE CURRICULUM TRANSACTION ===');
       
-      // Handle chapters first
-      console.log(`Processing ${body.chapters.length} chapters for curriculum update`);
-      
-      // Get existing chapters
-      const existingChapters = await tx.chapter.findMany({
-        where: { courseId },
-        include: { lessons: true }
+      // Step 1: Delete existing chapters and lessons for clean slate
+      console.log('Deleting existing curriculum...');
+      await tx.lesson.deleteMany({
+        where: { courseId }
+      });
+      await tx.chapter.deleteMany({
+        where: { courseId }
       });
       
-      const existingChapterIds = existingChapters.map(c => c.id);
-      const incomingChapterIds = body.chapters
-        .filter((c: any) => c.id && !c.id.startsWith('temp-'))
-        .map((c: any) => c.id);
+      // Step 2: Create chapters FIRST
+      const chapterIdMap = new Map<string, string>();
       
-      // Delete chapters that are no longer in the incoming data
-      const chaptersToDelete = existingChapterIds.filter(id => !incomingChapterIds.includes(id));
-      if (chaptersToDelete.length > 0) {
-        await tx.chapter.deleteMany({
-          where: { id: { in: chaptersToDelete } }
+      for (const chapter of body.chapters) {
+        console.log(`Creating chapter: ${chapter.title}`);
+        const newChapter = await tx.chapter.create({
+          data: {
+            title: chapter.title,
+            description: chapter.description || '',
+            order: chapter.order || 1,
+            courseId
+          }
         });
+        
+        // Map temporary ID to real ID (now includes temp IDs from client)
+        if (chapter.id) {
+          chapterIdMap.set(chapter.id, newChapter.id);
+          console.log(`Mapped chapter ID: ${chapter.id} → ${newChapter.id}`);
+        }
+        console.log(`Created chapter with ID: ${newChapter.id}`);
       }
       
-      // Process each chapter (create or update)
-      for (const chapter of body.chapters) {
-        const chapterData = {
-          title: chapter.title || 'Untitled Chapter',
-          description: chapter.description || '',
-          order: chapter.order || 1,
-          courseId
+      // Step 3: Create lessons AFTER chapters exist
+      for (const lesson of body.lessons) {
+        const realChapterId = lesson.chapterId ? chapterIdMap.get(lesson.chapterId) : null;
+        
+        console.log(`Creating lesson: ${lesson.title}`);
+        console.log(`  - Original chapterId: ${lesson.chapterId}`);
+        console.log(`  - Mapped to real chapterId: ${realChapterId}`);
+        
+        const lessonData = {
+          title: lesson.title || 'Untitled Lesson',
+          content: lesson.content || '',
+          videoUrl: lesson.videoUrl || null,
+          order: lesson.order || 1,
+          courseId,
+          chapterId: realChapterId
         };
         
-        if (chapter.id && !chapter.id.startsWith('temp-') && existingChapterIds.includes(chapter.id)) {
-          // Update existing chapter
-          await tx.chapter.update({
-            where: { id: chapter.id },
-            data: chapterData
-          });
-          chapterIdMap.set(chapter.id, chapter.id);
-        } else {
-          // Create new chapter
-          const newChapter = await tx.chapter.create({
-            data: chapterData
-          });
-          
-          // Map temp ID to real ID for lessons processing
-          if (chapter.id && chapter.id.startsWith('temp-')) {
-            chapterIdMap.set(chapter.id, newChapter.id);
-          }
-        }
-      }
-
-      // Handle lessons if provided
-      if (body.lessons && Array.isArray(body.lessons) && body.lessons.length > 0) {
-        console.log(`Processing ${body.lessons.length} lessons for curriculum update`);
-        
-        // Get existing lessons
-        const existingLessons = await tx.lesson.findMany({
-          where: { courseId }
+        const newLesson = await tx.lesson.create({
+          data: lessonData
         });
-        
-        const existingLessonIds = existingLessons.map(l => l.id);
-        const incomingLessonIds = body.lessons
-          .filter((l: any) => l.id && !l.id.startsWith('temp-'))
-          .map((l: any) => l.id);
-        
-        // Delete lessons that are no longer in the incoming data
-        const lessonsToDelete = existingLessonIds.filter(id => !incomingLessonIds.includes(id));
-        if (lessonsToDelete.length > 0) {
-          await tx.lesson.deleteMany({
-            where: { id: { in: lessonsToDelete } }
-          });
-        }
-        
-        // Process each lesson
-        for (const lesson of body.lessons) {
-          // Map temp chapter ID to real chapter ID
-          const realChapterId = chapterIdMap.get(lesson.chapterId) || lesson.chapterId;
-          
-          const lessonData = {
-            title: lesson.title || 'Untitled Lesson',
-            content: lesson.content || '',
-            videoUrl: lesson.videoUrl || '',
-            order: lesson.order || 1,
-            courseId,
-            chapterId: realChapterId
-          };
-          
-          if (lesson.id && !lesson.id.startsWith('temp-') && existingLessonIds.includes(lesson.id)) {
-            // Update existing lesson
-            await tx.lesson.update({
-              where: { id: lesson.id },
-              data: lessonData
-            });
-          } else {
-            // Create new lesson
-            await tx.lesson.create({
-              data: lessonData
-            });
-          }
-        }
+        console.log(`Created lesson with ID: ${newLesson.id} in chapter: ${realChapterId}`);
       }
       
-      // Return updated course with fresh curriculum data
-      return await tx.course.findUnique({
+      // Step 4: Return updated course with new curriculum
+      const course = await tx.course.findUnique({
         where: { id: courseId },
         include: {
           chapters: {
@@ -163,7 +122,28 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
           }
         }
       });
+      
+      console.log('=== CURRICULUM TRANSACTION COMPLETED ===');
+      return course;
     });
+
+    // AFTER transaction completion, sync lesson status if needed
+    console.log(`=== POST-TRANSACTION STATUS SYNCHRONIZATION ===`);
+    if (existingCourse.status === 'published') {
+      console.log(`Updating lesson status to published for course ${courseId}`);
+      try {
+        const updateResult = await prisma.lesson.updateMany({
+          where: { courseId: courseId },
+          data: { status: LessonStatus.published }
+        });
+        console.log(`Updated ${updateResult.count} lessons to published status`);
+      } catch (statusError) {
+        console.error(`Failed to sync lesson status:`, statusError);
+        // Don't throw here, as the main curriculum operation was successful
+      }
+    } else {
+      console.log(`No status sync needed - course is ${existingCourse.status}`);
+    }
 
     return NextResponse.json({
       success: true,
@@ -172,7 +152,28 @@ export const PUT = withAdmin(async (req: NextRequest, context: AuthenticatedCont
     });
 
   } catch (error) {
+    console.error('=== CURRICULUM API ERROR ===');
     console.error('Error updating curriculum:', error);
+    
+    // More detailed error logging
+    if (error instanceof Error) {
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    
+    // Log the error type
+    console.error('Error type:', typeof error);
+    console.error('Error constructor:', error?.constructor?.name);
+    
+    // If it's a Prisma error, log specific details
+    if (error && typeof error === 'object' && 'code' in error) {
+      console.error('Prisma error code:', (error as any).code);
+      console.error('Prisma error meta:', (error as any).meta);
+    }
+    
+    console.error('=== END CURRICULUM API ERROR ===');
+    
     return NextResponse.json(
       { 
         success: false, 

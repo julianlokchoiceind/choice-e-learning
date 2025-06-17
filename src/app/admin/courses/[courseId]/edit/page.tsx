@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { CourseFormTabs, CurriculumTab, BasicInfoTab, MediaResourcesTab } from '@/client/components/admin/courses';
 import { LoadingState, StatusBadge, LastSavedIndicator } from '@/client/components/common';
@@ -40,6 +39,7 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [hasCurriculumChanges, setHasCurriculumChanges] = useState(false);
   const curriculumRef = useRef<CurriculumTabRef>(null);
+  
   
   // Enhanced navigation function with courses list refresh
   const navigateToCoursesWithRefresh = useCallback(() => {
@@ -271,7 +271,8 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
           await handleUpdateDraft();
           return;
         } else {
-          toast.error(validationErrors.join('. '));
+          // User chose not to save as draft - just return without action
+          // The validation errors were already shown in the confirm dialog
           return;
         }
       }
@@ -379,7 +380,38 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
             <>
               <button
                 type="button"
-                onClick={handleUpdateDraft}
+                onClick={async () => {
+                  try {
+                    // Save curriculum if there are changes
+                    if (hasCurriculumChanges && curriculumRef.current) {
+                      await curriculumRef.current.saveCurriculum();
+                      await queryClient.invalidateQueries({ queryKey: ['course', params.courseId] });
+                      await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+
+                    const updateData = {
+                      title: values.title.trim() || 'Untitled Course',
+                      description: values.description.trim() || '',
+                      price: parseFloat(values.price) || 0,
+                      level: values.level || 'beginner',
+                      topics: Array.isArray(values.topics) ? values.topics : [],
+                      imageUrl: values.imageUrl || '',
+                      status: courseData?.status || CourseStatus.DRAFT,
+                    };
+                    
+                    await updateCourseMutation.mutateAsync({
+                      id: params.courseId,
+                      data: updateData
+                    });
+                    
+                    setLastSaved(new Date());
+                    setHasUnsavedChanges(false);
+                    setHasCurriculumChanges(false);
+                    setInitialValues(values);
+                  } catch (error: any) {
+                    console.error('Error updating course:', error);
+                  }
+                }}
                 disabled={updateCourseMutation.isPending}
                 className="btn-admin-secondary-lg"
               >

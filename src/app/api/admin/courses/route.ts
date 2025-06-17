@@ -114,11 +114,10 @@ export const POST = withAdmin(async (req: Request, context) => {
         today.getFullYear()}`;
       
       try {
-        // Tìm khóa học nháp trong ngày
-        const todayDrafts = await prisma.course.findMany({
+        // Tìm tất cả khóa học (cả draft và published) trong ngày để tránh trùng số
+        const todayCourses = await prisma.course.findMany({
           where: {
-            title: { contains: `-${dateStr}` },
-            status: 'draft'
+            title: { contains: `-${dateStr}` }
           }
         });
         
@@ -126,8 +125,8 @@ export const POST = withAdmin(async (req: Request, context) => {
         const untitledPattern = new RegExp(`^Untitled-Course-(\\d+)-${dateStr}$`);
         let maxSequence = 0;
         
-        todayDrafts.forEach(draft => {
-          const match = draft.title.match(untitledPattern);
+        todayCourses.forEach(course => {
+          const match = course.title.match(untitledPattern);
           if (match && match[1]) {
             const sequence = parseInt(match[1]);
             if (sequence > maxSequence) {
@@ -142,7 +141,7 @@ export const POST = withAdmin(async (req: Request, context) => {
         console.log(`Created new draft course with title: ${body.title}`);
         
       } catch (error) {
-        console.error('Error finding draft courses:', error);
+        console.error('Error finding existing courses for numbering:', error);
         // Fallback với timestamp
         const timestamp = Date.now();
         body.title = `Untitled-Course-1-${dateStr}-${timestamp}`;
