@@ -13,3 +13,8 @@ export { default as useLesson } from './useLesson';
  */
 export * from './useLessonsQuery';
 export { default as useLessonsQuery } from './useLessonsQuery';
+
+/**
+ * Exports the useLessonMaterialsQuery hook for lesson materials operations
+ */
+export * from './useLessonMaterialsQuery';

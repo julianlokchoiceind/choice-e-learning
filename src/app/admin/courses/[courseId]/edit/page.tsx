@@ -5,8 +5,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { CourseFormTabs, CurriculumTab, BasicInfoTab, MediaResourcesTab } from '@/client/components/admin/courses';
-import { LoadingState, StatusBadge, LastSavedIndicator } from '@/client/components/common';
+import { CourseFormTabs, CurriculumTab, BasicInfoTab, MediaResourcesTab, CourseSettingsTab } from '@/client/components/admin/courses';
+import { CourseQuizzesTab } from '@/client/components/admin/courses/quizzes';
+import CoursePreviewTab from '@/client/components/admin/courses/preview/CoursePreviewTab';
+import { LoadingState, LastSavedIndicator } from '@/client/components/common';
 import { useCoursesQuery } from '@/client/hooks/courses';
 import { useNavigationGuard } from '@/client/hooks/common/useNavigationGuard';
 import { isFormDirty } from '@/client/utils/form-utils';
@@ -38,6 +40,9 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
   const [lessons, setLessons] = useState<any[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [hasCurriculumChanges, setHasCurriculumChanges] = useState(false);
+  const [hasMediaChanges, setHasMediaChanges] = useState(false);
+  const [hasSettingsChanges, setHasSettingsChanges] = useState(false);
+  const [hasQuizChanges, setHasQuizChanges] = useState(false);
   const curriculumRef = useRef<CurriculumTabRef>(null);
   
   
@@ -51,9 +56,11 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
     router.push('/admin/courses');
   }, [queryClient, router]);
 
-  // Navigation guard - check both form and curriculum changes
+  // Navigation guard - check ALL tab changes
+  const hasAnyUnsavedChanges = hasUnsavedChanges || hasCurriculumChanges || hasMediaChanges || hasSettingsChanges || hasQuizChanges;
+  
   const { navigateWithConfirmation } = useNavigationGuard({
-    hasUnsavedChanges: hasUnsavedChanges || hasCurriculumChanges,
+    hasUnsavedChanges: hasAnyUnsavedChanges,
     message: 'You have unsaved changes. Are you sure you want to leave this page?'
   });
   
@@ -235,6 +242,9 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
       setLastSaved(new Date());
       setHasUnsavedChanges(false);
       setHasCurriculumChanges(false);
+      setHasMediaChanges(false);
+      setHasSettingsChanges(false);
+      setHasQuizChanges(false);
       setInitialValues(values);
       
       // Remove manual toast - QueryProvider will handle it via mutation meta
@@ -312,6 +322,9 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
       setLastSaved(new Date());
       setHasUnsavedChanges(false);
       setHasCurriculumChanges(false);
+      setHasMediaChanges(false);
+      setHasSettingsChanges(false);
+      setHasQuizChanges(false);
       setInitialValues(values);
       
       navigateToCoursesWithRefresh();
@@ -348,7 +361,7 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
     <div className="space-y-6">
       <button
         onClick={() => {
-          if (hasUnsavedChanges || hasCurriculumChanges) {
+          if (hasAnyUnsavedChanges) {
             const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave this page?');
             if (confirmed) {
               navigateToCoursesWithRefresh();
@@ -366,9 +379,8 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center space-x-3">
           <h1 className="text-2xl font-bold text-gray-900">Edit Course</h1>
-          <StatusBadge status={courseData?.status || 'draft'} size="sm" />
           <LastSavedIndicator lastSaved={lastSaved} />
-          {(hasUnsavedChanges || hasCurriculumChanges) && (
+          {hasAnyUnsavedChanges && (
             <span className="text-sm text-orange-600 font-medium">
               • Unsaved changes
             </span>
@@ -407,6 +419,9 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
                     setLastSaved(new Date());
                     setHasUnsavedChanges(false);
                     setHasCurriculumChanges(false);
+                    setHasMediaChanges(false);
+                    setHasSettingsChanges(false);
+                    setHasQuizChanges(false);
                     setInitialValues(values);
                   } catch (error: any) {
                     console.error('Error updating course:', error);
@@ -499,7 +514,29 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
         </div>
         
         <div style={{ display: activeTab === 'media-resources' ? 'block' : 'none' }}>
-          <MediaResourcesTab courseId={params.courseId} />
+          <MediaResourcesTab 
+            courseId={params.courseId} 
+            onChangesDetected={setHasMediaChanges}
+          />
+        </div>
+        
+        <div style={{ display: activeTab === 'quizzes' ? 'block' : 'none' }}>
+          <CourseQuizzesTab 
+            courseId={params.courseId} 
+            courseTitle={values.title}
+            onChangesDetected={setHasQuizChanges}
+          />
+        </div>
+        
+        <div style={{ display: activeTab === 'settings-pricing' ? 'block' : 'none' }}>
+          <CourseSettingsTab 
+            courseId={params.courseId}
+            onChangesDetected={setHasSettingsChanges}
+          />
+        </div>
+        
+        <div style={{ display: activeTab === 'preview' ? 'block' : 'none' }}>
+          <CoursePreviewTab course={courseData} />
         </div>
         
         {/* Navigation Buttons */}
@@ -508,7 +545,7 @@ export default function EditCoursePage({ params }: { params: { courseId: string 
           <div className="flex space-x-4">
             <button
               onClick={() => {
-          if (hasUnsavedChanges || hasCurriculumChanges) {
+          if (hasAnyUnsavedChanges) {
             const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave this page?');
             if (confirmed) {
               navigateToCoursesWithRefresh();

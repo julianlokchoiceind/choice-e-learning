@@ -12,6 +12,7 @@ const CourseFormTabs: FC<CourseFormTabsProps> = ({ activeTab, onTabChange }) => 
     { id: 'basicInfo', label: 'Basic Info' },
     { id: 'curriculum', label: 'Curriculum' },
     { id: 'media-resources', label: 'Media & Resources' },
+    { id: 'quizzes', label: 'Quizzes' },
     { id: 'settings-pricing', label: 'Settings & Pricing' },
     { id: 'preview', label: 'Preview' },
   ];

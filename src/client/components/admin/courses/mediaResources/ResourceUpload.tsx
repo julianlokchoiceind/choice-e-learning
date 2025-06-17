@@ -8,58 +8,31 @@ import {
   PencilIcon,
   DocumentArrowDownIcon 
 } from '@heroicons/react/24/outline';
-// Removed FileUpload import as we're using native input
-
-interface CourseResource {
-  id: string;
-  type: 'pdf' | 'zip' | 'xls' | 'doc' | 'ppt' | 'video' | 'audio' | 'image';
-  title: string;
-  description?: string;
-  fileName: string;
-  fileSize: number;
-  url: string;
-  createdAt: Date;
-}
+import { CourseMaterial } from '@/shared/types/courses/course-material';
+import { useCourseMaterialsQuery } from '@/client/hooks/courses/useCourseMaterialsQuery';
+import { LoadingState } from '@/client/components/common/LoadingState';
 
 interface ResourceUploadProps {
   courseId: string;
+  onChangesDetected?: (hasChanges: boolean) => void;
 }
 
-const ResourceUpload: FC<ResourceUploadProps> = ({ courseId }) => {
-  const [resources, setResources] = useState<CourseResource[]>([
-    {
-      id: '1',
-      type: 'pdf',
-      title: 'React Fundamentals Cheat Sheet.pdf',
-      description: 'Study Guide',
-      fileName: 'React Fundamentals Cheat Sheet.pdf',
-      fileSize: 2400000,
-      url: '/uploads/course-materials/react-cheat-sheet.pdf',
-      createdAt: new Date('2024-01-15')
-    },
-    {
-      id: '2',
-      type: 'zip',
-      title: 'Project Starter Code.zip',
-      description: 'Source Code',
-      fileName: 'Project Starter Code.zip',
-      fileSize: 8300000,
-      url: '/uploads/course-materials/starter-code.zip',
-      createdAt: new Date('2024-01-14')
-    },
-    {
-      id: '3',
-      type: 'xls',
-      title: 'Exercise Worksheet.xlsx',
-      description: 'Practice Exercises',
-      fileName: 'Exercise Worksheet.xlsx',
-      fileSize: 1200000,
-      url: '/uploads/course-materials/exercises.xlsx',
-      createdAt: new Date('2024-01-13')
-    }
-  ]);
-
+const ResourceUpload: FC<ResourceUploadProps> = ({ courseId, onChangesDetected }) => {
   const [isUploading, setIsUploading] = useState(false);
+  
+  // Use React Query hooks for data management
+  const {
+    useGetCourseMaterials,
+    useCreateCourseMaterial,
+    useDeleteCourseMaterial
+  } = useCourseMaterialsQuery(courseId);
+  
+  const { data: materialsData, isLoading, error } = useGetCourseMaterials();
+  const createMutation = useCreateCourseMaterial();
+  const deleteMutation = useDeleteCourseMaterial();
+  
+  // Ensure materials is always an array
+  const materials = Array.isArray(materialsData) ? materialsData : [];
 
   const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return bytes + ' B';
@@ -83,20 +56,47 @@ const ResourceUpload: FC<ResourceUploadProps> = ({ courseId }) => {
   const handleFileUpload = async (file: File) => {
     setIsUploading(true);
     try {
-      // Simulate file upload
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // First upload the file
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', 'course-material');
+      formData.append('courseId', courseId);
+
+      const uploadResponse = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) throw new Error('Upload failed');
+
+      const uploadResult = await uploadResponse.json();
       
-      const newResource: CourseResource = {
-        id: Date.now().toString(),
-        type: file.name.split('.').pop()?.toLowerCase() as any || 'doc',
-        title: file.name,
-        fileName: file.name,
+      // Get file extension for type
+      const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+      const fileType = getFileTypeFromExtension(fileExtension);
+      
+      // Create filename with choice prefix
+      const choiceFileName = `choice-${file.name}`;
+      
+      // Create course material record in database
+      await createMutation.mutateAsync({
+        title: choiceFileName,
+        fileName: choiceFileName,
         fileSize: file.size,
-        url: `/uploads/course-materials/${file.name}`,
-        createdAt: new Date()
-      };
-      
-      setResources(prev => [newResource, ...prev]);
+        fileType,
+        mimeType: file.type,
+        description: getDefaultDescription(fileType),
+        url: uploadResult.data.url
+      });
+
+      // Notify parent of successful upload (this counts as a "change")
+      if (onChangesDetected) {
+        onChangesDetected(false); // Reset after successful save
+      }
+
+      // Reset input
+      const input = document.getElementById('file-upload') as HTMLInputElement;
+      if (input) input.value = '';
     } catch (error) {
       console.error('Upload failed:', error);
     } finally {
@@ -104,9 +104,64 @@ const ResourceUpload: FC<ResourceUploadProps> = ({ courseId }) => {
     }
   };
 
-  const handleDelete = (id: string) => {
-    setResources(prev => prev.filter(resource => resource.id !== id));
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this course material?')) {
+      try {
+        await deleteMutation.mutateAsync(id);
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
+    }
   };
+
+  const getFileTypeFromExtension = (extension: string): string => {
+    const typeMap: { [key: string]: string } = {
+      pdf: 'pdf',
+      doc: 'doc',
+      docx: 'doc',
+      xls: 'xls',
+      xlsx: 'xls',
+      ppt: 'ppt',
+      pptx: 'ppt',
+      zip: 'zip',
+      txt: 'txt',
+      csv: 'csv'
+    };
+    return typeMap[extension] || 'doc';
+  };
+
+  const getDefaultDescription = (fileType: string): string => {
+    const descMap: { [key: string]: string } = {
+      pdf: 'Study Guide',
+      doc: 'Document',
+      xls: 'Practice Exercises',
+      ppt: 'Presentation',
+      zip: 'Source Code',
+      txt: 'Text File',
+      csv: 'Data File'
+    };
+    return descMap[fileType] || 'Course Material';
+  };
+
+  // Loading state
+  if (isLoading) {
+    return <LoadingState message="Loading course materials..." />;
+  }
+  
+  // Error state
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600 mb-4">Failed to load course materials</p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="btn-admin-primary"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -127,7 +182,7 @@ const ResourceUpload: FC<ResourceUploadProps> = ({ courseId }) => {
           <div className="mt-4">
             <h4 className="text-sm font-medium text-gray-900">Add Course Material</h4>
             <p className="text-sm text-gray-600 mt-1">
-              Upload PDFs, documents, videos, or other learning resources
+              Upload PDFs, documents, or other learning resources
             </p>
           </div>
           <div className="mt-4">
@@ -156,28 +211,28 @@ const ResourceUpload: FC<ResourceUploadProps> = ({ courseId }) => {
         </div>
       </div>
 
-      {/* Resources List */}
-      {resources.length > 0 && (
+      {/* Materials List */}
+      {materials.length > 0 ? (
         <div className="space-y-3">
           <h4 className="text-sm font-medium text-gray-900">
-            Uploaded Materials ({resources.length})
+            Uploaded Materials ({materials.length})
           </h4>
           <div className="space-y-2">
-            {resources.map((resource) => (
+            {materials.map((material) => (
               <div
-                key={resource.id}
+                key={material.id}
                 className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors"
               >
                 <div className="flex items-center space-x-3">
-                  {getFileTypeIcon(resource.type)}
+                  {getFileTypeIcon(material.fileType)}
                   <div className="flex-1 min-w-0">
                     <h5 className="text-sm font-medium text-gray-900 truncate">
-                      {resource.title}
+                      {material.title}
                     </h5>
                     <div className="flex items-center space-x-4 text-xs text-gray-500">
-                      <span>{formatFileSize(resource.fileSize)}</span>
+                      <span>{formatFileSize(material.fileSize)}</span>
                       <span>•</span>
-                      <span>{resource.description}</span>
+                      <span>{material.description}</span>
                     </div>
                   </div>
                 </div>
@@ -190,9 +245,10 @@ const ResourceUpload: FC<ResourceUploadProps> = ({ courseId }) => {
                     <PencilIcon className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => handleDelete(resource.id)}
+                    onClick={() => handleDelete(material.id)}
                     className="p-2 text-gray-400 hover:text-red-600 rounded-md hover:bg-white"
                     title="Delete"
+                    disabled={deleteMutation.isPending}
                   >
                     <TrashIcon className="h-4 w-4" />
                   </button>
@@ -201,14 +257,24 @@ const ResourceUpload: FC<ResourceUploadProps> = ({ courseId }) => {
             ))}
           </div>
         </div>
+      ) : (
+        !isUploading && !createMutation.isPending && (
+          <div className="text-center py-8 text-gray-500">
+            <DocumentIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+            <p>No course materials uploaded yet</p>
+            <p className="text-sm">Upload PDF, ZIP, DOC, XLS, PPT files for students</p>
+          </div>
+        )
       )}
 
       {/* Loading State */}
-      {isUploading && (
+      {(isUploading || createMutation.isPending) && (
         <div className="text-center py-8">
           <div className="inline-flex items-center space-x-2 text-blue-600">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-            <span className="text-sm">Uploading file...</span>
+            <span className="text-sm">
+              {isUploading ? 'Uploading file...' : 'Saving course material...'}
+            </span>
           </div>
         </div>
       )}

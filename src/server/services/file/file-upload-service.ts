@@ -7,12 +7,13 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 
 // Define the upload types for better type safety
-export type UploadType = 'course-cover' | 'course-material' | 'user-avatar' | 'common';
+export type UploadType = 'course-cover' | 'course-material' | 'lesson-material' | 'user-avatar' | 'common';
 
 // Options interface for uploading files
 interface UploadOptions {
   type: UploadType;
   courseId?: string;
+  lessonId?: string;
   userId?: string;
 }
 
@@ -28,7 +29,7 @@ export async function uploadFile(
   fileName: string,
   options: UploadOptions
 ): Promise<string> {
-  const { type, courseId, userId } = options;
+  const { type, courseId, lessonId, userId } = options;
   
   // Get the base upload directory
   const baseUploadDir = join(process.cwd(), 'public', 'uploads');
@@ -47,6 +48,12 @@ export async function uploadFile(
       uploadDir = join(uploadDir, 'courses', 'materials');
       if (courseId) {
         uploadDir = join(uploadDir, courseId);
+      }
+      break;
+    case 'lesson-material':
+      uploadDir = join(uploadDir, 'lessons', 'materials');
+      if (lessonId) {
+        uploadDir = join(uploadDir, lessonId);
       }
       break;
     case 'user-avatar':

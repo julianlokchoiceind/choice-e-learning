@@ -13,9 +13,10 @@ import {
 
 interface ResourceSettingsProps {
   courseId: string;
+  onChangesDetected?: (hasChanges: boolean) => void;
 }
 
-const ResourceSettings: FC<ResourceSettingsProps> = ({ courseId }) => {
+const ResourceSettings: FC<ResourceSettingsProps> = ({ courseId, onChangesDetected }) => {
   const [settings, setSettings] = useState({
     videoControl: {
       completionPercentage: 80,
@@ -50,6 +51,11 @@ const ResourceSettings: FC<ResourceSettingsProps> = ({ courseId }) => {
         [key]: !(prev as any)[section][key]
       }
     }));
+    
+    // Notify parent of changes
+    if (onChangesDetected) {
+      onChangesDetected(true);
+    }
   };
 
   const handleNumberChange = (section: string, key: string, value: number) => {
@@ -60,6 +66,11 @@ const ResourceSettings: FC<ResourceSettingsProps> = ({ courseId }) => {
         [key]: value
       }
     }));
+    
+    // Notify parent of changes
+    if (onChangesDetected) {
+      onChangesDetected(true);
+    }
   };
 
   const ToggleSwitch: FC<{ 
@@ -360,6 +371,15 @@ const ResourceSettings: FC<ResourceSettingsProps> = ({ courseId }) => {
       <div className="flex justify-end pt-4 border-t">
         <button
           type="button"
+          onClick={() => {
+            // In a real implementation, this would save to the server
+            console.log('Saving settings:', settings);
+            
+            // Reset changes state after successful save
+            if (onChangesDetected) {
+              onChangesDetected(false);
+            }
+          }}
           className="btn-admin-primary"
         >
           Save Settings

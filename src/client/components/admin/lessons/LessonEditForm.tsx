@@ -9,10 +9,12 @@ import {
   ChevronDownIcon
 } from '@heroicons/react/24/outline';
 import { Lesson } from '@/shared/types/lessons/lesson';
+import { LessonResources } from '@/shared/types/lessons/lesson-resources';
 import { useCoursesQuery } from '@/client/hooks/courses';
 import { useLessonsQuery } from '@/client/hooks/lessons';
 import { LoadingState } from '@/client/components/common';
 import { isFormDirty } from '@/client/utils/form-utils';
+import { LessonResourcesSection } from './resources';
 
 interface LessonEditFormProps {
   lesson: Lesson;
@@ -55,6 +57,14 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
   const [formData, setFormData] = useState(initialFormData);
   const [initialFormDataRef, setInitialFormDataRef] = useState(initialFormData);
   
+  // Resources state
+  const [resources, setResources] = useState<LessonResources>({
+    files: [],
+    links: [],
+    code: []
+  });
+  const [allowDownload, setAllowDownload] = useState(true); // TODO: Get from course settings
+  
   // Update form data when lesson prop changes
   React.useEffect(() => {
     if (lesson) {
@@ -70,6 +80,17 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
       };
       setFormData(newFormData);
       setInitialFormDataRef(newFormData);
+      
+      // Parse lesson resources
+      if (lesson.resourcesData) {
+        try {
+          const parsedResources = JSON.parse(lesson.resourcesData);
+          setResources(parsedResources);
+        } catch (error) {
+          console.error('Error parsing lesson resources:', error);
+          // Keep default empty resources
+        }
+      }
     }
   }, [lesson]);
 
@@ -134,7 +155,8 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
         order: parseInt(formData.order.toString()),
         courseId: formData.courseId,
         chapterId: formData.chapterId || null,
-        duration: formData.duration ? formData.duration.toString() : null
+        duration: formData.duration ? formData.duration.toString() : null,
+        resourcesData: JSON.stringify(resources)
       };
 
       if (isNew) {
@@ -166,7 +188,8 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
         order: parseInt(formData.order.toString()),
         courseId: formData.courseId,
         chapterId: formData.chapterId || null,
-        duration: formData.duration ? formData.duration.toString() : null
+        duration: formData.duration ? formData.duration.toString() : null,
+        resourcesData: JSON.stringify(resources)
       };
 
       if (isNew) {
@@ -409,6 +432,15 @@ You'll learn about:
         </div>
 
       </div>
+
+      {/* Lesson Resources Section */}
+      <LessonResourcesSection
+        lessonId={lesson?.id || ''}
+        courseId={formData.courseId}
+        initialResources={resources}
+        allowDownload={allowDownload}
+        onResourcesChange={setResources}
+      />
     </div>
   );
 };

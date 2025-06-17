@@ -321,3 +321,225 @@ export async function getEnrolledCourses(
     };
   }
 }
+
+/**
+ * Find course materials by course ID
+ * @param courseId Course ID
+ * @returns Array of course materials
+ */
+export async function findCourseMaterialsByCourseId(courseId: string) {
+  try {
+    return await prisma.courseMaterial.findMany({
+      where: { 
+        courseId,
+        isActive: true
+      },
+      orderBy: { order: 'asc' }
+    });
+  } catch (error: unknown) {
+    console.error('Error finding course materials:', error);
+    return [];
+  }
+}
+
+/**
+ * Create a new course material
+ * @param courseId Course ID
+ * @param data Course material data
+ * @returns Created course material or null if creation failed
+ */
+export async function createCourseMaterial(
+  courseId: string,
+  data: {
+    title: string;
+    fileName: string;
+    fileSize: number;
+    fileType: string;
+    mimeType: string;
+    description?: string;
+    url: string;
+  }
+) {
+  try {
+    // Verify that the course exists
+    const course = await prisma.course.findUnique({
+      where: { id: courseId }
+    });
+
+    if (!course) {
+      console.error(`Course with ID ${courseId} not found`);
+      return null;
+    }
+
+    // Get the highest order and add 1
+    const highestOrderMaterial = await prisma.courseMaterial.findFirst({
+      where: { courseId },
+      orderBy: { order: 'desc' }
+    });
+    
+    const orderValue = highestOrderMaterial ? highestOrderMaterial.order + 1 : 1;
+
+    return await prisma.courseMaterial.create({
+      data: {
+        ...data,
+        courseId,
+        order: orderValue
+      }
+    });
+  } catch (error: unknown) {
+    console.error('Error creating course material:', error);
+    return null;
+  }
+}
+
+/**
+ * Update course material
+ * @param materialId Material ID
+ * @param data Update data
+ * @returns Updated course material or null if update failed
+ */
+export async function updateCourseMaterial(
+  materialId: string,
+  data: Partial<{
+    title: string;
+    description: string;
+    order: number;
+  }>
+) {
+  try {
+    return await prisma.courseMaterial.update({
+      where: { id: materialId },
+      data
+    });
+  } catch (error: unknown) {
+    console.error('Error updating course material:', error);
+    return null;
+  }
+}
+
+/**
+ * Delete course material
+ * @param materialId Material ID
+ * @returns Deleted course material or null if deletion failed
+ */
+export async function deleteCourseMaterial(materialId: string) {
+  try {
+    return await prisma.courseMaterial.delete({
+      where: { id: materialId }
+    });
+  } catch (error: unknown) {
+    console.error('Error deleting course material:', error);
+    return null;
+  }
+}
+
+/**
+ * Find lesson materials by lesson ID
+ * @param lessonId Lesson ID
+ * @returns Array of lesson materials
+ */
+export async function findLessonMaterialsByLessonId(lessonId: string) {
+  try {
+    return await prisma.lessonMaterial.findMany({
+      where: { 
+        lessonId,
+        isActive: true
+      },
+      orderBy: { order: 'asc' }
+    });
+  } catch (error: unknown) {
+    console.error('Error finding lesson materials:', error);
+    return [];
+  }
+}
+
+/**
+ * Create a new lesson material
+ * @param lessonId Lesson ID
+ * @param data Lesson material data
+ * @returns Created lesson material or null if creation failed
+ */
+export async function createLessonMaterial(
+  lessonId: string,
+  data: {
+    title: string;
+    fileName: string;
+    fileSize: number;
+    fileType: string;
+    mimeType: string;
+    description?: string;
+    url: string;
+  }
+) {
+  try {
+    // Verify that the lesson exists
+    const lesson = await prisma.lesson.findUnique({
+      where: { id: lessonId }
+    });
+
+    if (!lesson) {
+      console.error(`Lesson with ID ${lessonId} not found`);
+      return null;
+    }
+
+    // Get the highest order and add 1
+    const highestOrderMaterial = await prisma.lessonMaterial.findFirst({
+      where: { lessonId },
+      orderBy: { order: 'desc' }
+    });
+    
+    const orderValue = highestOrderMaterial ? highestOrderMaterial.order + 1 : 1;
+
+    return await prisma.lessonMaterial.create({
+      data: {
+        ...data,
+        lessonId,
+        order: orderValue
+      }
+    });
+  } catch (error: unknown) {
+    console.error('Error creating lesson material:', error);
+    return null;
+  }
+}
+
+/**
+ * Update lesson material
+ * @param materialId Material ID
+ * @param data Update data
+ * @returns Updated lesson material or null if update failed
+ */
+export async function updateLessonMaterial(
+  materialId: string,
+  data: Partial<{
+    title: string;
+    description: string;
+    order: number;
+  }>
+) {
+  try {
+    return await prisma.lessonMaterial.update({
+      where: { id: materialId },
+      data
+    });
+  } catch (error: unknown) {
+    console.error('Error updating lesson material:', error);
+    return null;
+  }
+}
+
+/**
+ * Delete lesson material
+ * @param materialId Material ID
+ * @returns Deleted lesson material or null if deletion failed
+ */
+export async function deleteLessonMaterial(materialId: string) {
+  try {
+    return await prisma.lessonMaterial.delete({
+      where: { id: materialId }
+    });
+  } catch (error: unknown) {
+    console.error('Error deleting lesson material:', error);
+    return null;
+  }
+}

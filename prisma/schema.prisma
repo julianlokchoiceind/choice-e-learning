@@ -42,6 +42,7 @@ model User {
   submissions  Submission[]
   achievements Achievement[]
   progress     UserProgress[]
+  quizAttempts QuizAttempt[]
 
   @@map("users")
 }
@@ -106,6 +107,8 @@ model Course {
   reviews    Review[]
   progress   UserProgress[]
   referenceLinks ReferenceLink[]
+  materials  CourseMaterial[]
+  quizzes    Quiz[]
 
   @@map("courses")
 }
@@ -140,6 +143,7 @@ model Lesson {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   progress      UserProgress[]
+  materials     LessonMaterial[]
 
   @@map("lessons")
 }
@@ -272,6 +276,98 @@ model ReferenceLink {
   updatedAt   DateTime @updatedAt
 
   @@map("reference_links")
+}
+
+model CourseMaterial {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  fileName    String
+  fileSize    Int
+  fileType    String   // "pdf", "zip", "xls", etc
+  mimeType    String   // "application/pdf", etc
+  description String?  // "Study Guide", "Source Code", etc
+  url         String   // File path
+  courseId    String   @db.ObjectId
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("course_materials")
+}
+
+model LessonMaterial {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  fileName    String
+  fileSize    Int
+  fileType    String   // "pdf", "zip", "xls", etc
+  mimeType    String   // "application/pdf", etc
+  description String?  // "Study Guide", "Source Code", etc
+  url         String   // File path
+  lessonId    String   @db.ObjectId
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("lesson_materials")
+}
+
+model Quiz {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String?
+  courseId    String   @db.ObjectId
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  timeLimit   Int?     // Time limit in minutes
+  passingScore Int     @default(70) // Passing score percentage
+  maxAttempts Int      @default(3)  // Maximum attempts allowed
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  questions   Question[]
+  attempts    QuizAttempt[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("quizzes")
+}
+
+model Question {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  type          String   // "multiple_choice", "true_false", "short_answer"
+  content       String   // Question text
+  options       String[] // Array of options for multiple choice
+  correctAnswer String   // Correct answer(s)
+  explanation   String?  // Explanation for the answer
+  points        Int      @default(1)
+  order         Int      @default(0)
+  quizId        String   @db.ObjectId
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("questions")
+}
+
+model QuizAttempt {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizId      String   @db.ObjectId
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  answers     String   // JSON string of answers
+  score       Float    // Score achieved (0-100)
+  timeSpent   Int      // Time spent in seconds
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("quiz_attempts")
 }
 
 

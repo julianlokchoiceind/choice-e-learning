@@ -30,6 +30,7 @@ export function useNavigationGuard({
         const confirmed = window.confirm(message);
         if (!confirmed) {
           // Push current state back to history to prevent navigation
+          e.preventDefault();
           window.history.pushState(null, '', window.location.href);
         }
       }
@@ -59,19 +60,16 @@ export function useNavigationGuard({
       }
     };
     
-    if (hasUnsavedChanges) {
-      window.addEventListener('beforeunload', handleBeforeUnload);
-      window.addEventListener('popstate', handlePopState);
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      
-      // Add indicator to title when there are unsaved changes
-      if (document.title && !document.title.includes('•')) {
-        document.title = '• ' + document.title;
-      }
-    }
-    
-    // Always listen for navigation check events
+    // Add listeners conditionally
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('checkUnsavedChanges', handleNavigationCheck as EventListener);
+    
+    // Add indicator to title when there are unsaved changes
+    if (hasUnsavedChanges && document.title && !document.title.includes('•')) {
+      document.title = '• ' + document.title;
+    }
     
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
