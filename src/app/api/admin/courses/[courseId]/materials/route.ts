@@ -26,7 +26,7 @@ import {
 export const GET = withAdmin(async (
   _req: NextRequest,
   context: AuthenticatedContext) => {
-  const courseId = context.params.courseId;
+  const courseId = context.params?.courseId;
   
   if (!courseId) {
     return apiError('Course ID is required', {}, ApiErrorCode.VALIDATION_ERROR);
@@ -34,7 +34,6 @@ export const GET = withAdmin(async (
   
   try {
     const materials = await findCourseMaterialsByCourseId(courseId);
-    
     return apiSuccess(materials);
   } catch (error: unknown) {
     console.error(`Error fetching course materials for course ${courseId}:`, error);

@@ -73,7 +73,7 @@
     "file-loader": "^6.2.0",
     "fs-extra": "^11.3.0",
     "glob": "^11.0.2",
-    "mongodb": "^6.16.0",
+    "mongodb": "^6.17.0",
     "path": "^0.12.7",
     "path-browserify": "^1.0.1",
     "postcss": "^8.4.33",

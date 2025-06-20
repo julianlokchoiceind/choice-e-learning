@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/server/auth/auth-options';
-import { ReferenceLinkService } from '@/server/services/courses/reference-link-service';
-import { updateReferenceLinkSchema } from '@/shared/schemas/courses/reference-link-schema';
+import { CourseReferenceLinkService } from '@/server/services/courses/course-reference-link-service';
+import { updateCourseReferenceLinkSchema } from '@/shared/schemas/courses/course-reference-link-schema';
 import { validateRequest } from '@/server/utils/data/validation';
 
 /**
- * GET /api/admin/courses/[courseId]/reference-links/[linkId]
+ * GET /api/admin/courses/[courseId]/course-reference-links/[linkId]
  * Get a single reference link by ID
  */
 export async function GET(
@@ -26,9 +26,9 @@ export async function GET(
     const { linkId } = params;
 
     // Get reference link
-    const referenceLink = await ReferenceLinkService.getReferenceLinkById(linkId);
+    const courseReferenceLink = await CourseReferenceLinkService.getCourseReferenceLinkById(linkId);
     
-    if (!referenceLink) {
+    if (!courseReferenceLink) {
       return NextResponse.json(
         { success: false, error: 'Reference link not found' },
         { status: 404 }
@@ -37,7 +37,7 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      data: referenceLink
+      data: courseReferenceLink
     });
 
   } catch (error: any) {
@@ -54,7 +54,7 @@ export async function GET(
 }
 
 /**
- * PUT /api/admin/courses/[courseId]/reference-links/[linkId]
+ * PUT /api/admin/courses/[courseId]/course-reference-links/[linkId]
  * Update a reference link
  */
 export async function PUT(
@@ -75,7 +75,7 @@ export async function PUT(
     const body = await request.json();
 
     // Validate request body
-    const validationResult = validateRequest(updateReferenceLinkSchema, body);
+    const validationResult = validateRequest(updateCourseReferenceLinkSchema, body);
     if (!validationResult.success) {
       return NextResponse.json(
         { 
@@ -94,7 +94,7 @@ export async function PUT(
     }
 
     // Check if reference link exists
-    const existingLink = await ReferenceLinkService.getReferenceLinkById(linkId);
+    const existingLink = await CourseReferenceLinkService.getCourseReferenceLinkById(linkId);
     if (!existingLink) {
       return NextResponse.json(
         { success: false, error: 'Reference link not found' },
@@ -103,11 +103,11 @@ export async function PUT(
     }
 
     // Update reference link
-    const referenceLink = await ReferenceLinkService.updateReferenceLink(linkId, updateData);
+    const courseReferenceLink = await CourseReferenceLinkService.updateCourseReferenceLink(linkId, updateData);
 
     return NextResponse.json({
       success: true,
-      data: referenceLink,
+      data: courseReferenceLink,
       message: 'Reference link updated successfully'
     });
 
@@ -125,7 +125,7 @@ export async function PUT(
 }
 
 /**
- * DELETE /api/admin/courses/[courseId]/reference-links/[linkId]
+ * DELETE /api/admin/courses/[courseId]/course-reference-links/[linkId]
  * Delete a reference link
  */
 export async function DELETE(
@@ -145,7 +145,7 @@ export async function DELETE(
     const { linkId } = params;
 
     // Check if reference link exists
-    const existingLink = await ReferenceLinkService.getReferenceLinkById(linkId);
+    const existingLink = await CourseReferenceLinkService.getCourseReferenceLinkById(linkId);
     if (!existingLink) {
       return NextResponse.json(
         { success: false, error: 'Reference link not found' },
@@ -154,7 +154,7 @@ export async function DELETE(
     }
 
     // Delete reference link
-    await ReferenceLinkService.deleteReferenceLink(linkId);
+    await CourseReferenceLinkService.deleteCourseReferenceLink(linkId);
 
     return NextResponse.json({
       success: true,

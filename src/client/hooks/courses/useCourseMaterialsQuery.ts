@@ -24,7 +24,19 @@ export function useCourseMaterialsQuery(courseId: string) {
   const useGetCourseMaterials = () => {
     return useQuery({
       queryKey,
-      queryFn: () => apiRequest.get<CourseMaterial[]>(`/api/admin/courses/${courseId}/materials`),
+      queryFn: async (): Promise<CourseMaterial[]> => {
+        const response = await apiRequest.get(`/api/admin/courses/${courseId}/materials`);
+        
+        // The useApiRequest hook returns the full Axios response
+        // response.data contains our API response: { success: true, data: CourseMaterial[] }
+        if (response && response.data && typeof response.data === 'object' && 'success' in response.data && 'data' in response.data) {
+          const materials = response.data.data;
+          return Array.isArray(materials) ? materials : [];
+        }
+        
+        // Fallback
+        return [];
+      },
       enabled: !!courseId
     });
   };
@@ -34,22 +46,37 @@ export function useCourseMaterialsQuery(courseId: string) {
    */
   const useCreateCourseMaterial = () => {
     return useMutation({
-      mutationFn: (data: CreateCourseMaterialData) => 
-        apiRequest.post<CourseMaterial>(`/api/admin/courses/${courseId}/materials`, data),
+      mutationFn: async (data: CreateCourseMaterialData) => {
+        const response = await apiRequest.post(
+          `/api/admin/courses/${courseId}/materials`, 
+          data
+        );
+        
+        if (!response || !response.data) {
+          throw new Error('Failed to create course material');
+        }
+        
+        // The useApiRequest hook returns the full Axios response
+        // response.data contains our API response: { success: boolean, data: CourseMaterial }
+        if (response.data && typeof response.data === 'object' && 'success' in response.data && 'data' in response.data) {
+          const material = response.data.data;
+          return material as CourseMaterial;
+        }
+        
+        // Fallback
+        throw new Error('Unexpected response format');
+      },
+      // Remove toasts - only use for update/publish/unpublish as requested
       onSuccess: (newMaterial) => {
         // Update the cache with the new material
         queryClient.setQueryData<CourseMaterial[]>(queryKey, (oldData) => {
-          if (!oldData) return [newMaterial];
+          if (!oldData || !Array.isArray(oldData)) return [newMaterial];
           return [...oldData, newMaterial];
         });
         
         // Invalidate related queries
         queryClient.invalidateQueries({ queryKey: ['courses'] });
       },
-      meta: {
-        successToast: 'Course material uploaded successfully',
-        errorToast: 'Failed to upload course material'
-      }
     });
   };
   
@@ -58,21 +85,35 @@ export function useCourseMaterialsQuery(courseId: string) {
    */
   const useUpdateCourseMaterial = () => {
     return useMutation({
-      mutationFn: ({ materialId, data }: { materialId: string; data: UpdateCourseMaterialData }) =>
-        apiRequest.put<CourseMaterial>(`/api/admin/courses/${courseId}/materials/${materialId}`, data),
+      mutationFn: async ({ materialId, data }: { materialId: string; data: UpdateCourseMaterialData }) => {
+        const response = await apiRequest.put(
+          `/api/admin/courses/${courseId}/materials/${materialId}`, 
+          data
+        );
+        
+        if (!response || !response.data) {
+          throw new Error('Failed to update course material');
+        }
+        
+        // Extract material from API response format
+        if (response.data && typeof response.data === 'object' && 'success' in response.data && 'data' in response.data) {
+          return response.data.data as CourseMaterial;
+        }
+        throw new Error('Unexpected response format');
+      },
+      meta: {
+        successToast: 'Course material updated successfully',
+        errorToast: 'Failed to update course material'
+      },
       onSuccess: (updatedMaterial) => {
         // Update the cache with the updated material
         queryClient.setQueryData<CourseMaterial[]>(queryKey, (oldData) => {
-          if (!oldData) return [updatedMaterial];
+          if (!oldData || !Array.isArray(oldData)) return [updatedMaterial];
           return oldData.map(material => 
             material.id === updatedMaterial.id ? updatedMaterial : material
           );
         });
       },
-      meta: {
-        successToast: 'Course material updated successfully',
-        errorToast: 'Failed to update course material'
-      }
     });
   };
   
@@ -83,20 +124,17 @@ export function useCourseMaterialsQuery(courseId: string) {
     return useMutation({
       mutationFn: (materialId: string) =>
         apiRequest.delete(`/api/admin/courses/${courseId}/materials/${materialId}`),
+      // Remove toasts - only use for update/publish/unpublish as requested
       onSuccess: (_, materialId) => {
         // Remove the material from cache
         queryClient.setQueryData<CourseMaterial[]>(queryKey, (oldData) => {
-          if (!oldData) return [];
+          if (!oldData || !Array.isArray(oldData)) return [];
           return oldData.filter(material => material.id !== materialId);
         });
         
         // Invalidate related queries
         queryClient.invalidateQueries({ queryKey: ['courses'] });
       },
-      meta: {
-        successToast: 'Course material deleted successfully',
-        errorToast: 'Failed to delete course material'
-      }
     });
   };
   

@@ -24,7 +24,19 @@ export function useLessonMaterialsQuery(lessonId: string) {
   const useGetLessonMaterials = () => {
     return useQuery({
       queryKey,
-      queryFn: () => apiRequest.get<LessonMaterial[]>(`/api/admin/lessons/${lessonId}/materials`),
+      queryFn: async (): Promise<LessonMaterial[]> => {
+        const response = await apiRequest.get(`/api/admin/lessons/${lessonId}/materials`);
+        
+        // The useApiRequest hook returns the full Axios response
+        // response.data contains our API response: { success: true, data: LessonMaterial[] }
+        if (response && response.data && typeof response.data === 'object' && 'success' in response.data && 'data' in response.data) {
+          const materials = response.data.data;
+          return Array.isArray(materials) ? materials : [];
+        }
+        
+        // Fallback
+        return [];
+      },
       enabled: !!lessonId
     });
   };
@@ -36,20 +48,20 @@ export function useLessonMaterialsQuery(lessonId: string) {
     return useMutation({
       mutationFn: (data: CreateLessonMaterialData) => 
         apiRequest.post<LessonMaterial>(`/api/admin/lessons/${lessonId}/materials`, data),
-      onSuccess: (newMaterial) => {
+      onSuccess: (response) => {
+        // Extract material from API response: { success: true, data: material }
+        const newMaterial = response?.data?.data || response?.data || response;
+        if (!newMaterial) return;
+        
         // Update the cache with the new material
         queryClient.setQueryData<LessonMaterial[]>(queryKey, (oldData) => {
-          if (!oldData) return [newMaterial];
+          if (!oldData || !Array.isArray(oldData)) return [newMaterial];
           return [...oldData, newMaterial];
         });
         
         // Invalidate related queries
         queryClient.invalidateQueries({ queryKey: ['lessons'] });
       },
-      meta: {
-        successToast: 'Lesson material uploaded successfully',
-        errorToast: 'Failed to upload lesson material'
-      }
     });
   };
   
@@ -60,19 +72,19 @@ export function useLessonMaterialsQuery(lessonId: string) {
     return useMutation({
       mutationFn: ({ materialId, data }: { materialId: string; data: UpdateLessonMaterialData }) =>
         apiRequest.put<LessonMaterial>(`/api/admin/lessons/${lessonId}/materials/${materialId}`, data),
-      onSuccess: (updatedMaterial) => {
+      onSuccess: (response) => {
+        // Extract material from API response: { success: true, data: material }
+        const updatedMaterial = response?.data?.data || response?.data || response;
+        if (!updatedMaterial) return;
+        
         // Update the cache with the updated material
         queryClient.setQueryData<LessonMaterial[]>(queryKey, (oldData) => {
-          if (!oldData) return [updatedMaterial];
+          if (!oldData || !Array.isArray(oldData)) return [updatedMaterial];
           return oldData.map(material => 
             material.id === updatedMaterial.id ? updatedMaterial : material
           );
         });
       },
-      meta: {
-        successToast: 'Lesson material updated successfully',
-        errorToast: 'Failed to update lesson material'
-      }
     });
   };
   
@@ -93,10 +105,6 @@ export function useLessonMaterialsQuery(lessonId: string) {
         // Invalidate related queries
         queryClient.invalidateQueries({ queryKey: ['lessons'] });
       },
-      meta: {
-        successToast: 'Lesson material deleted successfully',
-        errorToast: 'Failed to delete lesson material'
-      }
     });
   };
   

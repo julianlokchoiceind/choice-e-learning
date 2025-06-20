@@ -1,4 +1,4 @@
-export interface ReferenceLink {
+export interface CourseReferenceLink {
   id: string;
   title: string;
   url: string;
@@ -10,14 +10,14 @@ export interface ReferenceLink {
   updatedAt: Date;
 }
 
-export interface CreateReferenceLinkRequest {
+export interface CreateCourseReferenceLinkRequest {
   title: string;
   url: string;
   description?: string;
   order?: number;
 }
 
-export interface UpdateReferenceLinkRequest {
+export interface UpdateCourseReferenceLinkRequest {
   title?: string;
   url?: string;
   description?: string;
@@ -25,12 +25,12 @@ export interface UpdateReferenceLinkRequest {
   isActive?: boolean;
 }
 
-export interface ReferenceLinkFilter {
+export interface CourseReferenceLinkFilter {
   isActive?: boolean;
   search?: string;
 }
 
-export interface ReferenceLinkListResponse {
-  referenceLinks: ReferenceLink[];
+export interface CourseReferenceLinkListResponse {
+  courseReferenceLinks: CourseReferenceLink[];
   total: number;
 }

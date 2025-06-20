@@ -65,14 +65,18 @@ export const GuardedFormPage = ({
       setLastSaved(new Date(data.updatedAt));
     }
     if (data) {
-      setCurrentStatus(data.isActive ? 'active' : 'inactive');
+      // Handle status enum (draft/published)
+      if (data.status) {
+        setCurrentStatus(data.status); // draft/published
+      }
     }
   }, [data, lastSaved]);
   
   // Handle form changes
   const handleFormChange = (formData: any, isDirty: boolean) => {
-    if (formData.isActive !== undefined) {
-      setCurrentStatus(formData.isActive ? 'active' : 'inactive');
+    // Handle status enum (draft/published)
+    if (formData.status) {
+      setCurrentStatus(formData.status); // draft/published
     }
     setHasUnsavedChanges(isDirty);
     onFormChange(formData, isDirty);

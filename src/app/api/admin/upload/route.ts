@@ -58,6 +58,9 @@ export const POST = withAdmin(
       // Get upload type to determine validation rules
       const type = (formData.get('type') as string) || 'common';
       
+      // Check if this is a temporary upload
+      const isTemporary = formData.get('temporary') === 'true';
+      
       // Validate file type and size based on upload type
       if (type === 'course-material' || type === 'lesson-material') {
         // Course/Lesson materials validation
@@ -108,11 +111,15 @@ export const POST = withAdmin(
         type: type as any,
         courseId,
         lessonId,
-        userId
+        userId,
+        temporary: isTemporary
       });
       
       // Return the upload result
-      return apiSuccess({ url: fileUrl }, 'File uploaded successfully');
+      return apiSuccess({ 
+        url: fileUrl,
+        temporary: isTemporary 
+      }, 'File uploaded successfully');
     } catch (error: unknown) {
       console.error('Error uploading file:', error);
       return apiServerError('Failed to upload file');

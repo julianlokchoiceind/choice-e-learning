@@ -20,7 +20,7 @@ import {
 import { 
   findLessonMaterialsByLessonId,
   createLessonMaterial
-} from '@/server/db/services/course-service';
+} from '@/server/services/lessons/lesson-service';
 
 // GET handler to fetch lesson materials (admin only)
 export const GET = withAdmin(async (

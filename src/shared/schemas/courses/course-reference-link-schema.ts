@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const createReferenceLinkSchema = z.object({
+export const createCourseReferenceLinkSchema = z.object({
   title: z.string()
     .min(1, 'Title is required')
     .max(200, 'Title must not exceed 200 characters'),
@@ -16,7 +16,7 @@ export const createReferenceLinkSchema = z.object({
     .optional()
 });
 
-export const updateReferenceLinkSchema = z.object({
+export const updateCourseReferenceLinkSchema = z.object({
   title: z.string()
     .min(1, 'Title is required')
     .max(200, 'Title must not exceed 200 characters')
@@ -35,11 +35,11 @@ export const updateReferenceLinkSchema = z.object({
   isActive: z.boolean().optional()
 });
 
-export const referenceLinkFilterSchema = z.object({
+export const courseReferenceLinkFilterSchema = z.object({
   isActive: z.boolean().optional(),
   search: z.string().optional()
 });
 
-export type CreateReferenceLinkData = z.infer<typeof createReferenceLinkSchema>;
-export type UpdateReferenceLinkData = z.infer<typeof updateReferenceLinkSchema>;
-export type ReferenceLinkFilterData = z.infer<typeof referenceLinkFilterSchema>;
+export type CreateCourseReferenceLinkData = z.infer<typeof createCourseReferenceLinkSchema>;
+export type UpdateCourseReferenceLinkData = z.infer<typeof updateCourseReferenceLinkSchema>;
+export type CourseReferenceLinkFilterData = z.infer<typeof courseReferenceLinkFilterSchema>;

@@ -232,7 +232,7 @@ npm run dev           # Development server
 
 ### Database Commands
 ```bash
-npx prisma migrate dev     # Run migrations
+Npx prisma db push 	
 npx prisma generate        # Generate client
 npx prisma studio          # Database GUI
 ```

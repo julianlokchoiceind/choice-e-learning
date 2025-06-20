@@ -106,7 +106,7 @@ model Course {
   studentIds String[]  @db.ObjectId
   reviews    Review[]
   progress   UserProgress[]
-  referenceLinks ReferenceLink[]
+  courseReferenceLinks CourseReferenceLink[]
   materials  CourseMaterial[]
   quizzes    Quiz[]
 
@@ -144,6 +144,7 @@ model Lesson {
   updatedAt     DateTime @updatedAt
   progress      UserProgress[]
   materials     LessonMaterial[]
+  referenceLinks LessonReferenceLink[]
 
   @@map("lessons")
 }
@@ -263,7 +264,7 @@ model UserProgress {
   @@map("user_progress")
 }
 
-model ReferenceLink {
+model CourseReferenceLink {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   url         String
@@ -275,7 +276,7 @@ model ReferenceLink {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@map("reference_links")
+  @@map("course_reference_links")
 }
 
 model CourseMaterial {
@@ -314,6 +315,21 @@ model LessonMaterial {
   updatedAt   DateTime @updatedAt
 
   @@map("lesson_materials")
+}
+
+model LessonReferenceLink {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  url         String
+  description String?
+  lessonId    String   @db.ObjectId
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("lesson_reference_links")
 }
 
 model Quiz {

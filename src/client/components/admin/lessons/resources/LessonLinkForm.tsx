@@ -2,72 +2,59 @@
 
 import { FC, useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { ReferenceLink } from '@/shared/types/courses/reference-link';
+import { LessonResourceLink } from '@/shared/types/lessons';
 
-interface LinkFormProps {
-  initialData?: ReferenceLink | null;
-  onSubmit: (data: Omit<ReferenceLink, 'id' | 'createdAt' | 'updatedAt' | 'courseId' | 'order' | 'isActive'>) => void;
+interface LessonLinkFormProps {
+  initialData?: LessonResourceLink | null;
+  onSubmit: (data: Omit<LessonResourceLink, 'id' | 'order'>) => void;
   onCancel: () => void;
 }
 
-const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
+const LessonLinkForm: FC<LessonLinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     url: initialData?.url || '',
     description: initialData?.description || ''
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isValidating, setIsValidating] = useState(false);
-
-  const validateUrl = (url: string): boolean => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrors({});
-    setIsValidating(true);
 
-    // Validation
-    const newErrors: Record<string, string> = {};
-
+    // Basic validation
     if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
+      console.error('Title is required');
+      return;
     }
 
     if (!formData.url.trim()) {
-      newErrors.url = 'URL is required';
-    } else if (!validateUrl(formData.url)) {
-      newErrors.url = 'Please enter a valid URL (e.g., https://example.com)';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      setIsValidating(false);
+      console.error('URL is required');
       return;
     }
 
     // Auto-add https:// if not present
     let finalUrl = formData.url.trim();
-    if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
+    if (finalUrl && !finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
       finalUrl = 'https://' + finalUrl;
     }
+
+    // Validate URL format
+    try {
+      new URL(finalUrl);
+    } catch {
+      console.error('Invalid URL format:', finalUrl);
+      return;
+    }
+
+    console.log('🔍 LessonLinkForm submitting data:', {
+      title: formData.title.trim(),
+      url: finalUrl,
+      description: formData.description.trim() || undefined
+    });
 
     try {
       await onSubmit({
@@ -77,8 +64,6 @@ const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
       });
     } catch (error) {
       console.error('Failed to save link:', error);
-    } finally {
-      setIsValidating(false);
     }
   };
 
@@ -89,11 +74,10 @@ const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
   };
 
   const extractTitle = async () => {
-    if (!formData.url || !validateUrl(formData.url) || formData.title) return;
+    if (!formData.url || formData.title) return;
     
     try {
-      // In a real implementation, you'd make an API call to extract the title
-      // For now, we'll just extract the domain name as a fallback
+      // Extract the domain name as a fallback
       const domain = new URL(formData.url).hostname.replace('www.', '');
       const suggestedTitle = domain.charAt(0).toUpperCase() + domain.slice(1);
       setFormData(prev => ({ ...prev, title: suggestedTitle }));
@@ -120,7 +104,7 @@ const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
       {/* URL Field */}
       <div>
         <label htmlFor="url" className="block text-base font-medium text-gray-700 mb-2">
-          URL <span className="text-red-500">*</span>
+          URL
         </label>
         <div className="flex space-x-2">
           <input
@@ -131,9 +115,7 @@ const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
             onChange={handleChange}
             onBlur={handleUrlBlur}
             placeholder="https://reactjs.org/docs"
-            className={`flex-1 px-3 py-2 text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.url ? 'border-red-300' : 'border-gray-300'
-            }`}
+            className="flex-1 px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {!formData.title && formData.url && (
             <button
@@ -145,9 +127,6 @@ const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
             </button>
           )}
         </div>
-        {errors.url && (
-          <p className="mt-1 text-sm text-red-600">{errors.url}</p>
-        )}
         <p className="mt-1 text-xs text-gray-500">
           Enter URL (e.g., https://reactjs.org/docs)
         </p>
@@ -156,7 +135,7 @@ const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
       {/* Title Field */}
       <div>
         <label htmlFor="title" className="block text-base font-medium text-gray-700 mb-2">
-          Title <span className="text-red-500">*</span>
+          Title
         </label>
         <input
           type="text"
@@ -165,13 +144,8 @@ const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
           value={formData.title}
           onChange={handleChange}
           placeholder="React Official Documentation"
-          className={`w-full px-3 py-2 text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.title ? 'border-red-300' : 'border-gray-300'
-          }`}
+          className="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        {errors.title && (
-          <p className="mt-1 text-sm text-red-600">{errors.title}</p>
-        )}
       </div>
 
       {/* Description Field */}
@@ -204,14 +178,13 @@ const LinkForm: FC<LinkFormProps> = ({ initialData, onSubmit, onCancel }) => {
         </button>
         <button
           type="submit"
-          disabled={isValidating}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          {isValidating ? 'Saving...' : (initialData ? 'Update Link' : 'Add Link')}
+          {initialData ? 'Update Link' : 'Add Link'}
         </button>
       </div>
     </form>
   );
 };
 
-export default LinkForm;
+export default LessonLinkForm;

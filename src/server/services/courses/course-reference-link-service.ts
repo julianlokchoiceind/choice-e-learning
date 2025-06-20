@@ -1,19 +1,19 @@
 import prisma from '@/server/db/prisma-client';
 import { 
-  ReferenceLink, 
-  CreateReferenceLinkRequest, 
-  UpdateReferenceLinkRequest,
-  ReferenceLinkFilter 
-} from '@/shared/types/courses/reference-link';
+  CourseReferenceLink, 
+  CreateCourseReferenceLinkRequest, 
+  UpdateCourseReferenceLinkRequest,
+  CourseReferenceLinkFilter 
+} from '@/shared/types/courses/course-reference-link';
 
-export class ReferenceLinkService {
+export class CourseReferenceLinkService {
   /**
    * Get all reference links for a course
    */
-  static async getReferenceLinks(
+  static async getCourseReferenceLinks(
     courseId: string, 
-    filter: ReferenceLinkFilter = {}
-  ): Promise<ReferenceLink[]> {
+    filter: CourseReferenceLinkFilter = {}
+  ): Promise<CourseReferenceLink[]> {
     const where: any = {
       courseId,
       ...(filter.isActive !== undefined && { isActive: filter.isActive })
@@ -28,42 +28,42 @@ export class ReferenceLinkService {
       ];
     }
 
-    const referenceLinks = await prisma.referenceLink.findMany({
+    const courseReferenceLinks = await prisma.courseReferenceLink.findMany({
       where,
       orderBy: { order: 'asc' },
     });
 
-    return referenceLinks;
+    return courseReferenceLinks;
   }
 
   /**
    * Get a single reference link by ID
    */
-  static async getReferenceLinkById(id: string): Promise<ReferenceLink | null> {
-    const referenceLink = await prisma.referenceLink.findUnique({
+  static async getCourseReferenceLinkById(id: string): Promise<CourseReferenceLink | null> {
+    const courseReferenceLink = await prisma.courseReferenceLink.findUnique({
       where: { id },
     });
 
-    return referenceLink;
+    return courseReferenceLink;
   }
 
   /**
    * Create a new reference link
    */
-  static async createReferenceLink(
+  static async createCourseReferenceLink(
     courseId: string,
-    data: CreateReferenceLinkRequest
-  ): Promise<ReferenceLink> {
+    data: CreateCourseReferenceLinkRequest
+  ): Promise<CourseReferenceLink> {
     // Auto-assign order if not provided
     if (data.order === undefined) {
-      const lastLink = await prisma.referenceLink.findFirst({
+      const lastLink = await prisma.courseReferenceLink.findFirst({
         where: { courseId },
         orderBy: { order: 'desc' },
       });
       data.order = (lastLink?.order ?? -1) + 1;
     }
 
-    const referenceLink = await prisma.referenceLink.create({
+    const courseReferenceLink = await prisma.courseReferenceLink.create({
       data: {
         title: data.title,
         url: data.url,
@@ -73,29 +73,29 @@ export class ReferenceLinkService {
       },
     });
 
-    return referenceLink;
+    return courseReferenceLink;
   }
 
   /**
    * Update a reference link
    */
-  static async updateReferenceLink(
+  static async updateCourseReferenceLink(
     id: string,
-    data: UpdateReferenceLinkRequest
-  ): Promise<ReferenceLink> {
-    const referenceLink = await prisma.referenceLink.update({
+    data: UpdateCourseReferenceLinkRequest
+  ): Promise<CourseReferenceLink> {
+    const courseReferenceLink = await prisma.courseReferenceLink.update({
       where: { id },
       data,
     });
 
-    return referenceLink;
+    return courseReferenceLink;
   }
 
   /**
    * Delete a reference link
    */
-  static async deleteReferenceLink(id: string): Promise<void> {
-    await prisma.referenceLink.delete({
+  static async deleteCourseReferenceLink(id: string): Promise<void> {
+    await prisma.courseReferenceLink.delete({
       where: { id },
     });
   }
@@ -103,14 +103,14 @@ export class ReferenceLinkService {
   /**
    * Reorder reference links
    */
-  static async reorderReferenceLinks(
+  static async reorderCourseReferenceLinks(
     courseId: string,
     linkOrders: { id: string; order: number }[]
   ): Promise<void> {
     // Use transaction to update all orders atomically
     await prisma.$transaction(
       linkOrders.map(({ id, order }) =>
-        prisma.referenceLink.update({
+        prisma.courseReferenceLink.update({
           where: { id },
           data: { order },
         })
@@ -121,8 +121,8 @@ export class ReferenceLinkService {
   /**
    * Toggle active status of a reference link
    */
-  static async toggleActiveStatus(id: string): Promise<ReferenceLink> {
-    const currentLink = await prisma.referenceLink.findUnique({
+  static async toggleActiveStatus(id: string): Promise<CourseReferenceLink> {
+    const currentLink = await prisma.courseReferenceLink.findUnique({
       where: { id },
       select: { isActive: true },
     });
@@ -131,20 +131,20 @@ export class ReferenceLinkService {
       throw new Error('Reference link not found');
     }
 
-    const referenceLink = await prisma.referenceLink.update({
+    const courseReferenceLink = await prisma.courseReferenceLink.update({
       where: { id },
       data: { isActive: !currentLink.isActive },
     });
 
-    return referenceLink;
+    return courseReferenceLink;
   }
 
   /**
    * Get reference links count for a course
    */
-  static async getReferenceLinkCount(
+  static async getCourseReferenceLinkCount(
     courseId: string,
-    filter: ReferenceLinkFilter = {}
+    filter: CourseReferenceLinkFilter = {}
   ): Promise<number> {
     const where: any = {
       courseId,
@@ -159,7 +159,7 @@ export class ReferenceLinkService {
       ];
     }
 
-    const count = await prisma.referenceLink.count({ where });
+    const count = await prisma.courseReferenceLink.count({ where });
     return count;
   }
 

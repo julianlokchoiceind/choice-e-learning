@@ -19,4 +19,7 @@ export { default as useQueryOptimizer } from './useQueryOptimizer';
 export * from './useSelection';
 
 // Navigation hooks
-export * from './useNavigationGuard'; 
+export * from './useNavigationGuard';
+
+// File upload workflow hooks
+export * from './useFileUploadWorkflow'; 

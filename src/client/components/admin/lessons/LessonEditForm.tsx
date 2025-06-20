@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   ListBulletIcon,
@@ -14,7 +14,7 @@ import { useCoursesQuery } from '@/client/hooks/courses';
 import { useLessonsQuery } from '@/client/hooks/lessons';
 import { LoadingState } from '@/client/components/common';
 import { isFormDirty } from '@/client/utils/form-utils';
-import { LessonResourcesSection } from './resources';
+import { LessonResourcesSection, LessonResourcesSectionRef } from './resources';
 
 interface LessonEditFormProps {
   lesson: Lesson;
@@ -30,13 +30,13 @@ interface Chapter {
   order: number;
 }
 
-export const LessonEditForm: React.FC<LessonEditFormProps> = ({ 
+export const LessonEditForm = forwardRef<{ handleSave: () => Promise<void> }, LessonEditFormProps>(({ 
   lesson, 
   isNew = false,
   onFormChange,
   onSubmit,
   isLoading: isSubmitting = false
-}) => {
+}, ref) => {
   const router = useRouter();
   const { useGetCourses } = useCoursesQuery(true);
   const { useUpdateLesson } = useLessonsQuery();
@@ -60,10 +60,13 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
   // Resources state
   const [resources, setResources] = useState<LessonResources>({
     files: [],
-    links: [],
-    code: []
+    links: []
   });
   const [allowDownload, setAllowDownload] = useState(true); // TODO: Get from course settings
+  const [hasResourceChanges, setHasResourceChanges] = useState(false);
+  
+  // Resources ref
+  const resourcesRef = useRef<LessonResourcesSectionRef>(null);
   
   // Update form data when lesson prop changes
   React.useEffect(() => {
@@ -93,6 +96,14 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
       }
     }
   }, [lesson]);
+
+  // Notify parent when resource changes occur
+  React.useEffect(() => {
+    if (onFormChange) {
+      const isDirty = isFormDirty(formData, initialFormDataRef) || hasResourceChanges;
+      onFormChange(formData, isDirty);
+    }
+  }, [hasResourceChanges]); // Only depend on hasResourceChanges to avoid infinite loops
 
   const [isPublishing, setIsPublishing] = useState(false);
   const [chapters, setChapters] = useState<Chapter[]>([]);
@@ -126,18 +137,30 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
 
   const updateMutation = useUpdateLesson();
 
+  // Expose save method to parent
+  useImperativeHandle(ref, () => ({
+    handleSave: handleSaveDraft
+  }), []);
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+    
+    // Convert number fields to proper type for consistent comparison
+    let processedValue: any = value;
+    if (name === 'duration' || name === 'order') {
+      processedValue = value === '' ? 0 : parseInt(value) || 0;
+    }
+    
     const newFormData = {
       ...formData,
-      [name]: value
+      [name]: processedValue
     };
     setFormData(newFormData);
     
     // Check if form is dirty with smart detection
-    const isDirty = isFormDirty(newFormData, initialFormDataRef);
+    const isDirty = isFormDirty(newFormData, initialFormDataRef) || hasResourceChanges;
     
     // Notify parent of changes
     if (onFormChange) {
@@ -146,7 +169,19 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
   };
 
   const handleSaveDraft = async () => {
+    console.log('🔄 LessonEditForm: Starting handleSaveDraft, hasResourceChanges:', hasResourceChanges);
+    console.log('🔍 LessonEditForm: resourcesRef.current exists:', !!resourcesRef.current);
+    
     try {
+      // Save resources changes first
+      if (resourcesRef.current && hasResourceChanges) {
+        console.log('💾 LessonEditForm: Calling resourcesRef.saveChanges()');
+        await resourcesRef.current.saveChanges();
+        console.log('✅ LessonEditForm: Resources saved successfully');
+      } else {
+        console.log('⏭️ LessonEditForm: No resource changes to save');
+        console.log('⚠️ LessonEditForm: Reason - resourcesRef:', !!resourcesRef.current, 'hasResourceChanges:', hasResourceChanges);
+      }
       // Only send fields that are in the lesson schema
       const dataToSave = {
         title: formData.title,
@@ -178,8 +213,18 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
   };
 
   const handlePublish = async () => {
+    console.log('🔄 LessonEditForm: Starting handlePublish, hasResourceChanges:', hasResourceChanges);
     setIsPublishing(true);
     try {
+      // Save resources changes first
+      if (resourcesRef.current && hasResourceChanges) {
+        console.log('💾 LessonEditForm: Calling resourcesRef.saveChanges() from publish');
+        await resourcesRef.current.saveChanges();
+        console.log('✅ LessonEditForm: Resources saved successfully from publish');
+      } else {
+        console.log('⏭️ LessonEditForm: No resource changes to save from publish');
+      }
+      
       // Only send fields that are in the lesson schema
       const dataToSave = {
         title: formData.title,
@@ -248,8 +293,8 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
         <div className="p-6 space-y-6">
           {/* Lesson Title */}
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-              Lesson Title *
+            <label htmlFor="title" className="block text-base font-medium text-gray-700 mb-2">
+              Lesson Title <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -257,7 +302,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
               name="title"
               value={formData.title}
               onChange={handleInputChange}
-              className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-0 focus:border-[var(--color-primary)] text-sm"
+              className="block w-full px-3 py-3 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Enter lesson title"
               required
             />
@@ -266,8 +311,8 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
           {/* Course and Chapter Selection */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="courseId" className="block text-sm font-medium text-gray-700 mb-2">
-                Course *
+              <label htmlFor="courseId" className="block text-base font-medium text-gray-700 mb-2">
+                Course <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <select
@@ -275,7 +320,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
                   name="courseId"
                   value={formData.courseId}
                   onChange={handleInputChange}
-                  className="appearance-none block w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-0 focus:border-[var(--color-primary)] text-sm cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="appearance-none block w-full px-3 py-3 pr-10 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
                   required
                   disabled={!isNew} // Disable course selection when editing existing lesson
                 >
@@ -293,7 +338,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
             </div>
 
             <div>
-              <label htmlFor="chapterId" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="chapterId" className="block text-base font-medium text-gray-700 mb-2">
                 Chapter
               </label>
               <div className="relative">
@@ -302,7 +347,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
                   name="chapterId"
                   value={formData.chapterId}
                   onChange={handleInputChange}
-                  className="appearance-none block w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg focus:ring-0 focus:border-[var(--color-primary)] text-sm cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="appearance-none block w-full px-3 py-3 pr-10 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
                   disabled={!formData.courseId || !isNew}
                 >
                   <option value="">
@@ -327,7 +372,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
 
           {/* Video URL */}
           <div>
-            <label htmlFor="videoUrl" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="videoUrl" className="block text-base font-medium text-gray-700 mb-2">
               Video URL
               <span className="text-xs text-gray-500 ml-2">
                 (YouTube, Vimeo, or direct video link will be embedded in lesson)
@@ -339,7 +384,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
               name="videoUrl"
               value={formData.videoUrl}
               onChange={handleInputChange}
-              className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-0 focus:border-[var(--color-primary)] text-sm"
+              className="block w-full px-3 py-3 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="https://youtube.com/watch?v=dQw4w9WgXcQ"
             />
           </div>
@@ -347,7 +392,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
           {/* Duration, Order, and Status */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="duration" className="block text-base font-medium text-gray-700 mb-2">
                 Duration
                 <span className="text-xs text-gray-500 ml-2">
                   (Estimated time to complete lesson)
@@ -360,7 +405,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
                   name="duration"
                   value={formData.duration}
                   onChange={handleInputChange}
-                  className="block w-full px-3 py-2.5 pr-16 border border-gray-300 rounded-lg focus:ring-0 focus:border-[var(--color-primary)] text-sm"
+                  className="block w-full px-3 py-3 pr-16 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="0"
                   min="0"
                   title="Enter the estimated time in minutes that students will need to complete this lesson"
@@ -372,7 +417,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
             </div>
 
             <div>
-              <label htmlFor="order" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="order" className="block text-base font-medium text-gray-700 mb-2">
                 Order
                 <span className="text-xs text-gray-500 ml-2">
                   (Position in chapter/course sequence)
@@ -384,7 +429,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
                 name="order"
                 value={formData.order}
                 onChange={handleInputChange}
-                className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-0 focus:border-[var(--color-primary)] text-sm"
+                className="block w-full px-3 py-3 text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="1"
                 min="1"
                 title="Determines the display order of this lesson within its chapter or course. Lower numbers appear first (e.g., 1 = first lesson, 2 = second lesson)"
@@ -395,7 +440,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
 
           {/* Lesson Content */}
           <div>
-            <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="content" className="block text-base font-medium text-gray-700 mb-2">
               Lesson Content
               <span className="text-xs text-gray-500 ml-2">
                 (Rich text content, explanations, and additional resources)
@@ -419,7 +464,7 @@ export const LessonEditForm: React.FC<LessonEditFormProps> = ({
               value={formData.content}
               onChange={handleInputChange}
               rows={10}
-              className="block w-full px-3 py-2.5 border-x border-b border-gray-300 rounded-b-lg focus:ring-0 focus:border-[var(--color-primary)] text-sm"
+              className="block w-full px-3 py-3 text-base border-x border-b border-gray-300 rounded-b-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="In this lesson, we will explore how to handle events in React components.
 
 You'll learn about:
@@ -435,14 +480,18 @@ You'll learn about:
 
       {/* Lesson Resources Section */}
       <LessonResourcesSection
+        ref={resourcesRef}
         lessonId={lesson?.id || ''}
         courseId={formData.courseId}
         initialResources={resources}
         allowDownload={allowDownload}
         onResourcesChange={setResources}
+        onChangesDetected={setHasResourceChanges}
       />
     </div>
   );
-};
+});
+
+LessonEditForm.displayName = 'LessonEditForm';
 
 export default LessonEditForm;

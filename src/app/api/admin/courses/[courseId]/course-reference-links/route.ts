@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/server/auth/auth-options';
-import { ReferenceLinkService } from '@/server/services/courses/reference-link-service';
-import { createReferenceLinkSchema, referenceLinkFilterSchema } from '@/shared/schemas/courses/reference-link-schema';
+import { CourseReferenceLinkService } from '@/server/services/courses/course-reference-link-service';
+import { createCourseReferenceLinkSchema, courseReferenceLinkFilterSchema } from '@/shared/schemas/courses/course-reference-link-schema';
 import { validateRequest } from '@/server/utils/data/validation';
 
 /**
- * GET /api/admin/courses/[courseId]/reference-links
+ * GET /api/admin/courses/[courseId]/course-reference-links
  * Get all reference links for a course
  */
 export async function GET(
@@ -33,7 +33,7 @@ export async function GET(
     };
 
     // Validate filter parameters
-    const validationResult = referenceLinkFilterSchema.safeParse(filter);
+    const validationResult = courseReferenceLinkFilterSchema.safeParse(filter);
     if (!validationResult.success) {
       return NextResponse.json(
         { 
@@ -46,13 +46,13 @@ export async function GET(
     }
 
     // Get reference links
-    const referenceLinks = await ReferenceLinkService.getReferenceLinks(courseId, validationResult.data);
-    const total = await ReferenceLinkService.getReferenceLinkCount(courseId, validationResult.data);
+    const courseReferenceLinks = await CourseReferenceLinkService.getCourseReferenceLinks(courseId, validationResult.data);
+    const total = await CourseReferenceLinkService.getCourseReferenceLinkCount(courseId, validationResult.data);
 
     return NextResponse.json({
       success: true,
       data: {
-        referenceLinks,
+        courseReferenceLinks,
         total
       }
     });
@@ -71,7 +71,7 @@ export async function GET(
 }
 
 /**
- * POST /api/admin/courses/[courseId]/reference-links
+ * POST /api/admin/courses/[courseId]/course-reference-links
  * Create a new reference link
  */
 export async function POST(
@@ -92,7 +92,7 @@ export async function POST(
     const body = await request.json();
 
     // Validate request body
-    const validationResult = validateRequest(createReferenceLinkSchema, body);
+    const validationResult = validateRequest(createCourseReferenceLinkSchema, body);
     if (!validationResult.success) {
       return NextResponse.json(
         { 
@@ -113,7 +113,7 @@ export async function POST(
     }
 
     // Create reference link
-    const referenceLink = await ReferenceLinkService.createReferenceLink(courseId, {
+    const courseReferenceLink = await CourseReferenceLinkService.createCourseReferenceLink(courseId, {
       title,
       url,
       description,
@@ -122,7 +122,7 @@ export async function POST(
 
     return NextResponse.json({
       success: true,
-      data: referenceLink,
+      data: courseReferenceLink,
       message: 'Reference link created successfully'
     }, { status: 201 });
 

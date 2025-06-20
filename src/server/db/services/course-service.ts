@@ -4,6 +4,7 @@ import prisma from '@/server/db/prisma-client';
 import { Prisma } from '@prisma/client';
 import { Course as CourseType } from '@/shared/types/courses/course';
 import { Course as PrismaCourse } from '@prisma/client';
+import { moveTempFileToPermanent, deleteFileByUrl } from '@/server/services/file/file-management-service';
 
 /**
  * Find a course by ID
@@ -329,13 +330,14 @@ export async function getEnrolledCourses(
  */
 export async function findCourseMaterialsByCourseId(courseId: string) {
   try {
-    return await prisma.courseMaterial.findMany({
+    const materials = await prisma.courseMaterial.findMany({
       where: { 
         courseId,
         isActive: true
       },
       orderBy: { order: 'asc' }
     });
+    return materials;
   } catch (error: unknown) {
     console.error('Error finding course materials:', error);
     return [];
@@ -371,6 +373,27 @@ export async function createCourseMaterial(
       return null;
     }
 
+    // Move file from temp to permanent storage with original filename in organized folders
+    let permanentUrl = data.url;
+    if (data.url.includes('/uploads/temp/')) {
+      try {
+        // Get course title for folder naming
+        const courseTitle = course?.title || 'untitled-course';
+        permanentUrl = await moveTempFileToPermanent(data.url, 'course-material', courseTitle, data.fileName);
+        console.log(`Moved course material to permanent storage (${courseTitle}): ${data.url} -> ${permanentUrl}`);
+        
+        // CRITICAL: Verify that file was actually moved to permanent storage
+        if (permanentUrl.includes('/uploads/temp/')) {
+          console.error('File move failed - still has temp URL:', permanentUrl);
+          throw new Error('Failed to move temp file to permanent storage - DB should not contain temp URLs');
+        }
+      } catch (error) {
+        console.error('Failed to move temp file to permanent storage:', error);
+        // CRITICAL: Do NOT save to DB if file cannot be moved to permanent storage
+        throw new Error('Cannot save course material: Failed to move temp file to permanent storage');
+      }
+    }
+
     // Get the highest order and add 1
     const highestOrderMaterial = await prisma.courseMaterial.findFirst({
       where: { courseId },
@@ -379,13 +402,16 @@ export async function createCourseMaterial(
     
     const orderValue = highestOrderMaterial ? highestOrderMaterial.order + 1 : 1;
 
-    return await prisma.courseMaterial.create({
+    const material = await prisma.courseMaterial.create({
       data: {
         ...data,
+        url: permanentUrl, // Use the permanent URL with original filename
         courseId,
-        order: orderValue
+        order: orderValue,
+        isActive: true  // Explicitly set isActive to true
       }
     });
+    return material;
   } catch (error: unknown) {
     console.error('Error creating course material:', error);
     return null;
@@ -424,122 +450,36 @@ export async function updateCourseMaterial(
  */
 export async function deleteCourseMaterial(materialId: string) {
   try {
-    return await prisma.courseMaterial.delete({
+    // Get the material to find its URL before deletion
+    const material = await prisma.courseMaterial.findUnique({
+      where: { id: materialId },
+      select: { url: true }
+    });
+
+    // Delete from database
+    const deleted = await prisma.courseMaterial.delete({
       where: { id: materialId }
     });
+
+    // Delete the physical file from permanent storage
+    if (material?.url) {
+      try {
+        await deleteFileByUrl(material.url);
+        console.log(`Deleted course material file: ${material.url}`);
+      } catch (error) {
+        console.error(`Failed to delete file ${material.url}:`, error);
+        // Continue even if file deletion fails
+      }
+    }
+
+    return deleted;
   } catch (error: unknown) {
     console.error('Error deleting course material:', error);
     return null;
   }
 }
 
-/**
- * Find lesson materials by lesson ID
- * @param lessonId Lesson ID
- * @returns Array of lesson materials
- */
-export async function findLessonMaterialsByLessonId(lessonId: string) {
-  try {
-    return await prisma.lessonMaterial.findMany({
-      where: { 
-        lessonId,
-        isActive: true
-      },
-      orderBy: { order: 'asc' }
-    });
-  } catch (error: unknown) {
-    console.error('Error finding lesson materials:', error);
-    return [];
-  }
-}
+// Lesson material functions available in lesson-service.ts
 
-/**
- * Create a new lesson material
- * @param lessonId Lesson ID
- * @param data Lesson material data
- * @returns Created lesson material or null if creation failed
- */
-export async function createLessonMaterial(
-  lessonId: string,
-  data: {
-    title: string;
-    fileName: string;
-    fileSize: number;
-    fileType: string;
-    mimeType: string;
-    description?: string;
-    url: string;
-  }
-) {
-  try {
-    // Verify that the lesson exists
-    const lesson = await prisma.lesson.findUnique({
-      where: { id: lessonId }
-    });
 
-    if (!lesson) {
-      console.error(`Lesson with ID ${lessonId} not found`);
-      return null;
-    }
 
-    // Get the highest order and add 1
-    const highestOrderMaterial = await prisma.lessonMaterial.findFirst({
-      where: { lessonId },
-      orderBy: { order: 'desc' }
-    });
-    
-    const orderValue = highestOrderMaterial ? highestOrderMaterial.order + 1 : 1;
-
-    return await prisma.lessonMaterial.create({
-      data: {
-        ...data,
-        lessonId,
-        order: orderValue
-      }
-    });
-  } catch (error: unknown) {
-    console.error('Error creating lesson material:', error);
-    return null;
-  }
-}
-
-/**
- * Update lesson material
- * @param materialId Material ID
- * @param data Update data
- * @returns Updated lesson material or null if update failed
- */
-export async function updateLessonMaterial(
-  materialId: string,
-  data: Partial<{
-    title: string;
-    description: string;
-    order: number;
-  }>
-) {
-  try {
-    return await prisma.lessonMaterial.update({
-      where: { id: materialId },
-      data
-    });
-  } catch (error: unknown) {
-    console.error('Error updating lesson material:', error);
-    return null;
-  }
-}
-
-/**
- * Delete lesson material
- * @param materialId Material ID
- * @returns Deleted lesson material or null if deletion failed
- */
-export async function deleteLessonMaterial(materialId: string) {
-  try {
-    return await prisma.lessonMaterial.delete({
-      where: { id: materialId }
-    });
-  } catch (error: unknown) {
-    console.error('Error deleting lesson material:', error);
-    return null;
-  }
-}

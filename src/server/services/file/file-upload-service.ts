@@ -3,8 +3,18 @@
  * Handles file upload operations for the application
  */
 
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, access } from 'fs/promises';
 import { join } from 'path';
+
+// Helper function to check if file exists
+const exists = async (path: string): Promise<boolean> => {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 // Define the upload types for better type safety
 export type UploadType = 'course-cover' | 'course-material' | 'lesson-material' | 'user-avatar' | 'common';
@@ -15,6 +25,7 @@ interface UploadOptions {
   courseId?: string;
   lessonId?: string;
   userId?: string;
+  temporary?: boolean;
 }
 
 /**
@@ -29,10 +40,28 @@ export async function uploadFile(
   fileName: string,
   options: UploadOptions
 ): Promise<string> {
-  const { type, courseId, lessonId, userId } = options;
+  const { type, courseId, lessonId, userId, temporary } = options;
   
   // Get the base upload directory
   const baseUploadDir = join(process.cwd(), 'public', 'uploads');
+  
+  // If temporary, use temp directory
+  if (temporary) {
+    const uploadDir = join(baseUploadDir, 'temp');
+    await mkdir(uploadDir, { recursive: true });
+    
+    // Create unique filename for temp files
+    const fileExtension = fileName.split('.').pop() || 'jpg';
+    const uniqueFileName = `temp-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
+    const filePath = join(uploadDir, uniqueFileName);
+    
+    // Save the file
+    await writeFile(filePath, buffer);
+    
+    // Return the relative URL path
+    const relativePath = filePath.replace(join(process.cwd(), 'public'), '');
+    return relativePath.replace(/\\/g, '/');
+  }
   
   // Determine the specific upload directory based on file type and context
   let uploadDir = baseUploadDir;
@@ -69,9 +98,27 @@ export async function uploadFile(
   // Ensure the upload directory exists
   await mkdir(uploadDir, { recursive: true });
   
-  // Create a unique filename with timestamp to avoid conflicts
+  // Keep original filename but handle duplicates
   const fileExtension = fileName.split('.').pop() || 'jpg';
-  const uniqueFileName = `${type}-${Date.now()}.${fileExtension}`;
+  const baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+  
+  // Function to check if file exists and generate unique name
+  const generateUniqueFileName = async (dir: string, name: string, ext: string): Promise<string> => {
+    let finalName = `${name}.${ext}`;
+    let filePath = join(dir, finalName);
+    let counter = 1;
+    
+    // Check if file exists and increment counter if needed
+    while (await exists(filePath)) {
+      finalName = `${name} (${counter}).${ext}`;
+      filePath = join(dir, finalName);
+      counter++;
+    }
+    
+    return finalName;
+  };
+  
+  const uniqueFileName = await generateUniqueFileName(uploadDir, baseName, fileExtension);
   const filePath = join(uploadDir, uniqueFileName);
   
   // Save the file

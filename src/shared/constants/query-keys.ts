@@ -19,9 +19,9 @@ export const QueryKeys = {
   FAQS: 'faqs',
   FAQ: 'faq',
   
-  // Reference Links
-  REFERENCE_LINKS: 'reference-links',
-  REFERENCE_LINK: 'reference-link',
+  // Course Reference Links
+  COURSE_REFERENCE_LINKS: 'course-reference-links',
+  COURSE_REFERENCE_LINK: 'course-reference-link',
   
   // User Progress
   USER_PROGRESS: 'user-progress',

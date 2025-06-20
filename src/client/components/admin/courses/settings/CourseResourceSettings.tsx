@@ -1,6 +1,7 @@
 'use client';
 
-import { FC, useState } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { deepEqual } from '@/client/utils/form-utils';
 import { 
   PlayIcon, 
   ShieldCheckIcon, 
@@ -11,13 +12,18 @@ import {
   LockClosedIcon
 } from '@heroicons/react/24/outline';
 
-interface ResourceSettingsProps {
+interface CourseResourceSettingsProps {
   courseId: string;
   onChangesDetected?: (hasChanges: boolean) => void;
 }
 
-const ResourceSettings: FC<ResourceSettingsProps> = ({ courseId, onChangesDetected }) => {
-  const [settings, setSettings] = useState({
+export interface CourseResourceSettingsRef {
+  getSettings: () => any;
+  reset: () => void;
+}
+
+const CourseResourceSettings = forwardRef<CourseResourceSettingsRef, CourseResourceSettingsProps>(({ courseId, onChangesDetected }, ref) => {
+  const initialSettings = {
     videoControl: {
       completionPercentage: 80,
       preventSeeking: true,
@@ -41,7 +47,28 @@ const ResourceSettings: FC<ResourceSettingsProps> = ({ courseId, onChangesDetect
       downloadLimit: 3,
       offlineAccess: false
     }
-  });
+  };
+
+  const [settings, setSettings] = useState(initialSettings);
+  
+  // Store initial settings in state to track changes properly
+  const [savedSettings, setSavedSettings] = useState(initialSettings);
+  
+  // Check if settings have changed from saved values
+  useEffect(() => {
+    if (onChangesDetected) {
+      const hasChanges = !deepEqual(settings, savedSettings);
+      onChangesDetected(hasChanges);
+    }
+  }, [settings, savedSettings, onChangesDetected]);
+
+  // Expose methods to parent
+  useImperativeHandle(ref, () => ({
+    getSettings: () => settings,
+    reset: () => {
+      setSavedSettings(settings);
+    }
+  }), [settings]);
 
   const handleToggle = (section: string, key: string) => {
     setSettings(prev => ({
@@ -51,11 +78,6 @@ const ResourceSettings: FC<ResourceSettingsProps> = ({ courseId, onChangesDetect
         [key]: !(prev as any)[section][key]
       }
     }));
-    
-    // Notify parent of changes
-    if (onChangesDetected) {
-      onChangesDetected(true);
-    }
   };
 
   const handleNumberChange = (section: string, key: string, value: number) => {
@@ -66,18 +88,13 @@ const ResourceSettings: FC<ResourceSettingsProps> = ({ courseId, onChangesDetect
         [key]: value
       }
     }));
-    
-    // Notify parent of changes
-    if (onChangesDetected) {
-      onChangesDetected(true);
-    }
   };
 
-  const ToggleSwitch: FC<{ 
+  const ToggleSwitch = ({ enabled, onChange, disabled = false }: { 
     enabled: boolean; 
     onChange: () => void; 
     disabled?: boolean;
-  }> = ({ enabled, onChange, disabled = false }) => (
+  }) => (
     <button
       type="button"
       onClick={onChange}
@@ -94,13 +111,13 @@ const ResourceSettings: FC<ResourceSettingsProps> = ({ courseId, onChangesDetect
     </button>
   );
 
-  const NumberInput: FC<{
+  const NumberInput = ({ value, onChange, min = 0, max = 100, suffix = '' }: {
     value: number;
     onChange: (value: number) => void;
     min?: number;
     max?: number;
     suffix?: string;
-  }> = ({ value, onChange, min = 0, max = 100, suffix = '' }) => (
+  }) => (
     <div className="flex items-center space-x-2">
       <input
         type="number"
@@ -352,33 +369,16 @@ const ResourceSettings: FC<ResourceSettingsProps> = ({ courseId, onChangesDetect
           <div>
             <h5 className="text-sm font-medium text-blue-900">Settings Impact</h5>
             <p className="text-sm text-blue-800 mt-1">
-              These settings apply to all lessons and resources in this course. Changes take effect 
-              immediately for new student sessions. Existing active sessions may need to be refreshed.
+              These settings apply to all lessons and resources in this course. Changes will be saved 
+              when you click "Update Draft" or "Publish Course" at the top of the page.
             </p>
           </div>
         </div>
       </div>
-
-      {/* Save Button */}
-      <div className="flex justify-end pt-4 border-t">
-        <button
-          type="button"
-          onClick={() => {
-            // In a real implementation, this would save to the server
-            console.log('Saving settings:', settings);
-            
-            // Reset changes state after successful save
-            if (onChangesDetected) {
-              onChangesDetected(false);
-            }
-          }}
-          className="btn-admin-primary"
-        >
-          Save Settings
-        </button>
-      </div>
     </div>
   );
-};
+});
 
-export default ResourceSettings;
+CourseResourceSettings.displayName = 'CourseResourceSettings';
+
+export default CourseResourceSettings;

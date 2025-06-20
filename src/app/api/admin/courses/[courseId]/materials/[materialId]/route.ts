@@ -22,6 +22,8 @@ import {
   deleteCourseMaterial
 } from '@/server/db/services/course-service';
 import prisma from '@/server/db/prisma-client';
+import { unlink } from 'fs/promises';
+import { join } from 'path';
 
 // PUT handler to update a course material (admin only)
 export const PUT = withAdmin(async (
@@ -122,11 +124,26 @@ export const DELETE = withAdmin(async (
       );
     }
     
-    // Delete the material
+    // Store file URL before deletion
+    const fileUrl = existingMaterial.url;
+    
+    // Delete the material from database
     const deletedMaterial = await deleteCourseMaterial(materialId);
     
     if (!deletedMaterial) {
       return apiServerError('Failed to delete course material');
+    }
+    
+    // Try to delete the physical file if it exists
+    if (fileUrl && fileUrl.startsWith('/uploads/')) {
+      try {
+        const filePath = join(process.cwd(), 'public', fileUrl);
+        await unlink(filePath);
+        console.log(`Deleted file: ${filePath}`);
+      } catch (error) {
+        // Log error but don't fail the request if file deletion fails
+        console.error(`Failed to delete file: ${fileUrl}`, error);
+      }
     }
     
     return apiSuccess(null, 'Course material deleted successfully');

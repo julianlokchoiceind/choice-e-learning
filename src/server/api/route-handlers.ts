@@ -41,12 +41,23 @@ export type AuthenticatedHandlerFunction = (
 export function withErrorHandling(handler: HandlerFunction) {
   return async function errorHandlingWrapper(
     req: NextRequest,
-    context?: { params?: Record<string, string> }
+    context?: { params?: Record<string, string> | Promise<Record<string, string>> }
   ): Promise<NextResponse> {
     try {
+      // Handle async params in Next.js 13+
+      let params: Record<string, string> = {};
+      if (context?.params) {
+        // Check if params is a Promise (Next.js 13+)
+        if (context.params instanceof Promise) {
+          params = await context.params;
+        } else {
+          params = context.params;
+        }
+      }
+      
       // Create route context from Next.js params
       const routeContext: RouteContext = {
-        params: context?.params || {}
+        params
       };
       
       const result = await handler(req, routeContext);
@@ -77,7 +88,7 @@ export function withErrorHandling(handler: HandlerFunction) {
 export function withAuth(handler: AuthenticatedHandlerFunction) {
   return async function authWrapper(
     req: NextRequest,
-    context?: { params?: Record<string, string> }
+    context?: { params?: Record<string, string> | Promise<Record<string, string>> }
   ): Promise<NextResponse> {
     try {
       // Authenticate user
@@ -87,9 +98,20 @@ export function withAuth(handler: AuthenticatedHandlerFunction) {
         return auth.response || apiUnauthorized();
       }
       
+      // Handle async params in Next.js 13+
+      let params: Record<string, string> = {};
+      if (context?.params) {
+        // Check if params is a Promise (Next.js 13+)
+        if (context.params instanceof Promise) {
+          params = await context.params;
+        } else {
+          params = context.params;
+        }
+      }
+      
       // Create route context from Next.js params
       const routeContext: RouteContext = {
-        params: context?.params || {}
+        params
       };
       
       // Create authenticated context with user data
@@ -131,7 +153,7 @@ export function withRole(
 ) {
   return async function roleWrapper(
     req: NextRequest,
-    context?: { params?: Record<string, string> }
+    context?: { params?: Record<string, string> | Promise<Record<string, string>> }
   ): Promise<NextResponse> {
     try {
       // Check user role
@@ -141,9 +163,20 @@ export function withRole(
         return auth.response || apiForbidden();
       }
       
+      // Handle async params in Next.js 13+
+      let params: Record<string, string> = {};
+      if (context?.params) {
+        // Check if params is a Promise (Next.js 13+)
+        if (context.params instanceof Promise) {
+          params = await context.params;
+        } else {
+          params = context.params;
+        }
+      }
+      
       // Create route context from Next.js params
       const routeContext: RouteContext = {
-        params: context?.params || {}
+        params
       };
       
       // Create authenticated context with user data
@@ -182,7 +215,7 @@ export function withAdmin(handler: AuthenticatedHandlerFunction) {
   // Return a function that matches Next.js route handler signature
   return async function adminWrapper(
     req: NextRequest,
-    context?: { params?: Record<string, string> }
+    context?: { params?: Record<string, string> | Promise<Record<string, string>> }
   ): Promise<NextResponse> {
     try {
       
@@ -193,9 +226,20 @@ export function withAdmin(handler: AuthenticatedHandlerFunction) {
         return auth.response || apiUnauthorized();
       }
       
+      // Handle async params in Next.js 13+
+      let params: Record<string, string> = {};
+      if (context?.params) {
+        // Check if params is a Promise (Next.js 13+)
+        if (context.params instanceof Promise) {
+          params = await context.params;
+        } else {
+          params = context.params;
+        }
+      }
+      
       // Create context with params from Next.js
       const routeContext: RouteContext = {
-        params: context?.params || {}
+        params
       };
       
       // Create authenticated context with admin user data

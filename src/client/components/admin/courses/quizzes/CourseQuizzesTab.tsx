@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   AcademicCapIcon,
   PlusIcon,
@@ -43,6 +43,15 @@ export const CourseQuizzesTab: React.FC<CourseQuizzesTabProps> = ({
   const createQuiz = useCreateQuiz();
   const updateQuiz = useUpdateQuiz();
   const deleteQuiz = useDeleteQuiz();
+  
+  // Track form state changes
+  useEffect(() => {
+    if (onChangesDetected) {
+      // Has changes if form is open (either create or edit)
+      const hasChanges = showCreateForm || editingQuiz !== null;
+      onChangesDetected(hasChanges);
+    }
+  }, [showCreateForm, editingQuiz, onChangesDetected]);
   
   const handleCreateQuiz = () => {
     setEditingQuiz(null);

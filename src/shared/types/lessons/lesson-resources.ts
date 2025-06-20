@@ -1,7 +1,7 @@
 /**
  * Lesson Resource Types
  */
-export type LessonResourceType = 'file' | 'link' | 'code';
+export type LessonResourceType = 'file' | 'link';
 
 export interface LessonResourceFile {
   id: string;
@@ -20,20 +20,9 @@ export interface LessonResourceLink {
   order: number;
 }
 
-export interface LessonResourceCode {
-  id: string;
-  title: string;
-  description?: string;
-  language: string;
-  content: string;
-  isStarterCode: boolean; // true = starter template, false = completed example
-  order: number;
-}
-
 export interface LessonResources {
   files: LessonResourceFile[];
   links: LessonResourceLink[];
-  code: LessonResourceCode[];
 }
 
 /**
@@ -45,4 +34,5 @@ export interface LessonResourcesSectionProps {
   initialResources?: LessonResources;
   allowDownload?: boolean; // From course settings
   onResourcesChange?: (resources: LessonResources) => void;
+  onChangesDetected?: (hasChanges: boolean) => void;
 }

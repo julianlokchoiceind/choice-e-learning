@@ -417,6 +417,149 @@ export async function bulkDeleteLessons(lessonIds: string[]): Promise<{
   return { deleted, failed };
 }
 
+/**
+ * Find all materials for a lesson
+ * @param lessonId Lesson ID
+ * @returns Array of lesson materials
+ */
+export async function findLessonMaterialsByLessonId(lessonId: string) {
+  try {
+    const materials = await prisma.lessonMaterial.findMany({
+      where: { 
+        lessonId,
+        isActive: true
+      },
+      orderBy: { order: 'asc' }
+    });
+    return materials;
+  } catch (error: unknown) {
+    console.error('Error finding lesson materials:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create a new lesson material
+ * @param lessonId Lesson ID
+ * @param data Material data
+ * @returns Created lesson material or null if creation failed
+ */
+export async function createLessonMaterial(
+  lessonId: string,
+  data: {
+    title: string;
+    fileName: string;
+    fileSize: number;
+    fileType: string;
+    mimeType: string;
+    description?: string;
+    url: string;
+  }
+) {
+  try {
+    // Import file management functions
+    const { moveTempFileToPermanent } = await import('@/server/services/file/file-management-service');
+    
+    // Fetch lesson title for folder naming
+    const lesson = await prisma.lesson.findUnique({
+      where: { id: lessonId },
+      select: { title: true }
+    });
+    
+    // Move file from temp to permanent storage with original filename in organized folders
+    let permanentUrl = data.url;
+    if (data.url.includes('/uploads/temp/')) {
+      try {
+        const lessonTitle = lesson?.title || 'untitled-lesson';
+        permanentUrl = await moveTempFileToPermanent(data.url, 'lesson-material', lessonTitle, data.fileName);
+        console.log(`Moved lesson material to permanent storage (${lessonTitle}): ${data.url} -> ${permanentUrl}`);
+      } catch (error) {
+        console.error('Failed to move temp file to permanent storage:', error);
+        // Continue with temp URL if move fails
+      }
+    }
+
+    // Auto-assign order (calculate next order number)
+    const lastMaterial = await prisma.lessonMaterial.findFirst({
+      where: { lessonId },
+      orderBy: { order: 'desc' },
+    });
+    const orderNumber = (lastMaterial?.order ?? -1) + 1;
+
+    const lessonMaterial = await prisma.lessonMaterial.create({
+      data: {
+        title: data.title,
+        fileName: data.fileName,
+        fileSize: data.fileSize,
+        fileType: data.fileType,
+        mimeType: data.mimeType,
+        description: data.description,
+        url: permanentUrl, // Use the permanent URL with original filename
+        lessonId,
+        order: orderNumber,
+      },
+    });
+
+    return lessonMaterial;
+  } catch (error: unknown) {
+    console.error('Error creating lesson material:', error);
+    throw error;
+  }
+}
+
+/**
+ * Find a lesson material by ID
+ * @param id Material ID
+ * @returns Lesson material or null if not found
+ */
+export async function findLessonMaterialById(id: string) {
+  try {
+    const material = await prisma.lessonMaterial.findUnique({
+      where: { id },
+    });
+    return material;
+  } catch (error: unknown) {
+    console.error('Error finding lesson material by ID:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a lesson material
+ * @param id Material ID
+ */
+export async function deleteLessonMaterial(id: string): Promise<void> {
+  try {
+    // Import file management functions
+    const { deleteFileByUrl } = await import('@/server/services/file/file-management-service');
+    
+    // Get the material to find its URL before deletion
+    const material = await prisma.lessonMaterial.findUnique({
+      where: { id },
+      select: { url: true }
+    });
+
+    // Delete from database
+    await prisma.lessonMaterial.delete({
+      where: { id },
+    });
+
+    // Delete the physical file from permanent storage
+    if (material?.url) {
+      try {
+        await deleteFileByUrl(material.url);
+        console.log(`Deleted lesson material file: ${material.url}`);
+      } catch (error) {
+        console.error(`Failed to delete file ${material.url}:`, error);
+        // Continue even if file deletion fails
+      }
+    }
+  } catch (error: unknown) {
+    console.error('Error deleting lesson material:', error);
+    throw error;
+  }
+}
+
 export default {
   getLessons,
   getLessonById,
@@ -427,5 +570,10 @@ export default {
   getLessonsByCourseId,
   getLessonsByCourse,
   updateLessonsOrder,
-  bulkDeleteLessons
+  bulkDeleteLessons,
+  // Material functions
+  findLessonMaterialsByLessonId,
+  createLessonMaterial,
+  findLessonMaterialById,
+  deleteLessonMaterial
 };
